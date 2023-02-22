@@ -1,0 +1,22 @@
+课题1
+
+----------------------课题2--------------------
+env_test          课题2系统环境分析
+concolic          课题2测试样本自动生成
+DeepLogic      课题2逻辑神经元测试
+deepsst           课题2敏感神经元测试
+dnn_coverage 课题2重要神经元覆盖、多粒度神经元覆盖
+课题2 开发框架安全度量
+ssh -p 14106 keti2@10.99.140.140
+cd /home/keti2/framework_test
+conda activate test_env
+nohup python __init__.py > out.log 2>&1 &
+待提交
+异常数据检测
+ai模型安全度量
+ai模型模块化开发
+----------------------课题2--------------------
+
+课题3
+
+课题4
