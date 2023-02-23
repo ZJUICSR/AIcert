@@ -1,0 +1,173 @@
+{
+    "1": {
+        "name": "resnet_greedy",
+        "state": "\u8bad\u7ec3\u5b8c\u6210",
+        "type": "\u56fe\u50cf\u5206\u7c7b",
+        "time": "2022-04-07",
+        "modelType": "resnet",
+        "trainDataset": "1",
+        "testDataset": "2",
+        "autoSearchMethod": "greedy",
+        "selfDefinitionSuperParameter": "",
+        "epoch_num": 2,
+        "dataAugmentationParams": {
+            "default": true
+        },
+        "trial": 50,
+        "id": "1",
+        "save_dir": "/data/jwp/codes/Platform/v1/dataBase/Model/modelstore/1",
+        "gpu": "0"
+    },
+    "2": {
+        "name": "resnet_random",
+        "state": "\u8bad\u7ec3\u5b8c\u6210",
+        "type": "\u56fe\u50cf\u5206\u7c7b",
+        "time": "2022-04-07",
+        "modelType": "resnet",
+        "trainDataset": "1",
+        "testDataset": "2",
+        "autoSearchMethod": "random",
+        "selfDefinitionSuperParameter": "",
+        "epoch_num": 2,
+        "dataAugmentationParams": {
+            "default": true
+        },
+        "trial": 2,
+        "id": "2",
+        "save_dir": "/data/jwp/codes/Platform/v1/dataBase/Model/modelstore/2",
+        "gpu": "1"
+    },
+    "3": {
+        "name": "efficient_mnist",
+        "state": "\u8bad\u7ec3\u5b8c\u6210",
+        "type": "\u56fe\u50cf\u5206\u7c7b",
+        "time": "2022-04-07",
+        "modelType": "efficient",
+        "trainDataset": "1",
+        "testDataset": "2",
+        "autoSearchMethod": "greedy",
+        "selfDefinitionSuperParameter": "",
+        "epoch_num": "1",
+        "dataAugmentationParams": {
+            "default": true
+        },
+        "trial": 1,
+        "id": "3",
+        "save_dir": "/data/jwp/codes/Platform/v1/dataBase/Model/modelstore/3",
+        "gpu": "1"
+    },
+    "5": {
+        "name": "xception_mnist",
+        "state": "\u8bad\u7ec3\u5b8c\u6210",
+        "type": "\u56fe\u50cf\u5206\u7c7b",
+        "time": "2022-04-07",
+        "modelType": "xception",
+        "trainDataset": "1",
+        "testDataset": "2",
+        "autoSearchMethod": "greedy",
+        "selfDefinitionSuperParameter": "",
+        "epoch_num": "1",
+        "dataAugmentationParams": {
+            "default": true
+        },
+        "trial": 1,
+        "id": "5",
+        "save_dir": "/data/jwp/codes/Platform/v1/dataBase/Model/modelstore/5",
+        "gpu": "1"
+    },
+    "4": {
+        "name": "vgg_mnist",
+        "state": "\u8bad\u7ec3\u5b8c\u6210",
+        "type": "\u56fe\u50cf\u5206\u7c7b",
+        "time": "2022-04-07",
+        "modelType": "vgg",
+        "trainDataset": "1",
+        "testDataset": "2",
+        "autoSearchMethod": "greedy",
+        "selfDefinitionSuperParameter": "",
+        "epoch_num": "5",
+        "dataAugmentationParams": {
+            "default": true
+        },
+        "trial": 1,
+        "id": "4",
+        "save_dir": "/data/jwp/codes/Platform/v1/dataBase/Model/modelstore/4",
+        "gpu": "1"
+    },
+    "6": {
+        "name": "vgg_cifar10",
+        "state": "\u8bad\u7ec3\u5b8c\u6210",
+        "type": "\u56fe\u50cf\u5206\u7c7b",
+        "time": "2022-04-07",
+        "modelType": "vgg",
+        "trainDataset": "3",
+        "testDataset": "4",
+        "autoSearchMethod": "greedy",
+        "selfDefinitionSuperParameter": "",
+        "epoch_num": "10",
+        "dataAugmentationParams": {
+            "default": true
+        },
+        "trial": 1,
+        "id": "6",
+        "save_dir": "/data/jwp/codes/Platform/v1/dataBase/Model/modelstore/6",
+        "gpu": "1"
+    },
+    "7": {
+        "name": "efficient_cifar10",
+        "state": "\u8bad\u7ec3\u5b8c\u6210",
+        "type": "\u56fe\u50cf\u5206\u7c7b",
+        "time": "2022-04-07",
+        "modelType": "efficient",
+        "trainDataset": "3",
+        "testDataset": "4",
+        "autoSearchMethod": "greedy",
+        "selfDefinitionSuperParameter": "",
+        "epoch_num": "10",
+        "dataAugmentationParams": {
+            "default": true
+        },
+        "trial": 1,
+        "id": "7",
+        "save_dir": "/data/jwp/codes/Platform/v1/dataBase/Model/modelstore/7",
+        "gpu": "1"
+    },
+    "8": {
+        "name": "resnet_cifar10",
+        "state": "\u8bad\u7ec3\u5b8c\u6210",
+        "type": "\u56fe\u50cf\u5206\u7c7b",
+        "time": "2022-04-07",
+        "modelType": "resnet",
+        "trainDataset": "3",
+        "testDataset": "4",
+        "autoSearchMethod": "greedy",
+        "selfDefinitionSuperParameter": "",
+        "epoch_num": "10",
+        "dataAugmentationParams": {
+            "default": true
+        },
+        "trial": 1,
+        "id": "8",
+        "save_dir": "/data/jwp/codes/Platform/v1/dataBase/Model/modelstore/8",
+        "gpu": "1"
+    },
+    "9": {
+        "name": "xception_cifar10",
+        "state": "\u8bad\u7ec3\u5b8c\u6210",
+        "type": "\u56fe\u50cf\u5206\u7c7b",
+        "time": "2022-04-07",
+        "modelType": "xception",
+        "trainDataset": "3",
+        "testDataset": "4",
+        "autoSearchMethod": "greedy",
+        "selfDefinitionSuperParameter": "",
+        "epoch_num": "10",
+        "dataAugmentationParams": {
+            "default": true
+        },
+        "trial": 1,
+        "id": "9",
+        "save_dir": "/data/jwp/codes/Platform/v1/dataBase/Model/modelstore/9",
+        "gpu": "1"
+    }
+}

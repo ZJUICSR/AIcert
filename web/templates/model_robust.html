@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>模型鲁棒性增强</title>
+	<link href="favicon.ico" rel="shortcut icon">
+	<!-- Bootstrap & Plugins CSS -->
+	<link href="../static/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+	<link href="../static/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" type="text/css" href="../static/css/html5tooltips.css" />
+	<link rel="stylesheet" type="text/css" href="../static/css/html5tooltips.animation.css" />
+	<!-- Custom CSS -->
+	<link href="../static/css/green.css" rel="stylesheet" type="text/css">
+	<!-- <link rel="stylesheet" type="text/css" href="../static/css/index_params_2.css" /> -->
+	<style id="imgfix_img_style_for_imgfix_wrapper_layer_0_0">
+		#imgfix_wrapper_layer_0_0 .imgfix_src_img {
+			left: -999999px;
+			right: -999999px;
+			top: -999999px;
+			bottom: -999999px;
+			z-index: 0;
+			width: 586px;
+			height: 302px;
+			max-width: auto !important;
+			min-width: auto !important;
+			position: absolute;
+			margin: auto;
+			-webkit-transition: all 0.4s;
+			transition: all 0.4s;
+			-webkit-transform: scale(1);
+			-ms-transform: scale(1);
+			transform: scale(1);
+		}
+
+		#imgfix_wrapper_layer_0_0:hover .imgfix_src_img {
+			-webkit-transform: scale(1);
+			-ms-transform: scale(1);
+			transform: scale(1);
+		}
+	</style>
+	<style id="imgfix_img_style_for_imgfix_wrapper_layer_0_1">
+		#imgfix_wrapper_layer_0_1 .imgfix_src_img {
+			left: -999999px;
+			right: -999999px;
+			top: -999999px;
+			bottom: -999999px;
+			z-index: 0;
+			width: 417px;
+			height: 276px;
+			max-width: auto !important;
+			min-width: auto !important;
+			position: absolute;
+			margin: auto;
+			-webkit-transition: all 0.4s;
+			transition: all 0.4s;
+			-webkit-transform: scale(1);
+			-ms-transform: scale(1);
+			transform: scale(1);
+		}
+
+		#imgfix_wrapper_layer_0_1:hover .imgfix_src_img {
+			-webkit-transform: scale(1);
+			-ms-transform: scale(1);
+			transform: scale(1);
+		}
+	</style>
+	<style id="imgfix_img_style_for_imgfix_wrapper_layer_0_2">
+		#imgfix_wrapper_layer_0_2 .imgfix_src_img {
+			left: -999999px;
+			right: -999999px;
+			top: -999999px;
+			bottom: -999999px;
+			z-index: 0;
+			width: 417px;
+			height: 278px;
+			max-width: auto !important;
+			min-width: auto !important;
+			position: absolute;
+			margin: auto;
+			-webkit-transition: all 0.4s;
+			transition: all 0.4s;
+			-webkit-transform: scale(1);
+			-ms-transform: scale(1);
+			transform: scale(1);
+		}
+
+		#imgfix_wrapper_layer_0_2:hover .imgfix_src_img {
+			-webkit-transform: scale(1);
+			-ms-transform: scale(1);
+			transform: scale(1);
+		}
+	</style>
+	<style id="imgfix_img_style_for_imgfix_wrapper_layer_0_3">
+		#imgfix_wrapper_layer_0_3 .imgfix_src_img {
+			left: -999999px;
+			right: -999999px;
+			top: -999999px;
+			bottom: -999999px;
+			z-index: 0;
+			width: 417px;
+			height: 342px;
+			max-width: auto !important;
+			min-width: auto !important;
+			position: absolute;
+			margin: auto;
+			-webkit-transition: all 0.4s;
+			transition: all 0.4s;
+			-webkit-transform: scale(1);
+			-ms-transform: scale(1);
+			transform: scale(1);
+		}
+
+		#imgfix_wrapper_layer_0_3:hover .imgfix_src_img {
+			-webkit-transform: scale(1);
+			-ms-transform: scale(1);
+			transform: scale(1);
+		}
+	</style>
+	<style id="imgfix_img_style_for_imgfix_wrapper_layer_0_4">
+		#imgfix_wrapper_layer_0_4 .imgfix_src_img {
+			left: -999999px;
+			right: -999999px;
+			top: -999999px;
+			bottom: -999999px;
+			z-index: 0;
+			width: 417px;
+			height: 277px;
+			max-width: auto !important;
+			min-width: auto !important;
+			position: absolute;
+			margin: auto;
+			-webkit-transition: all 0.4s;
+			transition: all 0.4s;
+			-webkit-transform: scale(1);
+			-ms-transform: scale(1);
+			transform: scale(1);
+		}
+
+		#imgfix_wrapper_layer_0_4:hover .imgfix_src_img {
+			-webkit-transform: scale(1);
+			-ms-transform: scale(1);
+			transform: scale(1);
+		}
+	</style>
+	<style id="imgfix_img_style_for_imgfix_wrapper_layer_0_5">
+		#imgfix_wrapper_layer_0_5 .imgfix_src_img {
+			left: -999999px;
+			right: -999999px;
+			top: -999999px;
+			bottom: -999999px;
+			z-index: 0;
+			width: 417px;
+			height: 276px;
+			max-width: auto !important;
+			min-width: auto !important;
+			position: absolute;
+			margin: auto;
+			-webkit-transition: all 0.4s;
+			transition: all 0.4s;
+			-webkit-transform: scale(1);
+			-ms-transform: scale(1);
+			transform: scale(1);
+		}
+
+		#imgfix_wrapper_layer_0_5:hover .imgfix_src_img {
+			-webkit-transform: scale(1);
+			-ms-transform: scale(1);
+			transform: scale(1);
+		}
+	</style>
+	<style id="imgfix_img_style_for_imgfix_wrapper_layer_1_0">
+		#imgfix_wrapper_layer_1_0 .imgfix_src_img {
+			left: -999999px;
+			right: -999999px;
+			top: -999999px;
+			bottom: -999999px;
+			z-index: 0;
+			width: 417px;
+			height: 277px;
+			max-width: auto !important;
+			min-width: auto !important;
+			position: absolute;
+			margin: auto;
+			-webkit-transition: all 0.4s;
+			transition: all 0.4s;
+			-webkit-transform: scale(1);
+			-ms-transform: scale(1);
+			transform: scale(1);
+		}
+
+		#imgfix_wrapper_layer_1_0:hover .imgfix_src_img {
+			-webkit-transform: scale(1);
+			-ms-transform: scale(1);
+			transform: scale(1);
+		}
+	</style>
+</head>
+
+<body>
+	<!-- ***** Header Area Start ***** -->
+	<div class="block_1 flex-row">
+		<div class="group_1 flex-col"></div>
+		<a href="/"><button class="text_start">平台介绍</button></a>
+		<a href="/"><button class="text1">解决方案</button></a>
+		<!-- <a href="/index_task_center"><button class="text_3">在线体验</button></a> -->
+		<img class="image_center" referrerpolicy="no-referrer" src="../static/imgs/head_line_1.png" />
+		<button class="text_center" onclick="open_function_introduction() ">在线体验</button>
+		<img class="image_2" referrerpolicy="no-referrer" src="../static/imgs/head_line_2.png" />
+		<a href="../static/pdf/AI平台介绍文档v8.pdf"><button class="text1">帮助文档</button></a>
+		<a href="https://icsr.zju.edu.cn"><button class="text1">关于我们</button></a>
+		<div class="group_2 flex-col" onclick="window.open('https://github.com/AISecurity2030/Attack', '_self')"></div>
+	</div>
+	<!-- ***** Header Area End ***** -->
+
+
+	<section class="page">
+		<div class="page-bottom">
+			<div class="container">
+				<div class="row">
+					<!-- ***** Page Content Start ***** -->
+					<div class="col-lg-8 col-md-12 col-sm-12">
+						<div class="row margin-bottom-30">
+							<div>
+								<div class="box_7 flex-col" style="display: inline-block;width:5px;"></div>
+								<span
+									style="font-weight:bold;margin-left: 7px; margin-bottom: 1px;display: inline-block;">功能介绍</span>
+							</div>
+							<div class="col-lg-6 col-md-6 col-sm-12">
+								<div class="blog-post-thumb">
+									<div class="img imgfix_top_container" style="overflow: hidden;">
+										<div id="imgfix_wrapper_layer_0_0" class="imgfix_wrapper_layer"
+											style="position: relative; padding: 0; margin: 0; width: 580px; height: 298px; overflow: hidden;">
+											<!-- <img src="./子功能配置 template_files/eva3.gif" alt="" class="imgfix_src_img" style="opacity: 1;">
+										 -->
+											<img class="imgfix_src_img" style="opacity: 1;" src="../static/imgs/ens.png">
+												<!-- <source src="../static/imgs/eva3.mp4" type="video/mp4"> -->
+											<!-- </img> -->
+										</div>
+									</div>
+									<div class="post-content">
+										<h3>
+											群智化防御
+										</h3>
+										<div class="text">
+											群智化防御即基于协同防御的集成对抗算法中，将对抗样本的生成与被训练的模型解耦，同时将其与黑盒对抗的健壮性明确联系起来，也就是集成对抗训练，通过使用在其他静态预训练模型上产生的对抗样本来扩充模型的训练数据；支持FGSM、RFGSM、FFGSM、BIM、PGD等9种对抗攻击算法
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-6 col-md-6 col-sm-12">
+								<div class="blog-post-thumb">
+									<div class="img imgfix_top_container" style="overflow: hidden;">
+										<div id="imgfix_wrapper_layer_0_1" class="imgfix_wrapper_layer"
+											style="position: relative; padding: 0; margin: 0; width: 100%; height: 100%; overflow: hidden;">
+											<img src="../static/imgs/PACA.png" alt="" class="imgfix_src_img" style="opacity: 1;">
+											<!-- <video alt="" class="imgfix_src_img" style="opacity: 1;" autoplay muted>
+												<source src="../static/imgs/debias.mp4" type="video/mp4">
+											</video> -->
+										</div>
+									</div>
+									<div class="post-content">
+										<h3>
+											PACA算法
+										</h3>
+										<div class="text">
+											PACA算法即基于注意力机制的对抗样本检测算法，主要由三个模块组成，即数据处理模块、输入注意模块和子检测模块。数据处理模块生成双流数据，用于后续检测。输入注意模块用于提取双流数据在通道和空间维度上的注意力权重。子检测模块根据输入注意力模块的输出，预测原始输入是否为对样本
+										</div>
+									</div>
+								</div>
+							</div>
+							<div>
+								<div class="box_7 flex-col" style="display: inline-block;width:5px;"></div>
+								<span
+									style="font-weight:bold;margin-left: 7px; margin-bottom: 1px;display: inline-block;">参数配置</span>
+							</div>
+							<div class="col-lg-6 col-md-6 col-sm-12">
+								<div class="blog-post-thumb">
+									<div class="post-content params_select">
+										<h3>
+											<span>数据集选择</span>
+										</h3>
+										<div class="group_9 flex-row dropdown">
+											<button class="section_2 flex-row dropbtn">
+												<div class="image-text_1 flex-row justify-between ">
+													<img class="thumbnail_bef" referrerpolicy="no-referrer"
+														src="../static/imgs/dataset.png" />
+													<span class="text-group_1">请选择数据集</span>
+													<div class="dropdown-content">
+														<p id="dataset_mnist" onclick="select_mnist()">MNIST</p>
+														<p id="dataset_cifar10" onclick="select_cifar10()">CIFAR10</p>
+													</div>
+												</div>
+												<img class="thumbnail_back" referrerpolicy="no-referrer"
+													src="../static/imgs/thumbnail_9.png" />
+											</button>
+											<div class="text_choose flex-row">
+												<p class="text_17 ">已选择数据集：</p>
+												<p class="text_17" id="dataset_choose"></p>
+											</div>
+
+										</div>
+										<div class="image-wrapper_1 flex-col" id="div1">
+											<a href="#"><img src="" class="dataset_
+											  display"></a>
+											<a href="#"><img src="" class="dataset_display"></a>
+											<a href="#"><img src="" class="dataset_display"></a>
+											<a href="#"><img src="" class="dataset_display"></a>
+											<a href="#"><img src="" class="dataset_display"></a>
+											<a href="#"><img src="" class="dataset_display"></a>
+											<a href="#"><img src="" class="dataset_display"></a>
+											<a href="#"><img src="" class="dataset_display"></a>
+											<a href="#"><img src="" class="dataset_display"></a>
+											<a href="#"><img src="" class="dataset_display"></a>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-6 col-md-6 col-sm-12">
+								<div class="blog-post-thumb">
+
+									<div class="post-content params_select">
+										<h3>
+											<span>模型选择</span>
+										</h3>
+										<div class="group_10 flex-row dropdown">
+											<button class="section_2 flex-row dropbtn">
+												<div class="image-text_1 flex-row justify-between">
+													<img class="thumbnail_bef" referrerpolicy="no-referrer"
+														src="../static/imgs/thumbnail_10.png" />
+													<span class="text-group_1">请选择模型</span>
+													<div class="dropdown-content">
+														<p id="model_vgg" onclick="show_model('vgg16')">VGG16</p>
+														<p id="model_resnet" onclick="show_model('resnet34')">ResNet34</p>
+													</div>
+												</div>
+												<img class="thumbnail_back" referrerpolicy="no-referrer"
+													src="../static/imgs/thumbnail_9.png" />
+											</button>
+											<div class="text_choose flex-row">
+												<p class="text_17 ">已选择模型：</p>
+												<p class="text_17" id="model_choose"></p>
+											</div>
+										</div>
+										<div class="image-wrapper_2 flex-col">
+											<div class="container">
+												<div class="w3lsaboutaits-grids">
+													<div class="lwcontainer">
+														<div class="lwflex-1" id="control" style="float:left;display: inline-block;">
+															<form>
+																<label for="ratio1">水平拉伸</label>
+																<input id="ratio1" type="range" value="300" min="0" max="1000">
+																<div class="blankspace"></div>
+																<label for="ratio2">竖直拉伸</label>
+																<input id="ratio2" type="range" value="500" min="0" max="1000">
+																<div class="blankspace"></div>
+																<label for="zoomx">X轴拉伸</label>
+																<input id="zoomx" type="range" value="4" min="0" max="20">
+																<div class="blankspace"></div>
+																<label for="zoomy">Y轴拉伸</label>
+																<input id="zoomy" type="range" value="4" min="0" max="20">
+																<div class="blankspace"></div>
+																<label for="zoomz">Z轴拉伸</label>
+																<input id="zoomz" type="range" value="4" min="0" max="20">
+							  
+															</form>
+														</div>
+														<div class="lwflex-2">
+							  
+															<div class="lwflex-3-child" id="net" style="float: right;display: inline-block;height:338px;width:360px"></div>
+														</div>
+													</div>
+													<div class="clearfix"></div>
+												</div>
+											</div>
+											<img id="model_img" class="image_4" referrerpolicy="no-referrer" alt="" />
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-6 col-md-6 col-sm-12" style="width:100%">
+								<div class="blog-post-thumb">
+
+									<div class="post-content" style="height:1340px;width: 1180px;">
+										<h3>
+											<span>对抗参数配置</span>
+										</h3>
+										<div class="group_35 flex-row">
+											<div class="image-text_7 flex-row justify-between">
+												<img class="thumbnail_4" referrerpolicy="no-referrer"
+													src="../static/imgs/thumbnail_11.png" />
+												<span class="text-group_7">群智化防御</span>
+											</div>
+											<div id="multi_defense_params" class="switchOn switchOff">
+												<em></em>
+											</div>
+										</div>
+										<div class="group_35 flex-row">
+											<div class="image-text_7 flex-row justify-between">
+												<img class="thumbnail_4" referrerpolicy="no-referrer"
+													src="../static/imgs/thumbnail_11.png" />
+												<span class="text-group_7">自动化攻击监测</span>
+											</div>
+											<div id="auto_attack_params" class="switchOn switchOff">
+												<em></em>
+											</div>
+										</div>
+										<div class="group_35 flex-row">
+											<div class="image-text_7 flex-row justify-between">
+												<img class="thumbnail_4" referrerpolicy="no-referrer"
+													src="../static/imgs/thumbnail_11.png" />
+												<span class="text-group_7">对抗攻击</span>
+											</div>
+											<div id="adv_analysis_params" class="switchOn switchOff">
+												<em></em>
+											</div>
+										</div>
+										<div class="group_adv" id="algorithms_params_input">
+											<form class="text_26">
+												<div>
+													<input type="checkbox" id="FGSM_algorithm">
+													<label for="FGSM_algorithm" style="margin-left: 10px;">FGSM</label>
+													<div id="FGSM_params" class="flex-row">
+														<div class="text-wrapper_27" name="eps">&epsilon;(epsilon)</div>
+														<input type="text" class="text-wrapper_26 eps" value="0.156">
+													</div>
+												</div>
+												<img class="image_8" referrerpolicy="no-referrer"
+													src="../static/imgs/white_line.png" />
+												<div>
+													<input type="checkbox" id="RFGSM_algorithm">
+													<label for="RFGSM_algorithm" style="margin-left: 10px;">RFGSM</label>
+													<div id="RFGSM_params" class="flex-row">
+														<div class="text-wrapper_27" name="eps">&epsilon;(epsilon)</div>
+														<input type="text" class="text-wrapper_26 eps" value="0.06">
+														<div class="text-wrapper_27" name="steps">steps</div>
+														<input type="text" class="text-wrapper_26 steps" value="5">
+														<div class="text-wrapper_27" name="alpha">&alpha;(alpha)</div>
+														<input type="text" class="text-wrapper_26 alpha" value="0.031">
+													</div>
+												</div>
+												<img class="image_8" referrerpolicy="no-referrer"
+													src="../static/imgs/white_line.png" />
+												<div>
+													<input type="checkbox" id="FFGSM_algorithm">
+													<label for="FFGSM_algorithm" style="margin-left: 10px;">FFGSM</label>
+													<div id="FFGSM_params" class="flex-row">
+														<div class="text-wrapper_27" name="eps">&epsilon;(epsilon)</div>
+														<input type="text" class="text-wrapper_26 eps" value="0.131">
+														<div class="text-wrapper_27" name="alpha">&alpha;(alpha)</div>
+														<input type="text" class="text-wrapper_26 alpha" value="0.037">
+													</div>
+												</div>
+												<img class="image_8" referrerpolicy="no-referrer"
+													src="../static/imgs/white_line.png" />
+												<div>
+													<input type="checkbox" id="MIFFGSM_algorithm">
+													<label style="margin-left: 10px;">MIFFGSM</label>
+													<div id="MIFFGSM_params" class="flex-row">
+														<div class="text-wrapper_27" name="eps">&epsilon;(epsilon)</div>
+														<input type="text" class="text-wrapper_26 eps" value="0.131">
+														<div class="text-wrapper_27" name="alpha">&alpha;(alpha)</div>
+														<input type="text" class="text-wrapper_26 alpha" value="0.037">
+														<div class="text-wrapper_27" name="steps">steps</div>
+														<input type="text" class="text-wrapper_26 steps" value="5">
+													</div>
+												</div>
+												<img class="image_8" referrerpolicy="no-referrer"
+													src="../static/imgs/white_line.png" />
+												<div>
+													<input type="checkbox" id="BIM_algorithm">
+													<label style="margin-left: 10px;">BIM</label>
+													<div id="BIM_params" class="flex-row">
+														<div class="text-wrapper_27" name="eps">&epsilon;(epsilon)</div>
+														<input type="text" class="text-wrapper_26 eps" value="0.015">
+														<div class="text-wrapper_27" name="steps">steps</div>
+														<input type="text" class="text-wrapper_26 steps" value="10">
+														<div class="text-wrapper_27" name="alpha">&alpha;(alpha)</div>
+														<input type="text" class="text-wrapper_26 alpha" value="0.139">
+													</div>
+												</div>
+												<img class="image_8" referrerpolicy="no-referrer"
+													src="../static/imgs/white_line.png" />
+												<div>
+													<input type="checkbox" id="PGD_algorithm">
+													<label style="margin-left: 10px;">PGD</label>
+													<div id="PGD_params" class="flex-row">
+														<div class="text-wrapper_27" name="eps">&epsilon;(epsilon)</div>
+														<input type="text" class="text-wrapper_26 eps" value="0.3">
+														<div class="text-wrapper_27" name="steps">steps</div>
+														<input type="text" class="text-wrapper_26 steps" value="10">
+														<div class="text-wrapper_27" name="alpha">&alpha;(alpha)</div>
+														<input type="text" class="text-wrapper_26 alpha" value="0.057">
+													</div>
+												</div>
+
+												<img class="image_8" referrerpolicy="no-referrer"
+													src="../static/imgs/white_line.png" />
+												<div>
+													<input type="checkbox" id="PGDL2_algorithm">
+													<label style="margin-left: 10px;">PGDL2</label>
+													<div id="PGDL2_params" class="flex-row">
+														<!-- <div class="flex-row"> -->
+															<div class="text-wrapper_27" name="eps">&epsilon;(epsilon)</div>
+															<input type="text" class="text-wrapper_26 eps" value="0.3">
+															<div class="text-wrapper_27" name="steps">steps</div>
+															<input type="text" class="text-wrapper_26 steps" value="5">
+															<div class="text-wrapper_27" name="alpha">&alpha;(alpha)</div>
+															<input type="text" class="text-wrapper_26 alpha" value="1.0">
+															<!-- <div class="text-wrapper_27" name="epsilon for division">&epsilon; for division</div>
+															<input type="text" class="text-wrapper_26 eps_for_division" value="1e-10"> -->
+														<!-- </div>
+														<div class="flex-row">
+															<input type="checkbox" class="text-wrapper_26"
+																value="1e-10"><label class="text-wrapper_27">random
+																start</label>
+														</div> -->
+
+													</div>
+												</div>
+												<img class="image_8" referrerpolicy="no-referrer"
+													src="../static/imgs/white_line.png" />
+												<div>
+													<input type="checkbox" id="DI2FGSM_algorithm">
+													<label style="margin-left: 10px;">DI2FGSM</label>
+													<div id="DI2FGSM_params" class="flex-row">
+														<!-- <div class="flex-row"> -->
+															<div class="text-wrapper_27" name="eps">&epsilon;(epsilon)</div>
+															<input type="text" class="text-wrapper_26 eps" value="0.03">
+															<div class="text-wrapper_27" name="steps">steps</div>
+															<input type="text" class="text-wrapper_26 steps" value="20">
+															<div class="text-wrapper_27" name="alpha">&alpha;(alpha)</div>
+															<input type="text" class="text-wrapper_26 alpha" value="0.0078">
+															<div class="text-wrapper_27" name="decay">decay</div>
+															<input type="text" class="text-wrapper_26 decay" value="0.0">
+														<!-- </div> -->
+														<!-- <div class="flex-row">
+															<div class="text-wrapper_27">resize_rate</div>
+															<input type="text" class="text-wrapper_26 resize_rate" value="1e-10">
+															<div class="text-wrapper_27">diversity_prob</div>
+															<input type="text" class="text-wrapper_26 diversity_prob" value="1e-10">
+															<input type="checkbox" class="text-wrapper_26">
+															<label class="text-wrapper_27">random start</label>
+														</div> -->
+													</div>
+												</div>
+												<img class="image_8" referrerpolicy="no-referrer"
+													src="../static/imgs/white_line.png" />
+												<div>
+													<input type="checkbox" id="EOTPGD_algorithm">
+													<label style="margin-left: 10px;">EOTPGD</label>
+													<div id="EOTPGD_params" class="flex-row">
+														<div class="text-wrapper_27" name="eps">&epsilon;(epsilon)</div>
+														<input type="text" class="text-wrapper_26 eps" value="0.3">
+														<div class="text-wrapper_27" name="steps">steps</div>
+														<input type="text" class="text-wrapper_26 steps" value="5">
+														<div class="text-wrapper_27" name="alpha">&alpha;(alpha)</div>
+														<input type="text" class="text-wrapper_26 alpha" value="1.0">
+														<div class="text-wrapper_27" name="sampling">sampling</div>
+														<input type="text" class="text-wrapper_26 sampling" value="10">
+													</div>
+												</div>
+											</form>
+											<div class="startBtnF" style="margin-bottom: -1010px;">
+												<button style="float: right" class="filebtn2" id="popK"
+													onclick="click_pop();">鲁棒性增强</button>
+												<!-- <button style="float: right" class="filebtn1" style="margin: 10px 54px 13px 9px;" id="debias" onclick="datadebias();">公平性提升</button> -->
+											</div>
+										</div>
+
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-6 col-md-6 col-sm-12 result_body1" style="display: none;width:100%">
+								<div class="blog-post-thumb">
+
+									<div class="post-content post-content1" style="width:1180px;">
+
+										<!-- <div class="text">
+											Mauris tellus sem, ultrices varius nisl at, convallis iaculis mauris. Sed eget sem vitae purus tempus.
+										</div> -->
+										<h3>
+											<span>结果展示</span>
+										</h3>
+										<div class="paragraph_0" id="robust_div">
+											<p class="main_top_echarts_con_title">鲁棒性增强：</p><br />
+											<span class="paragraph_2" id="robust_conclusions"></span>
+											<div class="image_4" style="width: 1000px;height:500px" id="results_robust"></div>
+											<img class="image_5" referrerpolicy="no-referrer"
+												src="../static/imgs/white_line.png" />
+										</div>
+										<div class="paragraph_0" id="scatter">
+											<p class="main_top_echarts_con_title">鲁棒训练前后样本置信度分布对比：</p><br />
+											<p class="paragraph_2" id="scatter_conclusions"></p> 
+											<div class="image_3" style="width: 500px;height:400px;margin-left: 5%;" id="results_scatter_bef"></div>
+											<div class="image_3" style="width: 500px;height:400px;margin-left: 2%;" id="results_scatter_aft"></div>
+											<img
+											class="image_5"
+											referrerpolicy="no-referrer"
+											src="../static/imgs/white_line.png"
+										  />
+										
+									</div>
+									<div id="resultloading" class="loading" style="display: none;margin-top: 1%;">
+										<span></span>
+
+										<span></span>
+
+										<span></span>
+
+										<span></span>
+
+										<span></span>
+									</div>
+								</div>
+							</div>
+
+						</div>
+					</div>
+					<!-- ***** Page Content End ***** -->
+
+					<!-- ***** Aside Start ***** -->
+
+					<!-- ***** Aside End ***** -->
+				</div>
+			</div>
+		</div>
+		<!-- ***** Page Content End ***** -->
+	</section>
+
+
+
+	<!-- ***** Footer Start ***** -->
+	<footer>
+		<div class="block_3 flex-col">
+			<div class="block_4 flex-row justify-between">
+				<div class="box_4 flex-col"></div>
+				<span class="text_23">人工智能安全理论及验证平台</span>
+			</div>
+			<div class="block_5 flex-row justify-between">
+				<div class="image-text_3 flex-row justify-between">
+					<img class="image_6" referrerpolicy="no-referrer" src="../static/imgs/email.png" />
+					<span class="text-group_3">xxxx&#64;xxxx.com</span>
+				</div>
+				<div class="image-text_4 flex-row justify-between">
+					<img class="thumbnail_7" referrerpolicy="no-referrer" src="../static/imgs/tel.png" />
+					<span class="text-group_4">0571-XXXXXXXXX</span>
+				</div>
+				<div class="image-text_5 flex-row justify-between">
+					<img class="thumbnail_8" referrerpolicy="no-referrer" src="../static/imgs/address.png" />
+					<span class="text-group_5">浙江省杭州市xxxxxxxxxx</span>
+				</div>
+			</div>
+		</div>
+	</footer>
+	<!-- ***** Footer End ***** -->
+
+
+
+	<!-- jQuery -->
+	<script src="../static/js/jquery-3.6.0.min.js"></script>
+
+	<!-- Bootstrap -->
+	<script src="../static/js/popper.js"></script>
+	<script src="../static/js/bootstrap.min.js"></script>
+
+	<!-- Plugins -->
+	<script src="../static/js/scrollreveal.min.js"></script>
+	<script src="../static/js/parallax.min.js"></script>
+	<script src="../static/js/waypoints.min.js"></script>
+	<script src="../static/js/jquery.counterup.min.js"></script>
+	<script type="text/javascript" src="../static/js/echarts.min.js"></script>
+	<script src="../static/js/imgfix.min.js"></script>
+	<script type="text/javascript" src="../static/js/html5tooltips.js"></script>
+	<script type="text/javascript" src="../static/js/convnetdraw.js"></script>
+	<!-- <script type="text/javascript" src="../static/js/use.js"></script> -->
+	<!-- <script type="text/javascript" src="../static/js/flexible.js"></script> -->
+	<script type="text/javascript" src="../static/js/model_robust.js"></script>
+	<script type="text/javascript" src="../static/js/dataset.js"></script>
+	<!-- Global Init -->
+	<script src="../static/js/custom.js"></script>
+	<script type="text/javascript">
+
+		for (var i = 10; i--;)
+			html5tooltips([
+				{
+					contentText: "RFGSM算法",
+					contentMore: "Random Fast Gradient Sign MethodR-FGSM随机快速梯度符号法是FGSM的一种变体，在应用FGSM产生的对抗扰动之前，给在输入样本中增加一个小的随机扰动，这样有助于避免梯度Mask的防御策略。",
+					targetSelector: "#RFGSM_algorithm",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 1000,
+					persistent: true
+				},
+				{
+					contentText: "FGSM算法",
+					contentMore: "Fast Gradient Sign MethodFGSM快速梯度符号法是一种简单而有效的生成对抗样本的方法，其工作方式如下：在给定输入数据后，利用已训练的模型输出预测并计算损失函数的梯度，然后使用梯度的符号来创建使损失最大化的新数据。",
+					targetSelector: "#FGSM_algorithm",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 1000,
+					persistent: true
+				},
+				{
+					contentText: "FFGSM算法",
+					contentMore: "FGSM in fast adversarial trainingFFGSM快速FGSM是FGSM的一种变体，在应用FGSM产生的对抗扰动前，给在输入样本中增加一个小的随机扰动。与R-FGSM不同的是，扰动以均匀分布代替高斯分布。",
+					targetSelector: "#FFGSM_algorithm",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 1000,
+					persistent: true
+				},
+				{
+					contentText: "MIFFGSM算法",
+					contentMore: "Momentum Iterative Fast Gradient Sign MethodMI-FGSM基于动量的迭代FGSM是在I-FGSM的基础上，通过将动量项整合到攻击的迭代过程中，使计算结果能摆脱局部最优，并且增加了更新方向的稳定性。",
+					targetSelector: "#MIFFGSM_algorithm",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 1000,
+					persistent: true
+				}
+				,
+				{
+					contentText: "BIM算法",
+					contentMore: "Basic Iterative MethodBIM迭代式FGSM是FGSM方法的变体，其工作原理为：每轮迭代在上一步算得的对抗样本基础上，各像素增加（或减少）一个常数。",
+					targetSelector: "#BIM_algorithm",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 1000,
+					persistent: true
+				},
+				{
+					contentText: "PGDL2算法",
+					contentMore: "L2-bounded PGDPGDL2L2范数投影梯度下降法是PGD算法的另一个版本，其对每次的迭代结果采用L2范数裁剪。",
+					targetSelector: "#PGDL2_algorithm",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 1000,
+					persistent: true
+				},
+				{
+					contentText: "DI2FGSM算法",
+					contentMore: "Diverse Inputs Iterative Fast Gradient Sign MethodDI2-FGSM输入多样的迭代FGSM是在I-FGSM的基础上，让输入图片随机进行数据增强，即在样本输入模型之前，以一定概率p对其进行随机resize，padding等操作。该方法增强了攻击的鲁棒性，使得黑盒攻击成功率显著增加。",
+					targetSelector: "#DI2FGSM_algorithm",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 1000,
+					persistent: true
+				},
+				{
+					contentText: "PGD算法",
+					contentMore: "Projected Gradient DescentPGD投影梯度下降法是FGSM的迭代版本，与BIM不同的是，它对每次迭代的结果进行裁剪，保证新样本的各个像素都在x的ϵ邻域（L∞）内。",
+					targetSelector: "#PGD_algorithm",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 1000,
+					persistent: true
+				},
+				{
+					contentText: "EOTPGD算法",
+					contentMore: "Expectation Over Transformation based PGDEOTPGD变换期望PGD是将EOT的思想加入到PGD算法中，即迭代中用损失函数梯度的期望代替符号梯度本身。",
+					targetSelector: "#EOTPGD_algorithm",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 1000,
+					persistent: true
+				},
+				{
+					contentText: "扰动建议值",
+					contentMore: "选择0.001-0.1之间",
+					targetSelector: ".eps",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 180,
+					persistent: true
+				},
+				{
+					contentText: "步骤建议值",
+					contentMore: "选择5-20之间，数值越大，算法运行时间越久",
+					targetSelector: ".steps",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 180,
+					persistent: true
+				},
+				{
+					contentText: "学习率建议值",
+					contentMore: "选择0.0-1.0之间",
+					targetSelector: ".alpha",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 180,
+					persistent: true
+				},
+				{
+					contentText: "resize_rate建议值",
+					contentMore: "选择0.0-1.0之间",
+					targetSelector: ".resize_rate",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 180,
+					persistent: true
+				},
+				{
+					contentText: "diversity_prob建议值",
+					contentMore: "选择0.0-1.0之间",
+					targetSelector: ".diversity_prob",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 180,
+					persistent: true
+				},
+				{
+					contentText: "sampling建议值",
+					contentMore: "选择10-20之间",
+					targetSelector: ".sampling",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 180,
+					persistent: true
+				},
+				{
+					contentText: "偏置量建议值",
+					contentMore: "选择0.0-1.0之间",
+					targetSelector: ".decay",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 180,
+					persistent: true
+				},
+				{
+					contentText: "分类扰动值建议值",
+					contentMore: "选择0.0-1.0之间",
+					targetSelector: ".eps_for_division",
+					stickTo: "right",
+					color: '#F8F8F8',
+					maxWidth: 180,
+					persistent: true
+				}
+			]);
+
+
+		for (var i = 10; i--;)
+			html5tooltips.refresh();
+
+
+	</script>
+
+</body>
+
+</html>

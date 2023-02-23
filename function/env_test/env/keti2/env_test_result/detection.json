@@ -1,0 +1,10 @@
+{
+    "Risk":{
+        "Libs":[],
+        "CVE Reports":{},
+        "Test Method":"hard",
+        "description":"This dict shows the risk of the libs in current environment. We have list the lib name and the correspoding CVE reports for reference."
+    },
+    "Framework Adaptation Result":"Pytorch version 1.7.1 is not aviliable with cuda version 11.2! Please update your cuda or change pytorch version",
+    "Current Cuda Version":"11.2"
+}
