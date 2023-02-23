@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/common.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css/index_evaluate.css" />
+    <link href="favicon.ico" rel="shortcut icon">
+  </head>
+  <body>
+    <div class="page flex-col">
+      <div class="block_1 flex-row">
+        <div class="box_1 flex-col"></div>
+        
+        <a href="/"><button class="text_start">平台介绍</button></a>
+        <a href="/"><button class="text">解决方案</button></a>
+        <img
+          class="image_center"
+          referrerpolicy="no-referrer"
+          src="../static/imgs/head_line_1.png"
+        />
+        <button class="text_center" onclick="open_task_center()">在线体验</button>
+        <img
+          class="image_2"
+          referrerpolicy="no-referrer"
+          src="../static/imgs/head_line_2.png"
+        />
+        <!-- <a href="/index_task_center"><button class="text_3">在线体验</button></a> -->
+        <a href="../static/pdf/AI平台介绍文档v8.pdf"><button class="text">帮助文档</button></a>
+        <a href="https://icsr.zju.edu.cn"><button class="text">关于我们</button></a>
+        <div class="section_2 flex-col" onclick="window.open('https://github.com/AISecurity2030/Attack', '_self')"></div>
+      </div>
+      <div class="block_2 flex-col">
+        <div class="group_1 flex-row justify-between">
+          <span class="text_6">平台介绍</span>
+          <img
+            class="thumbnail_1"
+            referrerpolicy="no-referrer"
+            src="../static/imgs/thumbnail_1.png"
+          />
+          <span class="text_7">任务中心</span>
+          <img
+            class="thumbnail_2"
+            referrerpolicy="no-referrer"
+            src="../static/imgs/thumbnail_1.png"
+          />
+          <span class="text_8">参数设置</span>
+        </div>
+        <div class="group_2 flex-col">
+          <div class="box_3 flex-row">
+            <div class="text-wrapper_1 flex-col">
+              <span class="text_9">1</span>
+            </div>
+            <div class="box_4 flex-col">
+              <div class="group_3 flex-col">
+                <div class="box_5 flex-col"></div>
+                <div class="box_6 flex-col"></div>
+              </div>
+            </div>
+            <div class="text-wrapper_2 flex-col">
+              <span class="text_10">4</span>
+            </div>
+          </div>
+          <div class="text-wrapper_3 flex-row">
+            <span class="text_11">数据&amp;模型</span>
+            <span class="text_12">功能参数</span>
+            <span class="text_13">开始评估</span>
+            <span class="text_14">结果展示</span>
+          </div>
+          <div class="text-wrapper_4 flex-row">
+            <span class="text_15">开始评估时间：</span>
+            <span class="text_16"></span>
+            <span class="text_17">执行时长：</span>
+            <span class="text_18"></span>
+          </div>
+          <div class="box_7 flex-row justify-between">
+            <div class="group_4 flex-col"></div>
+            <span class="text_19">日志</span>
+          </div>
+          <div class="image-wrapper_1 flex-col">
+            <p class="pop_text" style="overflow: scroll;height:500px;margin-left:5px;margin-right:5px;font-size:14px"></p>
+          </div>
+          <img
+            class="image_4"
+            referrerpolicy="no-referrer"
+            src="../static/imgs/white_line.png"
+          />
+         <div class="box_8 flex-row justify-between">
+          <div class="text-wrapper_5 flex-col">
+            <span class="text_21" onclick="window.open('/index_task_center', '_self')">返回任务中心</span>
+          </div>
+          <div class="text-wrapper_6 flex-col">
+            <span class="text_22" id="res_btn" onclick="window.open('/index_results?tid='+storage['Taskid'], '_self')">查看结果</span>
+          </div>
+         </div>
+          <div class="text-wrapper_8 flex-col">
+            <span class="text_23">2</span>
+          </div>
+          <div class="text-wrapper_9 flex-col">
+            <span class="text_24">3</span>
+          </div>
+        </div>
+      </div>
+      <div class="block_3 flex-col">
+        <div class="group_5 flex-row justify-between">
+          <div class="box_9 flex-col"></div>
+          <span class="text_25">人工智能安全理论及验证平台</span>
+        </div>
+        <div class="group_6 flex-row justify-between">
+          <div class="image-text_1 flex-row justify-between">
+            <img
+              class="image_5"
+              referrerpolicy="no-referrer"
+              src="../static/imgs/email.png"
+            />
+            <span class="text-group_1">xxxx&#64;xxxx.com</span>
+          </div>
+          <div class="image-text_2 flex-row justify-between">
+            <img
+              class="thumbnail_3"
+              referrerpolicy="no-referrer"
+              src="../static/imgs/tel.png"
+            />
+            <span class="text-group_2">0571-XXXXXXXXX</span>
+          </div>
+          <div class="image-text_3 flex-row justify-between">
+            <img
+              class="thumbnail_4"
+              referrerpolicy="no-referrer"
+              src="../static/imgs/address.png"
+            />
+            <span class="text-group_3">浙江省杭州市xxxxxxxxxx</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+<script type="text/javascript" src="../static/js/echarts.min.js"></script>
+<script type="text/javascript" src="../static/js/jquery-3.6.1.js"></script>
+<script type="text/javascript" src="../static/js/flexible.js"></script>
+<script type="text/javascript" src="../static/js/use.js"></script>
+<script type="text/javascript" src="../static/js/log.js"></script>

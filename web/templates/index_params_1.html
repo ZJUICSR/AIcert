@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/common.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css/index_params_1.css" />
+    <link href="favicon.ico" rel="shortcut icon">
+  </head>
+  <body>
+    <div class="page flex-col">
+      <div class="block_1 flex-row">
+        <div class="group_1 flex-col"></div>
+        
+        <a href="/"><button class="text_start">平台介绍</button></a>
+        
+        <a href="/"><button class="text">解决方案</button></a>
+        <!-- <a href="/index_task_center"><button class="text_3">在线体验</button></a> -->
+        <img
+          class="image_center"
+          referrerpolicy="no-referrer"
+          src="../static/imgs/head_line_1.png"
+        />
+        <button class="text_center" onclick="open_task_center()">在线体验</button>
+        <img
+          class="image_2"
+          referrerpolicy="no-referrer"
+          src="../static/imgs/head_line_2.png"
+        />
+        <a href="../static/pdf/AI平台介绍文档v8.pdf"><button class="text">帮助文档</button></a>
+        <a href="https://icsr.zju.edu.cn"><button class="text">关于我们</button></a>
+        <div class="group_2 flex-col" onclick="window.open('https://github.com/AISecurity2030/Attack', '_self')"></div>
+      </div>
+      <div class="block_2 flex-col">
+        <div class="group_3 flex-row justify-between">
+          <span class="text_6">平台介绍</span>
+          <img
+            class="thumbnail_1"
+            referrerpolicy="no-referrer"
+            src="../static/imgs/thumbnail_1.png"
+          />
+          <span class="text_7">任务中心</span>
+          <img
+            class="thumbnail_2"
+            referrerpolicy="no-referrer"
+            src="../static/imgs/thumbnail_1.png"
+          />
+          <span class="text_8">参数设置</span>
+        </div>
+        <div class="group_4 flex-col">
+          <div class="group_5 flex-row">
+            <div class="box_1 flex-col">
+              <span class="text_9">1</span>
+              <div class="section_1 flex-col"></div>
+            </div>
+            <div class="box_2 flex-col"></div>
+            <div class="text-wrapper_1 flex-col">
+              <span class="text_10">4</span>
+            </div>
+          </div>
+          <div class="text-wrapper_2 flex-row">
+            <span class="text_11">数据&amp;模型</span>
+            <span class="text_12">功能参数</span>
+            <span class="text_13">开始评估</span>
+            <span class="text_14">结果展示</span>
+          </div>
+          <div class="group_6 flex-row">
+            <div class="group_7 flex-col"></div>
+            <span class="text_15">数据集</span>
+            <div class="group_8 flex-col"></div>
+            <span class="text_16">模型</span>
+          </div>
+          <div class="grid_1 flex-row">
+            <div class="group_9 flex-row dropdown">
+              <button class="section_2 flex-row dropbtn">
+                <div class="image-text_1 flex-row justify-between ">
+                  <img
+                    class="thumbnail_3"
+                    referrerpolicy="no-referrer"
+                    src="../static/imgs/dataset.png"
+                  />
+                  <span class="text-group_1">请选择数据集</span>
+                  <div class="dropdown-content"> 
+                    <p id="dataset_mnist" onclick="select_mnist()">MNIST</p>
+                    <p id="dataset_cifar10" onclick="select_cifar10()">CIFAR10</p>
+                  </div>
+                </div>
+                <img
+                  class="thumbnail_4"
+                  referrerpolicy="no-referrer"
+                  src="../static/imgs/thumbnail_9.png"
+                />
+              </button>
+              <div class="text_choose flex-row">
+                <p class="text_17 ">已选择数据集：</p>  
+                <p class="text_17" id="dataset_choose"></p>
+              </div>
+            </div>
+            <div class="group_10 flex-row dropdown">
+              <button class="section_2 flex-row dropbtn">
+                <div class="image-text_1 flex-row justify-between">
+                  
+                  <img
+                    class="thumbnail_3"
+                    referrerpolicy="no-referrer"
+                    src="../static/imgs/thumbnail_10.png"
+                  />
+                  <span class="text-group_1">请选择模型</span>
+                  <!-- show_model(vgg16) -->
+                  <!-- show_model(ResNet34) -->
+                  <div class="dropdown-content">
+                    <p id="model_vgg" onclick="show_model('vgg16')">VGG16</p>
+                    <p id="model_resnet" onclick="show_model('resnet34')">ResNet34</p>
+                  </div>
+                </div>
+                <img
+                  class="thumbnail_4"
+                  referrerpolicy="no-referrer"
+                  src="../static/imgs/thumbnail_9.png"
+                />
+              </button>
+              <div class="text_choose flex-row">
+                <p class="text_17 ">已选择模型：</p>  
+                <p class="text_17" id="model_choose"></p>
+              </div>
+            </div>
+            <div class="image-wrapper_1 flex-col" id="div1">
+              <a href="#"><img src="" class="dataset_
+                display"></a>
+              <a href="#"><img src="../static/imgs/cifar100.jpg" class="dataset_display"></a>
+              <a href="#"><img src="../static/imgs/cifar101.jpg" class="dataset_display"></a>
+              <a href="#"><img src="../static/imgs/cifar102.jpg" class="dataset_display"></a>
+              <a href="#"><img src="../static/imgs/cifar103.jpg" class="dataset_display"></a>
+              <a href="#"><img src="../static/imgs/cifar104.jpg" class="dataset_display"></a>
+              <a href="#"><img src="../static/imgs/cifar105.jpg" class="dataset_display"></a>
+              <a href="#"><img src="../static/imgs/cifar106.jpg" class="dataset_display"></a>
+              <a href="#"><img src="../static/imgs/cifar107.jpg" class="dataset_display"></a>
+              <a href="#"><img src="../static/imgs/cifar108.jpg" class="dataset_display"></a>
+          </div>
+            <div class="image-wrapper_2 flex-col">
+                <div class="container">
+                  <div class="w3lsaboutaits-grids">
+                      <div class="lwcontainer">
+                          <div class="lwflex-1" id="control" style="float:left;display: inline-block;">
+                              <form>
+                                  <label for="ratio1">水平拉伸</label>
+                                  <input id="ratio1" type="range" value="300" min="0" max="1000">
+                                  <div class="blankspace"></div>
+                                  <label for="ratio2">竖直拉伸</label>
+                                  <input id="ratio2" type="range" value="500" min="0" max="1000">
+                                  <div class="blankspace"></div>
+                                  <label for="zoomx">X轴拉伸</label>
+                                  <input id="zoomx" type="range" value="4" min="0" max="20">
+                                  <div class="blankspace"></div>
+                                  <label for="zoomy">Y轴拉伸</label>
+                                  <input id="zoomy" type="range" value="4" min="0" max="20">
+                                  <div class="blankspace"></div>
+                                  <label for="zoomz">Z轴拉伸</label>
+                                  <input id="zoomz" type="range" value="4" min="0" max="20">
+
+                              </form>
+                          </div>
+                          <div class="lwflex-2">
+
+                              <div class="lwflex-3-child" id="net" style="float: right;display: inline-block;height:415px;width:450px"></div>
+                          </div>
+                      </div>
+                      <div class="clearfix"></div>
+                  </div>
+              </div>
+
+              <img id="model_img"
+                class="image_4"
+                referrerpolicy="no-referrer"
+                alt=""
+              />
+            </div>
+          </div>
+          <img
+            class="image_5"
+            referrerpolicy="no-referrer"
+            src="../static/imgs/white_line.png"
+          />
+          <div class="group_11 flex-row justify-between">
+            <button class="text-wrapper_3 flex-col">
+              <span class="text_19" onclick="open_task_center()">取消创建</span>
+            </button>
+            <button class="text-wrapper_4 flex-col">
+              <span class="text_20" onclick="check_params_and_next_step()">下一步</span>
+            </button>
+          </div>
+          <div class="text-wrapper_5 flex-col">
+            <span class="text_21">2</span>
+          </div>
+          <div class="text-wrapper_6 flex-col">
+            <span class="text_22">3</span>
+          </div>
+        </div>
+      </div>
+      <div class="block_3 flex-col">
+        <div class="block_4 flex-row justify-between">
+          <div class="box_4 flex-col"></div>
+          <span class="text_23">人工智能安全理论及验证平台</span>
+        </div>
+        <div class="block_5 flex-row justify-between">
+          <div class="image-text_3 flex-row justify-between">
+            <img
+              class="image_6"
+              referrerpolicy="no-referrer"
+              src="../static/imgs/email.png"
+            />
+            <span class="text-group_3">xxxx&#64;xxxx.com</span>
+          </div>
+          <div class="image-text_4 flex-row justify-between">
+            <img
+              class="thumbnail_7"
+              referrerpolicy="no-referrer"
+              src="../static/imgs/tel.png"
+            />
+            <span class="text-group_4">0571-XXXXXXXXX</span>
+          </div>
+          <div class="image-text_5 flex-row justify-between">
+            <img
+              class="thumbnail_8"
+              referrerpolicy="no-referrer"
+              src="../static/imgs/address.png"
+            />
+            <span class="text-group_5">浙江省杭州市xxxxxxxxxx</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+<script type="text/javascript" src="../static/js/echarts.min.js"></script>
+<script type="text/javascript" src="../static/js/dataset.js"></script>
+<script type="text/javascript" src="../static/js/jquery-3.6.1.js"></script>
+<script type="text/javascript" src="../static/js/flexible.js"></script>
+<script type="text/javascript" src="../static/js/convnetdraw.js"></script>
+<script type="text/javascript" src="../static/js/use.js"></script>

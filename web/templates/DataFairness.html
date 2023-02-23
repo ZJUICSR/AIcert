@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/common.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css/index_params_1.css" />
+    <link href="favicon.ico" rel="shortcut icon">
+  </head>
+  <body>
+    <div class="page flex-col">
+      <div class="block_1 flex-row">
+        <div class="group_1 flex-col"></div>
+        
+        <a href="/"><button class="text_start">平台介绍</button></a>
+        
+        <a href="/"><button class="text">解决方案</button></a>
+        <!-- <a href="/index_task_center"><button class="text_3">在线体验</button></a> -->
+        <img
+          class="image_center"
+          referrerpolicy="no-referrer"
+          src="../static/imgs/head_line_1.png"
+        />
+        <button class="text_center" onclick="open_task_center()">在线体验</button>
+        <img
+          class="image_2"
+          referrerpolicy="no-referrer"
+          src="../static/imgs/head_line_2.png"
+        />
+        <a href="../static/pdf/AI平台介绍文档v8.pdf"><button class="text">帮助文档</button></a>
+        <a href="https://icsr.zju.edu.cn"><button class="text">关于我们</button></a>
+        <div class="group_2 flex-col" onclick="window.open('https://github.com/AISecurity2030/Attack', '_self')"></div>
+      </div>
+      <div class="block_2 flex-col">
+        <div class="group_3 flex-row justify-between">
+          <span class="text_6">平台介绍</span>
+          <img
+            class="thumbnail_1"
+            referrerpolicy="no-referrer"
+            src="../static/imgs/thumbnail_1.png"
+          />
+          <span class="text_7">任务中心</span>
+          <img
+            class="thumbnail_2"
+            referrerpolicy="no-referrer"
+            src="../static/imgs/thumbnail_1.png"
+          />
+          <span class="text_8">参数设置</span>
+        </div>
+        <div class="group_body flex-col">
+          <div class="introduce_title">
+            <div class="group_7 flex-col"></div>
+            <span class="title_text">数据集公平性</span>
+          </div>
+          <span class="introduce">数据集在收集的过程中的偏见行为可能导致数据集中存在偏见，包括带有偏见的数据标注，带有偏见的数据采样，如男性样本的比例远高于女性等等，这些都可能导致后续在该数据集上训练的模型产生带有偏见的预测结果。因此，我们面向这些问题提供了数据集公平性评估与公平性提升功能。</span>
+          <div style="align-items:center;">
+            <img src="../static/imgs/datafairness.png" alt="" class="fairnessimg" >
+          </div>
+          <div class="group_6 flex-row">
+            <div class="group_7 flex-col"></div>
+            <span class="text_15">参数配置</span>
+          </div>
+          <div class="grid_fairness flex-row">
+            <div class="gzdiv">
+              <div style="float: left; margin-right: 1%"><span class="input_label" style="margin-bottom:4px">选择/上传数据集</span></div>
+              <select name="" class="form-control fairness"  id="dataname">
+                  <option value="" disabled selected hidden>请选择数据集</option>
+                  <option value="German">German</option>
+                  <option value="Adult">Adult</option>
+                  <option value="Compas">Compas</option>
+              </select>
+              <!-- <br /> -->
+              <div style="float: left; margin-right: 1%"><span class="input_label" style="margin-bottom:4px">选择数据集优化算法</span></div>
+              <select name="" class="form-control"  id="datamethod">
+                  <option value="" disabled selected hidden>请选择数据集优化算法</option>
+                  <option value="LFR">LFR</option>
+                  <option value="Reweighing">Reweighing</option>
+              </select>
+              <br />
+              <div class="startBtnF">
+                <button style="float: right" class="filebtn1" id="popK" onclick="dataeva();">公平性评估</button>
+                <button style="float: right" class="filebtn1" id="debias" onclick="datadebias();">公平性提升</button>
+            </div>
+          </div>
+        </div>
+        <div id="adv_att_loading" class="loading" style="display: none;" >
+          <span></span>
+
+          <span></span>
+  
+          <span></span>
+  
+          <span></span>
+  
+          <span></span>
+      </div>
+      <div class="fail">
+        <h4>结果生成失败，请重新执行</h4>
+      </div>
+        <div class="result_body">
+          <div class="introduce_title">
+            <div class="group_7 flex-col"></div>
+            <span class="title_text">结果展示</span>
+          </div>
+          
+          
+        <div class="result" style="width: 100%;position: relative;float: left;">
+          <div id="rdeva" style="display: none;">
+              <div class=" main_top_echarts_con_title ">个体公平性评估</div>
+              <div id = 'conseva' class="result" style="width: 500px;height:400px;display: none;float: left;margin-left:25%;margin-top: -10px;"></div>
+          </div>
+          <!-- 提升的公平性评估 -->
+          <div id = 'consdebias' style="width: 100%;height:100%;display: block;float: left;">
+              <div class=" main_top_echarts_con_title ">个体公平性提升对比</div>
+              <div id = "original" class="result" style="width: 500px;height:350px;float: left;margin-left:5%;margin-top: -20px;"></div>
+              <div id = "improved" class="result" style="width: 450px;height:350px;float: left;margin-left:3%;margin-top: -20px;"></div>
+          </div>
+        </div>
+          <div class="result" style="width: 100%;position: relative;float: left;margin-top: 0%;">
+            <div class=" main_top_echarts_con_title " id="popResult">数据占比</div>
+            <div><h4 style="text-align:center;margin-bottom: 5px;" class="poptitle">各群体优势预测结果占比/各群体样本占比</h4></div>
+            <div id = 'class1pro' class="result" style="width: 500px;height:350px;display: inline-block;margin-left:10%;margin-top: -25px;"></div>
+            <div id = 'class2pro' class="result" style="width: 450px;height:350px;display: inline-block;margin-left:3%;margin-top: -25px;"></div>
+          </div>
+        
+        <div class="result" style="width: 100%; position: relative; float: left;margin-top: 0.1%;">
+          <div class=" main_top_echarts_con_title bar_data_debias" style="display:none">数据集：群体公平性提升对比</div>
+          <div class=" main_top_echarts_con_title bar_data_eva" style="display:none">数据集：群体公平性评估</div>
+          <div style="width: 98%;height: 90%;overflow: scroll;margin-left :1%">
+            <div class="result" style="float: left;margin-top:.5%;margin-bottom:5%">
+                <div style="float: left; width:100px ;height:400px"><span style="margin-left:30px;margin-top:120px;border: 3px solid rgb(15, 153, 160);writing-mode: vertical-lr;padding:20px 10px;font-size:18px;font-weight: bold;" id="class1">敏感属性：Sex</span></div>
+                <div  style="float: left;width: 500px;height: 400px;" id="class1Difference"></div>
+                <div style="width:500px;float:left;height:400px" id="class1Ratio"></div>
+            </div>
+            <div class="result" style="float: left;margin-top:.5%;width:100%">
+                <div style="float: left; width:100px ;height:400px;"><span style="margin-left:30px;margin-top:120px;border: 3px solid rgb(15, 153, 160);writing-mode: vertical-lr;padding:20px 10px;font-size:18px;font-weight: bold;" id="class2">敏感属性：Age</span></div>
+                <div  style="float: left;width: 500px;height: 400px;" id="class2Difference"></div>
+                <div style="width:500px;float:left;height:400px" id="class2Ratio"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+      <div class="block_3 flex-col">
+        <div class="block_4 flex-row justify-between">
+          <div class="box_4 flex-col"></div>
+          <span class="text_23">人工智能安全理论及验证平台</span>
+        </div>
+        <div class="block_5 flex-row justify-between">
+          <div class="image-text_3 flex-row justify-between">
+            <img
+              class="image_6"
+              referrerpolicy="no-referrer"
+              src="../static/imgs/email.png"
+            />
+            <span class="text-group_3">xxxx&#64;xxxx.com</span>
+          </div>
+          <div class="image-text_4 flex-row justify-between">
+            <img
+              class="thumbnail_7"
+              referrerpolicy="no-referrer"
+              src="../static/imgs/tel.png"
+            />
+            <span class="text-group_4">0571-XXXXXXXXX</span>
+          </div>
+          <div class="image-text_5 flex-row justify-between">
+            <img
+              class="thumbnail_8"
+              referrerpolicy="no-referrer"
+              src="../static/imgs/address.png"
+            />
+            <span class="text-group_5">浙江省杭州市xxxxxxxxxx</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+<script type="text/javascript" src="../static/js/echarts.min.js"></script>
+<script type="text/javascript" src="../static/js/jquery-3.6.1.js"></script>
+<script type="text/javascript" src="../static/js/flexible.js"></script>
+<script type="text/javascript" src="../static/js/DataFairness.js"></script>
+<!-- <script type="text/javascript">document.write("<script type='text/javascript' src='../static/js/DataFairness.js?v=" + new Date().getTime() + "'><\/script>");</script> -->
+<script type="text/javascript" src="../static/js/use.js"></script>
