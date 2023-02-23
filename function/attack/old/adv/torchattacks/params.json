@@ -1,0 +1,146 @@
+{
+    "FGSM": {
+      "eps": 0.007
+    },
+    "BIM": {
+      "eps": 0.01568627450980392,
+      "alpha": 0.00392156862745098,
+      "steps": 0
+    },
+    "RFGSM": {
+      "eps": 0.06274509803921569,
+      "alpha": 0.03137254901960784,
+      "steps": 1.0
+    },
+    "CW": {
+      "c": 1e-4,
+      "kappa": 0.0,
+      "steps": 1000,
+      "lr": 0.01
+    },
+    "PGD": {
+      "eps": 0.3,
+      "alpha": 0.00784313725490196,
+      "steps": 40,
+      "random_start": false
+    },
+    "PGDL2": {
+      "eps": 1.0,
+      "alpha": 0.2,
+      "steps": 40,
+      "random_start": false,
+      "eps_for_division": 1e-10
+    },
+    "EOTPGD": {
+      "eps": 0.3,
+      "alpha": 0.00784313725490196,
+      "steps": 40,
+      "sampling": 10
+    },
+    "MultiAttack": {
+      "attacks": []
+    },
+    "FFGSM": {
+      "eps": 0.03137254901960784,
+      "alpha": 0.0392156862745098
+    },
+    "TPGD": {
+      "eps": 0.03137254901960784,
+      "alpha": 0.00784313725490196,
+      "steps": 7
+    },
+    "MIFGSM": {
+      "eps": 0.03137254901960784,
+      "steps": 5,
+      "decay": 1.0
+    },
+    "VANILA": {
+    },
+    "GN": {
+      "sigma": 0.1
+    },
+    "PGDDLR": {
+      "eps": 0.3,
+      "alpha": 0.00784313725490196,
+      "steps": 40,
+      "random_start": false
+    },
+    "APGD": {
+      "norm": "Linf",
+      "eps": 0.03137254901960784,
+      "steps": 100,
+      "n_restarts": 1,
+      "seed": 0,
+      "loss": "ce'",
+      "eot_iter": 1,
+      "rho": 0.75,
+      "verbose": false
+    },
+    "APGDT": {
+        "eps": 0.03137254901960784,
+        "steps": 100,
+        "n_restarts": 1,
+        "seed": 0,
+        "eot_iter": 1,
+        "rho": 0.75,
+        "verbose": false,
+        "n_classes": 10
+    },
+    "FAB": {
+        "norm": "Linf",
+        "eps": null,
+        "steps": 100,
+        "n_restarts": 1,
+        "alpha_max": 0.1,
+        "eta": 1.05,
+        "beta": 0.9,
+        "verbose": false,
+        "seed": 0,
+        "targeted": false,
+        "n_classes": 10
+    },
+    "Square": {
+        "norm": "Linf",
+        "eps": null,
+        "n_queries": 5000,
+        "n_restarts": 1,
+        "p_init": 0.8,
+        "loss": "margin",
+        "resc_schedule": true,
+        "seed": 0,
+        "verbose": false,
+        "targeted": false
+    },
+    "AutoAttack": {
+        "norm": "Linf",
+        "eps": 0.3,
+        "version": "standard",
+        "n_classes": 10,
+        "seed": null,
+        "verbose": false
+    },
+    "OnePixel": {
+        "pixels": 1,
+        "steps": 75,
+        "popsize": 400,
+        "inf_batch": 128
+    },
+    "DeepFool": {
+      "steps": 50,
+      "overshoot": 0.02
+    },
+    "SparseFool": {
+        "steps": 20,
+        "lam": 3,
+        "overshoot": 0.02
+    },
+    "DI2FGSM": {
+        "eps": 0.03137254901960784,
+        "alpha": 0.00784313725490196,
+        "steps": 20,
+        "decay": 0.0,
+        "resize_rate": 0.9,
+        "diversity_prob": 0.5,
+        "random_start": false
+    }
+}

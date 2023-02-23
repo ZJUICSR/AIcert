@@ -1,0 +1,128 @@
+[
+    [
+        "pyyaml",
+        "<5.4",
+        "5.3.1",
+        "A vulnerability was discovered in the PyYAML library in versions before 5.4, where it is susceptible to arbitrary code execution when it processes untrusted YAML files through the full_load method or with the FullLoader loader. Applications that use the library to process untrusted input may be vulnerable to this flaw. This flaw allows an attacker to execute arbitrary code on the system by abusing the python/object/new constructor. This flaw is due to an incomplete fix for CVE-2020-1747. See CVE-2020-14343.",
+        "39611"
+    ],
+    [
+        "pyjwt",
+        "<1.5.1",
+        "1.3.0",
+        "In PyJWT 1.5.0 and below the `invalid_strings` check in `HMACAlgorithm.prepare_key` does not account for all PEM encoded public keys. Specifically, the PKCS1 PEM encoded format would be allowed because it is prefaced with the string `-----BEGIN RSA PUBLIC KEY-----` which is not accounted for. This enables symmetric/asymmetric key confusion attacks against users using the PKCS1 PEM encoded public keys, which would allow an attacker to craft JWTs from scratch.",
+        "35014"
+    ],
+    [
+        "psutil",
+        "<=5.6.5",
+        "3.4.2",
+        "psutil (aka python-psutil) through 5.6.5 can have a double free. This occurs because of refcount mishandling within a while or for loop that converts system data into a Python object. See CVE-2019-18874.",
+        "37765"
+    ],
+    [
+        "lxml",
+        "<4.4.0",
+        "3.5.0",
+        "In lxml before 4.4.0, when writing to file paths that contain the URL escape character '%', the file path could wrongly be mangled by URL unescaping and thus write to a different file or directory.  Code that writes to file paths that are provided by untrusted sources, but that must work with previous versions of lxml, should best either reject paths that contain '%' characters, or otherwise make sure that the path does not contain maliciously injected '%XX' URL hex escapes for paths like '../'.",
+        "39195"
+    ],
+    [
+        "lxml",
+        "<4.6.1",
+        "3.5.0",
+        "Lxml 4.6.1 includes a fix for a vulnerability that was discovered in the HTML Cleaner, which allowed JavaScript to pass through.  The cleaner now removes more sneaky \"style\" content.",
+        "38892"
+    ],
+    [
+        "lxml",
+        "<4.6.2",
+        "3.5.0",
+        "In lxml before version 4.6.2, a vulnerability was discovered in the HTML Cleaner which allowed JavaScript to pass through.  The cleaner now removes more sneaky \"style\" content.",
+        "39194"
+    ],
+    [
+        "jinja2",
+        ">=0.0.0,<2.11.3",
+        "2.8",
+        "This affects the package jinja2 from 0.0.0 and before 2.11.3. The ReDOS vulnerability of the regex is mainly due to the sub-pattern [a-zA-Z0-9._-]+.[a-zA-Z0-9._-]+ This issue can be mitigated by Markdown to format user content instead of the urlize filter, or by implementing request timeouts and limiting process memory. See CVE-2020-28493.",
+        "39525"
+    ],
+    [
+        "httplib2",
+        "<0.18.0",
+        "0.9.1",
+        "Httplib2 0.18.0 is an important security update to patch a CWE-93 CRLF injection vulnerability which forces %xx quote of space, CR, LF characters in uri. See: <https://cwe.mitre.org/data/definitions/93.html>.",
+        "38303"
+    ],
+    [
+        "httplib2",
+        "<0.18.0",
+        "0.9.1",
+        "In httplib2 before version 0.18.0, an attacker controlling unescaped part of uri for `httplib2.Http.request()` could change request headers and body, send additional hidden requests to same server. This vulnerability impacts software that uses httplib2 with uri constructed by string concatenation, as opposed to proper urllib building with escaping. This has been fixed in 0.18.0. See CVE-2020-11078.",
+        "38368"
+    ],
+    [
+        "httplib2",
+        "<0.19.0",
+        "0.9.1",
+        "httplib2 is a comprehensive HTTP client library for Python. In httplib2 before version 0.19.0, a malicious server which responds with long series of \"\\xa0\" characters in the \"www-authenticate\" header may cause Denial of Service (CPU burn while parsing header) of the httplib2 client accessing said server. This is fixed in version 0.19.0 which contains a new implementation of auth headers parsing using the pyparsing library. See CVE-2021-21240.",
+        "39608"
+    ],
+    [
+        "httplib2",
+        "<=0.9.2",
+        "0.9.1",
+        "httplib2 before and including 0.9.2 on \"SSL certificate hostname mismatch\" it is checked only once: https://github.com/httplib2/httplib2/issues/5",
+        "25848"
+    ],
+    [
+        "html5lib",
+        "<0.99999999",
+        "0.999",
+        "The serializer in html5lib before 0.99999999 might allow remote attackers to conduct cross-site scripting (XSS) attacks by leveraging mishandling of the < (less than) character in attribute values.",
+        "35693"
+    ],
+    [
+        "html5lib",
+        "<0.99999999",
+        "0.999",
+        "The serializer in html5lib before 0.99999999 might allow remote attackers to conduct cross-site scripting (XSS) attacks by leveraging mishandling of special characters in attribute values, a different vulnerability than CVE-2016-9909.",
+        "35694"
+    ],
+    [
+        "html5lib",
+        "<0.99999999",
+        "0.999",
+        "html5lib before 0.99999999 is vulnerable to a XSS attack. Upgrading avoids the XSS bug potentially caused by serializer allowing attribute values to be escaped out of in old browser versions, changing the quote_attr_values option on serializer to take one of three values, \"always\" (the old True value), \"legacy\" (the new option,  and the new default), and \"spec\" (the old False value, and the old default).",
+        "25846"
+    ],
+    [
+        "cryptography",
+        "<1.5.3",
+        "1.2.3",
+        "HKDF in cryptography before 1.5.2 returns an empty byte-string if used with a length less than algorithm.digest_size.",
+        "25680"
+    ],
+    [
+        "cryptography",
+        "<3.3",
+        "1.2.3",
+        "Cryptography 3.3 no longer allows loading of finite field Diffie-Hellman parameters of less than 512 bits in length. This change is to conform with an upcoming OpenSSL release that no longer supports smaller sizes. These keys were already wildly insecure and should not have been used in any application outside of testing.",
+        "39252"
+    ],
+    [
+        "cryptography",
+        "<3.3.2",
+        "1.2.3",
+        "In the cryptography package before 3.3.2 for Python, certain sequences of update calls to symmetrically encrypt multi-GB values could result in an integer overflow and buffer overflow, as demonstrated by the Fernet class. See CVE-2020-36242.",
+        "39606"
+    ],
+    [
+        "cryptography",
+        "<=3.2",
+        "1.2.3",
+        "Cryptography 3.2 was released with the warning that its maintainers became aware of a Bleichenbacher vulnerability that they were only partly able to mitigate. See: CVE-2020-25659.",
+        "38932"
+    ]
+]
