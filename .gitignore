@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 */__pycache__
 __pycache__
@@ -11,3 +12,24 @@ function/attack/adv0211/data/MNIST/processed/training.pt
 function/DeepLogic/adv_train/model-resnet18-fashionminist/Standard-fashionminist-model-resnet18-epoch300.pt
 function/concolic/Utils/Models/cifar10_vgg16.pth
 function/env_test/valid_extract.pkl
+=======
+output/
+dataset/data/
+attacks/adv/__pycache__
+attacks/adv/torchattacks/attacks/__pycache__
+attacks/adv/torchattacks/__pycache__
+attacks/__pycache__
+models/mnist/__pycache__
+models/cifar/__pycache__
+models/__pycache__
+dataset/__pycache__
+__pycache__
+*/__pycache__
+dataset/Dataset/customize/
+dataset/Dataset/public/
+dataset/Model/modelstore
+models/ckpt/
+evaluator/paca_detect/detect_models
+evaluator/paca_detect/results/
+third_party/auto_LiRPA/third_party/auto_LiRPA_verifiy/vision/data
+>>>>>>> 4b86a7118926b8794a469b203733e70635d990e7
