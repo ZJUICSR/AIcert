@@ -67,6 +67,7 @@ class IOtool:
     
     @staticmethod
     def change_subtask_state(taskparam,tid,stid,state):
+        """修改子任务状态"""
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         info = taskparam.get_info_value(key="function")
         info[stid]["state"]=state
@@ -75,7 +76,29 @@ class IOtool:
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
 
     @staticmethod   
+    def change_task_success_v2(tid):
+        """判断主任务是否执行成功,不存在全局变量时使用"""
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        info = taskinfo[tid]["function"]
+        sub_task_list = info.keys()
+        state = 2
+        sub_state_list = [] # 子任务状态列表
+        for stid in sub_task_list:
+            sub_state_list.append(info[stid]["state"])
+        if 0 in sub_state_list: # 如果子任务状态列表中存在0 未执行状态，则主任务为执行中
+            state = 1
+        elif 1 in sub_state_list: # 如果子任务状态列表中存在1 执行中状态，则主任务为执行中
+            state = 1
+        elif 3 in sub_state_list: # 如果子任务状态列表中存在3则代表有子任务执行失败，则主任务为执行失败
+            state = 3
+        else: # 如果子任务状态列表中不存在0，1，3则代表所有子任务执行成功，则主任务为执行成功
+            state = 2
+        taskinfo[tid]["state"] = state
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+
+    @staticmethod   
     def change_task_success(taskparam,tid):
+        """判断主任务是否执行成功"""
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         info = taskparam.get_info_value(key="function")
         sub_task_list = info.keys()
