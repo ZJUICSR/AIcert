@@ -1,0 +1,11 @@
+{
+    "name": "BadNets",
+    "version": "0.0.1",
+    "note": "BadNets attack, generate trigger to dataset",
+    "interface": "BadNets.run",
+    "release": "2021.06.01",
+    "output": "None",
+    "aicycle": 1,
+    "dtype": "image",
+    "dataset": ["mnist", "cifar10", "cifar100"]
+}
