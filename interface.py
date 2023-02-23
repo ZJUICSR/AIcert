@@ -18,6 +18,7 @@ from IOtool import IOtool, Logger, Callback
 from torchvision import  transforms
 import torch
 import gol
+# from function.formal_verify import *
  
 from function.fairness import api
 
@@ -148,4 +149,45 @@ def get_model_loader(dataset, modelparam, logging, train_loader=None, test_loade
     logging.info("[模型训练阶段] 模型训练完成，测试准确率：{:.3f}% 测试损失：{:.5f}".format(test_acc, test_loss))
     return model,trainer
 
+def run_verify(tid, AAtid, param):
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    N = param['size']
+    device = 'cpu'
+    verify = vision_verify
+    if param['dataset'] == 'mnist':
+        mn_model = get_mnist_cnn_model()
+        test_data, n_class = get_mnist_data(number=N, batch_size=10)
+    if param['dataset'] == 'cifar':
+        mn_model = get_cifar_resnet18()
+        test_data, n_class = get_cifar_data(number=N, batch_size=10)
+    if param['dataset'] == 'gtsrb':
+        mn_model = get_gtsrb_resnet18()
+        test_data, n_class = get_gtsrb_data(number=N, batch_size=10)
+    if param['dataset'] == 'mtfl':
+        mn_model = get_MTFL_resnet18()
+        test_data, n_class = get_MTFL_data(number=N, batch_size=10)
+    if param['dataset'] == 'sst':
+        mn_model = get_lstm_demo_model()
+        test_data, _ = get_sst_data(ver_num=N)
+        n_class = 2
+        verify = language_verify
 
+    global LiRPA_LOGS
+    input_param = {'interface': 'Verification',
+                    'node': "中间结果可视化",
+                    'input_param': {'model': mn_model,
+                                    'dataset': test_data,
+                                    'n_class': n_class,
+                                    'up_eps': param['up_eps'],
+                                    'down_eps': param['down_eps'],
+                                    'steps': param['steps'],
+                                    'device': device,
+                                    'output_path': 'static/output',
+                                    'task_id': f"{param['task_id']}"}}
+    global result
+    result = verify(input_param)
+    result["stop"] = 1
+    IOtool.write_json(result,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+    taskinfo[tid]["function"][AAtid]["state"]=2
+    taskinfo[tid]["state"]=2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))

@@ -76,7 +76,7 @@ def ModelFairness():
         return render_template("ModelFairness.html")
     else:
         abort(403)
-# 数据集公平性评估
+# ---------------模板：数据集公平性评估---------
 @app.route('/DataFairnessEvaluate', methods=['POST'])
 def DataFairnessEvaluate():
     """
@@ -86,23 +86,39 @@ def DataFairnessEvaluate():
     """
     if (request.method == "POST"):
         dataname = request.form.get("dataname")
+        # 获取主任务ID
         tid = request.form.get("tid")
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        # 生成子任务ID
         AAtid = "S"+IOtool.get_task_id(str(format_time))
+        # 获取任务列表
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        # 添加任务信息到taskinfo
         taskinfo[tid]["function"].update({AAtid:{
+            # 任务类型
             "type":"date_evaluate",
+            # 任务状态：0 未执行；1 正在执行；2 执行成功；3 执行失败
             "state":0,
+            # 方法名称：如对抗攻击中的fgsm，ffgsm等，呈现在结果界面
             "name":["date_evaluate"],
+            # 数据集信息，呈现在结果界面，若干有选择模型还需增加模型字段：model
             "dataset":dataname,
         }})
+        
         taskinfo[tid]["dataset"]=dataname
+        # 执行任务
         res = api.dataset_evaluate(dataname)
+        # 执行完成，结果中的stop置为1，表示结束
+        
         res["stop"] = 1
+        # 保存结果
         IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+        # 将taskinfo中的状态置为2 代表子任务结果执行成功，此步骤为每个子任务必要步骤，请勿省略
         taskinfo[tid]["function"][AAtid]["state"]=2
-        taskinfo[tid]["state"]=2
+        # 任务信息写回任务文件
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        # 调用主任务状态修改函数，此步骤为每个子任务必要步骤，请勿省略
+        IOtool.change_task_success_v2(tid=tid)
         return jsonify(res)
     else:
         abort(403)
@@ -440,6 +456,7 @@ def get_result():
         tid = request.args.get("Taskid")
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         stidlist = taskinfo[tid]["function"].keys()
+        print(stidlist)
         result = {}
         for stid in stidlist:
             attack_type = taskinfo[tid]["function"][stid]["type"]
@@ -462,8 +479,7 @@ def get_result():
         return jsonify({"code":1,"msg":"success","result":result,"stop":stopflag})
 
 # ----------------- 课题4 形式化验证 -----------------
-import sys
-sys.path.append("./third_party/auto_LiRPA/third_party/auto_LiRPA")
+
 @app.route('/FormalVerification', methods=['GET',"POST"])
 def FormalVerification():
     
@@ -496,49 +512,14 @@ def FormalVerification():
         global end
         start = time.time()
         end = -1
-
-        print(param)
-        N = param['size']
-        device = 'cpu'
-        verify = vision_verify
-        if param['dataset'] == 'mnist':
-            mn_model = get_mnist_cnn_model()
-            test_data, n_class = get_mnist_data(number=N, batch_size=10)
-        if param['dataset'] == 'cifar':
-            mn_model = get_cifar_resnet18()
-            test_data, n_class = get_cifar_data(number=N, batch_size=10)
-        if param['dataset'] == 'gtsrb':
-            mn_model = get_gtsrb_resnet18()
-            test_data, n_class = get_gtsrb_data(number=N, batch_size=10)
-        if param['dataset'] == 'mtfl':
-            mn_model = get_MTFL_resnet18()
-            test_data, n_class = get_MTFL_data(number=N, batch_size=10)
-        if param['dataset'] == 'sst':
-            mn_model = get_lstm_demo_model()
-            test_data, _ = get_sst_data(ver_num=N)
-            n_class = 2
-            verify = language_verify
-
-        global LiRPA_LOGS
-        input_param = {'interface': 'Verification',
-                       'node': "中间结果可视化",
-                       'input_param': {'model': mn_model,
-                                       'dataset': test_data,
-                                       'n_class': n_class,
-                                       'up_eps': param['up_eps'],
-                                       'down_eps': param['down_eps'],
-                                       'steps': param['steps'],
-                                       'device': device,
-                                       'output_path': 'static/output',
-                                       'task_id': f"{param['task_id']}"}}
-        global result
-        result = verify(input_param)
-        result["stop"] = 1
-        IOtool.write_json(result,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
-        taskinfo[tid]["function"][AAtid]["state"]=2
-        taskinfo[tid]["state"]=2
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        return json.dumps({"data":"success"})
+        t2 = threading.Thread(target=interface.run_verify, args=(tid, AAtid, param))
+        t2.setDaemon(True)
+        t2.start()
+        res = {
+            "tid":tid,
+            "AAtid":AAtid
+        }
+        return jsonify(res)
 
 # ----------------- 课题1 对抗攻击评估 -----------------
 # from function.attack.adv0211 import *
