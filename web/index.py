@@ -557,6 +557,43 @@ def Concolic():
     else:
         abort(403)
 
+# ----------------- 课题2 系统环境分析与框架适配 -----------------
+@app.route('/EnvTest/ETParamSet', methods=['GET','POST'])
+def EnvTest():
+    '''
+    输入：
+        tid：主任务ID
+        
+    '''
+    if (request.method == "GET"):
+        return render_template("")
+    elif (request.method == "POST"):
+        matchmethod = request.form.get("matchmethod")
+        frameworkname = request.form.get("frameworkname")
+        frameversion = request.form.get("frameversion")
+        tid = request.form.get("tid")
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        AAtid = "S"+IOtool.get_task_id(str(format_time))
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["function"].update({AAtid:{
+            "type":"EnvTest",
+            "state":0,
+            "name":["EnvTest"],
+            "dataset": "",
+            "model": "",
+            "matchmethod": matchmethod,
+            "framework": frameworkname+frameversion
+        }})
+        taskinfo[tid]["dataset"]=""
+        taskinfo[tid]["model"]=""
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        t2 = threading.Thread(target=interface.run_envtest,args=(tid,AAtid,matchmethod, frameworkname,frameversion))
+        t2.setDaemon(True)
+        t2.start()
+        res = {"code":1,"msg":"success","Taskid":tid,"Concolicid":AAtid}
+        return jsonify(res)
+    else:
+        abort(403)
 
 def app_run(args):
     web_config={'host':args.host,'port':args.port,'debug':args.debug}
