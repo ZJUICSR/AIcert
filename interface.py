@@ -21,7 +21,7 @@ import gol
 # from function.formal_verify import *
  
 from function.fairness import api
-from function import concolic
+from function import concolic, env_test
 
 
 ROOT = osp.dirname(osp.abspath(__file__))
@@ -205,6 +205,23 @@ def run_concolic(tid, AAtid, dataname, modelname, norm):
     """
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     res = concolic.run_concolic(dataname, modelname, norm)   
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+    taskinfo[tid]["function"][AAtid]["state"]=2
+    taskinfo[tid]["state"]=2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    
+    
+def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
+    """系统环境分析
+    :params tid:主任务ID
+    :params AAtid:子任务id
+    :params matchmethod:环境分析匹配机制
+    :params frameworkname:适配框架名称
+    :params frameversion:框架版本
+    """
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    res = env_test.run_env_frame(matchmethod,frameworkname,frameversion)
+    # res = concolic.run_concolic(dataname, modelname, norm)   
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
