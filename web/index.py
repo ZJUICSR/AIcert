@@ -525,24 +525,8 @@ def FormalVerification():
 # from function.attack.adv0211 import *
 
 # ----------------- 课题2 测试样本自动生成 -----------------
-from function import concolic
-def run_concolic(tid, AAtid, dataname, modelname, norm):
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = concolic.run_concolic(dataname, modelname, norm)   
-    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
-    taskinfo[tid]["function"][AAtid]["state"]=2
-    taskinfo[tid]["state"]=2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-
 @app.route('/Concolic/SamGenParamGet', methods=['GET','POST'])
 def Concolic():
-    '''
-    输入：
-        tid：主任务ID
-        concolic_dataset: 数据集
-        concolic_model：模型
-        norm：范数约束
-    '''
     if (request.method == "GET"):
         return render_template("")
     elif (request.method == "POST"):
@@ -565,7 +549,7 @@ def Concolic():
         taskinfo[tid]["dataset"]=concolic_dataset
         taskinfo[tid]["model"]=concolic_model
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        t2 = threading.Thread(target=run_concolic,args=(tid,AAtid,concolic_dataset,concolic_model,norm))
+        t2 = threading.Thread(target=interface.run_concolic,args=(tid,AAtid,concolic_dataset,concolic_model,norm))
         t2.setDaemon(True)
         t2.start()
         res = {"code":1,"msg":"success","Taskid":tid,"Concolicid":AAtid}
