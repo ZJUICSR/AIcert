@@ -1,0 +1,130 @@
+{
+    "20230223_1245_d20b143": {
+        "state": 2,
+        "createtime": "202302231245",
+        "dataset": "German",
+        "model": "",
+        "function": {
+            "S20230223_1245_913f4cc": {
+                "type": "date_evaluate",
+                "state": 2,
+                "name": [
+                    "date_evaluate"
+                ],
+                "dataset": "German"
+            }
+        }
+    },
+    "20230223_1245_7066f5b": {
+        "state": 2,
+        "createtime": "202302231245",
+        "dataset": "Compas",
+        "model": "",
+        "function": {
+            "S20230223_1245_37a6eab": {
+                "type": "data_debias",
+                "state": 2,
+                "name": [
+                    "data_debias"
+                ],
+                "dataset": "German",
+                "datamethod": "Reweighing"
+            },
+            "S20230224_0851_f76de65": {
+                "type": "date_evaluate",
+                "state": 2,
+                "name": [
+                    "date_evaluate"
+                ],
+                "dataset": "Compas"
+            }
+        }
+    },
+    "20230223_1312_6b2cfea": {
+        "state": 2,
+        "createtime": "202302231312",
+        "dataset": "German",
+        "model": "",
+        "function": {
+            "S20230223_1312_05a17e3": {
+                "type": "data_debias",
+                "state": 2,
+                "name": [
+                    "data_debias"
+                ],
+                "dataset": "German",
+                "datamethod": "Reweighing"
+            }
+        }
+    },
+    "20230223_1632_d86cea3": {
+        "state": 0,
+        "createtime": "202302231632",
+        "dataset": "",
+        "model": "",
+        "function": {}
+    },
+    "20230223_1755_2d4e866": {
+        "state": 1,
+        "createtime": "202302231755",
+        "dataset": "German",
+        "model": "",
+        "function": {
+            "S20230223_1755_7da90e2": {
+                "type": "date_evaluate",
+                "state": 0,
+                "name": [
+                    "date_evaluate"
+                ],
+                "dataset": "German"
+            }
+        }
+    },
+    "20230223_1803_246947b": {
+        "state": 2,
+        "createtime": "202302231803",
+        "dataset": "German",
+        "model": "",
+        "function": {
+            "S20230223_1803_2c94387": {
+                "type": "date_evaluate",
+                "state": 2,
+                "name": [
+                    "date_evaluate"
+                ],
+                "dataset": "German"
+            }
+        }
+    },
+    "20230224_1041_4c29326": {
+        "state": 0,
+        "createtime": "202302241041",
+        "dataset": "",
+        "model": "",
+        "function": {}
+    },
+    "20230224_1049_52839c7": {
+        "state": 0,
+        "createtime": "202302241049",
+        "dataset": "",
+        "model": "",
+        "function": {}
+    },
+    "20230224_1106_d5ab4b1": {
+        "state": 2,
+        "createtime": "202302241106",
+        "dataset": "mnist",
+        "model": "cnn",
+        "function": {
+            "S20230224_1106_368e295": {
+                "type": "formal_verification",
+                "state": 2,
+                "name": [
+                    "formal_verification"
+                ],
+                "dataset": "mnist",
+                "model": "cnn"
+            }
+        }
+    }
+}
