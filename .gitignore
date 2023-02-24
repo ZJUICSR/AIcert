@@ -12,3 +12,4 @@ function/DeepLogic/adv_train/model-resnet18-fashionminist/Standard-fashionminist
 function/concolic/Utils/Models/cifar10_vgg16.pth
 function/env_test/valid_extract.pkl
 output/
+function/formal_verify/auto_LiRPA_verifiy/vision/data

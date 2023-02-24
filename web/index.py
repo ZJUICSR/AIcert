@@ -90,12 +90,12 @@ def DataFairnessEvaluate():
         tid = request.form.get("tid")
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         # 生成子任务ID
-        AAtid = "S"+IOtool.get_task_id(str(format_time))
+        stid = "S"+IOtool.get_task_id(str(format_time))
         # 获取任务列表
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         # 添加任务信息到taskinfo
-        taskinfo[tid]["function"].update({AAtid:{
-            # 任务类型
+        taskinfo[tid]["function"].update({stid:{
+            # 任务类型,注意任务类型不能重复，用于结果返回的key值索引
             "type":"date_evaluate",
             # 任务状态：0 未执行；1 正在执行；2 执行成功；3 执行失败
             "state":0,
@@ -104,17 +104,16 @@ def DataFairnessEvaluate():
             # 数据集信息，呈现在结果界面，若干有选择模型还需增加模型字段：model
             "dataset":dataname,
         }})
-        
         taskinfo[tid]["dataset"]=dataname
-        # 执行任务
+        # 执行任务，运行时间超过3分钟的请使用多线程，参考DataFairnessDebias函数的执行部分
         res = api.dataset_evaluate(dataname)
         # 执行完成，结果中的stop置为1，表示结束
         
         res["stop"] = 1
         # 保存结果
-        IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+        IOtool.write_json(res,osp.join(ROOT,"output", tid, stid+"_result.json"))
         # 将taskinfo中的状态置为2 代表子任务结果执行成功，此步骤为每个子任务必要步骤，请勿省略
-        taskinfo[tid]["function"][AAtid]["state"]=2
+        taskinfo[tid]["function"][stid]["state"]=2
         # 任务信息写回任务文件
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
         # 调用主任务状态修改函数，此步骤为每个子任务必要步骤，请勿省略
@@ -148,7 +147,7 @@ def DataFairnessDebias():
         }})
         taskinfo[tid]["dataset"]=dataname
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        
+        # 执行任务
         t2 = threading.Thread(target=interface.run_data_debias,args=(tid,AAtid,dataname,datamethod))
         t2.setDaemon(True)
         t2.start()
@@ -451,11 +450,25 @@ def adv_attack():
 @app.route("/output/Resultdata", methods=["GET"])
 def get_result():
     if request.method == "GET":
-        if not request.args.get("Taskid"):
-            stidlist = request.args.get("stid")
-        tid = request.args.get("Taskid")
+        stidlist = []
+        # 使用postman获取参数
+        try:
+            inputdata = json.loads(request.data)
+            print(inputdata)
+            tid = inputdata["Taskid"]
+            stidlist = inputdata["sid"]
+        except:
+            pass
+        # 从web上传下来的参数
+        if request.args.get("Taskid") != None:
+            tid = request.args.get("Taskid")
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        stidlist = taskinfo[tid]["function"].keys()
+        if stidlist== []:
+            stidlist = taskinfo[tid]["function"].keys()
+        # 如果能获取到子任务列表就使用获取，否则读取主任务下的所有子任务
+        
+        if request.args.get("stid") != None:
+            stidlist = request.args.get("stid")
         print(stidlist)
         result = {}
         for stid in stidlist:
@@ -474,8 +487,6 @@ def get_result():
                 stopflag = 0
             elif  result[temp]["stop"] != 1:
                 stopflag = 0
-        print("**********result:",tid)
-        # print(result)
         return jsonify({"code":1,"msg":"success","result":result,"stop":stopflag})
 
 # ----------------- 课题4 形式化验证 -----------------
@@ -499,6 +510,7 @@ def FormalVerification():
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        print("*************************************add stid******************")
         taskinfo[tid]["function"].update({AAtid:{
             "type":"formal_verification",
             "state":0,
@@ -508,10 +520,7 @@ def FormalVerification():
         }})
         taskinfo[tid]["dataset"]=request.form.get("dataset")
         taskinfo[tid]["model"]=request.form.get("model")
-        global start
-        global end
-        start = time.time()
-        end = -1
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
         t2 = threading.Thread(target=interface.run_verify, args=(tid, AAtid, param))
         t2.setDaemon(True)
         t2.start()
