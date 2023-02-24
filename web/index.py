@@ -534,24 +534,8 @@ def FormalVerification():
 # from function.attack.adv0211 import *
 
 # ----------------- 课题2 测试样本自动生成 -----------------
-from function import concolic
-def run_concolic(tid, AAtid, dataname, modelname, norm):
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = concolic.run_concolic(dataname, modelname, norm)   
-    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
-    taskinfo[tid]["function"][AAtid]["state"]=2
-    taskinfo[tid]["state"]=2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-
 @app.route('/Concolic/SamGenParamGet', methods=['GET','POST'])
 def Concolic():
-    '''
-    输入：
-        tid：主任务ID
-        concolic_dataset: 数据集
-        concolic_model：模型
-        norm：范数约束
-    '''
     if (request.method == "GET"):
         return render_template("")
     elif (request.method == "POST"):
@@ -574,7 +558,7 @@ def Concolic():
         taskinfo[tid]["dataset"]=concolic_dataset
         taskinfo[tid]["model"]=concolic_model
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        t2 = threading.Thread(target=run_concolic,args=(tid,AAtid,concolic_dataset,concolic_model,norm))
+        t2 = threading.Thread(target=interface.run_concolic,args=(tid,AAtid,concolic_dataset,concolic_model,norm))
         t2.setDaemon(True)
         t2.start()
         res = {"code":1,"msg":"success","Taskid":tid,"Concolicid":AAtid}
@@ -582,6 +566,43 @@ def Concolic():
     else:
         abort(403)
 
+# ----------------- 课题2 系统环境分析与框架适配 -----------------
+@app.route('/EnvTest/ETParamSet', methods=['GET','POST'])
+def EnvTest():
+    '''
+    输入：
+        tid：主任务ID
+        
+    '''
+    if (request.method == "GET"):
+        return render_template("")
+    elif (request.method == "POST"):
+        matchmethod = request.form.get("matchmethod")
+        frameworkname = request.form.get("frameworkname")
+        frameversion = request.form.get("frameversion")
+        tid = request.form.get("tid")
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        AAtid = "S"+IOtool.get_task_id(str(format_time))
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["function"].update({AAtid:{
+            "type":"EnvTest",
+            "state":0,
+            "name":["EnvTest"],
+            "dataset": "",
+            "model": "",
+            "matchmethod": matchmethod,
+            "framework": frameworkname+frameversion
+        }})
+        taskinfo[tid]["dataset"]=""
+        taskinfo[tid]["model"]=""
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        t2 = threading.Thread(target=interface.run_envtest,args=(tid,AAtid,matchmethod, frameworkname,frameversion))
+        t2.setDaemon(True)
+        t2.start()
+        res = {"code":1,"msg":"success","Taskid":tid,"Concolicid":AAtid}
+        return jsonify(res)
+    else:
+        abort(403)
 
 def app_run(args):
     web_config={'host':args.host,'port':args.port,'debug':args.debug}
