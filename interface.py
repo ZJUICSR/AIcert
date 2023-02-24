@@ -21,6 +21,8 @@ import gol
 # from function.formal_verify import *
  
 from function.fairness import api
+from function import concolic
+
 
 ROOT = osp.dirname(osp.abspath(__file__))
 def run_model_debias(tid,AAtid,dataname,modelname,algorithmname):
@@ -188,6 +190,22 @@ def run_verify(tid, AAtid, param):
     result = verify(input_param)
     result["stop"] = 1
     IOtool.write_json(result,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+    taskinfo[tid]["function"][AAtid]["state"]=2
+    taskinfo[tid]["state"]=2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    
+    
+def run_concolic(tid, AAtid, dataname, modelname, norm):
+    """测试样本自动生成
+    :params tid:主任务ID
+    :params AAtid:子任务id
+    :params dataname:数据集名称
+    :params modelname:模型名称
+    :params norm:范数约束
+    """
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    res = concolic.run_concolic(dataname, modelname, norm)   
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
