@@ -18,7 +18,7 @@ from IOtool import IOtool, Logger, Callback
 from torchvision import  transforms
 import torch
 import gol
-# from function.formal_verify import *
+from function.formal_verify import *
  
 from function.fairness import api
 
@@ -182,7 +182,7 @@ def run_verify(tid, AAtid, param):
                                     'down_eps': param['down_eps'],
                                     'steps': param['steps'],
                                     'device': device,
-                                    'output_path': 'static/output',
+                                    'output_path': osp.join('output',tid,AAtid,"formal_img"),
                                     'task_id': f"{param['task_id']}"}}
     global result
     result = verify(input_param)
