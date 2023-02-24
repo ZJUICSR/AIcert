@@ -18,7 +18,7 @@ from IOtool import IOtool, Logger, Callback
 from torchvision import  transforms
 import torch
 import gol
-# from function.formal_verify import *
+from function.formal_verify import *
  
 from function.fairness import api
 
