@@ -18,10 +18,10 @@ from IOtool import IOtool, Logger, Callback
 from torchvision import  transforms
 import torch
 import gol
-from function.formal_verify import *
+# from function.formal_verify import *
  
 from function.fairness import api
-from function import concolic, env_test
+from function import concolic, env_test, deepsst
 
 
 ROOT = osp.dirname(osp.abspath(__file__))
@@ -221,6 +221,23 @@ def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
     """
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     res = env_test.run_env_frame(matchmethod,frameworkname,frameversion)
+    # res = concolic.run_concolic(dataname, modelname, norm)   
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+    taskinfo[tid]["function"][AAtid]["state"]=2
+    taskinfo[tid]["state"]=2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    
+def run_deepsst(tid,AAtid,dataset,modelname,pertube,m_dir):
+    """敏感神经元测试准则
+    :params tid:主任务ID
+    :params AAtid:子任务id
+    :params dataset: 数据集名称
+    :params modelname: 模型名称
+    :params pertube: 敏感神经元扰动比例
+    :params m_dir: 敏感度值文件位置
+    """
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    res = deepsst.run_deepsst(dataset, modelname, float(pertube), m_dir)
     # res = concolic.run_concolic(dataname, modelname, norm)   
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2

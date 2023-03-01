@@ -599,7 +599,46 @@ def EnvTest():
         t2 = threading.Thread(target=interface.run_envtest,args=(tid,AAtid,matchmethod, frameworkname,frameversion))
         t2.setDaemon(True)
         t2.start()
-        res = {"code":1,"msg":"success","Taskid":tid,"Concolicid":AAtid}
+        res = {"code":1,"msg":"success","Taskid":tid,"EnvTestid":AAtid}
+        return jsonify(res)
+    else:
+        abort(403)
+        
+# ----------------- 课题2 标准化单元测试-- -----------------
+@app.route('/UnitTest/DeepSstParamSet', methods=['GET','POST'])
+def DeepSstParamSet():
+    '''
+    输入：
+        tid：主任务ID
+        
+    '''
+    if (request.method == "GET"):
+        return render_template("")
+    elif (request.method == "POST"):
+        dataset = request.form.get("dataset")
+        modelname = request.form.get("modelname")
+        pertube = request.form.get("pertube")
+        m_dir = request.form.get("m_dir")
+        tid = request.form.get("tid")
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        AAtid = "S"+IOtool.get_task_id(str(format_time))
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["function"].update({AAtid:{
+            "type":"DeepSst",
+            "state":0,
+            "name":["DeepSst"],
+            "dataset": dataset,
+            "model": modelname,
+            "pertube": pertube,
+            "m_dir": m_dir
+        }})
+        taskinfo[tid]["dataset"]=dataset
+        taskinfo[tid]["model"]=modelname
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        t2 = threading.Thread(target=interface.run_deepsst,args=(tid, AAtid, dataset, modelname, pertube, m_dir))
+        t2.setDaemon(True)
+        t2.start()
+        res = {"code":1,"msg":"success","Taskid":tid,"DeepSstid":AAtid}
         return jsonify(res)
     else:
         abort(403)
