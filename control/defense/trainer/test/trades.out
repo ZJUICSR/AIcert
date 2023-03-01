@@ -1,0 +1,27 @@
+nohup: ignoring input
+got GPU
+cuda:0
+Step 1: Load the MNIST dataset
+Files already downloaded and verified
+Files already downloaded and verified
+Step 2: Create the model
+Step 2a: Define the optimizer
+Step 4: Train the TRADES classifier
+/mnt/data/miniconda3/envs/art/lib/python3.9/site-packages/torch/nn/_reduction.py:44: UserWarning: size_average and reduce args will be deprecated, please use reduction='sum' instead.
+  warnings.warn(warning.format(ret))
+Train Epoch: 1 [0/50000 (0%)]	Loss: 2.443996
+Train Epoch: 1 [6400/50000 (13%)]	Loss: 2.276883
+Train Epoch: 1 [12800/50000 (26%)]	Loss: 2.110475
+Train Epoch: 1 [19200/50000 (38%)]	Loss: 2.163791
+Train Epoch: 1 [25600/50000 (51%)]	Loss: 2.112572
+Train Epoch: 1 [32000/50000 (64%)]	Loss: 2.093357
+Train Epoch: 1 [38400/50000 (77%)]	Loss: 2.079063
+Train Epoch: 1 [44800/50000 (90%)]	Loss: 2.068716
+Step 5: Evaluate the ART classifier on benign test examples
+err pgd (white-box):  tensor(77., device='cuda:0')
+natural_err_total:  tensor(65., device='cuda:0')
+robust_err_total:  tensor(77., device='cuda:0')
+Accuracy on benign test examples: 35.000003814697266%
+Step 7: Evaluate the ART classifier on adversarial test examples
+Accuracy on adversarial test examples: 23.000001907348633%
+detect rate:  tensor(0.2300, device='cuda:0')

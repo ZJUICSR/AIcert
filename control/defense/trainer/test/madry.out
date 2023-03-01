@@ -1,0 +1,17 @@
+nohup: ignoring input
+Precompute adv samples:   0%|          | 0/1 [00:00<?, ?it/s]Precompute adv samples: 100%|██████████| 1/1 [00:00<00:00, 11915.64it/s]
+Adversarial training epochs:   0%|          | 0/1 [00:00<?, ?it/s]Adversarial training epochs: 100%|██████████| 1/1 [05:21<00:00, 321.28s/it]Adversarial training epochs: 100%|██████████| 1/1 [05:21<00:00, 321.28s/it]
+got GPU
+cuda:0
+Step 1: Load the MNIST dataset
+Step 1a: Swap axes to PyTorch's NCHW format
+Step 2: Create the model
+Step 2a: Define the loss function and the optimizer
+Step 3: Create the ART classifier
+Step 4: Train the ART classifier
+Step 5: Evaluate the ART classifier on benign test examples
+Accuracy on benign test examples: 10.0%
+Step 6: Generate adversarial test examples
+Step 7: Evaluate the ART classifier on adversarial test examples
+Accuracy on adversarial test examples: 10.0%
+detect rate:  0.1

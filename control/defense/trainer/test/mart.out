@@ -1,0 +1,25 @@
+nohup: ignoring input
+got GPU
+cuda:0
+Step 1: Load the MNIST dataset
+Files already downloaded and verified
+Files already downloaded and verified
+Step 2: Create the model
+Step 2a: Define the optimizer
+Step 4: Train the TRADES classifier
+Train Epoch: 1 [0/50000 (0%)]	Loss: 2.561245
+Train Epoch: 1 [6400/50000 (13%)]	Loss: 2.419203
+Train Epoch: 1 [12800/50000 (26%)]	Loss: 2.423017
+Train Epoch: 1 [19200/50000 (38%)]	Loss: 2.378587
+Train Epoch: 1 [25600/50000 (51%)]	Loss: 2.344642
+Train Epoch: 1 [32000/50000 (64%)]	Loss: 2.390786
+Train Epoch: 1 [38400/50000 (77%)]	Loss: 2.356482
+Train Epoch: 1 [44800/50000 (90%)]	Loss: 2.363012
+Step 5: Evaluate the ART classifier on benign test examples
+err pgd (white-box):  tensor(79., device='cuda:0')
+natural_err_total:  tensor(75., device='cuda:0')
+robust_err_total:  tensor(79., device='cuda:0')
+Accuracy on benign test examples: 25.0%
+Step 7: Evaluate the ART classifier on adversarial test examples
+Accuracy on adversarial test examples: 21.000003814697266%
+detect rate:  0.21000003814697266
