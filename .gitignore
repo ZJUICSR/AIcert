@@ -136,3 +136,12 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# output cache
+output
+
+# model ckpt
+model
+
+# dataset data
+dataset
