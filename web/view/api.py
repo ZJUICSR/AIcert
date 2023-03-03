@@ -1,7 +1,7 @@
 import json
 from flask import request
 from flask import Blueprint, render_template
-from control.detect import detect
+from interface import detect
 
 api = Blueprint("api", __name__, template_folder="../templates", static_folder="../static")
 
