@@ -10,7 +10,7 @@ import os
 import redis
 from flask_caching import Cache
 
-from control.task import Task
+from function.task import Task
 
 
 def init(app):
