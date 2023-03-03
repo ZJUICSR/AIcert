@@ -8,7 +8,7 @@
  ### 项目基本架构介绍：
 attack: 项目涉及的攻击算法，其中对抗样本采用的github整合好的torchattack库，后门暂时没有涉及  https://github.com/Harry24k/adversarial-attacks-pytorch  
  config: web运行时的设置（不需要管）  
- control：后台的总接口，里面存放调用各个算法的函数
+ function：后台的总接口，里面存放调用各个算法的函数
  data： 需要的数据集缓存目录，如mnist\cifar10等    
  logs: 日志存储文件，暂时没做  
  models： 暂时放了预训练模型，后面应该会加入一些构建预训练模型的代码  
