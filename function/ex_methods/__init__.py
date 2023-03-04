@@ -4,17 +4,16 @@ import torch
 import torchvision
 from PIL import Image
 
-from ex_methods.module.load_model import load_model
-from ex_methods.module.func import grad_visualize, lrp_visualize, target_layer
-from ex_methods.module.layer_activation_with_guided_backprop import get_all_layer_analysis
-from ex_methods.module.func import get_class_list, get_target_num, grad_visualize, convert_to_grayscale, \
-    loader2imagelist, save_ex_img, save_process_result, get_normalize_para
+from .module.load_model import load_model
+from .module.func import grad_visualize, lrp_visualize, target_layer
+from .module.layer_activation_with_guided_backprop import get_all_layer_analysis
+from .module.func import get_class_list, get_target_num, grad_visualize, convert_to_grayscale, \
+    loader2imagelist, save_ex_img, save_process_result, get_normalize_para, preprocess_transform
 from scipy.stats import kendalltau
 
 from .lime import lime_image
 from skimage.color import rgb2gray
 from skimage.segmentation import mark_boundaries
-from ex_methods.module.func import preprocess_transform
 
 '''预测函数'''
 
@@ -112,7 +111,7 @@ def explain_ig(net, x, dataset, device, prediction, activation_output):
 '''课题一总接口'''
 
 
-def run(model, nor_loader, adv_dataloader, ex_methods, params, size, logging):
+def attribution_maps(model, nor_loader, adv_dataloader, ex_methods, params, size, logging):
     """
     :param model: pytorch模型类型
     :param test_loader: 正常样本测试集
@@ -136,16 +135,16 @@ def run(model, nor_loader, adv_dataloader, ex_methods, params, size, logging):
     ])
 
     class_list = get_class_list(dataset, root)
-    logging.info("[加载被解释模型]:准备加载{:s}模型".format(model_name))
+    logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
     net = load_model(model_name, pretrained=True,
                      reference_model=model, num_classes=get_target_num(dataset))
     net = net.eval().to(device)
-    logging.info("[加载被解释模型]:{:s}模型已加载完成".format(model_name))
+    logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
 
     t_layer = target_layer(model_name, dataset)
     nor_img_list = loader2imagelist(nor_loader, dataset, size)
 
-    logging.info("[执行解释算法]:系统已准备完成，开始运行所选解释算法")
+    logging.info("[执行解释算法]：系统已准备完成，开始运行所选解释算法")
     logging.info("[正常样本分析阶段]：正在对正常样本进行分析")
     lrp_result_list, gradcam_result_list, ig_result_list, class_name_list = [], [], [], []
     for imgs_x, label in nor_loader:
@@ -185,7 +184,7 @@ def run(model, nor_loader, adv_dataloader, ex_methods, params, size, logging):
     if len(adv_dataloader) != 0:
         adv_ex_dict = {}
         for method, adv_loader in adv_dataloader.items():
-            logging.info("[对抗样本分析阶段]：当前执行:{:s}对抗样本攻击机理分析".format(str(method)))
+            logging.info("[对抗样本分析阶段]：当前执行{:s}对抗样本攻击机理分析".format(str(method)))
             results["adv_methods"].append(method)
             adv_img_list = loader2imagelist(adv_loader, dataset, size)
             lrp_result_list, gradcam_result_list, ig_result_list, class_name_list = [], [], [], []
@@ -226,6 +225,7 @@ def run(model, nor_loader, adv_dataloader, ex_methods, params, size, logging):
         results["kendalltau"] = kendalltau_result
         logging.info("[解释结果量化分析阶段]：解释结果量化分析已完成")
 
+    logging.info("[算法完成]：注意力分布图绘制完成")
     save_process_result(save_path, results, filename="keti1.json")
     return results
 

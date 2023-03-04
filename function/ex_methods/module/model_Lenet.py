@@ -1,5 +1,4 @@
 import torch
-import torchvision
 from .sequential import Sequential
 from .linear import Linear
 from .relu import ReLU
@@ -8,13 +7,13 @@ from .convolution import Conv2d
 from .pool import MaxPool2d
 
 
-class Network_CNN(Module):
+class LeNet(Module):
     """
         使用sequential构建网络，Sequential()函数的功能是将网络的层组合到一起
         """
 
     def __init__(self):
-        super(Network_CNN, self).__init__()
+        super(LeNet, self).__init__()
         self.output_size = 3
         self.feature = Sequential(
             Conv2d(in_channels=1, out_channels=6, kernel_size=3, stride=1),
@@ -37,9 +36,9 @@ class Network_CNN(Module):
         return x
 
 
-def cnn(pretrained=False, reference_model=None):
+def lenet(pretrained=False, reference_model=None):
     net = torch.load("models/mnist_cnn.pt")
     if pretrained == True:
         return net.feature
     else:
-        return Network_CNN().feature
+        return LeNet().feature
