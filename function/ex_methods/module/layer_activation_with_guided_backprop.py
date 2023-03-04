@@ -1,8 +1,8 @@
 """
-Created on Thu Oct 26 11:23:47 2017
-@author: Utku Ozbulak - github.com/utkuozbulak
+The algorithm code is based on the github.com/utkuozbulak of author(Utku Ozbulak)
+but we use the maximum value of the feature map channel to generate the attention map
 """
-import imp
+
 import os
 import os.path as osp
 import json
@@ -13,7 +13,7 @@ import torchvision
 from torch.autograd import Variable
 from torch.nn import ReLU
 
-from ex_methods.module.func import save_gradient_images, load_image,loader2imagelist
+from function.ex_methods.module.func import save_gradient_images, load_image,loader2imagelist
 from scipy.stats import kendalltau
 
 class GuidedBackprop():

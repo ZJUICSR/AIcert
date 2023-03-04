@@ -1,7 +1,7 @@
 from .model_VGG import VGG
 from .model_Resnet import resnet18, resnet34, resnet50, resnet101, resnet152
 from .model_Densenet import densenet121, densenet161, densenet169, densenet201
-from .model_CNN import cnn
+from .model_Lenet import lenet
 
 
 def load_model(model, pretrained=True, reference_model=None, num_classes=1000):
@@ -48,7 +48,7 @@ def load_model(model, pretrained=True, reference_model=None, num_classes=1000):
         net = densenet161(
             pretrained=pretrained, reference_model=reference_model, num_classes=num_classes)
     elif model == 'cnn':
-        net = cnn(pretrained=pretrained, reference_model=reference_model)
+        net = lenet(pretrained=pretrained, reference_model=reference_model)
     else:
         raise NotImplementedError("selected model is not supported!")
     return net

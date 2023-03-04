@@ -11,22 +11,6 @@ from PIL import Image
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-def get_normalize_para(dataset):
-    dataset = dataset.lower()
-    mean, std = None, None
-    if dataset == "imagenet":
-        mean = [0.485, 0.456, 0.406]
-        std = [0.229, 0.224, 0.225]
-    elif dataset == "cifar10":
-        mean = [0.485, 0.456, 0.406]
-        std = [0.229, 0.224, 0.225]
-    elif dataset == "mnist":
-        mean = [0.1307]
-        std = [0.3081]
-    else:
-        raise NotImplementedError("not support for other data set!")
-    return mean, std
-
 def format_np_output(np_arr):
     """
         This is a (kind of) bandaid fix to streamline saving procedure.
@@ -88,14 +72,30 @@ def save_process_result(root, results, filename):
         json.dump(results, fp, indent=2)
         fp.close()
 
-'''获取缓存的样本数据'''
-def get_loader(url,batchsize=8):
+'''获取数据集标准化时的均值和方差'''
+def get_normalize_para(dataset):
+    dataset = dataset.lower()
+    mean, std = None, None
+    if dataset == "imagenet":
+        mean = [0.485, 0.456, 0.406]
+        std = [0.229, 0.224, 0.225]
+    elif dataset == "cifar10":
+        mean = [0.485, 0.456, 0.406]
+        std = [0.229, 0.224, 0.225]
+    elif dataset == "mnist":
+        mean = [0.1307]
+        std = [0.3081]
+    else:
+        raise NotImplementedError("not support for other data set!")
+    return mean, std
+
+'''加载样本数据'''
+def get_loader(data, batchsize=8):
     """
     对于ImageNet数据集，batchsize默认为8,
     当使用lrp在vgg系列上时，batchsize可以设置为16
     当使用lrp解释Resnet50时，batchsize最大为8; resnet152时，batch为4.
     """
-    data = torch.load(url)
     adv_dst = TensorDataset(torch.cat(data["x"],dim=0).float().cpu() ,torch.cat(data["y"],dim=0).long().cpu())
     adv_loader = DataLoader(
         adv_dst,
@@ -104,6 +104,7 @@ def get_loader(url,batchsize=8):
         num_workers=2
     )
     return adv_loader
+
 
 '''将三通道图片转成单通道图片'''
 def convert_to_grayscale(im_as_arr):
@@ -126,7 +127,7 @@ def convert_to_grayscale(im_as_arr):
 '''获取分类数据集的每个类名称（英文）'''
 def get_class_list(dataset, root):
     if dataset == 'imagenet':
-        imagenet_path = osp.join(root, "ex_methods/cache/imagenet_class_index.json")
+        imagenet_path = osp.join(root, "function/ex_methods/cache/imagenet_class_index.json")
         with open(os.path.abspath(imagenet_path), 'r') as read_file:
             class_idx = json.load(read_file)
             idx2label = [class_idx[str(k)][1] for k in range(len(class_idx))]
