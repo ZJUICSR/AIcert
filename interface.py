@@ -21,7 +21,7 @@ import gol
 # from function.formal_verify import *
  
 from function.fairness import api
-from function import concolic, env_test, deepsst
+from function import concolic, env_test, deepsst, dataclean
 
 
 ROOT = osp.dirname(osp.abspath(__file__))
@@ -210,7 +210,19 @@ def run_concolic(tid, AAtid, dataname, modelname, norm):
     taskinfo[tid]["state"]=2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
     
-    
+def run_dataclean(tid, AAtid, dataname):
+    """异常数据检测
+    :params tid:主任务ID
+    :params AAtid:子任务id
+    :params dataname:数据集名称
+    """
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    res = dataclean.run_dataclean(dataname)   
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+    taskinfo[tid]["function"][AAtid]["state"]=2
+    taskinfo[tid]["state"]=2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+
 def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
     """系统环境分析
     :params tid:主任务ID
