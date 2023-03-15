@@ -46,5 +46,5 @@ class SmallCNN(nn.Module):
 
     def forward(self, input):
         features = self.feature_extractor(input)
-        logits = self.classifier(features.view(-1, 64 * 4 * 4))
+        logits = self.classifier(features.contiguous().view(-1, 64 * 4 * 4)) #
         return logits

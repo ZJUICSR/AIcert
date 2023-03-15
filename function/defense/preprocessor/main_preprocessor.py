@@ -1,19 +1,30 @@
 import os
 import torch
-from function.defense.models.resnet import ResNet18
+import sys
+sys.path.append('../../..')
+from function.defense.models import *
 from function.defense.preprocessor.preprocessor import *
-mean = [0.485, 0.456, 0.406]
-std = [0.229, 0.224, 0.225]
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 if torch.cuda.is_available():
     print("got GPU")
 
-model = ResNet18()
-checkpoint = torch.load('/mnt/data2/yxl/AI-platform/function/defense/trained_models/ckpt-cifar10-32-resnet18_0.9513.pth', map_location='cuda')
-model.load_state_dict(checkpoint['net'])
-model = model.to(device)   
-print(next(model.parameters()).device)
-deflection = Pixel_defend(model = model, mean = mean, std = std, adv_method='PGD', adv_dataset='CIFAR10', adv_nums=1000, device=device)
+adv_dataset = 'CIFAR10'
+adv_method = 'FGSM'
+if adv_dataset == 'CIFAR10':
+    model = ResNet18()
+    mean = [0.4914, 0.4822, 0.4465]
+    std = [0.2023, 0.1994, 0.2010]
+    # # checkpoint = torch.load('/mnt/data/yxl/AI-platform/trades/model-cifar-wideResNet/model-wideres-epoch91.pt')
+    checkpoint = torch.load('/mnt/data2/yxl/AI-platform/model/model-cifar-wideResNet/model-wideres-epoch85.pt') 
+elif adv_dataset == 'MNIST':
+    model = SmallCNN()
+    mean = 0.1307
+    std = 0.3081
+    # checkpoint = torch.load('/mnt/data/yxl/AI-platform/trades/model-mnist-smallCNN/model-nn-epoch82.pt')
+    checkpoint = torch.load('/mnt/data2/yxl/AI-platform/model/model-mnist-smallCNN/model-nn-epoch61.pt')
+model.load_state_dict(checkpoint)
+model = model.to(device)
+deflection = Defense_gan(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=100, device=device)#, adv_examples='data/' + adv_dataset + '/adv_' + adv_dataset + '_' + adv_method + '.npy')
 deflection.detect()
 deflection.print_res()
