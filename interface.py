@@ -26,7 +26,7 @@ def detect(adv_dataset, adv_method, adv_nums, defense_methods):
     elif adv_dataset == 'MNIST':
         mean = (0.1307,)
         std = (0.3081,)
-        model = Net()
+        model = SmallCNN()
         checkpoint = torch.load('/mnt/data2/yxl/AI-platform/model/model-mnist-smallCNN/model-nn-epoch61.pt')
         model.load_state_dict(checkpoint)
         model = model.to(device).eval()    

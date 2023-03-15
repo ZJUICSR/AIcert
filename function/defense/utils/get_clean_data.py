@@ -27,7 +27,7 @@ def get_clean_loader(dataset):
                     # transforms.Normalize((0.1307, ), (0.3081, ))
             ])
         cleanset = datasets.MNIST(
-            root = '/mnt/data2/yxl/AI-platform/data', train=False, download=True, transform=tf_test
+            root = '/mnt/data2/yxl/AI-platform/dataset', train=False, download=True, transform=tf_test
         )
         clean_loader = DataLoader(dataset=cleanset,
                                    batch_size=128,
