@@ -6,14 +6,12 @@
  **在此之前，需要具备web前后端基本交互流程，ajax传参，flask基本运行原理等知识**
 
  ### 项目基本架构介绍：
-attack: 项目涉及的攻击算法，其中对抗样本采用的github整合好的torchattack库，后门暂时没有涉及  https://github.com/Harry24k/adversarial-attacks-pytorch  
  config: web运行时的设置（不需要管）  
  function：后台的总接口，里面存放调用各个算法的函数
- data： 需要的数据集缓存目录，如mnist\cifar10等    
+ dataset： 需要的数据集缓存目录，如mnist\cifar10等    
  logs: 日志存储文件，暂时没做  
- models： 暂时放了预训练模型，后面应该会加入一些构建预训练模型的代码  
+ model： 暂时放了预训练模型，后面应该会加入一些构建预训练模型的代码  
  output： 暂时没用，后面会作为输出的缓存  
- third_party: 每个子课题的核心算法代码库，eg:ex_methods是可解释的所有算法库  
  utils:工具库，暂时没用，不确定需要哪些共同算法  
  web：前端所有文件  
   
