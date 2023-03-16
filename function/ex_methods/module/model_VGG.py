@@ -8,14 +8,14 @@ from .module import Module
 from .convolution import Conv2d
 from .batchnorm import BatchNorm2d
 from .pool import MaxPool2d
-import os
 
 class VGG(Module):
     def __init__(self):
         super(VGG, self).__init__()
 
 
-    def forward(self, name='E', pretrained=False, reference_model=None, batch_norm=False, whichScore=None, num_classes=1000, output_size=7):
+    def forward(self, name='E', pretrained=False, reference_model=None, batch_norm=False, whichScore=None, num_classes=1000, output_size=7, input_channel=3):
+        self.input_channel = input_channel
         layers = self.make_layers(cfg[name])
 
         layers = layers + [Linear(512 * output_size * output_size, 4096),
@@ -63,7 +63,7 @@ class VGG(Module):
 
     def make_layers(self, cfg, batch_norm=False):
         layers = []
-        in_channels = 3
+        in_channels = self.input_channel
         for v in cfg:
             if v == 'M':
                 layers += [MaxPool2d(kernel_size=2, stride=2)]

@@ -95,7 +95,7 @@ class Sequential(Module):
         # classic forward
         activation_output = input
         for module in self._modules.values():
-            activation_output = module.forward(activation_output)
+            activation_output = module(activation_output)
         return activation_output
 
     def accuracy(self, activation_output, labels):

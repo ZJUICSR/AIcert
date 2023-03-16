@@ -11,6 +11,17 @@ from PIL import Image
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
+def apply_trigger(data, mask, trigger):
+    # Only return poisoned samples
+
+    X = copy.deepcopy(data)
+    for i in range(32):
+        for j in range(32):
+            if mask[i, j] > 0.95:
+                X[:, i, j] = X[:, i, j] * (1 - mask[i, j]) + trigger[:, i, j] * mask[i, j]
+
+    return X
+
 def format_np_output(np_arr):
     """
         This is a (kind of) bandaid fix to streamline saving procedure.
@@ -322,8 +333,14 @@ def target_layer(model,dataset):
         elif model == 'resnet50':
             target_layer_ = '10'
         elif model == 'densenet121':
-            target_layer_ = '64'
-        elif model == 'cnn':
+            target_layer_ = '22'
+        elif model == 'densenet161':
+            target_layer_ = '84'
+        elif model == 'densenet169':
+            target_layer_ = '88'
+        elif model == 'densenet201':
+            target_layer_ = '104'
+        elif model == 'lenet':
             target_layer_ = '4'
         else:
             raise NotImplementedError("selected model is not supported!")

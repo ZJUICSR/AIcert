@@ -1,4 +1,5 @@
 import os.path as osp
+import os
 import numpy as np
 import torch
 import torchvision
@@ -111,7 +112,7 @@ def explain_ig(net, x, dataset, device, prediction, activation_output):
 '''课题一总接口'''
 
 
-def attribution_maps(model, nor_loader, adv_dataloader, ex_methods, params, size, logging):
+def attribution_maps(net, nor_loader, adv_dataloader, ex_methods, params, size, logging):
     """
     :param model: pytorch模型类型
     :param test_loader: 正常样本测试集
@@ -135,11 +136,6 @@ def attribution_maps(model, nor_loader, adv_dataloader, ex_methods, params, size
     ])
 
     class_list = get_class_list(dataset, root)
-    logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
-    net = load_model(model_name, pretrained=True,
-                     reference_model=model, num_classes=get_target_num(dataset))
-    net = net.eval().to(device)
-    logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
 
     t_layer = target_layer(model_name, dataset)
     nor_img_list = loader2imagelist(nor_loader, dataset, size)
@@ -263,53 +259,24 @@ def get_kendalltau(nor_dict, adv_dict, save_path):
     return result
 
 
-def batch_predict(images, model, device, dataset):
-    """
-    lime 中对随机取样图像进行预测
-    :param images: np.array
-    :param model:
-    :param device:
-    :return:
-    """
-    if dataset == "mnist":
-        images = rgb2gray(images)
-    batch = torch.stack(tuple(preprocess_transform(i, dataset)
-                        for i in images), dim=0)
-    batch = batch.to(device).type(dtype=torch.float32)
-    probs = model.forward(batch)
-    return probs.detach().cpu().numpy()
+from function.ex_methods.dim_reduction.ctl import Controller
+from function.ex_methods.dim_reduction.draw import draw_contrast
 
-
-def draw_lime(img, net, device, dataset):
-    explainer = lime_image.LimeImageExplainer()
-    explanation = explainer.explain_instance(np.array(img),
-                                             net,
-                                             device,
-                                             dataset,
-                                             batch_predict,  # classification function
-                                             top_labels=5,
-                                             hide_color=0,
-                                             num_samples=1000)  # number of images that will be sent to classification function
-
-    temp, mask = explanation.get_image_and_mask(explanation.top_labels[0], positive_only=False, negative_only=False,
-                                                num_features=5, hide_rest=False)
-    img_boundry = mark_boundaries(temp / 255.0, mask)
-    img_boundry = Image.fromarray((img_boundry * 255).astype(np.uint8))
-    return img_boundry
-
-
-def lime_image_ex(img, net, dataset, device, model):
-    class_list = get_class_list(dataset)
-    ex_images = {}
-    i = 0
-    for img in imgs:
-        if dataset == "mnist":
-            img = img.convert("L")
-        x = load_image(device, img, dataset)
-        prediction, activation_output = predict(x, net, device)
-        class_name = class_list[prediction.item()]
-        img_lime = draw_lime(img, net, device, dataset)
-        ex_images[f"image_{i}"] = {"class_name": class_name,
-                                   "ex_imgs": [img_l, img_h, img_lime]}
-        i += 1
-    return ex_images
+def dim_reduciton_visualize(vis_type_list, nor_loader, adv_loader, model, model_name, dataset, device, save_path):
+    # (1) determine your wanted visualization methods and instantiate one controller
+    my_pca_ctl = Controller(vis_type_list, device)
+    # (2) set model(torch.nn.Module type)
+    #         target_layer('' is the default one-the last feature extraction layer)
+    #         data_loader(both the benign one and the poisoned one)
+    my_pca_ctl.set_model(model)
+    my_pca_ctl.set_layer(target_layer(model_name, dataset))
+    my_pca_ctl.set_data_loaders(nor_loader, adv_loader)
+    # (3) call the 'prepare_feats' function to collect original feature
+    my_pca_ctl.prepare_feats()
+    # (4) call the get_reduced_feats function to obtain dimensionality-reduced feature and visualize it through 'draw_contrast'
+    save_path = osp.join(save_path ,'dim_reduction')
+    if not osp.exists(save_path):
+        os.makedirs(save_path)
+    for vis_type in vis_type_list:
+        clean_feat, bad_feat = my_pca_ctl.get_reduced_feats(vis_type)
+        draw_contrast(clean_feat, bad_feat, save_path= osp.join(save_path,f'{dataset}_{model_name}_{vis_type}.jpg'), vis_type=vis_type)
