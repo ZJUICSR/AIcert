@@ -132,13 +132,17 @@ class DenseNet(Module):
     """
 
     def __init__(self, growth_rate=32, block_config=(6, 12, 24, 16),
-                 num_init_features=64, bn_size=4, drop_rate=0, num_classes=1000, whichScore=None):
+                 num_init_features=64, bn_size=4, drop_rate=0, input_channel=3, num_classes=1000, whichScore=None):
 
         super(DenseNet, self).__init__()
 
+        conv1 = Conv2d(input_channel, 64, kernel_size=7, stride=2, padding=3,
+                            bias=False)
+        if num_classes == 10:
+            conv1 = Conv2d(input_channel, 64, kernel_size=3, stride=1, padding=1, bias=False)
         # First convolution
         self.layers = []
-        self.layers.append(Conv2d(3, num_init_features, kernel_size=7, stride=2, padding=3, bias=False))
+        self.layers.append(conv1)
         self.layers.append(BatchNorm2d(num_init_features))
         self.layers.append(ReLU(inplace=False))
         self.layers.append(MaxPool2d(kernel_size=3, stride=2, padding=1))
@@ -180,15 +184,15 @@ def densenet121(pretrained=False, reference_model=None, **kwargs):
             net = torchvision.models.densenet121(weights=torchvision.models.DenseNet121_Weights.DEFAULT)
         else:
             net = reference_model
-            for key1, key2 in zip(model.state_dict().keys(), net.state_dict().keys()):
-                try:
-                    model.state_dict()[key1][:] = net.state_dict()[key2][:]
-                except:
-                    model.state_dict()[key1] = net.state_dict()[key2]
+        for key1, key2 in zip(model.state_dict().keys(), net.state_dict().keys()):
+            try:
+                model.state_dict()[key1][:] = net.state_dict()[key2][:]
+            except:
+                model.state_dict()[key1] = net.state_dict()[key2]
     return model
 
 
-def densenet169(pretrained=False, reference_model=None,**kwargs):
+def densenet169(pretrained=False, reference_model=None, **kwargs):
     r"""Densenet-169 model from
     `"Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`_
 
@@ -202,15 +206,15 @@ def densenet169(pretrained=False, reference_model=None,**kwargs):
             net = torchvision.models.densenet169(weights=torchvision.models.DenseNet169_Weights.DEFAULT)
         else:
             net = reference_model
-            for key1, key2 in zip(model.state_dict().keys(), net.state_dict().keys()):
-                try:
-                    model.state_dict()[key1][:] = net.state_dict()[key2][:]
-                except:
-                    model.state_dict()[key1] = net.state_dict()[key2]
+        for key1, key2 in zip(model.state_dict().keys(), net.state_dict().keys()):
+            try:
+                model.state_dict()[key1][:] = net.state_dict()[key2][:]
+            except:
+                model.state_dict()[key1] = net.state_dict()[key2]
     return model
 
 
-def densenet201(pretrained=False, reference_model=None,**kwargs):
+def densenet201(pretrained=False, reference_model=None, **kwargs):
     r"""Densenet-201 model from
     `"Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`_
 
@@ -224,11 +228,11 @@ def densenet201(pretrained=False, reference_model=None,**kwargs):
             net = torchvision.models.densenet201(weights=torchvision.models.DenseNet201_Weights.DEFAULT)
         else:
             net = reference_model
-            for key1, key2 in zip(model.state_dict().keys(), net.state_dict().keys()):
-                try:
-                    model.state_dict()[key1][:] = net.state_dict()[key2][:]
-                except:
-                    model.state_dict()[key1] = net.state_dict()[key2]
+        for key1, key2 in zip(model.state_dict().keys(), net.state_dict().keys()):
+            try:
+                model.state_dict()[key1][:] = net.state_dict()[key2][:]
+            except:
+                model.state_dict()[key1] = net.state_dict()[key2]
     return model
 
 
@@ -246,9 +250,9 @@ def densenet161(pretrained=False, reference_model=None,**kwargs):
             net = torchvision.models.densenet161(weights=torchvision.models.DenseNet161_Weights.DEFAULT)
         else:
             net = reference_model
-            for key1, key2 in zip(model.state_dict().keys(), net.state_dict().keys()):
-                try:
-                    model.state_dict()[key1][:] = net.state_dict()[key2][:]
-                except:
-                    model.state_dict()[key1] = net.state_dict()[key2]
+        for key1, key2 in zip(model.state_dict().keys(), net.state_dict().keys()):
+            try:
+                model.state_dict()[key1][:] = net.state_dict()[key2][:]
+            except:
+                model.state_dict()[key1] = net.state_dict()[key2]
     return model

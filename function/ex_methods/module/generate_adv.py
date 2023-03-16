@@ -46,7 +46,6 @@ def get_attack(dataset, method, model, params):
         
 def get_accuracy(dataloader,model,device,mean,std):
     num = 0
-    model.eval().to(device)
     for i, (x,y) in enumerate(dataloader):
         x = x.to(device)
         y = y.to(device)
@@ -89,7 +88,7 @@ def untargeted_attack(dataset, method, model, data_loader, device, params, mean,
     ben_x = []
     ben_y = []
     attack = get_attack(dataset, method, model, params)
-    attack.set_normalization_used(mean=mean, std=std)
+    # attack.set_normalization_used(mean=mean, std=std)
     logging.info("[生成对抗样本]：当前执行{:s}对抗方法生成对抗样本...".format(method))
     for step, (x, y) in enumerate(data_loader):
         x = x.to(device)
@@ -111,13 +110,13 @@ def untargeted_attack(dataset, method, model, data_loader, device, params, mean,
 
 
 '''加载对抗样本'''
-def get_adv_loader(dataloader, method, param, batchsize, logging):
+def get_adv_loader(model, dataloader, method, param, batchsize, logging):
     dataset = param["dataset"]["name"]
-    model = param["model"]["model_ckpt"]
     model_name = param["model"]["name"]
     device = param["device"]
     root = param["root"]
     
+    model.eval().to(device)
     with open(osp.join(root, "function/ex_methods/cache/adv_params.json")) as fp:
         def_params = json.load(fp)
     
@@ -141,7 +140,7 @@ def get_adv_loader(dataloader, method, param, batchsize, logging):
         data = untargeted_attack(dataset, method, model, dataloader, device, def_params, mean, std, logging)
         torch.save(data, path)
     else:
-        logging.info("[加载数据集]：测到缓存{:s}对抗样本，直接加载缓存文件".format(method))
+        logging.info("[加载数据集]：检测到缓存{:s}对抗样本，直接加载缓存文件".format(method))
         data = torch.load(path)
 
     adv_loader = get_loader(data, batchsize)

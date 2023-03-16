@@ -79,12 +79,9 @@ class Module(object):
         # values for presetting lrp decomposition parameters per layer
         self.lrp_var = None
         self.lrp_param = 1.
-        
-
-    def grad_cam(self, dx, requires_activation):
-        # This function does not return grad_cam, but it returns the activations and its gradients.
-        dx, x = self.get_grad_and_activation(dx, requires_activation)
-        return dx, x
+    
+    def get_grad_and_activation(self, dx, requires_activation):
+        raise NotImplementedError()
 
 
     def set_lrp_parameters(self, lrp_var=None, param=None):
