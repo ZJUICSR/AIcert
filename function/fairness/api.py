@@ -21,8 +21,18 @@ torch.cuda.manual_seed(seed)
 torch.cuda.manual_seed_all(seed)
 torch.backends.cudnn.deterministic = True
 
-# dataset evaluation e.g.
-def dataset_evaluate(dataset_name):
+# dataset evaluation
+def dataset_evaluate(dataset_name, sensattrs=[], targetattrs=[]):
+    """Evaluates fairness of built-in dataset 
+
+    Args:
+        dataset_name (str): name of built in dataset, in ['Compas', 'Adult', 'German']
+        sensattrs (list, optional): names of sensitive attributes. Defaults to [], which include all sensitive attributes available.
+        targetattrs (list, optional): names of target attributes. Defaults to [], which include all target attributes available.
+
+    Returns:
+        Dict: result of the evaluation
+    """
     dataset_cls = None
     result = {
         'Favorable Rate Difference': {},
@@ -39,19 +49,33 @@ def dataset_evaluate(dataset_name):
     else:
         raise ValueError('invalid data set: \'{}\''.format(dataset_name))
     
+    # check attrs validity
+    if not all(attr in dataset_cls.favorable.keys() for attr in targetattrs):
+        raise ValueError('invalid target attribute: \'{}\''.format(targetattrs))
+    if not all(attr in dataset_cls.privileged for attr in sensattrs):
+        raise ValueError('invalid sensitive attribute: \'{}\''.format(sensattrs))
+    
+    # take all sensitive/target attributes as default
+    if len(sensattrs) == 0:
+        sensattrs = list(dataset_cls.privileged.keys())
+    if len(targetattrs) == 0:
+        targetattrs = list(dataset_cls.favorable.keys())
+    
     # group and individual fairness metrics
-    for target in dataset_cls.favorable.keys():
+    for target in targetattrs:
         dataset = dataset_cls(favorable=target)
         metrics = DatasetMetrics(dataset=dataset)
-        result['Favorable Rate Difference'][target] = metrics.favorable_diff()
-        result['Favorable Rate Ratio'][target] = metrics.favorable_ratio()
+        fd = metrics.favorable_diff()
+        fr = metrics.favorable_ratio()
+        result['Favorable Rate Difference'][target] = {k:fd[k] for k in sensattrs}
+        result['Favorable Rate Ratio'][target] = {k:fr[k] for k in sensattrs}
         if result['Consistency'] is None:
             result['Consistency'] = metrics.consistency()
 
     # proportion of goups
     dataset = dataset_cls()
     prop = dataset.proportion()
-    for attr in dataset.privileged.keys():
+    for attr in sensattrs:
         result['Proportion'][attr] = {
             SENSITIVE_GROUPS[dataset_name][attr][0]: prop[attr],
             SENSITIVE_GROUPS[dataset_name][attr][1]: 1 - prop[attr],
@@ -60,7 +84,18 @@ def dataset_evaluate(dataset_name):
     return result
 
 # dataset debiasing e.g. the first element in the list is original, the second is improved
-def dataset_debias(dataset_name, algorithm_name):
+def dataset_debias(dataset_name, algorithm_name, sensattrs=[], targetattrs=[]):
+    """Debias built-in datasets
+
+    Args:
+        dataset_name (str): name of built in dataset, in ['Compas', 'Adult', 'German']
+        algorithm_name (str): name of built-in dataset debias algorithms
+        sensattrs (list, optional): names of sensitive attributes. Defaults to [], which include all sensitive attributes available.
+        targetattrs (list, optional): names of target attributes. Defaults to [], which include all target attributes available.
+
+    Returns:
+        _type_: _description_
+    """
     dataset_cls = None
     algorithm_cls = None
     result = {
@@ -84,7 +119,19 @@ def dataset_debias(dataset_name, algorithm_name):
         algorithm_cls = Reweighing
     else:
         raise ValueError('invalid algoritm: \'{}\''.format(algorithm_name))
+    
+    # check attrs validity
+    if not all(attr in dataset_cls.favorable.keys() for attr in targetattrs):
+        raise ValueError('invalid target attribute: \'{}\''.format(targetattrs))
+    if not all(attr in dataset_cls.privileged for attr in sensattrs):
+        raise ValueError('invalid sensitive attribute: \'{}\''.format(sensattrs))
 
+    # take all sensitive/target attributes as default
+    if len(sensattrs) == 0:
+        sensattrs = list(dataset_cls.privileged.keys())
+    if len(targetattrs) == 0:
+        targetattrs = list(dataset_cls.favorable.keys())
+        
     dataset = dataset_cls()
     # algorithm = algorithm_cls(dataset=dataset)
     metrics = DatasetMetrics(dataset=dataset)
@@ -93,22 +140,24 @@ def dataset_debias(dataset_name, algorithm_name):
     # new_metrics = DatasetMetrics(new_dataset)
 
     # group and individual fairness metrics
-    for target in dataset_cls.favorable.keys():
+    for target in targetattrs:
+        print('==debias target: {}=='.format(target))
         dataset = dataset_cls(favorable=target)
         metrics = DatasetMetrics(dataset=dataset)
         # debiasing
         new_dataset = algorithm_cls(dataset).fit().transform()
         new_metrics = DatasetMetrics(new_dataset)
-
-        result['Favorable Rate Difference'][target] = [metrics.favorable_diff(), new_metrics.favorable_diff()]
-        result['Favorable Rate Ratio'][target] = [metrics.favorable_ratio(), new_metrics.favorable_ratio()]
+        fd, nfd = metrics.favorable_diff(), new_metrics.favorable_diff()
+        fr, nfr = metrics.favorable_ratio(), new_metrics.favorable_ratio()
+        result['Favorable Rate Difference'][target] = [{k:d[k] for k in sensattrs} for d in [fd, nfd]]
+        result['Favorable Rate Ratio'][target] = [{k:d[k] for k in sensattrs} for d in [fr, nfr]]
         if result['Consistency'] is None:
             result['Consistency'] = [metrics.consistency(), new_metrics.consistency()]
 
     # proportion of goups
     dataset = dataset_cls()
     prop = dataset.proportion()
-    for attr in dataset.privileged.keys():
+    for attr in sensattrs:
         result['Proportion'][attr] = {
             SENSITIVE_GROUPS[dataset_name][attr][0]: prop[attr],
             SENSITIVE_GROUPS[dataset_name][attr][1]: 1 - prop[attr],
@@ -117,7 +166,20 @@ def dataset_debias(dataset_name, algorithm_name):
     return result
 
 # evaluate model fairness
-def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd']):
+def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, generalized=False):
+    """Evaluate fairness of model trained on built in dataset
+
+    Args:
+        dataset_name (str): name of built in dataset, in ['Compas', 'Adult', 'German']
+        model_name (str): name of model structure
+        metrics (list, optional): list of metric names to be evaluated upon. Defaults to ['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'].
+        sensattrs (list, optional): names of sensitive attributes. Defaults to [], which include all sensitive attributes available.
+        targetattr (str, optional): name of target attribute. Defaults to None, which use the default target attribute of the dataset.
+        generalized (bool, optional): if, the metrics are evaluated in a generalized way(according to soft prediction rather than hard). Defaults to False.
+
+    Returns:
+        _type_: _description_
+    """
     dataset_cls = None
     model_cls = None
     result = {
@@ -132,8 +194,18 @@ def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', '
         dataset_cls = GermanDataset
     else:
         raise ValueError('invalid data set: \'{}\''.format(dataset_name))
+    
+    # check attrs validity
+    if all((not targetattr in dataset_cls.favorable.keys(), targetattr is not None)):
+        raise ValueError('invalid target attribute: \'{}\''.format(targetattr))
+    if not all(attr in dataset_cls.privileged for attr in sensattrs):
+        raise ValueError('invalid sensitive attribute: \'{}\''.format(sensattrs))
 
-    dataset = dataset_cls()
+    # take all sensitive attributes as default
+    if len(sensattrs) == 0:
+        sensattrs = list(dataset_cls.privileged.keys())
+
+    dataset = dataset_cls(favorable=targetattr)
 
     if model_name == '3 Hidden-layer FCN':
         model_cls = Classifier
@@ -148,16 +220,20 @@ def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', '
     pred_dataset = model.predicted_dataset(dataset=dataset)
     model_metrics = ModelMetrics(dataset=dataset, classified_dataset=pred_dataset)
     for metric in metrics:
-        m = model_metrics.group_fairness_metrics(metrics=metric)
-        result[METRICS_FULL_NAME[metric]] = m
+        m = None
+        if generalized:
+            m = model_metrics.general_group_fairness_metrics(metrics=metric)
+        else:
+            m = model_metrics.group_fairness_metrics(metrics=metric)
+        result[METRICS_FULL_NAME[metric]] = {k:m[k] for k in sensattrs}
     result['Consistency'] = model_metrics.consistency()
     # if result['Consistency'] is None:
     #     result['Consistency'] = [metrics.consistency(), new_metrics.consistency()]
 
     # proportion of goups given favorable prediction
-    dataset = dataset_cls()
+    dataset = dataset_cls(favorable=targetattr)
     prop = dataset.proportion(favorable=True)
-    for attr in dataset.privileged.keys():
+    for attr in sensattrs:
         result['Proportion'][attr] = {
             SENSITIVE_GROUPS[dataset_name][attr][0]: prop[attr],
             SENSITIVE_GROUPS[dataset_name][attr][1]: 1 - prop[attr],
@@ -166,7 +242,21 @@ def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', '
     return result
 
 # model debiasing
-def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd']):
+def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, generalized=False):
+    """Debias model trained on built-in dataset
+
+    Args:
+        dataset_name (str): name of built in dataset, in ['Compas', 'Adult', 'German']
+        model_name (str): name of model structure
+        algorithm_name (str): the name of built in model debias algorithms
+        metrics (list, optional): list of metric names to be evaluated upon. Defaults to ['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'].
+        sensattrs (list, optional): names of sensitive attributes. Defaults to [], which include all sensitive attributes available.
+        targetattr (str, optional): name of target attribute. Defaults to None, which use the default target attribute of the dataset.
+        generalized (bool, optional): if, the metrics are evaluated in a generalized way(according to soft prediction rather than hard). Defaults to False.
+
+    Returns:
+        _type_: _description_
+    """
     dataset_cls = None
     model_cls = None
     algorithm_cls = None
@@ -182,8 +272,18 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
         dataset_cls = GermanDataset
     else:
         raise ValueError('invalid data set: \'{}\''.format(dataset_name))
+    
+    # check attrs validity
+    if all((not targetattr in dataset_cls.favorable.keys(), targetattr is not None)):
+        raise ValueError('invalid target attribute: \'{}\''.format(targetattr))
+    if not all(attr in dataset_cls.privileged for attr in sensattrs):
+        raise ValueError('invalid sensitive attribute: \'{}\''.format(sensattrs))
 
-    dataset = dataset_cls()
+    # take all sensitive attributes as default
+    if len(sensattrs) == 0:
+        sensattrs = list(dataset_cls.privileged.keys())
+
+    dataset = dataset_cls(favorable=targetattr)
 
     if model_name == '3 Hidden-layer FCN':
         model_cls = Classifier
@@ -196,6 +296,8 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
         algorithm_cls = FADClassifier
     elif algorithm_name in ['Calibrated EOD-'+c for c in ['fnr', 'fpr', 'weighted']]:
         algorithm_cls = CalibratedEqOdds
+    elif algorithm_name in ['Reject Option-'+c for c in ['SPd', 'AOd', 'EOd']]:
+        algorithm_cls = RejectOptionClassification
     else:
         raise ValueError('invalid algorithm: \'{}\''.format(algorithm_name))
 
@@ -215,22 +317,34 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
         new_pred_dataset = new_model.predicted_dataset(dataset=dataset)
     else: # post process debaising
         algorithm = algorithm_cls()
+        if issubclass(algorithm_cls, CalibratedEqOdds):
+            constraint = algorithm_name.split('-')[1]
+            algorithm = algorithm_cls(cost_constraint=constraint)
+        if issubclass(algorithm_cls, RejectOptionClassification):
+            metric_name = algorithm_name.split('-')[1]
+            algorithm = algorithm_cls(metric_name=metric_name)
         algorithm.fit(dataset=dataset, dataset_pred=pred_dataset)
         new_pred_dataset = algorithm.transform(pred_dataset)
     new_metrics = ModelMetrics(dataset=dataset, classified_dataset=new_pred_dataset)
 
     for metric in metrics:
-        m = model_metrics.group_fairness_metrics(metrics=metric)
-        new_m = new_metrics.group_fairness_metrics(metrics=metric)
-        result[METRICS_FULL_NAME[metric]] = [m, new_m]
+        m = None
+        new_m = None
+        if generalized:
+            m = model_metrics.general_group_fairness_metrics(metrics=metric)
+            new_m = new_metrics.general_group_fairness_metrics(metrics=metric)
+        else:
+            m = model_metrics.group_fairness_metrics(metrics=metric)
+            new_m = new_metrics.group_fairness_metrics(metrics=metric)
+        result[METRICS_FULL_NAME[metric]] = [{k:d[k] for k in sensattrs} for d in[m, new_m]]
     result['Consistency'] = [model_metrics.consistency(), new_metrics.consistency()]
     # if result['Consistency'] is None:
     #     result['Consistency'] = [metrics.consistency(), new_metrics.consistency()]
 
     # proportion of goups given favorable prediction
-    dataset = dataset_cls()
+    dataset = dataset_cls(favorable=targetattr)
     prop = dataset.proportion(favorable=True)
-    for attr in dataset.privileged.keys():
+    for attr in sensattrs:
         result['Proportion'][attr] = {
             SENSITIVE_GROUPS[dataset_name][attr][0]: prop[attr],
             SENSITIVE_GROUPS[dataset_name][attr][1]: 1 - prop[attr],
@@ -241,278 +355,61 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
 
 
 
-    
-
-if __name__ == '__main__':
-
-    # result = dataset_evaluate('Compas')
-    # {
-    #     "Favorable Rate Difference":{
-    #         "two_year_recid":{
-    #             "sex":0.1279983309134417,
-    #             "race":0.09745618466614947
-    #         },
-    #         "decile_score":{
-    #             "sex":0.06719725452292646,
-    #             "race":0.17530399000503327
-    #         },
-    #         "score_text":{
-    #             "sex":0.05016678091961568,
-    #             "race":0.17408231543674751
-    #         }
-    #     },
-    #     "Favorable Rate Ratio":{
-    #         "two_year_recid":{
-    #             "sex":0.8026272456387218,
-    #             "race":0.8400075282178671
-    #         },
-    #         "decile_score":{
-    #             "sex":0.9044106851520114,
-    #             "race":0.7705884934781674
-    #         },
-    #         "score_text":{
-    #             "sex":0.9156710048919193,
-    #             "race":0.739804470957015
-    #         }
-    #     },
-    #     "Consistency":0.6579714841218336,
-    #     "Proportion":{
-    #         "sex":{
-    #             "Female":0.1903758911211925,
-    #             "Male":0.8096241088788075
-    #         },
-    #         "race":{
-    #             "Caucasian":0.34073233959818533,
-    #             "non-Caucasian":0.6592676604018146
-    #         }
-    #     }
-    # }
-
-    # result = dataset_debias('Compas', 'LFR')
-    # {
-    #     "Favorable Rate Difference":{
-    #         "two_year_recid":[
-    #             {
-    #                 "sex":0.1279983309134417,
-    #                 "race":0.09745618466614947
-    #             },
-    #             {
-    #                 "sex":0.014617281006902072,
-    #                 "race":0.03182395639086899
-    #             }
-    #         ],
-    #         "decile_score":[
-    #             {
-    #                 "sex":0.06719725452292646,
-    #                 "race":0.17530399000503327
-    #             },
-    #             {
-    #                 "sex":0.002401440864518656,
-    #                 "race":0.002949127549766506
-    #             }
-    #         ],
-    #         "score_text":[
-    #             {
-    #                 "sex":0.05016678091961568,
-    #                 "race":0.17408231543674751
-    #             },
-    #             {
-    #                 "sex":-0.013771326625762637,
-    #                 "race":0.03432398356126665
-    #             }
-    #         ]
-    #     },
-    #     "Favorable Rate Ratio":{
-    #         "two_year_recid":[
-    #             {
-    #                 "sex":0.8026272456387218,
-    #                 "race":0.8400075282178671
-    #             },
-    #             {
-    #                 "sex":0.9843860861971728,
-    #                 "race":0.966335120578472
-    #             }
-    #         ],
-    #         "decile_score":[
-    #             {
-    #                 "sex":0.9044106851520114,
-    #                 "race":0.7705884934781674
-    #             },
-    #             {
-    #                 "sex":0.9975985591354813,
-    #                 "race":0.9970508724502335
-    #             }
-    #         ],
-    #         "score_text":[
-    #             {
-    #                 "sex":0.9156710048919193,
-    #                 "race":0.739804470957015
-    #             },
-    #             {
-    #                 "sex":1.0152509979126023,
-    #                 "race":0.9633587119648002
-    #             }
-    #         ]
-    #     },
-    #     "Consistency":[
-    #         0.6586519766688193,
-    #         0.9999675955930006
-    #     ],
-    #     "Proportion":{
-    #         "sex":{
-    #             "Female":0.1903758911211925,
-    #             "Male":0.8096241088788075
-    #         },
-    #         "race":{
-    #             "Caucasian":0.34073233959818533,
-    #             "non-Caucasian":0.6592676604018146
-    #         }
-    #     }
-    # }
-
-    # result = model_evaluate('Compas', '3 Hidden-layer FCN')
-    # {
-    #     "Consistency":0.9690134,
-    #     "Proportion":{
-    #         "sex":{
-    #             "Female":0.9390425215581326,
-    #             "Male":0.060957478441867385
-    #         },
-    #         "race":{
-    #             "Caucasian":0.9717514124293786,
-    #             "non-Caucasian":0.02824858757062143
-    #         }
-    #     },
-    #     "Dsiaprate Impact":{
-    #         "sex":0.7365824116239865,
-    #         "race":0.7516651530804042
-    #     },
-    #     "Demographic Parity":{
-    #         "sex":0.20131755649134164,
-    #         "race":0.17854527236833662
-    #     },
-    #     "Predictive Equality":{
-    #         "sex":0.05917126675917461,
-    #         "race":0.011487003319321287
-    #     },
-    #     "Equal Odds":{
-    #         "sex":0.31581726722288417,
-    #         "race":0.2978373870770743
-    #     },
-    #     "Overall Misclassification Difference":{
-    #         "sex":-0.03995248212757441,
-    #         "race":0.008757165242879394
-    #     },
-    #     "False Omission Difference":{
-    #         "sex":0.015086747393038169,
-    #         "race":0.05409303503612756
-    #     },
-    #     "False Negative Difference":{
-    #         "sex":-0.1368840573129051,
-    #         "race":-0.10071607421255457
-    #     }
-    # }
-
-    # result = model_debias('Compas', '3 Hidden-layer FCN', 'Adersarial Debiasing')
-    # {
-    #     "Consistency":[
-    #         0.96968377,
-    #         0.9789661
-    #     ],
-    #     "Proportion":{
-    #         "sex":{
-    #             "Female":0.9390425215581326,
-    #             "Male":0.060957478441867385
-    #         },
-    #         "race":{
-    #             "Caucasian":0.9717514124293786,
-    #             "non-Caucasian":0.02824858757062143
-    #         }
-    #     },
-    #     "Dsiaprate Impact":[
-    #         {
-    #             "sex":0.8174554678767078,
-    #             "race":0.7641244120047502
-    #         },
-    #         {
-    #             "sex":0.7239927198784254,
-    #             "race":0.7139070490458581
-    #         }
-    #     ],
-    #     "Demographic Parity":[
-    #         {
-    #             "sex":0.14184016793054555,
-    #             "race":0.18495351291037965
-    #         },
-    #         {
-    #             "sex":0.2201004006659315,
-    #             "race":0.2183441202733588
-    #         }
-    #     ],
-    #     "Predictive Equality":[
-    #         {
-    #             "sex":0.07810102697602617,
-    #             "race":0.026048302175713967
-    #         },
-    #         {
-    #             "sex":0.05851263888488267,
-    #             "race":-0.004159869267948313
-    #         }
-    #     ],
-    #     "Equal Odds":[
-    #         {
-    #             "sex":0.19747520219644127,
-    #             "race":0.31098108252676304
-    #         },
-    #         {
-    #             "sex":0.35978561223270633,
-    #             "race":0.3867523748823671
-    #         }
-    #     ],
-    #     "Overall Misclassification Difference":[
-    #         {
-    #             "sex":-0.04190531340080644,
-    #             "race":-0.009242609681052283
-    #         },
-    #         {
-    #             "sex":-0.04550526060317045,
-    #             "race":0.017236315965197146
-    #         }
-    #     ],
-    #     "False Omission Difference":[
-    #         {
-    #             "sex":0.03934459079900704,
-    #             "race":0.0012883635189267495
-    #         },
-    #         {
-    #             "sex":-0.01400162443519265,
-    #             "race":0.047004431898804266
-    #         }
-    #     ],
-    #     "False Negative Difference":[
-    #         {
-    #             "sex":-0.07872199366082701,
-    #             "race":-0.11237505821055686
-    #         },
-    #         {
-    #             "sex":-0.15412909026510094,
-    #             "race":-0.12611724899720364
-    #         }
-    #     ]
-    # }
-
+def test1():
     # testing
-    for dataset in ['Compas', 'Adult', 'German']: # go through all data sets
+    # for dataset in ['Compas', 'Adult', 'German']: # go through all data sets
+    # np.random.seed(seed)
+
+    # print(model_evaluate("Compas", '3 Hidden-layer FCN'))
+
+    # exit()
+    for dataset in ['Compas']: # go through all data sets
         print('======dataset evaluation: {}======'.format(dataset))
         print(dataset_evaluate(dataset_name=dataset))
         for dataset_algorithm in ['LFR', 'Reweighing']: # go through all data set debias algorithms
+        # for dataset_algorithm in ['LFR']: # go through all data set debias algorithms
             print('====dataset debiasing: {}, {}===='.format(dataset, dataset_algorithm))
             print(dataset_debias(dataset_name=dataset, algorithm_name=dataset_algorithm))
         for model in ['3 Hidden-layer FCN']: # go through all models
             print('====model evaluation: {}, {}===='.format(dataset, model))
             print(model_evaluate(dataset_name=dataset, model_name=model))
-            for model_algorithm in ['Domain Independent', 'Adersarial Debiasing', 'Calibrated EOD-fnr', 'Calibrated EOD-fpr', 'Calibrated EOD-weighted']: # go through all model debias algorithms
+            # for model_algorithm in ['Reject Option-SPd', 'Reject Option-AOd', 'Reject Option-EOd']: # go through all model debias algorithms
+            for model_algorithm in ['Domain Independent', 'Adersarial Debiasing', 'Calibrated EOD-fnr', 'Calibrated EOD-fpr', 'Calibrated EOD-weighted', 'Reject Option-SPd', 'Reject Option-AOd', 'Reject Option-EOd']: # go through all model debias algorithms
                 print('====model debiasing: {}, {}, {}===='.format(dataset, model, model_algorithm))
-                print(model_debias(dataset_name=dataset, model_name=model, algorithm_name=model_algorithm))  
+                print(model_debias(dataset_name=dataset, model_name=model, algorithm_name=model_algorithm,generalized=True))  
+
+TARGET_ATTR = {
+    'Compas': list(CompasDataset.favorable.keys()),
+    'Adult': list(AdultDataset.favorable.keys()),
+    'German': list(GermanDataset.favorable.keys()),
+}
+
+def test2():
+    # testing
+    # for dataset in ['Compas', 'Adult', 'German']: # go through all data sets
+    # np.random.seed(seed)
+
+    # print(model_evaluate("Compas", '3 Hidden-layer FCN'))
+
+    # exit()
+    for dataset in ['Adult', 'German']:
+    # for dataset in ['Compas']: # go through all data sets
+        print('======dataset evaluation: {}======'.format(dataset))
+        print(dataset_evaluate(dataset_name=dataset))
+        for dataset_algorithm in ['LFR', 'Reweighing']: # go through all data set debias algorithms
+        # for dataset_algorithm in ['LFR']: # go through all data set debias algorithms
+            print('====dataset debiasing: {}, {}===='.format(dataset, dataset_algorithm))
+            print(dataset_debias(dataset_name=dataset, algorithm_name=dataset_algorithm))
+        for model in ['3 Hidden-layer FCN']: # go through all models
+            for target_attr in TARGET_ATTR[dataset]:
+                print('====model evaluation: {}-{}, {}===='.format(dataset, target_attr, model))
+                print(model_evaluate(dataset_name=dataset, model_name=model, targetattr=target_attr))
+                # for model_algorithm in ['Reject Option-SPd', 'Reject Option-AOd', 'Reject Option-EOd']: # go through all model debias algorithms
+                for model_algorithm in ['Domain Independent', 'Adersarial Debiasing', 'Calibrated EOD-fnr', 'Calibrated EOD-fpr', 'Calibrated EOD-weighted', 'Reject Option-SPd', 'Reject Option-AOd', 'Reject Option-EOd']: # go through all model debias algorithms
+                    print('====model debiasing: {}-{}, {}, {}===='.format(dataset,target_attr, model, model_algorithm))
+                    print(model_debias(dataset_name=dataset, model_name=model, algorithm_name=model_algorithm,generalized=True, targetattr=target_attr))  
         
-    # print(result)
+    # print(result) 
+
+if __name__ == '__main__':
+    test2()
