@@ -232,7 +232,7 @@ def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
     :params frameversion:框架版本
     """
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = env_test.run_env_frame(matchmethod,frameworkname,frameversion)
+    res = env_test.run_env_frame(matchmethod,frameworkname,frameversion, osp.join(ROOT,"output", tid, AAtid))
     # res = concolic.run_concolic(dataname, modelname, norm)   
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
