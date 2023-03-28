@@ -10,6 +10,7 @@ from .metrics.model_metrics import *
 import copy
 from .debias.inprocess import *
 from .debias.postprocess import *
+from .dataset_analysis import *
 import os
 
 seed = 11
@@ -352,8 +353,71 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
 
     return result
 
+def dataset_analysis(dataset_name, attrs=[], targetattrs=[], prptn_thd=0.1):
+    """Analyize statistical characteristics (correlation coefficient and proportion) of built-in datasets. For m attribute and n target attributes there will be m * n pairs of correlation coefficient sets (4 correlation coefficients supported). Categorical attributes among 'attrs' will be given proportion analysis.
 
+    Args:
+        dataset_name (str): name of built in dataset, in ['Compas', 'Adult', 'German']
+        attrs (list, optional): names of attributes to analysis. Defaults to [], which include all attributes available.
+        targetattrs (list, optional): names of target attributes. Defaults to [], which include all target attributes available.
+        prptn_thd (float, optional): threshold of proportion. Categories with proportion lower then the threshold will be merged into one category named 'others'. 
 
+    Returns:
+        Dict: result of the analysis
+    """
+    dataset_cls = None
+    result = {
+        'Corelation coefficients': {},
+        'Proportion':{}
+    }
+    if dataset_name == 'Compas':
+        dataset_cls = CompasDataset
+    elif dataset_name == 'Adult':
+        dataset_cls = AdultDataset
+    elif dataset_name == 'German':
+        dataset_cls = GermanDataset
+    else:
+        raise ValueError('invalid data set: \'{}\''.format(dataset_name))
+    
+    # check attrs validity
+    if not all(attr in dataset_cls.favorable.keys() for attr in targetattrs):
+        raise ValueError('invalid target attribute: \'{}\''.format(targetattrs))
+    if not all(attr in dataset_cls.privileged for attr in attrs):
+        raise ValueError('invalid sensitive attribute: \'{}\''.format(attrs))
+    
+    # take all sensitive/target attributes as default
+    if len(attrs) == 0:
+        attrs = dataset_cls.features_to_keep
+    if len(targetattrs) == 0:
+        targetattrs = list(dataset_cls.favorable.keys())
+    
+    privileged = dataset_cls.privileged
+    favorable = dataset_cls.favorable
+    
+    # prepare dataset
+    dataset = dataset_cls()
+    dataset = preprocess(dataset, factorize=True)
+    
+    # categorical features
+    categotical_features = dataset.__class__.categotical_features + [key for key in favorable.keys() if isinstance(favorable[key], list)] + [key for key in privileged.keys() if isinstance(privileged[key], list)]
+    categotical_features = list(set(categotical_features))
+    # categotical_features = dataset_cls.categotical_features + list(favorable.keys()) + list(privileged.keys())
+
+    # calculate correlation
+    for attr in attrs:
+        attr2_type = 'continuous' if attr not in categotical_features else 'discrete'
+        attr2 = attr # if attr2_type == 'discrete' else attr + '_cat'
+        for target in targetattrs:
+            attr1_type = 'continuous' if target not in categotical_features else 'discrete'
+            attr1 = target # if attr1_type == 'discrete' else target + '_cat'
+            result['Corelation coefficients'][f'{attr}:{target}'] = correlation_analysis(dataset.df, attr1, attr2, attr1_type, attr2_type)
+
+    # calculate proportion
+    dataset = preprocess(dataset, factorize=False) # disable factorize so sens and target attr remains string format
+    cat_attrs = [attr for attr in attrs if attr in categotical_features]
+    result['Proportion'] = calculate_category_proportions(dataset.df, cat_attrs, prptn_thd)
+
+    return result
 
 def test1():
     # testing
@@ -392,10 +456,12 @@ def test2():
     # print(model_evaluate("Compas", '3 Hidden-layer FCN'))
 
     # exit()
-    for dataset in ['Adult', 'German']:
+    for dataset in ['Compas', 'Adult', 'German']:
     # for dataset in ['Compas']: # go through all data sets
         print('======dataset evaluation: {}======'.format(dataset))
-        print(dataset_evaluate(dataset_name=dataset))
+        # print(dataset_evaluate(dataset_name=dataset))
+        print(dataset_analysis(dataset_name=dataset))
+        continue
         for dataset_algorithm in ['LFR', 'Reweighing']: # go through all data set debias algorithms
         # for dataset_algorithm in ['LFR']: # go through all data set debias algorithms
             print('====dataset debiasing: {}, {}===='.format(dataset, dataset_algorithm))
