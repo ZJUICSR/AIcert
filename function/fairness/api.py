@@ -359,7 +359,7 @@ def dataset_analysis(dataset_name, attrs=[], targetattrs=[], prptn_thd=0.1):
     Args:
         dataset_name (str): name of built in dataset, in ['Compas', 'Adult', 'German']
         attrs (list, optional): names of attributes to analysis. Defaults to [], which include all attributes available.
-        targetattrs (list, optional): names of target attributes. Defaults to [], which include all target attributes available.
+        targetattrs (list, optional): names of target attributes (could be any attribute, not necessarily target attribute). Defaults to [], which include all target attributes available.
         prptn_thd (float, optional): threshold of proportion. Categories with proportion lower then the threshold will be merged into one category named 'others'. 
 
     Returns:
@@ -367,7 +367,7 @@ def dataset_analysis(dataset_name, attrs=[], targetattrs=[], prptn_thd=0.1):
     """
     dataset_cls = None
     result = {
-        'Corelation coefficients': {},
+        'Corelation coefficients': [],
         'Proportion':{}
     }
     if dataset_name == 'Compas':
@@ -378,12 +378,6 @@ def dataset_analysis(dataset_name, attrs=[], targetattrs=[], prptn_thd=0.1):
         dataset_cls = GermanDataset
     else:
         raise ValueError('invalid data set: \'{}\''.format(dataset_name))
-    
-    # check attrs validity
-    if not all(attr in dataset_cls.favorable.keys() for attr in targetattrs):
-        raise ValueError('invalid target attribute: \'{}\''.format(targetattrs))
-    if not all(attr in dataset_cls.privileged for attr in attrs):
-        raise ValueError('invalid sensitive attribute: \'{}\''.format(attrs))
     
     # take all sensitive/target attributes as default
     if len(attrs) == 0:
@@ -410,7 +404,7 @@ def dataset_analysis(dataset_name, attrs=[], targetattrs=[], prptn_thd=0.1):
         for target in targetattrs:
             attr1_type = 'continuous' if target not in categotical_features else 'discrete'
             attr1 = target # if attr1_type == 'discrete' else target + '_cat'
-            result['Corelation coefficients'][f'{attr}:{target}'] = correlation_analysis(dataset.df, attr1, attr2, attr1_type, attr2_type)
+            result['Corelation coefficients'].append({"attr": attr, "target": target, "values": correlation_analysis(dataset.df, attr1, attr2, attr1_type, attr2_type)})
 
     # calculate proportion
     dataset = preprocess(dataset, factorize=False) # disable factorize so sens and target attr remains string format
