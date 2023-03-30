@@ -17,7 +17,7 @@ from torch.utils.data import Dataset,DataLoader
 from IOtool import IOtool, Logger, Callback
 from torchvision import  transforms
 import torch
-import gol
+# import gol
 from function.formal_verify import *
  
 from function.fairness import api
@@ -105,8 +105,6 @@ def get_model_loader(dataset, modelparam, logging, train_loader=None, test_loade
     logging.info("[模型训练阶段] 正在分析AI模型（网络结构、参数和大小等）")
     batch_x = list(train_loader)[0][0]
     summary = IOtool.summary_dict(model.cpu(), input_size=batch_x.shape[1:], batch_size=batch_x.shape[0])
-    taskparam.set_res_value(key = "summary",value = summary)
-    # adv_result["summary"] = summary
     trainerParam = {
         "lr": 0.05,
         "optim": "SGD",
@@ -115,10 +113,13 @@ def get_model_loader(dataset, modelparam, logging, train_loader=None, test_loade
         "robustness": [],
         "epochs": 100
     }
-    taskparam.set_params_value(key="trainer",value=trainerParam)
+    try:
+        taskparam.set_res_value(key = "summary",value = summary)
+        taskparam.set_params_value(key="trainer",value=trainerParam)
+    except:
+        pass
     trainer = Trainer(**trainerParam)
     trainer.update_config(arch=model_name, task=data_name)
-    adv_result = taskparam.get_result()
     flag = False
     if modelparam["pretrained"]:
         model_path = modelparam["path"]
@@ -147,7 +148,7 @@ def get_model_loader(dataset, modelparam, logging, train_loader=None, test_loade
     adv_attack_res = {"test_acc":test_acc,"test_loss":test_loss}
     taskparam.set_res_value(key="AdvAttack",value=adv_attack_res)
     logging.info("[模型训练阶段] 模型训练完成，测试准确率：{:.3f}% 测试损失：{:.5f}".format(test_acc, test_loss))
-    return model,trainer
+    return model, trainer, summary
 
 def run_verify(tid, AAtid, param):
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
