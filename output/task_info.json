@@ -43,7 +43,7 @@
     "20230223_1312_6b2cfea": {
         "state": 2,
         "createtime": "202302231312",
-        "dataset": "German",
+        "dataset": "Compas",
         "model": "",
         "function": {
             "S20230223_1312_05a17e3": {
@@ -54,6 +54,14 @@
                 ],
                 "dataset": "German",
                 "datamethod": "Reweighing"
+            },
+            "S20230227_1308_6bc8c84": {
+                "type": "date_evaluate",
+                "state": 2,
+                "name": [
+                    "date_evaluate"
+                ],
+                "dataset": "Compas"
             }
         }
     },
@@ -124,6 +132,56 @@
                 ],
                 "dataset": "mnist",
                 "model": "cnn"
+            }
+        }
+    },
+    "20230224_1346_f932ff1": {
+        "state": 2,
+        "createtime": "202302241346",
+        "dataset": "mnist",
+        "model": "cnn",
+        "function": {
+            "S20230224_1346_ddf34c6": {
+                "type": "formal_verification",
+                "state": 2,
+                "name": [
+                    "formal_verification"
+                ],
+                "dataset": "mnist",
+                "model": "cnn"
+            }
+        }
+    },
+    "20230224_1356_57b952f": {
+        "state": 2,
+        "createtime": "202302241356",
+        "dataset": "mnist",
+        "model": "cnn",
+        "function": {
+            "S20230224_1356_4c95852": {
+                "type": "formal_verification",
+                "state": 2,
+                "name": [
+                    "formal_verification"
+                ],
+                "dataset": "mnist",
+                "model": "cnn"
+            }
+        }
+    },
+    "20230227_1414_f943fb5": {
+        "state": 2,
+        "createtime": "202302271414",
+        "dataset": "Compas",
+        "model": "",
+        "function": {
+            "S20230227_1415_f302b3e": {
+                "type": "date_evaluate",
+                "state": 2,
+                "name": [
+                    "date_evaluate"
+                ],
+                "dataset": "Compas"
             }
         }
     }
