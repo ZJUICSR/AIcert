@@ -88,8 +88,8 @@ def DataFairnessEvaluate():
         dataname = request.form.get("dataname")
         # 获取主任务ID
         tid = request.form.get("tid")
-        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         # 生成子任务ID
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
         # 获取任务列表
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
