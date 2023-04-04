@@ -236,7 +236,7 @@ class GermanDataset(FairnessDataset):
     categotical_features = ['status', 'credit_history', 'purpose',
                      'savings', 'employment', 'other_debtors', 'property',
                      'installment_plans', 'housing', 'skill_level', 'telephone',
-                     'foreign_worker']
+                     'foreign_worker', 'personal_status']
     # categotical_features = ['age_cat', 'c_charge_degree', 'c_charge_desc']
 
     def __init__(self, path=osp.join(ROOT,r'datasets/German/german.data'), favorable=None, privileged=None, features_to_keep=None, features_to_drop=None): # TODO: use key word argues
