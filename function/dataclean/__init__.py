@@ -5,8 +5,8 @@ import os.path as osp
 import json
 import logging
 # from Loader import ArgpLoader
-import dataloader_clean
-# from .dataloader_clean import *
+# import dataloader_clean
+from .dataloader_clean import *
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
@@ -31,11 +31,10 @@ def run_dataclean(dataset):
         train_loader = DataLoader(train_data,batch_size=4)
         test_loader = DataLoader(test_data,batch_size=4)
         run_cleanlab(train_loader, test_loader,root=ROOT, dataset=dataset,batch_size=test_loader.batch_size, PERT_NUM=100, MAX_IMAGES=32, log_func=print)
-    elif dataset=="text": 
+    elif dataset=="Text": 
         run_format_clean(inputfile=osp.join(current_dir,'text_sample1.txt'),outputfile=osp.join(ROOT,'text_sample1_benign.txt'),filler=" ",root=ROOT)
         run_encoding_clean(inputfile=osp.join(current_dir,'text_sample2.txt'),outputfile=osp.join(ROOT,'text_sample2_benign.txt'),root=ROOT)
-    elif dataset=="table":
-        
+    elif dataset=="Table":
         generate_abnormal_sample(outputfile=osp.join(current_dir,'abnormal_table.npz'))
         run_abnormal_table(inputfile=osp.join(current_dir,'abnormal_table.npz'),outputfile=osp.join(ROOT,'benign_table.npy'),root=ROOT)
     else:
