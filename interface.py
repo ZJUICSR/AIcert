@@ -204,7 +204,7 @@ def run_concolic(tid, AAtid, dataname, modelname, norm):
     :params norm:范数约束
     """
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = concolic.run_concolic(dataname, modelname, norm)   
+    res = concolic.run_concolic(dataname, modelname, norm, osp.join(ROOT,"output", tid, AAtid))   
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
@@ -215,6 +215,7 @@ def run_dataclean(tid, AAtid, dataname):
     :params tid:主任务ID
     :params AAtid:子任务id
     :params dataname:数据集名称
+    :output res:需保存到子任务json中的返回结果/路径
     """
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     res = dataclean.run_dataclean(dataname)   
@@ -230,6 +231,7 @@ def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
     :params matchmethod:环境分析匹配机制
     :params frameworkname:适配框架名称
     :params frameversion:框架版本
+    :output res:需保存到子任务json中的返回结果/路径
     """
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     res = env_test.run_env_frame(matchmethod,frameworkname,frameversion, osp.join(ROOT,"output", tid, AAtid))
@@ -247,6 +249,7 @@ def run_deepsst(tid,AAtid,dataset,modelname,pertube,m_dir):
     :params modelname: 模型名称
     :params pertube: 敏感神经元扰动比例
     :params m_dir: 敏感度值文件位置
+    :output res:需保存到子任务json中的返回结果/路径
     """
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     res = deepsst.run_deepsst(dataset, modelname, float(pertube), m_dir)
