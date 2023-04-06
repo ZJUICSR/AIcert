@@ -12,7 +12,8 @@ from art.attacks.evasion import SquareAttack, HopSkipJump, PixelAttack, SimBA, G
 from art.attacks.poisoning import PoisoningAttackBackdoor, PoisoningAttackCleanLabelBackdoor, FeatureCollisionAttack, PoisoningAttackAdversarialEmbedding
 from art.estimators.classification import PyTorchClassifier
 from art.utils import load_mnist, load_cifar10
-from art.resnet import ResNet18
+# from art.resnet import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
+from art.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
 from art.mnist import Mnist
 from art.utils import compute_success, compute_accuracy
 import random
@@ -21,7 +22,7 @@ class EvasionAttacker():
     def __init__(self, modelnet=Mnist, modelpath: str="./models/mnist-6-mnist_0.9890.pkl", 
     dataset="mnist", datasetpath="./datasets/", nb_classes=10, datanormalize: bool = True, 
     device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")) -> None:
-        self.modelnet = modelnet
+        self.modelnet = eval(modelnet)
         self.modelpath = modelpath
         self.dataset = dataset
         self.datasetpath = datasetpath
@@ -33,7 +34,7 @@ class EvasionAttacker():
         elif dataset == "mnist":
             self.loaddataset = load_mnist
         else:
-            raise ValueError("Dataset not supported")
+            raise ValueError("Dataset not supported:",dataset)
 
     def perturb(self, method: str="FastGradientMethod", sample_num: int=5, **kwargs) -> None:
         # 数据集加载
@@ -41,6 +42,7 @@ class EvasionAttacker():
         # 模型加载
         self.model = self.modelnet()
         checkpoint = torch.load(self.modelpath)
+        # self.model.load_state_dict(checkpoint,strict=False)
         try:
             self.model.load_state_dict(checkpoint)
         except:
@@ -93,7 +95,7 @@ class EvasionAttacker():
             self.asr  = compute_success(self.classifier, self.cln_examples, self.cln_lables, self.adv_examples)
         asr_list = []
         for eps in epslist:
-            self.attack(eps=eps)
+            self.attack.generate(eps=eps)
             attack_with_compute_asr()
             asr_list.append(self.asr)
         return asr_list
@@ -109,7 +111,7 @@ class BackdoorAttacker():
     self, modelnet=Mnist, modelpath: str="./models/ckpt-mnist-15-mnist_0.9905.pth", 
     dataset="mnist", datasetpath="./datasets/", nb_classes=10, datanormalize: bool = True, 
     device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")) -> None:
-        self.modelnet = modelnet
+        self.modelnet = eval(modelnet)
         self.modelpath = modelpath
         self.dataset = dataset
         self.datasetpath = datasetpath
