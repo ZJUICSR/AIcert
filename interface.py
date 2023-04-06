@@ -1,12 +1,14 @@
+import os
 import os.path as osp
 import torch
 import torchvision
 
-from function.ex_methods.module.func import get_loader, Logger
-from function.ex_methods.module.generate_adv import get_adv_loader
+from function.ex_methods.module.func import get_loader, Logger, recreate_image
+from function.ex_methods.module.generate_adv import get_adv_loader, sample_untargeted_attack
 from function.ex_methods.module.load_model import load_model
 from function.ex_methods import attribution_maps, layer_explain, dim_reduciton_visualize
 from function.ex_methods.module.model_Lenet import lenet
+from function.ex_methods.lime import lime_image_ex
 
 ROOT = osp.dirname(osp.abspath(__file__))
 
@@ -51,6 +53,7 @@ ROOT = osp.dirname(osp.abspath(__file__))
 #     logging.info("[注意力分布图计算]：选择了{:s}解释算法".format(", ".join(ex_methods)))
 #     ex_images = attribution_maps(net, nor_loader, adv_loader, ex_methods, params, 20, logging)
 
+
 """模型每层特征图可视化，支持vgg和alexnet"""
 # if __name__ == '__main__':
 #     params = {
@@ -81,15 +84,16 @@ ROOT = osp.dirname(osp.abspath(__file__))
 #     layer_explain(model_name, nor_loader, adv_loader["BIM"], params)
 
 
+''''五种降维方法'''
 if __name__ == "__main__":
 
     params = {
-        "dataset": {"name": "imagenet"},
-        "model": {"name": "densenet121","ckpt":None},
+        "dataset": {"name": "cifar10"},
+        "model": {"name": "resnet50","ckpt":None},
         "out_path": "./output",
         "device": torch.device("cuda:4"),
         "ex_methods":{"methods":["lrp", "gradcam", "integrated_grad"]},
-        "adv_methods":{"methods":["FGSM"]},
+        "adv_methods":{"methods":["PGD"]},
         "root":ROOT
     }
 
@@ -98,7 +102,7 @@ if __name__ == "__main__":
     root = params["root"]
     dataset = params["dataset"]["name"]
     nor_data = torch.load(osp.join(root, f"dataset/{dataset}/data/{dataset}_NOR.pt"))
-    nor_loader = get_loader(nor_data, batchsize=16)
+    nor_loader = get_loader(nor_data, batchsize=128)
     logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
 
     model_name = params["model"]["name"]
@@ -106,16 +110,57 @@ if __name__ == "__main__":
     model = params["model"]["ckpt"]
     logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
     net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
-    # net = torchvision.models.inception_v3(num_classes=10)
+    # net = torchvision.models.densenet121(weights=torchvision.models.DenseNet121_Weights.DEFAULT)
     net = net.eval().to(device)
     logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
 
     adv_loader = {}
     adv_methods = params["adv_methods"]["methods"]
     for adv_method in adv_methods:
-        adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=16, logging=logging)
+        adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=128, logging=logging)
     logging.info("[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
 
     save_path = params["out_path"]
     vis_type_list = ['pca', 'ss', 'tsne', 'svm', 'mean_diff']
-    dim_reduciton_visualize(vis_type_list, nor_loader, adv_loader["FGSM"], net, model_name, dataset, device, save_path)
+    dim_reduciton_visualize(vis_type_list, nor_loader, adv_loader["PGD"], net, model_name, dataset, device, save_path)
+
+
+'''lime的图像文本接口'''
+# if __name__ == "__main__":
+
+#     params = {
+#         "dataset": {"name": "imagenet"},
+#         "model": {"name": "vgg16","ckpt":None},
+#         "out_path": "./output",
+#         "device": torch.device("cuda:7"),
+#         "ex_methods":{"methods":["lrp", "gradcam", "integrated_grad"]},
+#         "adv_methods":{"methods":["FGSM"]},
+#         "root":ROOT
+#     }
+
+#     logging = Logger(filename=osp.join(params["out_path"], "kt1_logs.txt"))
+
+#     root = params["root"]
+#     dataset = params["dataset"]["name"]
+#     nor_data = torch.load(osp.join(root, f"dataset/{dataset}/data/{dataset}_NOR.pt"))
+#     nor_img_x = nor_data["x"][2]
+#     label = nor_data['y'][2]
+#     img = recreate_image(nor_img_x.squeeze())
+#     logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
+
+#     model_name = params["model"]["name"]
+#     device = params["device"]
+#     model = params["model"]["ckpt"]
+#     logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
+#     net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
+#     # net = torchvision.models.inception_v3(num_classes=10)
+#     net = net.eval().to(device)
+#     logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
+
+#     adv_loader = {}
+#     adv_methods = params["adv_methods"]["methods"]
+#     adv_img_x = sample_untargeted_attack(dataset, adv_methods[0], net, nor_img_x, label, device, root)
+#     logging.info("[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
+
+#     save_path = params["out_path"]
+#     lime_image_ex(img, net, model_name, dataset, device, root, save_path)

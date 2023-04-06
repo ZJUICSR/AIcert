@@ -5,8 +5,7 @@ import torch
 
 from PIL import Image
 
-from function.ex_methods.module.func import get_class_list, preprocess_transform
-from scipy.stats import kendalltau
+from function.ex_methods.module.func import get_class_list, preprocess_transform, load_image, predict
 
 from function.ex_methods.lime import lime_image
 from skimage.color import rgb2gray
@@ -31,7 +30,7 @@ def batch_predict(images, model, device, dataset):
     return probs.detach().cpu().numpy()
 
 
-def draw_lime(img, net, device, dataset):
+def explain_lime_image(img, net, device, dataset):
     explainer = lime_image.LimeImageExplainer()
     explanation = explainer.explain_instance(np.array(img),
                                              net,
@@ -49,18 +48,19 @@ def draw_lime(img, net, device, dataset):
     return img_boundry
 
 
-def lime_image_ex(img, net, dataset, device, model):
-    class_list = get_class_list(dataset)
-    ex_images = {}
-    i = 0
-    for img in imgs:
-        if dataset == "mnist":
-            img = img.convert("L")
-        x = load_image(device, img, dataset)
-        prediction, activation_output = predict(x, net, device)
-        class_name = class_list[prediction.item()]
-        img_lime = draw_lime(img, net, device, dataset)
-        ex_images[f"image_{i}"] = {"class_name": class_name,
-                                   "ex_imgs": [img_l, img_h, img_lime]}
-        i += 1
-    return ex_images
+def lime_image_ex(img, model, model_name, dataset, device, root, save_path):
+    class_list = get_class_list(dataset, root)
+    if dataset == "mnist":
+        img = img.convert("L")
+    x = load_image(device, img, dataset)
+    prediction, _ = predict(model, x)
+    class_name = class_list[prediction.item()]
+    img_lime = explain_lime_image(img, model, device, dataset)
+    path = osp.join(save_path, "lime_result")
+    if not os.path.exists(path):
+        os.makedirs(path)
+    save_path = osp.join(path, f"{model_name}_lime.png") 
+    img_lime.save(save_path)
+    return class_name, img_lime
+
+

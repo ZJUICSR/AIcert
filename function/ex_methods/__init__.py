@@ -9,20 +9,12 @@ from .module.load_model import load_model
 from .module.func import grad_visualize, lrp_visualize, target_layer
 from .module.layer_activation_with_guided_backprop import get_all_layer_analysis
 from .module.func import get_class_list, get_target_num, grad_visualize, convert_to_grayscale, \
-    loader2imagelist, save_ex_img, save_process_result, get_normalize_para, preprocess_transform
+    loader2imagelist, save_ex_img, save_process_result, get_normalize_para, preprocess_transform, predict
 from scipy.stats import kendalltau
 
 from .lime import lime_image
 from skimage.color import rgb2gray
 from skimage.segmentation import mark_boundaries
-
-'''预测函数'''
-
-
-def predict(net, x):
-    activation_output = net.forward(x)
-    _, prediction = torch.max(activation_output, 1)
-    return prediction, activation_output
 
 
 '''获取基于梯度/反向传播的解释方法'''
@@ -269,7 +261,7 @@ def dim_reduciton_visualize(vis_type_list, nor_loader, adv_loader, model, model_
     #         target_layer('' is the default one-the last feature extraction layer)
     #         data_loader(both the benign one and the poisoned one)
     my_pca_ctl.set_model(model)
-    my_pca_ctl.set_layer(target_layer(model_name, dataset))
+    my_pca_ctl.set_layer(target_layer(model_name,dataset))
     my_pca_ctl.set_data_loaders(nor_loader, adv_loader)
     # (3) call the 'prepare_feats' function to collect original feature
     my_pca_ctl.prepare_feats()
