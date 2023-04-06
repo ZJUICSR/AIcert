@@ -1,8 +1,8 @@
 课题1
 
 ----------------------课题2--------------------
-env_test          课题2系统环境分析
-concolic          课题2测试样本自动生成
+env_test          课题2系统环境分析 valid_extract.pkl保存在~/model目录下，下载链接【待定】
+concolic          课题2测试样本自动生成  cifar10_vgg16.pth保存在~/model/cifar目录下；MNIST_lenet.pth保存在~/model/mnist目录下；下载链接【待定】
 DeepLogic      课题2逻辑神经元测试
 deepsst           课题2敏感神经元测试
 dnn_coverage 课题2重要神经元覆盖、多粒度神经元覆盖

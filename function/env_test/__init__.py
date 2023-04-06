@@ -1,6 +1,6 @@
 import os
-from env_test import ENVT
-from gpu_test import framework_test
+from .env_test import ENVT
+from .gpu_test import framework_test
 import sys
 import os.path as osp
 import json
@@ -65,6 +65,18 @@ def run_framework(
     # return a json file
     return json_result
 
+
+def run_env_frame(method, frame, version):
+    out_path = ROOT+"/env"
+    cve_path = ROOT[:-17]+"/model/valid_extract.pkl"
+    json_path = os.path.join(out_path, "env_results.json")
+    save_dir= os.path.join(out_path, "env_test_result")
+    print("Analyzing Evironment.....")
+    run_env(json_path=json_path, method=method,cve_path=cve_path,save_dir=save_dir)
+    print("Finish Evironment!! Analyzing Framework.....")
+    res = run_framework(save_dir=out_path,json_path=json_path, frame=frame,version=version)
+    print(f"Finish Framework!! Please Check results in {json_path}")
+    return res
 
 def run(params):
     json_path = os.path.join(params["out_path"], "keti2/keti2.json")
