@@ -9,7 +9,6 @@ This is the package's interface class for application.
 """
 import sys
 import os
-sys.path.append(os.path.join(os.getcwd(),"functions/attack/old"))
 from adv.attack import Attack
 import os.path as osp
 from .torchattacks.attacks.fgsm import FGSM
