@@ -11,6 +11,12 @@ from PIL import Image
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
+def predict(net, x):
+    activation_output = net.forward(x)
+    _, prediction = torch.max(activation_output, 1)
+    return prediction, activation_output
+
+
 def apply_trigger(data, mask, trigger):
     # Only return poisoned samples
 
