@@ -13,10 +13,11 @@ from flask import current_app as abort
 from multiprocessing import Process
 from gol import Taskparam
 from function.fairness import api
+from flask_cors import *
 import threading
 ROOT = os.getcwd()
 app = Flask(__name__)
-
+CORS(app, supports_credentials=True)
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(ROOT, 'static'), 'favicon.ico')
@@ -85,9 +86,10 @@ def DataFairnessEvaluate():
     dataname：数据集名称
     """
     if (request.method == "POST"):
-        dataname = request.form.get("dataname")
+        inputParam = json.loads(request.data)
+        dataname = inputParam["dataname"]
         # 获取主任务ID
-        tid = request.form.get("tid")
+        tid = inputParam["tid"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         # 生成子任务ID
         stid = "S"+IOtool.get_task_id(str(format_time))
@@ -105,8 +107,18 @@ def DataFairnessEvaluate():
             "dataset":dataname,
         }})
         taskinfo[tid]["dataset"]=dataname
+        senAttrList=json.loads(inputParam["senAttrList"])
+        tarAttrList=json.loads(inputParam["tarAttrList"])
+        staAttrList=json.loads(inputParam["staAttrList"])
+        
         # 执行任务，运行时间超过3分钟的请使用多线程，参考DataFairnessDebias函数的执行部分
-        res = api.dataset_evaluate(dataname)
+        res = api.dataset_evaluate(dataname, sensattrs=senAttrList, targetattrs=tarAttrList)
+        res1 = api.dataset_analysis(dataname, attrs=staAttrList, targetattrs=staAttrList)
+        res['Corelation coefficients'] = res1['Corelation coefficients']
+        for key in res1['Proportion'].keys():
+            if key not in res['Proportion'].keys():
+                res['Proportion'][key] = res1['Proportion'][key]
+        print(res)
         # 执行完成，结果中的stop置为1，表示结束
         
         res["stop"] = 1
@@ -431,7 +443,7 @@ def index_evaluate():
         abort(403)
 
 # 对抗攻击评估和鲁棒性增强
-@app.route('/Attack/AdvAttack', methods=['POST'])
+@app.route('/Attack/AdvAttack_old', methods=['POST'])
 def adv_attack():
     if request.method == "POST":
         advInputDatastr = list(request.form.to_dict())[0]
@@ -532,7 +544,50 @@ def FormalVerification():
 
 # ----------------- 课题1 对抗攻击评估 -----------------
 # from function.attack.adv0211 import *
-
+@app.route('/Attack/AdvAttack', methods=['POST'])
+def AdvAttack():
+    """
+    对抗攻击评估
+    输入：tid：主任务ID
+    Dataset：数据集名称
+    Model：模型名称
+    Method:list 对抗攻击算法名称
+    
+    """
+    global LiRPA_LOGS
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        print(request.data)
+        tid = inputParam["Taskid"]
+        dataname = inputParam["Dataset"]
+        model = inputParam["Model"]
+        adv_method = inputParam["Method"]
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["function"].update({stid:{
+            "type":"adv_attack",
+            "state":0,
+            "name":["adv_attack"],
+            "dataset":dataname,
+            "method":adv_method,
+            "model":model,
+        }})
+        taskinfo[tid]["dataset"] = dataname
+        taskinfo[tid]["model"] = model
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        # 执行任务
+        
+        t2 = threading.Thread(target=interface.run_adv_attack,args=(tid, stid, dataname, model, adv_method, inputParam))
+        t2.setDaemon(True)
+        t2.start()
+        res = {
+            "tid":tid,
+            "AAtid":stid
+        }
+        return jsonify(res)
+    else:
+        abort(403)
 # ----------------- 课题2 测试样本自动生成 -----------------
 @app.route('/Concolic/SamGenParamGet', methods=['GET','POST'])
 def Concolic():
