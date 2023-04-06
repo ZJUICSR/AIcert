@@ -77,8 +77,8 @@ class ConcolicShow(object):
         ### provide demo images for showing.
         relative_path = data_name + "_" + norm + "/"
         outImgPath = os.path.join(out_path, relative_path)
-
-
+        if not os.path.exists(out_path):
+            os.mkdir(out_path)
 
         demofilespath = basepath + '/demoimgs/' + data_name + "_" + norm + "/"
 
@@ -101,10 +101,12 @@ class ConcolicShow(object):
             copyfile(demofilespath + imglist[idx * 3 + 1], outImgPath + imglist[idx * 3 + 1])
             copyfile(demofilespath + imglist[idx * 3 + 2], outImgPath + imglist[idx * 3 + 2])
 
-            showimgs[str(i) + '_diff'] = relative_path + imglist[idx * 3]
-            showimgs[str(i) + '_init'] = relative_path + imglist[idx * 3 + 1]
-            showimgs[str(i) + '_new'] = relative_path + imglist[idx * 3 + 2]
-
+            # showimgs[str(i) + '_diff'] = relative_path + imglist[idx * 3]
+            # showimgs[str(i) + '_init'] = relative_path + imglist[idx * 3 + 1]
+            # showimgs[str(i) + '_new'] = relative_path + imglist[idx * 3 + 2]
+            showimgs[str(i) + '_diff'] = outImgPath + imglist[idx * 3]
+            showimgs[str(i) + '_init'] = outImgPath + imglist[idx * 3 + 1]
+            showimgs[str(i) + '_new'] = outImgPath + imglist[idx * 3 + 2]
 
         
         # print(json_data['TestCaseGeneration'])
@@ -326,7 +328,7 @@ class MNIST(object):
     def get_back(basepath):
         # mnist_test = torchvision.datasets.MNIST(root=basepath + '/Utils/Datasets', train=False, download=True,
         #                                         transform=transforms.ToTensor())
-        mnist_test = torchvision.datasets.MNIST(root='../../dataset', train=False, download=True,
+        mnist_test = torchvision.datasets.MNIST(root='./dataset/data', train=False, download=True,
                                                 transform=transforms.ToTensor())
         batch_size = 128
         if sys.platform.startswith('win'):
@@ -337,7 +339,7 @@ class MNIST(object):
         test_iter = Data.DataLoader(mnist_test, batch_size=batch_size, shuffle=False, num_workers=num_workers)
         net = LeNet()
         # net.load_state_dict(torch.load(basepath + '/Utils/Models/MNIST_lenet.pth'))
-        net.load_state_dict(torch.load(basepath[:-18] + '/model/mnist/MNIST_lenet.pth'))
+        net.load_state_dict(torch.load(basepath[:-18] + '/model/ckpt/MNIST_lenet.pth'))
         return net, test_iter
 
     def ReNormalization(inputs):
@@ -358,7 +360,7 @@ class Cifar10(object):
 
         # testset = torchvision.datasets.CIFAR10(root=basepath + '/Utils/Datasets', train=False,
         #                                        download=True, transform=transform)
-        testset = torchvision.datasets.CIFAR10(root='../../dataset', train=False,
+        testset = torchvision.datasets.CIFAR10(root='./dataset/data', train=False,
                                                download=True, transform=transform)
         batch_size = 128
         if sys.platform.startswith('win'):
@@ -368,7 +370,7 @@ class Cifar10(object):
         test_iter = Data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
         net = VGG16_torch()
         # net.load_state_dict(torch.load(basepath + '/Utils/Models/cifar10_vgg16.pth'))
-        net.load_state_dict(torch.load(basepath[:-18] + '/model/cifar/cifar10_vgg16.pth'))
+        net.load_state_dict(torch.load(basepath[:-18] + '/model/ckpt/cifar10_vgg16.pth'))
         return net, test_iter
 
     def ReNormalization(inputs):
