@@ -17,10 +17,12 @@ from torch.utils.data import Dataset,DataLoader
 from IOtool import IOtool, Logger, Callback
 from torchvision import  transforms
 import torch
-# import gol
 from function.formal_verify import *
- 
+from function.attack.adv0211 import EvasionAttacker, BackdoorAttacker
+
 from function.fairness import api
+from function import concolic, env_test
+
 
 ROOT = osp.dirname(osp.abspath(__file__))
 def run_model_debias(tid,AAtid,dataname,modelname,algorithmname):
@@ -192,3 +194,166 @@ def run_verify(tid, AAtid, param):
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    
+    
+def run_concolic(tid, AAtid, dataname, modelname, norm):
+    """测试样本自动生成
+    :params tid:主任务ID
+    :params AAtid:子任务id
+    :params dataname:数据集名称
+    :params modelname:模型名称
+    :params norm:范数约束
+    """
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    res = concolic.run_concolic(dataname, modelname, norm)   
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+    taskinfo[tid]["function"][AAtid]["state"]=2
+    taskinfo[tid]["state"]=2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    
+    
+def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
+    """系统环境分析
+    :params tid:主任务ID
+    :params AAtid:子任务id
+    :params matchmethod:环境分析匹配机制
+    :params frameworkname:适配框架名称
+    :params frameversion:框架版本
+    """
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    res = env_test.run_env_frame(matchmethod,frameworkname,frameversion)
+    # res = concolic.run_concolic(dataname, modelname, norm)   
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+    taskinfo[tid]["function"][AAtid]["state"]=2
+    taskinfo[tid]["state"]=2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+
+
+def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
+    """对抗攻击评估
+    :params tid:主任务ID
+    :params stid:子任务id
+    :params dataname:数据集名称
+    :params model:模型名称
+    :params methods:list，对抗攻击方法
+    :params inputParam:输入参数
+    """
+    # 开始执行标记任务状态
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"][stid]["state"]=1
+    taskinfo[tid]["state"]=1
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    modelpath = osp.join("./model/ckpt",dataname.upper() + "_" + model.lower()+".pt")
+    device = torch.device(inputParam['device'])
+    a = EvasionAttacker(modelnet=model.lower(), modelpath=modelpath, dataset=dataname.lower(), device=device, datanormalize=True)
+    # 对应关系list
+    methoddict={
+        "FGSM":"FastGradientMethod",
+        "BIM":"BasicIterativeMethod",
+        "PGD":"ProjectedGradientDescent",
+        "C&W":"CarliniWagner",
+        "DeepFool":"DeepFool",
+        "JacobianSaliencyMap":"SaliencyMapMethod",
+        "Brendel&BethgeAttack":"BoundaryAttack",
+        "UniversalPerturbation":"UniversalPerturbation",
+        "AutoAttack":"AutoAttack",
+        "GD-UAP":"GDUniversarial",
+        "SquareAttack":"SquareAttack",
+        "HSJA":"HopSkipJump",
+        "PixelAttack":"PixelAttack",
+        "SimBA":"SimBA",
+        "ZOO":"ZooAttack",
+        "GeoDA":"GeoDA",
+        "Fastdrop":"Fastdrop"
+    }
+    resultlist={}
+    for method in methods:
+        attackparam = inputParam[method]
+        print("methoddict[method]--------------",methoddict[method])
+        a.perturb(methoddict[method], 1024, **attackparam)
+        print("********************method**********:",method)
+        a.print_res()
+        resultlist[method]=a.attack_with_eps(epslist=[0.00001, 0.01])
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"][stid]["state"] = 2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_task_success_v2(tid)
+    
+    
+def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
+    """后门攻击评估
+    :params tid:主任务ID
+    :params stid:子任务id
+    :params dataname:数据集名称
+    :params model:模型名称
+    :params methods:list，后门攻击方法
+    :params inputParam:输入参数
+    """
+    # 开始执行标记任务状态
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"][stid]["state"]=1
+    taskinfo[tid]["state"]=1
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    modelpath = osp.join("./model/ckpt",dataname.upper() + "_" + model.lower()+".pt")
+    b = BackdoorAttacker(modelnet=model.lower(), modelpath=modelpath, dataset=dataname.lower(),  datanormalize=True, device=torch.device(inputParam["device"]))
+    # 对应关系list
+    methoddict={
+        "BackdoorAttack":"PoisoningAttackBackdoor",
+        "Clean-LabelBackdoorAttack":"PoisoningAttackCleanLabelBackdoor",
+        "CleanLabelFeatureCollisionAttack":"FeatureCollisionAttack",
+        "AdversarialBackdoorEmbedding":"PoisoningAttackAdversarialEmbedding",
+    }
+    for method in methods:
+        attackparam = inputParam[method]
+        print("methoddict[method]--------------",methoddict[method])
+        b.backdoorattack(method=methoddict[method], batch_size=128, pp_poison=0.01, target=1, test_sample_num=1024)
+        
+        print("********************method**********:",method)
+        
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"][stid]["state"] = 2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_task_success_v2(tid)
+
+from function.ex_methods.module.func import get_loader, Logger
+from function.ex_methods.module.generate_adv import get_adv_loader
+from function.ex_methods.module.load_model import load_model
+from function.ex_methods import attribution_maps, layer_explain, dim_reduciton_visualize
+from function.ex_methods.module.model_Lenet import lenet
+
+def run_ex_method(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device):
+    params = {
+        "dataset": datasetparam,
+        "model": modelparam,
+        "out_path": "./output",
+        "device": torch.device("cuda:4"),
+        "ex_methods":{"methods":ex_methods},
+        "adv_methods":{"methods":adv_methods},
+        "root":ROOT
+    }
+    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
+
+    root = ROOT
+    dataset = datasetparam["name"]
+    nor_data = torch.load(osp.join(root, f"dataset/{dataset}/data/{dataset}_NOR.pt"))
+    nor_loader = get_loader(nor_data, batchsize=16)
+    logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
+
+    model_name = modelparam["name"]
+    model = modelparam["ckpt"]
+    logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
+    net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
+    # net = torchvision.models.inception_v3(num_classes=10)
+    net = net.eval().to(device)
+    logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
+
+    adv_loader = {}
+    for adv_method in adv_methods:
+        adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=16, logging=logging)
+    logging.info("[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
+
+    save_path = osp.join(ROOT,"output", tid, stid)
+    if not osp.exists(save_path):
+        os.mkdir(save_path)
+    vis_type_list = ['pca', 'ss', 'tsne', 'svm', 'mean_diff']
+    dim_reduciton_visualize(vis_type_list, nor_loader, adv_loader["FGSM"], net, model_name, dataset, device, save_path)

@@ -324,7 +324,9 @@ class MNIST(object):
         super(MNIST, self).__init__()
 
     def get_back(basepath):
-        mnist_test = torchvision.datasets.MNIST(root=basepath + '/Utils/Datasets', train=False, download=True,
+        # mnist_test = torchvision.datasets.MNIST(root=basepath + '/Utils/Datasets', train=False, download=True,
+        #                                         transform=transforms.ToTensor())
+        mnist_test = torchvision.datasets.MNIST(root='../../dataset', train=False, download=True,
                                                 transform=transforms.ToTensor())
         batch_size = 128
         if sys.platform.startswith('win'):
@@ -334,8 +336,8 @@ class MNIST(object):
 
         test_iter = Data.DataLoader(mnist_test, batch_size=batch_size, shuffle=False, num_workers=num_workers)
         net = LeNet()
-        net.load_state_dict(torch.load(basepath + '/Utils/Models/MNIST_lenet.pth'))
-
+        # net.load_state_dict(torch.load(basepath + '/Utils/Models/MNIST_lenet.pth'))
+        net.load_state_dict(torch.load(basepath[:-18] + '/model/mnist/MNIST_lenet.pth'))
         return net, test_iter
 
     def ReNormalization(inputs):
@@ -354,7 +356,9 @@ class Cifar10(object):
             [transforms.ToTensor(),
              transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-        testset = torchvision.datasets.CIFAR10(root=basepath + '/Utils/Datasets', train=False,
+        # testset = torchvision.datasets.CIFAR10(root=basepath + '/Utils/Datasets', train=False,
+        #                                        download=True, transform=transform)
+        testset = torchvision.datasets.CIFAR10(root='../../dataset', train=False,
                                                download=True, transform=transform)
         batch_size = 128
         if sys.platform.startswith('win'):
@@ -363,7 +367,8 @@ class Cifar10(object):
             num_workers = 4
         test_iter = Data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
         net = VGG16_torch()
-        net.load_state_dict(torch.load(basepath + '/Utils/Models/cifar10_vgg16.pth'))
+        # net.load_state_dict(torch.load(basepath + '/Utils/Models/cifar10_vgg16.pth'))
+        net.load_state_dict(torch.load(basepath[:-18] + '/model/cifar/cifar10_vgg16.pth'))
         return net, test_iter
 
     def ReNormalization(inputs):
