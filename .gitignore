@@ -15,3 +15,4 @@ output/*
 function/formal_verify/auto_LiRPA_verifiy/vision/data
 output/task_list.txt
 output/task_info.json
+model/ckpt/*
