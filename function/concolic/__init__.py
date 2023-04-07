@@ -5,7 +5,8 @@ import os.path as osp
 CURR = osp.dirname(osp.abspath(__file__))
 
 def run_concolic(data_name, model_name, norm, out_path):
-    res = ConcolicShow.show_results('a','a', model_name=model_name, data_name=data_name, norm=norm, basepath=CURR, out_path=out_path,Times=3)
+    # res = ConcolicShow.show_results('a','a', model_name=model_name, data_name=data_name, norm=norm, basepath=CURR, out_path=out_path,Times=3)
+    res = ConcolicShow.show_results('a','a', model_name=model_name, data_name=data_name, norm=norm, basepath=out_path.rsplit("/",2)[0]+"/cache", out_path=out_path,Times=3)
     return res
     # return ConcolicShow.show_results('a','a', model_name=model_name, data_name=data_name, norm=norm, basepath=CURR, out_path=CURR+'/show_path',Times=3)
 

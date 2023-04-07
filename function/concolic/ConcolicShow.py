@@ -80,7 +80,8 @@ class ConcolicShow(object):
         if not os.path.exists(out_path):
             os.mkdir(out_path)
 
-        demofilespath = basepath + '/demoimgs/' + data_name + "_" + norm + "/"
+        # demofilespath = basepath + '/demoimgs/' + data_name + "_" + norm + "/"
+        demofilespath = './dataset/data/demoimgs/' + data_name + "_" + norm + "/"
 
         imglist = os.listdir(demofilespath)
 
@@ -339,7 +340,7 @@ class MNIST(object):
         test_iter = Data.DataLoader(mnist_test, batch_size=batch_size, shuffle=False, num_workers=num_workers)
         net = LeNet()
         # net.load_state_dict(torch.load(basepath + '/Utils/Models/MNIST_lenet.pth'))
-        net.load_state_dict(torch.load(basepath[:-18] + '/model/ckpt/MNIST_lenet.pth'))
+        net.load_state_dict(torch.load('./model/ckpt/MNIST_lenet.pth'))
         return net, test_iter
 
     def ReNormalization(inputs):
@@ -370,7 +371,7 @@ class Cifar10(object):
         test_iter = Data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
         net = VGG16_torch()
         # net.load_state_dict(torch.load(basepath + '/Utils/Models/cifar10_vgg16.pth'))
-        net.load_state_dict(torch.load(basepath[:-18] + '/model/ckpt/cifar10_vgg16.pth'))
+        net.load_state_dict(torch.load('./model/ckpt/cifar10_vgg16.pth'))
         return net, test_iter
 
     def ReNormalization(inputs):
