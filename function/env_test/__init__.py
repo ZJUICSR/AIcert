@@ -69,7 +69,7 @@ def run_framework(
 def run_env_frame(method, frame, version, path):
     # out_path = ROOT+"/env"
     out_path = path
-    cve_path = ROOT[:-17]+"/model/valid_extract.pkl"
+    cve_path = ROOT[:-17]+"/model/ckpt/valid_extract.pkl"
     json_path = os.path.join(out_path, "env_results.json")
     save_dir= os.path.join(out_path, "env_test_result")
     print("Analyzing Evironment.....")
