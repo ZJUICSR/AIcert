@@ -204,7 +204,7 @@ def run_concolic(tid, AAtid, dataname, modelname, norm):
     :params norm:范数约束
     """
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = concolic.run_concolic(dataname, modelname, norm, osp.join(ROOT,"output", tid, AAtid))   
+    res = concolic.run_concolic(dataname.lower(), modelname.lower(), norm.lower(), osp.join(ROOT,"output", tid, AAtid))   
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
@@ -240,7 +240,10 @@ def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-    
+
+def run_coverage(tid,AAtid,dataset,modelname):
+    pass
+  
 def run_deepsst(tid,AAtid,dataset,modelname,pertube,m_dir):
     """敏感神经元测试准则
     :params tid:主任务ID
