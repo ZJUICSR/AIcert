@@ -12,7 +12,6 @@ cleanlab==1.0
 seaborn==0.11.2
 graphviz==0.17
 pyecharts==1.9.1
-adversarial-robustness-toolbox==1.7.2
 ai_benchmark==0.1.2
 gpustat==0.6.0
 networks==0.3.7
