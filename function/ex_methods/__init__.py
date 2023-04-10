@@ -214,7 +214,7 @@ def attribution_maps(net, nor_loader, adv_dataloader, ex_methods, params, size, 
         logging.info("[解释结果量化分析阶段]：解释结果量化分析已完成")
 
     logging.info("[算法完成]：注意力分布图绘制完成")
-    save_process_result(save_path, results, filename="keti1.json")
+    # save_process_result(save_path, results, filename=params["stid"]+"_result.json")
     return results
 
 
@@ -226,8 +226,9 @@ def layer_explain(model_name, loader, adv_loader, params):
     save_path = osp.join(params["out_path"], "layer_explain")
     result = get_all_layer_analysis(
         model_name=model_name, nor_loader=loader, adv_loader=adv_loader, dataset=dataset, save_path=save_path)
-    save_process_result(root=save_path, results=result,
-                        filename="layer_vis_result.json")
+    return result
+    # save_process_result(root=save_path, results=result,
+    #                     filename="layer_vis_result.json")
 
 
 """计算正常样本和对抗样本解释图的肯德尔相关系数"""
