@@ -306,7 +306,7 @@ class BackdoorAttacker():
             self.plist = plist
             print(self.evaluate(x, y, plist, batch_size=batch_size))
             self.finetune(x, y, batch_size=batch_size)
-            print(self.evaluate(x, y, plist, batch_size=batch_size))
+            return(self.evaluate(x, y, plist, batch_size=batch_size))
         else:
             # 其他三种攻击
             # 首先完成投毒
@@ -316,4 +316,4 @@ class BackdoorAttacker():
             self.plist = plist
             print(self.evaluate(x, y, plist, batch_size=batch_size))
             self.finetune(x, y, self.plist, batch_size=batch_size, num_epochs=num_epochs, lr=lr)
-            print(self.evaluate(x, y, plist, batch_size=batch_size))
+            return(self.evaluate(x, y, plist, batch_size=batch_size))
