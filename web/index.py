@@ -556,8 +556,8 @@ def AdvAttack():
     global LiRPA_LOGS
     if (request.method == "POST"):
         inputParam = json.loads(request.data)
-        print(request.data)
         tid = inputParam["Taskid"]
+        inputParam["device"] = "cuda:0"
         dataname = inputParam["Dataset"]
         model = inputParam["Model"]
         adv_method = inputParam["Method"]
@@ -582,7 +582,7 @@ def AdvAttack():
         t2.start()
         res = {
             "tid":tid,
-            "AAtid":stid
+            "stid":stid
         }
         return jsonify(res)
     else:
@@ -604,6 +604,7 @@ def BackdoorAttack():
         inputParam = json.loads(request.data)
         print(request.data)
         tid = inputParam["Taskid"]
+        inputParam["device"] = "cuda:0"
         dataname = inputParam["Dataset"]
         model = inputParam["Model"]
         adv_method = inputParam["Method"]
@@ -627,14 +628,215 @@ def BackdoorAttack():
         t2.setDaemon(True)
         t2.start()
         res = {
+            "code":1,
+            "msg":"success",
             "tid":tid,
-            "AAtid":stid
+            "stid":stid
         }
         return jsonify(res)
     else:
         abort(403)
 
+# ----------------- 课题1 攻击机理分析 -----------------
+@app.route('/Attack/AttackDimReduciton', methods=['POST'])
+def AttackDimReduciton():
+    """
+    数据降维分布解释
+    输入：tid：主任务ID
+    Dataset：数据集名称
+    Model：模型名称
+    AdvMethods:list 对抗攻击算法名称
+    
+    """
+    global LiRPA_LOGS
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        print(request.data)
+        tid = inputParam["Taskid"]
+        datasetparam = inputParam["DatasetParam"]
+        modelparam = inputParam["ModelParam"]
+        adv_methods = inputParam["AdvMethods"]
+        vis_methods = inputParam["VisMethods"]
+        device = "cuda:0"
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["function"].update({stid:{
+            "type":"attack_dim_reduciton",
+            "state":0,
+            "name":["adv_attack"],
+            "dataset":datasetparam["name"],
+            "method":adv_methods,
+            "model":modelparam["name"],
+        }})
+        taskinfo[tid]["dataset"] = datasetparam["name"]
+        taskinfo[tid]["model"] = modelparam["name"]
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        # 执行任务
+        datasetparam["name"] = datasetparam["name"].lower()
+        modelparam["name"] = modelparam["name"].lower()
+        t2 = threading.Thread(target=interface.run_dim_reduct,args=(tid, stid, datasetparam, modelparam, vis_methods, adv_methods, device))
+        t2.setDaemon(True)
+        t2.start()
+        res = {
+            "code":1,
+            "msg":"success",
+            "tid":tid,
+            "stid":stid
+        }
+        return jsonify(res)
+    else:
+        abort(403)
 
+@app.route('/Attack/AttackAttrbutionAnalysis', methods=['POST'])
+def AttackAttrbutionAnalysis():
+    """
+    对抗图像归因解释
+    输入：tid：主任务ID
+    Dataset：数据集名称
+    Model：模型名称
+    AdvMethods:list 对抗攻击算法名称
+    ExMethods:攻击机理解释方法名称
+    """
+    global LiRPA_LOGS
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        print(request.data)
+        tid = inputParam["Taskid"]
+        datasetparam = inputParam["DatasetParam"]
+        modelparam = inputParam["ModelParam"]
+        adv_methods = inputParam["AdvMethods"]
+        ex_methods = inputParam["ExMethods"]
+        device = "cuda:0"
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["function"].update({stid:{
+            "type":"attack_attrbution_analysis",
+            "state":0,
+            "name":["adv_attack"],
+            "dataset":datasetparam["name"],
+            "method":adv_methods,
+            "model":modelparam["name"],
+        }})
+        taskinfo[tid]["dataset"] = datasetparam["name"]
+        taskinfo[tid]["model"] = modelparam["name"]
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        # 执行任务
+        datasetparam["name"] = datasetparam["name"].lower()
+        modelparam["name"] = modelparam["name"].lower()
+        t2 = threading.Thread(target=interface.run_attrbution_analysis,args=(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device))
+        t2.setDaemon(True)
+        t2.start()
+        res = {
+            "code":1,
+            "msg":"success",
+            "tid":tid,
+            "stid":stid
+        }
+        return jsonify(res)
+    else:
+        abort(403)
+
+@app.route('/Attack/AttackLayerExplain', methods=['POST'])
+def AttackLayerExplain():
+    """
+    模型内部分析解释
+    输入：tid：主任务ID
+    Dataset：数据集名称
+    Model：模型名称
+    AdvMethods:list 对抗攻击算法名称
+    ExMethods:？？
+    """
+    global LiRPA_LOGS
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        print(request.data)
+        tid = inputParam["Taskid"]
+        datasetparam = inputParam["DatasetParam"]
+        modelparam = inputParam["ModelParam"]
+        adv_methods = inputParam["AdvMethods"]
+        ex_methods = inputParam["ExMethods"]
+        device = "cuda:0"
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["function"].update({stid:{
+            "type":"attack_layer_explain",
+            "state":0,
+            "name":["adv_attack"],
+            "dataset":datasetparam["name"],
+            "method":adv_methods,
+            "model":modelparam["name"],
+        }})
+        taskinfo[tid]["dataset"] = datasetparam["name"]
+        taskinfo[tid]["model"] = modelparam["name"]
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        # 执行任务
+        datasetparam["name"] = datasetparam["name"].lower()
+        modelparam["name"] = modelparam["name"].lower()
+        t2 = threading.Thread(target=interface.run_layer_explain,args=(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device))
+        t2.setDaemon(True)
+        t2.start()
+        res = {
+            "code":1,
+            "msg":"success",
+            "tid":tid,
+            "stid":stid
+        }
+        return jsonify(res)
+    else:
+        abort(403)
+
+@app.route('/Attack/AttackLime', methods=['POST'])
+def AttackLime():
+    """
+    多模态黑盒解释
+    输入：tid：主任务ID
+    Dataset：数据集名称
+    Model：模型名称
+    AdvMethods:list 对抗攻击算法名称
+    ExMethods:？？
+    """
+    global LiRPA_LOGS
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        print(request.data)
+        tid = inputParam["Taskid"]
+        datasetparam = inputParam["DatasetParam"]
+        modelparam = inputParam["ModelParam"]
+        adv_methods = inputParam["AdvMethods"]
+        # ex_methods = inputParam["ExMethods"]
+        device = "cuda:0"
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["function"].update({stid:{
+            "type":"attack_lime",
+            "state":0,
+            "name":["adv_attack"],
+            "dataset":datasetparam["name"],
+            "method":adv_methods,
+            "model":modelparam["name"],
+        }})
+        taskinfo[tid]["dataset"] = datasetparam["name"]
+        taskinfo[tid]["model"] = modelparam["name"]
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        # 执行任务
+        datasetparam["name"] = datasetparam["name"].lower()
+        modelparam["name"] = modelparam["name"].lower()
+        t2 = threading.Thread(target=interface.run_lime,args=(tid, stid, datasetparam, modelparam, adv_methods, device))
+        t2.setDaemon(True)
+        t2.start()
+        res = {
+            "code":1,
+            "msg":"success",
+            "tid":tid,
+            "stid":stid
+        }
+        return jsonify(res)
+    else:
+        abort(403)
 
 # ----------------- 课题2 测试样本自动生成 -----------------
 @app.route('/Concolic/SamGenParamGet', methods=['GET','POST'])
