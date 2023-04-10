@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
@@ -15,7 +14,7 @@ from function.attack.old.adv import Attack
 import os, json, copy
 import os.path as osp
 from torch.utils.data import Dataset,DataLoader
-from IOtool import IOtool, Logger, Callback
+from IOtool import IOtool, Callback
 from torchvision import  transforms
 import torch
 from function.formal_verify import *
@@ -336,53 +335,23 @@ def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
         "CleanLabelFeatureCollisionAttack":"FeatureCollisionAttack",
         "AdversarialBackdoorEmbedding":"PoisoningAttackAdversarialEmbedding",
     }
+    res = {}
     for method in methods:
+        res[method]={"asr":[], "pp_poison":[], "loss":[]}
         attackparam = inputParam[method]
         print("methoddict[method]--------------",methoddict[method])
-        b.backdoorattack(method=methoddict[method], batch_size=128, pp_poison=0.01, target=1, test_sample_num=1024)
+        for i in range(10):
+            pp_poison = 0.001 + 0.01 * i
+            accuracy, accuracyonb, attack_success_rate=b.backdoorattack(method=methoddict[method], batch_size=128, pp_poison=pp_poison, target=attackparam["target"], test_sample_num=1024)
+            res[method]["asr"].append(attack_success_rate)
+            res[method]["pp_poison"].append(pp_poison)
         
-        print("********************method**********:",method)
-        
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, stid+"_result.json")) 
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"] = 2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
     IOtool.change_task_success_v2(tid)
-
-from function.ex_methods.module.func import get_loader, Logger
-from function.ex_methods.module.generate_adv import get_adv_loader
-from function.ex_methods.module.load_model import load_model
-from function.ex_methods import attribution_maps, layer_explain, dim_reduciton_visualize
-from function.ex_methods.module.model_Lenet import lenet
-
-def run_ex_method(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device):
-    params = {
-        "dataset": datasetparam,
-        "model": modelparam,
-        "out_path": "./output",
-        "device": torch.device("cuda:4"),
-        "ex_methods":{"methods":ex_methods},
-        "adv_methods":{"methods":adv_methods},
-        "root":ROOT
-    }
-    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
-
-    root = ROOT
-    dataset = datasetparam["name"]
-    nor_data = torch.load(osp.join(root, f"dataset/{dataset}/data/{dataset}_NOR.pt"))
-    nor_loader = get_loader(nor_data, batchsize=16)
-    logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
-
-    model_name = modelparam["name"]
-    model = modelparam["ckpt"]
-    logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
-    net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
-    # net = torchvision.models.inception_v3(num_classes=10)
-=======
-import os
-import os.path as osp
-import torch
-import torchvision
-
+    
 from function.ex_methods.module.func import get_loader, Logger, recreate_image
 from function.ex_methods.module.generate_adv import get_adv_loader, sample_untargeted_attack
 from function.ex_methods.module.load_model import load_model
@@ -390,113 +359,48 @@ from function.ex_methods import attribution_maps, layer_explain, dim_reduciton_v
 from function.ex_methods.module.model_Lenet import lenet
 from function.ex_methods.lime import lime_image_ex
 
-ROOT = osp.dirname(osp.abspath(__file__))
-
-"""对抗样本加载计算，绘制解释图接口"""
-# if __name__ == '__main__':
-#     # m = lenet(None,1)
-#     # m.load_state_dict(torch.load("./model/ckpt/mnist_lenet.pt"))
-
-#     params = {
-#         "dataset": {"name": "imagenet"},
-#         "model": {"name": "densenet121","ckpt":None},
-#         "out_path": "./output",
-#         "device": torch.device("cuda:1"),
-#         "ex_methods":{"methods":["lrp", "gradcam", "integrated_grad"]},
-#         "adv_methods":{"methods":["FGSM"]},
-#         "root":ROOT
-#     }
-
-#     logging = Logger(filename=osp.join(params["out_path"], "kt1_logs.txt"))
-
-#     root = params["root"]
-#     dataset = params["dataset"]["name"]
-#     nor_data = torch.load(osp.join(root, f"dataset/{dataset}/data/{dataset}_NOR.pt"))
-#     nor_loader = get_loader(nor_data, batchsize=16)
-#     logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
-
-#     model_name = params["model"]["name"]
-#     device = params["device"]
-#     model = params["model"]["ckpt"]
-#     logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
-#     net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
-#     net = net.eval().to(device)
-#     logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
-
-#     adv_loader = {}
-#     adv_methods = params["adv_methods"]["methods"]
-#     for adv_method in adv_methods:
-#         adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=16, logging=logging)
-#     logging.info("[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
-
-#     ex_methods = params["ex_methods"]["methods"]
-#     logging.info("[注意力分布图计算]：选择了{:s}解释算法".format(", ".join(ex_methods)))
-#     ex_images = attribution_maps(net, nor_loader, adv_loader, ex_methods, params, 20, logging)
-
-
-"""模型每层特征图可视化，支持vgg和alexnet"""
-# if __name__ == '__main__':
-#     params = {
-#         "dataset": {"name": "imagenet"},
-#         "model": {"name": "vgg19"},
-#         "out_path": "./output",
-#         "device": torch.device("cuda:6"),
-#         "ex_methods":{"dataset":"ImageNet"},
-#         "root": ROOT
-#     }
-#     logging = Logger(filename=osp.join(params["out_path"], "kt1_logs.txt"))
-
-#     dataset = params["dataset"]["name"]
-
-#     nor_loader = get_loader(osp.join(ROOT,"dataset",dataset,"data"))
-#     logging.info("[数据集获取]：获取正常样本已完成.")
-
-#     adv_loader = {}
-#     adv_dataloader_path = osp.join(ROOT,"imagenet_adv_data")
-#     for data in os.listdir(adv_dataloader_path):
-#         adv_method = data.split("_")[1]
-#         adv_loader[adv_method] = get_loader(osp.join(adv_dataloader_path, data))
-#     logging.info("[获取数据集]：获取对抗样本已完成")
-
-#     # 执行卷积层解释运算
-#     model_name = params["model"]["name"]
-#     logging.info("[特征层可视化]:对{:s}模型逐层提取特征并进行可视化分析".format(model_name))
-#     layer_explain(model_name, nor_loader, adv_loader["BIM"], params)
-
-
-''''五种降维方法'''
-if __name__ == "__main__":
-
+def run_dim_reduct(tid, stid, datasetparam, modelparam, vis_methods, adv_methods, device):
+    """降维可视化
+    :params tid:主任务ID
+    :params stid:子任务id
+    :params datasetparam:数据集参数
+    :params modelparam:模型参数
+    :params vis_methods:list，降维方法
+    :params adv_methods:list，对抗攻击方法
+    :params device:GPU
+    """
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"][stid]["state"]=1
+    taskinfo[tid]["state"]=1
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
     params = {
-        "dataset": {"name": "cifar10"},
-        "model": {"name": "resnet50","ckpt":None},
-        "out_path": "./output",
-        "device": torch.device("cuda:4"),
-        "ex_methods":{"methods":["lrp", "gradcam", "integrated_grad"]},
-        "adv_methods":{"methods":["PGD"]},
+        "dataset": datasetparam,
+        "model": modelparam,
+        "out_path": osp.join(ROOT,"output", tid),
+        "device": torch.device(device),
+        "adv_methods":{"methods":adv_methods},
         "root":ROOT
     }
+    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
 
-    logging = Logger(filename=osp.join(params["out_path"], "kt1_logs.txt"))
-
-    root = params["root"]
-    dataset = params["dataset"]["name"]
-    nor_data = torch.load(osp.join(root, f"dataset/{dataset}/data/{dataset}_NOR.pt"))
-    nor_loader = get_loader(nor_data, batchsize=128)
+    root = ROOT
+    dataset = datasetparam["name"]
+    nor_data = torch.load(osp.join(root, f"dataset/data/{dataset}_NOR.pt"))
+    nor_loader = get_loader(nor_data, batchsize=16)
     logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
 
-    model_name = params["model"]["name"]
-    device = params["device"]
-    model = params["model"]["ckpt"]
+    model_name = modelparam["name"]
+    if modelparam["ckpt"] != "None":
+        model = torch.load(modelparam["ckpt"])
+    else:
+        modelparam["ckpt"] = None
+        model = modelparam["ckpt"]
     logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
     net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
-    # net = torchvision.models.densenet121(weights=torchvision.models.DenseNet121_Weights.DEFAULT)
->>>>>>> 5075498124cafc5a9e91f180fb1d2d01df47f159
     net = net.eval().to(device)
     logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
 
     adv_loader = {}
-<<<<<<< HEAD
     for adv_method in adv_methods:
         adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=16, logging=logging)
     logging.info("[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
@@ -504,56 +408,197 @@ if __name__ == "__main__":
     save_path = osp.join(ROOT,"output", tid, stid)
     if not osp.exists(save_path):
         os.mkdir(save_path)
-    vis_type_list = ['pca', 'ss', 'tsne', 'svm', 'mean_diff']
-    dim_reduciton_visualize(vis_type_list, nor_loader, adv_loader["FGSM"], net, model_name, dataset, device, save_path)
-=======
-    adv_methods = params["adv_methods"]["methods"]
+    res = {}
     for adv_method in adv_methods:
-        adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=128, logging=logging)
+        temp = dim_reduciton_visualize(vis_methods, nor_loader, adv_loader[adv_method], net, model_name, dataset, device, save_path)
+        res[adv_method] = temp
+    
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"][stid]["state"] = 2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_task_success_v2(tid)
+    
+def run_attrbution_analysis(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device):
+    """后门攻击评估
+    :params tid:主任务ID
+    :params stid:子任务id
+    :params datasetparam:数据集参数
+    :params modelparam:模型参数
+    :params ex_methods:list，攻击解释方法
+    :params adv_methods:list，对抗攻击方法
+    :params device:GPU
+    """
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"][stid]["state"]=1
+    taskinfo[tid]["state"]=1
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    params = {
+        "dataset": datasetparam,
+        "model": modelparam,
+        "out_path": osp.join(ROOT,"output", tid, stid),
+        "device": torch.device(device),
+        "ex_methods":{"methods":ex_methods},
+        "adv_methods":{"methods":adv_methods},
+        "root":ROOT,
+        "stid":stid
+    }
+    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
+
+    root = ROOT
+    dataset = datasetparam["name"]
+    nor_data = torch.load(osp.join(root, f"dataset/data/{dataset}_NOR.pt"))
+    nor_loader = get_loader(nor_data, batchsize=16)
+    logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
+
+    model_name = modelparam["name"]
+    if modelparam["ckpt"] != "None":
+        model = torch.load(modelparam["ckpt"])
+    else:
+        modelparam["ckpt"] = None
+        model = modelparam["ckpt"]
+    logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
+    net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
+    net = net.eval().to(device)
+    logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
+
+    adv_loader = {}
+    for adv_method in adv_methods:
+        adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=16, logging=logging)
     logging.info("[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
 
-    save_path = params["out_path"]
-    vis_type_list = ['pca', 'ss', 'tsne', 'svm', 'mean_diff']
-    dim_reduciton_visualize(vis_type_list, nor_loader, adv_loader["PGD"], net, model_name, dataset, device, save_path)
+    save_path = osp.join(ROOT,"output", tid, stid)
+    if not osp.exists(save_path):
+        os.mkdir(save_path)
+    
+    logging.info("[注意力分布图计算]：选择了{:s}解释算法".format(", ".join(ex_methods)))
+    ex_images = attribution_maps(net, nor_loader, adv_loader, ex_methods, params, 20, logging)
+    IOtool.write_json(ex_images,osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"][stid]["state"] = 2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_task_success_v2(tid)
 
 
-'''lime的图像文本接口'''
-# if __name__ == "__main__":
+def run_layer_explain(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device):
+    """后门攻击评估
+    :params tid:主任务ID
+    :params stid:子任务id
+    :params datasetparam:数据集参数
+    :params modelparam:模型参数
+    :params adv_methods:list，对抗攻击方法
+    :params device:GPU
+    """
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"][stid]["state"]=1
+    taskinfo[tid]["state"]=1
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    params = {
+        "dataset": datasetparam,
+        "model": modelparam,
+        "out_path": osp.join(ROOT,"output", tid),
+        "device": torch.device(device),
+        "adv_methods":{"methods":adv_methods},
+        "ex_methods":ex_methods,
+        "root":ROOT,
+        "stid":stid
+    }
+    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
 
-#     params = {
-#         "dataset": {"name": "imagenet"},
-#         "model": {"name": "vgg16","ckpt":None},
-#         "out_path": "./output",
-#         "device": torch.device("cuda:7"),
-#         "ex_methods":{"methods":["lrp", "gradcam", "integrated_grad"]},
-#         "adv_methods":{"methods":["FGSM"]},
-#         "root":ROOT
-#     }
+    root = ROOT
+    dataset = datasetparam["name"]
+    nor_data = torch.load(osp.join(root, f"dataset/data/{dataset}_NOR.pt"))
+    nor_loader = get_loader(nor_data, batchsize=16)
+    logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
+    
+    model_name = modelparam["name"]
+    if modelparam["ckpt"] != "None":
+        model = torch.load(modelparam["ckpt"])
+    else:
+        modelparam["ckpt"] = None
+        model = modelparam["ckpt"]
+    logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
+    net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
+    net = net.eval().to(device)
+    logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
+    
+    adv_loader = {}
+    res = {}
+    for adv_method in adv_methods:
+        logging.info("[数据集获取]：获取{:s}对抗样本".format(adv_method))
+        adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=16, logging=logging)
+        
+        logging.info("[特征层可视化]:对{:s}模型逐层提取特征并进行可视化分析".format(model_name))
+        result = layer_explain(model_name, nor_loader, adv_loader[adv_method], params)
+        res[adv_method]=result
+        
+        print(result)
+    IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"][stid]["state"] = 2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_task_success_v2(tid)
 
-#     logging = Logger(filename=osp.join(params["out_path"], "kt1_logs.txt"))
+def run_lime(tid, stid, datasetparam, modelparam,  adv_methods, device):
+    """后门攻击评估
+    :params tid:主任务ID
+    :params stid:子任务id
+    :params datasetparam:数据集参数
+    :params modelparam:模型参数
+    :params adv_methods:list，对抗攻击方法
+    :params device:GPU
+    """
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"][stid]["state"]=1
+    taskinfo[tid]["state"]=1
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    params = {
+        "dataset": datasetparam,
+        "model": modelparam,
+        "out_path": osp.join(ROOT,"output", tid),
+        "device": torch.device(device),
+        "adv_methods":{"methods":adv_methods},
+        # "ex_methods":ex_methods,
+        "root":ROOT,
+        "stid":stid
+    }
+    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
 
-#     root = params["root"]
-#     dataset = params["dataset"]["name"]
-#     nor_data = torch.load(osp.join(root, f"dataset/{dataset}/data/{dataset}_NOR.pt"))
-#     nor_img_x = nor_data["x"][2]
-#     label = nor_data['y'][2]
-#     img = recreate_image(nor_img_x.squeeze())
-#     logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
+    root = ROOT
+    dataset = datasetparam["name"]
+    nor_data = torch.load(osp.join(root, f"dataset/data/{dataset}_NOR.pt"))
+    # nor_loader = get_loader(nor_data, batchsize=16)
+    nor_img_x = nor_data["x"][2]
+    label = nor_data['y'][2]
+    img = recreate_image(nor_img_x.squeeze())
+    logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
+    
+    model_name = modelparam["name"]
+    if modelparam["ckpt"] != "None":
+        model = torch.load(modelparam["ckpt"])
+    else:
+        modelparam["ckpt"] = None
+        model = modelparam["ckpt"]
+    logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
+    net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
+    net = net.eval().to(device)
+    logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
+    
+    adv_loader = {}
+    res = {}
+    for adv_method in adv_methods:
+        logging.info("[数据集获取]：获取{:s}对抗样本".format(adv_method))
+        adv_img_x = sample_untargeted_attack(dataset, adv_methods[0], net, nor_img_x, label, device, root)
+        logging.info("[数据集获取]：获取{:s}对抗样本已完成".format(adv_method))
 
-#     model_name = params["model"]["name"]
-#     device = params["device"]
-#     model = params["model"]["ckpt"]
-#     logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
-#     net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
-#     # net = torchvision.models.inception_v3(num_classes=10)
-#     net = net.eval().to(device)
-#     logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
-
-#     adv_loader = {}
-#     adv_methods = params["adv_methods"]["methods"]
-#     adv_img_x = sample_untargeted_attack(dataset, adv_methods[0], net, nor_img_x, label, device, root)
-#     logging.info("[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
-
-#     save_path = params["out_path"]
-#     lime_image_ex(img, net, model_name, dataset, device, root, save_path)
->>>>>>> 5075498124cafc5a9e91f180fb1d2d01df47f159
+        save_path = params["out_path"]
+        result = lime_image_ex(img, net, model_name, dataset, device, root, save_path)
+        
+        res[adv_method]=result
+        
+        print(result)
+    IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"][stid]["state"] = 2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_task_success_v2(tid)
