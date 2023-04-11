@@ -420,7 +420,7 @@ def run_dim_reduct(tid, stid, datasetparam, modelparam, vis_methods, adv_methods
     IOtool.change_task_success_v2(tid)
     
 def run_attrbution_analysis(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device):
-    """后门攻击评估
+    """对抗攻击归因解释
     :params tid:主任务ID
     :params stid:子任务id
     :params datasetparam:数据集参数
@@ -481,7 +481,7 @@ def run_attrbution_analysis(tid, stid, datasetparam, modelparam, ex_methods, adv
 
 
 def run_layer_explain(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device):
-    """后门攻击评估
+    """模型内部解释
     :params tid:主任务ID
     :params stid:子任务id
     :params datasetparam:数据集参数
@@ -539,8 +539,8 @@ def run_layer_explain(tid, stid, datasetparam, modelparam, ex_methods, adv_metho
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
     IOtool.change_task_success_v2(tid)
 
-def run_lime(tid, stid, datasetparam, modelparam,  adv_methods, device):
-    """后门攻击评估
+def run_lime(tid, stid, datasetparam, modelparam, adv_methods, device):
+    """多模态解释
     :params tid:主任务ID
     :params stid:子任务id
     :params datasetparam:数据集参数
