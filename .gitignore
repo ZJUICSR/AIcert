@@ -19,7 +19,7 @@ model/ckpt/*
 output/task_info.json
 output/task_list.txt
 function/attack/adv0211/datasets/*
-dataset/data/*
+dataset/cifar10/*
 # C extensions
 *.so
 
