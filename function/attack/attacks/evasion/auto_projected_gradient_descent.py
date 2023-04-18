@@ -43,103 +43,103 @@ class AutoProjectedGradientDescent(EvasionAttack):
         loss_type: Optional[str] = None,
         # verbose: bool = True,
     ):
-        # from function.attack.estimators.classification import PyTorchClassifier
+        from function.attack.estimators.classification import PyTorchClassifier
 
-        # if loss_type not in self._predefined_losses:
-        #     raise ValueError(
-        #         f"The argument loss_type has an invalid value. The following options for `loss_type` are currently "
-        #         f"supported: {self._predefined_losses}"
-        #     )
+        if loss_type not in self._predefined_losses:
+            raise ValueError(
+                f"The argument loss_type has an invalid value. The following options for `loss_type` are currently "
+                f"supported: {self._predefined_losses}"
+            )
 
-        # if loss_type is None:
-        #     if hasattr(estimator, "predict") and is_probability(
-        #         estimator.predict(x=np.ones(shape=(1, *estimator.input_shape), dtype=np.float32))
-        #     ):
-        #         raise ValueError(  # pragma: no cover
-        #             "AutoProjectedGradientDescent is expecting logits as estimator output, the provided "
-        #             "estimator seems to predict probabilities."
-        #         )
+        if loss_type is None:
+            if hasattr(estimator, "predict") and is_probability(
+                estimator.predict(x=np.ones(shape=(1, *estimator.input_shape), dtype=np.float32))
+            ):
+                raise ValueError(  # pragma: no cover
+                    "AutoProjectedGradientDescent is expecting logits as estimator output, the provided "
+                    "estimator seems to predict probabilities."
+                )
 
-        #     estimator_apgd = estimator
-        # else:
-        #     import torch
+            estimator_apgd = estimator
+        else:
+            import torch
 
-        #     if loss_type == "cross_entropy":
-        #         if is_probability(
-        #             estimator.predict(x=np.ones(shape=(1, *estimator.input_shape), dtype=np.float32))
-        #         ):
-        #             raise ValueError(  # pragma: no cover
-        #                 "The provided estimator seems to predict probabilities. If loss_type='cross_entropy' "
-        #                 "the estimator has to to predict logits."
-        #             )
+            if loss_type == "cross_entropy":
+                if is_probability(
+                    estimator.predict(x=np.ones(shape=(1, *estimator.input_shape), dtype=np.float32))
+                ):
+                    raise ValueError(  # pragma: no cover
+                        "The provided estimator seems to predict probabilities. If loss_type='cross_entropy' "
+                        "the estimator has to to predict logits."
+                    )
 
-        #         self._loss_object = torch.nn.CrossEntropyLoss(reduction="mean")
-        #     elif loss_type == "difference_logits_ratio":
-        #         if is_probability(
-        #             estimator.predict(x=np.ones(shape=(1, *estimator.input_shape), dtype=MY_NUMPY_DTYPE))
-        #         ):
-        #             raise ValueError(  # pragma: no cover
-        #                 "The provided estimator seems to predict probabilities. "
-        #                 "If loss_type='difference_logits_ratio' the estimator has to to predict logits."
-        #             )
+                self._loss_object = torch.nn.CrossEntropyLoss(reduction="mean")
+            elif loss_type == "difference_logits_ratio":
+                if is_probability(
+                    estimator.predict(x=np.ones(shape=(1, *estimator.input_shape), dtype=MY_NUMPY_DTYPE))
+                ):
+                    raise ValueError(  # pragma: no cover
+                        "The provided estimator seems to predict probabilities. "
+                        "If loss_type='difference_logits_ratio' the estimator has to to predict logits."
+                    )
 
-        #         class DifferenceLogitsRatioPyTorch:
-        #             """
-        #             Callable class for Difference Logits Ratio loss in PyTorch.
-        #             """
+                class DifferenceLogitsRatioPyTorch:
+                    """
+                    Callable class for Difference Logits Ratio loss in PyTorch.
+                    """
 
-        #             def __init__(self):
-        #                 self.reduction = "mean"
+                    def __init__(self):
+                        self.reduction = "mean"
 
-        #             def __call__(self, y_pred, y_true):  # type: ignore
-        #                 if isinstance(y_true, np.ndarray):
-        #                     y_true = torch.from_numpy(y_true)
-        #                 if isinstance(y_pred, np.ndarray):
-        #                     y_pred = torch.from_numpy(y_pred)
+                    def __call__(self, y_pred, y_true):  # type: ignore
+                        if isinstance(y_true, np.ndarray):
+                            y_true = torch.from_numpy(y_true)
+                        if isinstance(y_pred, np.ndarray):
+                            y_pred = torch.from_numpy(y_pred)
 
-        #                 y_true = y_true.float()
+                        y_true = y_true.float()
 
-        #                 i_y_true = torch.argmax(y_true, axis=1)
-        #                 i_y_pred_arg = torch.argsort(y_pred, axis=1)
-        #                 i_z_i_list = []
+                        i_y_true = torch.argmax(y_true, axis=1)
+                        i_y_pred_arg = torch.argsort(y_pred, axis=1)
+                        i_z_i_list = []
 
-        #                 for i in range(y_true.shape[0]):
-        #                     if i_y_pred_arg[i, -1] != i_y_true[i]:
-        #                         i_z_i_list.append(i_y_pred_arg[i, -1])
-        #                     else:
-        #                         i_z_i_list.append(i_y_pred_arg[i, -2])
+                        for i in range(y_true.shape[0]):
+                            if i_y_pred_arg[i, -1] != i_y_true[i]:
+                                i_z_i_list.append(i_y_pred_arg[i, -1])
+                            else:
+                                i_z_i_list.append(i_y_pred_arg[i, -2])
 
-        #                 i_z_i = torch.stack(i_z_i_list)
+                        i_z_i = torch.stack(i_z_i_list)
 
-        #                 z_1 = y_pred[:, i_y_pred_arg[:, -1]]
-        #                 z_3 = y_pred[:, i_y_pred_arg[:, -3]]
-        #                 z_i = y_pred[:, i_z_i]
-        #                 z_y = y_pred[:, i_y_true]
+                        z_1 = y_pred[:, i_y_pred_arg[:, -1]]
+                        z_3 = y_pred[:, i_y_pred_arg[:, -3]]
+                        z_i = y_pred[:, i_z_i]
+                        z_y = y_pred[:, i_y_true]
 
-        #                 z_1 = torch.diagonal(z_1)
-        #                 z_3 = torch.diagonal(z_3)
-        #                 z_i = torch.diagonal(z_i)
-        #                 z_y = torch.diagonal(z_y)
+                        z_1 = torch.diagonal(z_1)
+                        z_3 = torch.diagonal(z_3)
+                        z_i = torch.diagonal(z_i)
+                        z_y = torch.diagonal(z_y)
 
-        #                 dlr = -(z_y - z_i) / (z_1 - z_3)
+                        dlr = -(z_y - z_i) / (z_1 - z_3)
 
-        #                 return torch.mean(dlr.float())
+                        return torch.mean(dlr.float())
 
-        #         self._loss_object = DifferenceLogitsRatioPyTorch()
+                self._loss_object = DifferenceLogitsRatioPyTorch()
 
-        #     estimator_apgd = PyTorchClassifier(
-        #         model=estimator.model,
-        #         loss=self._loss_object,
-        #         input_shape=estimator.input_shape,
-        #         nb_classes=estimator.nb_classes,
-        #         optimizer=None,
-        #         channels_first=estimator.channels_first,
-        #         clip_values=estimator.clip_values,
-        #         preprocessing_defences=estimator.preprocessing_defences,
-        #         postprocessing_defences=estimator.postprocessing_defences,
-        #         preprocessing=None,
-        #         device_type=str(estimator._device),
-        #     )
+            estimator_apgd = PyTorchClassifier(
+                model=estimator.model,
+                loss=self._loss_object,
+                input_shape=estimator.input_shape,
+                nb_classes=estimator.nb_classes,
+                optimizer=None,
+                channels_first=estimator.channels_first,
+                clip_values=estimator.clip_values,
+                preprocessing_defences=estimator.preprocessing_defences,
+                postprocessing_defences=estimator.postprocessing_defences,
+                preprocessing=None,
+                device_type=str(estimator._device),
+            )
 
         super().__init__(estimator=estimator)
         self.norm = norm

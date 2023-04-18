@@ -31,14 +31,14 @@ a = EvasionAttacker(modelnet=ResNet18(1), modelpath="./models/model_ckpt/ckpt-re
 # a.generate(method="CarliniWagner", save_num=32)
 # a.print_res()
 ### BlackBox ScoreBased Attak
-a.generate(method="PixelAttack", save_num=32)
-a.print_res()
-a.generate(method="SimBA", save_num=32)
-a.print_res()
+# a.generate(method="PixelAttack", save_num=32)
+# a.print_res()
+# a.generate(method="SimBA", save_num=32)
+# a.print_res()
 a.generate(method="ZooAttack", save_num=32)
 a.print_res()
-a.generate(method="SquareAttack", save_num=32)
-a.print_res()
+# a.generate(method="SquareAttack", save_num=32)
+# a.print_res()
 ### BlackBox DecesionBased Attak
 
 # ## CIFAR10
