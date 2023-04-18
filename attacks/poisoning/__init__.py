@@ -1,7 +1,0 @@
-"""
-Module providing poisoning attacks under a common interface.
-"""
-from attacks.poisoning.backdoor_attack import PoisoningAttackBackdoor
-from attacks.poisoning.feature_collision_attack import FeatureCollisionAttack
-from attacks.poisoning.adversarial_embedding_attack import PoisoningAttackAdversarialEmbedding
-from attacks.poisoning.clean_label_backdoor_attack import PoisoningAttackCleanLabelBackdoor
