@@ -1,9 +1,9 @@
 # 测试用例
-from attack_api import EvasionAttacker, BackdoorAttacker
+from function.attack.attack_api import EvasionAttacker, BackdoorAttacker
 import torch
-from models.model_net.lenet import Lenet
-from models.model_net.resnet import ResNet18
-from attacks.utils import load_mnist, load_cifar10
+from model.model_net.lenet import Lenet
+from model.model_net.resnet import ResNet18
+from function.attack.attacks.utils import load_mnist, load_cifar10
 
 # 对抗攻击测试
 ## MNIST
