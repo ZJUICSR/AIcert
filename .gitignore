@@ -1,6 +1,10 @@
 
 */__pycache__
-__pycache__
+datasets/**
+results/**
+*.pth
+*.pyc
+**/__pycache__
 model/ckpt/CIFAR10_vgg11.pt
 function/attack/adv0211/datasets/cifar-10-batches-py.tar.gz
 dataset/data/CIFAR10/cifar-10-python.tar.gz
