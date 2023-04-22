@@ -1,10 +1,14 @@
 
 */__pycache__
+<<<<<<< HEAD
 datasets/**
 results/**
 *.pth
 *.pyc
 **/__pycache__
+=======
+__pycache__
+>>>>>>> c156776f07b8272d684983de60bf7942f840182b
 model/ckpt/CIFAR10_vgg11.pt
 function/attack/adv0211/datasets/cifar-10-batches-py.tar.gz
 dataset/data/CIFAR10/cifar-10-python.tar.gz
@@ -18,6 +22,7 @@ function/env_test/valid_extract.pkl
 output/*
 function/formal_verify/auto_LiRPA_verifiy/vision/data
 output/task_list.txt
+<<<<<<< HEAD
 output/task_info.json
 model/ckpt/*
 output/task_info.json
@@ -168,3 +173,6 @@ model
 dataset
 
 /dev.env
+=======
+output/task_info.json
+>>>>>>> c156776f07b8272d684983de60bf7942f840182b
