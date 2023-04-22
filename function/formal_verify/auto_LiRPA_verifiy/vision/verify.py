@@ -3,8 +3,13 @@ from auto_LiRPA.auto_LiRPA.perturbations import *
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
+<<<<<<< HEAD
 from function.attack.adv0211.art.attacks.evasion import FastGradientMethod, DeepFool, AutoAttack
 from function.attack.adv0211.art.estimators.classification import PyTorchClassifier
+=======
+from function.attack.attacks.evasion import FastGradientMethod, DeepFool, AutoAttack
+from function.attack.estimators.classification import PyTorchClassifier
+>>>>>>> gitee/feature_chunlai
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
