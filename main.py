@@ -5,8 +5,6 @@ __author__ = 'homeway'
 __copyright__ = 'Copyright © 2021/03/22, ZJUICSR'
 import argparse
 
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--host',type=str,default='0.0.0.0',help='ip')
