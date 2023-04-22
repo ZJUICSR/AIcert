@@ -90,10 +90,6 @@ def DataFairnessEvaluate():
         dataname = inputParam["dataname"]
         # 获取主任务ID
         tid = inputParam["tid"]
-<<<<<<< HEAD
-        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
-=======
->>>>>>> gitee/feature_chunlai
         # 生成子任务ID
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
@@ -547,10 +543,6 @@ def FormalVerification():
         return jsonify(res)
 
 # ----------------- 课题1 对抗攻击评估 -----------------
-<<<<<<< HEAD
-# from function.attack.adv0211 import *
-=======
->>>>>>> gitee/feature_chunlai
 @app.route('/Attack/AdvAttack', methods=['POST'])
 def AdvAttack():
     """
@@ -564,13 +556,8 @@ def AdvAttack():
     global LiRPA_LOGS
     if (request.method == "POST"):
         inputParam = json.loads(request.data)
-<<<<<<< HEAD
-        print(request.data)
-        tid = inputParam["Taskid"]
-=======
         tid = inputParam["Taskid"]
         inputParam["device"] = "cuda:0"
->>>>>>> gitee/feature_chunlai
         dataname = inputParam["Dataset"]
         model = inputParam["Model"]
         adv_method = inputParam["Method"]
@@ -595,9 +582,6 @@ def AdvAttack():
         t2.start()
         res = {
             "tid":tid,
-<<<<<<< HEAD
-            "AAtid":stid
-=======
             "stid":stid
         }
         return jsonify(res)
@@ -849,15 +833,10 @@ def AttackLime():
             "msg":"success",
             "tid":tid,
             "stid":stid
->>>>>>> gitee/feature_chunlai
         }
         return jsonify(res)
     else:
         abort(403)
-<<<<<<< HEAD
-=======
-
->>>>>>> gitee/feature_chunlai
 # ----------------- 课题2 测试样本自动生成 -----------------
 @app.route('/Concolic/SamGenParamGet', methods=['GET','POST'])
 def Concolic():
