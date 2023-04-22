@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 import os.path as osp
-from function.attack.old.attack import AdvAttack
+# from function.attack.old.attack import AdvAttack
 import interface
 import os, json, datetime, pickle, io, ast, time
 import pytz,shutil
