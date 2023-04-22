@@ -77,8 +77,9 @@ class EvasionAttacker():
         # 设置攻击参数
         for key, value in kwargs.items():
             if key not in self.attack.attack_params:
-                error = "{} is not the parameter of {}".format(key, method)
-                raise ValueError(error)
+                if key != "save_path":
+                    error = "{} is not the parameter of {}".format(key, method)
+                    raise ValueError(error)
             else:
                 setattr(self.attack, key, value)
         for key in self.attack.attack_params:
@@ -89,9 +90,9 @@ class EvasionAttacker():
         
         # 第一次计算干净样本上的分类准确率
         print("first accurate:{}".format(compute_predict_accuracy(self.classifier.predict(cln_examples), real_lables)))
-        starttime = time.clock()
+        starttime = time.perf_counter()
         adv_examples  = self.attack.generate(cln_examples)
-        endtime = time.clock()
+        endtime = time.perf_counter()
         self.timespend = (endtime - starttime)/len(adv_examples)
         # 性能评估
         clean_predictions = self.classifier.predict(cln_examples)
@@ -100,7 +101,7 @@ class EvasionAttacker():
         self.psra= compute_predict_accuracy(adv_predictions, real_lables)
         # 计算真正的攻击成功率，将本来分类错误的样本排除在外
         self.coverrate, self.asr  = compute_attack_success(real_lables, clean_predictions, adv_predictions)
-        self.save_examples(save_num, self.nb_classes, real_lables, cln_examples, clean_predictions, adv_examples, adv_predictions)
+        self.save_examples(save_num, self.nb_classes, real_lables, cln_examples, clean_predictions, adv_examples, adv_predictions, kwargs["save_path"])
         return adv_examples
     
     def save_examples(self, save_num, class_num, label: np.ndarray, clean_example: np.ndarray, clean_prediction: np.ndarray, adv_example: np.ndarray, adv_prediction: np.ndarray, path:str="./results/"):
@@ -109,10 +110,10 @@ class EvasionAttacker():
             return
         
         try:
-            os.makedirs(path+self.method+"/")
+            os.makedirs(os.path.join(path,self.method))
         except Exception as e:
-            shutil.rmtree(path+self.method+"/")
-            os.makedirs(path+self.method+"/")
+            shutil.rmtree(os.path.join(path,self.method))
+            os.makedirs(os.path.join(path,self.method))
         
         l = np.argmax(label,1)
         s = np.argmax(clean_prediction,1)
@@ -145,6 +146,7 @@ class EvasionAttacker():
         print("After {} attack, the accuracy on adversarial test examples: {}%".format(self.method, self.psra*100))
         print("The final {} attack success rate: {}%, coverrate: {}%".format(self.method, (self.asr)*100, (self.coverrate)*100))
         print("Time spent per sample: {}s".format(self.timespend))
+        return {"before_acc":self.psrb* 100,"after_acc":self.psra*100, "asr":(self.asr)*100, "coverrate":(self.coverrate)*100, "time":self.timespend}
 
 class BackdoorAttacker():
     def __init__(
@@ -282,7 +284,7 @@ class BackdoorAttacker():
             self.attack_success_rate, _ = compute_accuracy(self.classifier.predict(x_poisoned, batch_size=batch_size), y_poisoned)
         return self.accuracy, self.accuracyonbm, self.attack_success_rate
 
-    def backdoorattack(self, method: str="PoisoningAttackBackdoor", pp_poison: float=0.5, target: int=3, batch_size:int=700, num_epochs=40, lr=0.01, alpha=50, test_sample_num:int=2048, save_num: int=32):
+    def backdoorattack(self, method: str="PoisoningAttackBackdoor", pp_poison: float=0.5, target: int=3, batch_size:int=700, num_epochs=40, lr=0.01, alpha=50, test_sample_num:int=2048, save_num: int=32, save_path=None):
         """
         为了简化后门攻击接口的使用提出的一个后门攻击样例方法
         该函数按照目标和投毒比例自动完成攻击
@@ -335,10 +337,13 @@ class BackdoorAttacker():
         self.poisoned_num = len(plist)
         print("投毒样本数目:{}".format(self.poisoned_num))
         # 保存部分投毒样本
-        self.save_examples(save_num=32, class_num=self.classifier.nb_classes, label=y_train_tmp[plist], clean_example=x_train_tmp[plist], poisoned_example=x_train[plist])
+        if save_path != None:
+            self.save_examples(save_num, class_num=self.classifier.nb_classes, label=y_train_tmp[plist], clean_example=x_train_tmp[plist], poisoned_example=x_train[plist], path=save_path)
         print(self.evaluate(x_test, y_test, test_plist, batch_size=batch_size))
         self.finetune(x_train, y_train, x_test, y_test, plist, test_plist, batch_size=batch_size)
-        print(self.evaluate(x_test, y_test, test_plist, batch_size=batch_size))
+        accuracy, accuracyonb, attack_success_rate=self.evaluate(x_test, y_test, test_plist, batch_size=batch_size)
+        print(accuracy, accuracyonb, attack_success_rate)
+        return accuracy, accuracyonb, attack_success_rate
 
     def save_model(self, path:str="./results/", desc:str="backdoor_model", epoch:int=0):
         path = path+self.method+"/backdoor_model/"
@@ -355,7 +360,7 @@ class BackdoorAttacker():
         # 尽量均匀到类
         if save_num <= 0:
             return
-        path = path+self.method+"/example/"
+        path = os.path.join(path,self.method,"example")
         try:
             os.makedirs(path)
         except Exception as e:
