@@ -17,19 +17,12 @@ from torch.utils.data import Dataset,DataLoader
 from IOtool import IOtool, Callback
 from torchvision import  transforms
 import torch
-<<<<<<< HEAD
-
-from function.formal_verify import *
-from function.attack.adv0211 import EvasionAttacker, BackdoorAttacker
-
-=======
 from function.formal_verify import *
 from function.attack.attack_api import EvasionAttacker, BackdoorAttacker
 from model.model_net.lenet import Lenet
 from model.model_net.resnet import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
 from function.attack.attacks.utils import load_mnist, load_cifar10
  
->>>>>>> gitee/feature_chunlai
 from function.fairness import api
 from function import concolic, env_test, deepsst, dataclean
 
@@ -280,20 +273,12 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
     :params methods:list，对抗攻击方法
     :params inputParam:输入参数
     """
-<<<<<<< HEAD
-=======
     logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
->>>>>>> gitee/feature_chunlai
     # 开始执行标记任务状态
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"]=1
     taskinfo[tid]["state"]=1
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-<<<<<<< HEAD
-    modelpath = osp.join("./model/ckpt",dataname.upper() + "_" + model.lower()+".pt")
-    device = torch.device(inputParam['device'])
-    a = EvasionAttacker(modelnet=model.lower(), modelpath=modelpath, dataset=dataname.lower(), device=device, datanormalize=True)
-=======
     modelpath = osp.join("./model/ckpt",dataname.upper() + "_" + model.lower()+".pth")
     device = torch.device(inputParam['device'])
     if (not osp.exists(modelpath)):
@@ -312,7 +297,6 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
     
     a = EvasionAttacker(modelnet=eval(model)(channel), modelpath=modelpath, dataset=dataname.lower(), device=device, datanormalize=True, sample_num=128)
         
->>>>>>> gitee/feature_chunlai
     # 对应关系list
     methoddict={
         "FGSM":"FastGradientMethod",
@@ -333,16 +317,6 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
         "GeoDA":"GeoDA",
         "Fastdrop":"Fastdrop"
     }
-<<<<<<< HEAD
-    resultlist={}
-    for method in methods:
-        attackparam = inputParam[method]
-        print("methoddict[method]--------------",methoddict[method])
-        a.perturb(methoddict[method], 1024, **attackparam)
-        print("********************method**********:",method)
-        a.print_res()
-        resultlist[method]=a.attack_with_eps(epslist=[0.00001, 0.01])
-=======
     if not osp.exists(osp.join(ROOT,"output", tid, stid)):
         os.mkdir(osp.join(ROOT,"output", tid, stid))
     resultlist={}
@@ -360,7 +334,6 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
     logging.info("[执行对抗攻击]:对抗攻击执行完成，数据保存中")
     resultlist["stop"] = 1
     IOtool.write_json(resultlist,osp.join(ROOT,"output", tid, stid+"_result.json"))
->>>>>>> gitee/feature_chunlai
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"] = 2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
@@ -377,18 +350,11 @@ def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
     :params inputParam:输入参数
     """
     # 开始执行标记任务状态
-<<<<<<< HEAD
-=======
     logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
->>>>>>> gitee/feature_chunlai
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"]=1
     taskinfo[tid]["state"]=1
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-<<<<<<< HEAD
-    modelpath = osp.join("./model/ckpt",dataname.upper() + "_" + model.lower()+".pt")
-    b = BackdoorAttacker(modelnet=model.lower(), modelpath=modelpath, dataset=dataname.lower(),  datanormalize=True, device=torch.device(inputParam["device"]))
-=======
     modelpath = osp.join("./model/ckpt",dataname.upper() + "_" + model.lower()+".pth")
     if (not osp.exists(modelpath)):
             logging.info("[模型获取]:服务器上模型不存在")
@@ -404,7 +370,6 @@ def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
     else:
         channel = 3
     b = BackdoorAttacker(modelnet=eval(model)(channel), modelpath=modelpath, dataset=dataname.lower(),  datanormalize=True, device=torch.device(inputParam["device"]))
->>>>>>> gitee/feature_chunlai
     # 对应关系list
     methoddict={
         "BackdoorAttack":"PoisoningAttackBackdoor",
@@ -412,15 +377,6 @@ def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
         "CleanLabelFeatureCollisionAttack":"FeatureCollisionAttack",
         "AdversarialBackdoorEmbedding":"PoisoningAttackAdversarialEmbedding",
     }
-<<<<<<< HEAD
-    for method in methods:
-        attackparam = inputParam[method]
-        print("methoddict[method]--------------",methoddict[method])
-        b.backdoorattack(method=methoddict[method], batch_size=128, pp_poison=0.01, target=1, test_sample_num=1024)
-        
-        print("********************method**********:",method)
-        
-=======
     res = {}
     logging.info("[执行后门攻击]:开始后门攻击")
     for method in methods:
@@ -442,27 +398,10 @@ def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
             logging.info("[执行后门攻击]:{:s}后门攻击运行结束，投毒率为{}时，攻击成功率为{}%".format(method, pp_poison, attack_success_rate))
     res["stop"] = 1
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
->>>>>>> gitee/feature_chunlai
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"] = 2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
     IOtool.change_task_success_v2(tid)
-<<<<<<< HEAD
-
-from function.ex_methods.module.func import get_loader, Logger
-from function.ex_methods.module.generate_adv import get_adv_loader
-from function.ex_methods.module.load_model import load_model
-from function.ex_methods import attribution_maps, layer_explain, dim_reduciton_visualize
-from function.ex_methods.module.model_Lenet import lenet
-
-def run_ex_method(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device):
-    params = {
-        "dataset": datasetparam,
-        "model": modelparam,
-        "out_path": "./output",
-        "device": torch.device("cuda:4"),
-        "ex_methods":{"methods":ex_methods},
-=======
     
 from function.ex_methods.module.func import get_loader, Logger, recreate_image
 from function.ex_methods.module.generate_adv import get_adv_loader, sample_untargeted_attack
@@ -490,7 +429,6 @@ def run_dim_reduct(tid, stid, datasetparam, modelparam, vis_methods, adv_methods
         "model": modelparam,
         "out_path": osp.join(ROOT,"output", tid),
         "device": torch.device(device),
->>>>>>> gitee/feature_chunlai
         "adv_methods":{"methods":adv_methods},
         "root":ROOT
     }
@@ -498,9 +436,6 @@ def run_dim_reduct(tid, stid, datasetparam, modelparam, vis_methods, adv_methods
 
     root = ROOT
     dataset = datasetparam["name"]
-<<<<<<< HEAD
-    nor_data = torch.load(osp.join(root, f"dataset/{dataset}/data/{dataset}_NOR.pt"))
-=======
     nor_data = torch.load(osp.join(root, f"dataset/data/{dataset}_NOR.pt"))
     nor_loader = get_loader(nor_data, batchsize=16)
     logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
@@ -564,17 +499,10 @@ def run_attrbution_analysis(tid, stid, datasetparam, modelparam, ex_methods, adv
     root = ROOT
     dataset = datasetparam["name"]
     nor_data = torch.load(osp.join(root, f"dataset/data/{dataset}_NOR.pt"))
->>>>>>> gitee/feature_chunlai
     nor_loader = get_loader(nor_data, batchsize=16)
     logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
 
     model_name = modelparam["name"]
-<<<<<<< HEAD
-    model = modelparam["ckpt"]
-    logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
-    net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
-    # net = torchvision.models.inception_v3(num_classes=10)
-=======
     if modelparam["ckpt"] != "None":
         model = torch.load(modelparam["ckpt"])
     else:
@@ -582,7 +510,6 @@ def run_attrbution_analysis(tid, stid, datasetparam, modelparam, ex_methods, adv
         model = modelparam["ckpt"]
     logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
     net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
->>>>>>> gitee/feature_chunlai
     net = net.eval().to(device)
     logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
 
@@ -594,10 +521,6 @@ def run_attrbution_analysis(tid, stid, datasetparam, modelparam, ex_methods, adv
     save_path = osp.join(ROOT,"output", tid, stid)
     if not osp.exists(save_path):
         os.mkdir(save_path)
-<<<<<<< HEAD
-    vis_type_list = ['pca', 'ss', 'tsne', 'svm', 'mean_diff']
-    dim_reduciton_visualize(vis_type_list, nor_loader, adv_loader["FGSM"], net, model_name, dataset, device, save_path)
-=======
     
     logging.info("[注意力分布图计算]：选择了{:s}解释算法".format(", ".join(ex_methods)))
     ex_images = attribution_maps(net, nor_loader, adv_loader, ex_methods, params, 20, logging)
@@ -730,4 +653,3 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, device):
     taskinfo[tid]["function"][stid]["state"] = 2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
     IOtool.change_task_success_v2(tid)
->>>>>>> gitee/feature_chunlai
