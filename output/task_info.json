@@ -776,6 +776,114 @@
                     "PGD"
                 ],
                 "model": "ResNet18"
+            },
+            "S20230420_2000_e8364d3": {
+                "type": "adv_attack",
+                "state": 1,
+                "name": [
+                    "adv_attack"
+                ],
+                "dataset": "CIFAR10",
+                "method": [
+                    "FGSM"
+                ],
+                "model": "ResNet18"
+            },
+            "S20230420_2001_9ac9e35": {
+                "type": "adv_attack",
+                "state": 1,
+                "name": [
+                    "adv_attack"
+                ],
+                "dataset": "CIFAR10",
+                "method": [
+                    "FGSM"
+                ],
+                "model": "ResNet18"
+            },
+            "S20230420_2002_a6cf500": {
+                "type": "adv_attack",
+                "state": 1,
+                "name": [
+                    "adv_attack"
+                ],
+                "dataset": "CIFAR10",
+                "method": [
+                    "FGSM"
+                ],
+                "model": "ResNet18"
+            },
+            "S20230420_2003_d68e09f": {
+                "type": "adv_attack",
+                "state": 1,
+                "name": [
+                    "adv_attack"
+                ],
+                "dataset": "CIFAR10",
+                "method": [
+                    "FGSM"
+                ],
+                "model": "ResNet18"
+            },
+            "S20230420_2004_3461576": {
+                "type": "adv_attack",
+                "state": 2,
+                "name": [
+                    "adv_attack"
+                ],
+                "dataset": "CIFAR10",
+                "method": [
+                    "FGSM"
+                ],
+                "model": "ResNet18"
+            },
+            "S20230420_2032_107366d": {
+                "type": "backdoor_attack",
+                "state": 1,
+                "name": [
+                    "adv_attack"
+                ],
+                "dataset": "CIFAR10",
+                "method": [
+                    "BackdoorAttack"
+                ],
+                "model": "ResNet18"
+            },
+            "S20230420_2032_6dde1c2": {
+                "type": "backdoor_attack",
+                "state": 1,
+                "name": [
+                    "adv_attack"
+                ],
+                "dataset": "CIFAR10",
+                "method": [
+                    "BackdoorAttack"
+                ],
+                "model": "ResNet18"
+            },
+            "S20230420_2216_a969e8b": {
+                "type": "backdoor_attack",
+                "state": 1,
+                "name": [
+                    "adv_attack"
+                ],
+                "dataset": "CIFAR10",
+                "method": [
+                    "BackdoorAttack"
+                ],
+                "model": "ResNet18"
+            },
+            "S20230421_0846_750806b": {
+                "type": "backdoor_attack",
+                "state": 2,
+                "name": [
+                    "adv_attack"
+                ],
+                "dataset": "CIFAR10",
+                "method": [
+                    "BackdoorAttack"
+                ],
+                "model": "ResNet18"
             }
         }
     },

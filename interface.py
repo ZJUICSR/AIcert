@@ -4,13 +4,13 @@
 __author__ = 'chunlai'
 __copyright__ = 'Copyright © 2021/11/01, ZJUICSR'
 
-from function.attack.old.backdoor.badnets.badnets_v2 import Badnets
+# from function.attack.old.backdoor.badnets.badnets_v2 import Badnets
 from model import ModelLoader
 from model.trainer import Trainer
 from dataset import ArgpLoader
 from dataset import LoadCustom
 from function.attack.config import Conf
-from function.attack.old.adv import Attack
+# from function.attack.old.adv import Attack
 import os, json, copy
 import os.path as osp
 from torch.utils.data import Dataset,DataLoader
@@ -18,7 +18,10 @@ from IOtool import IOtool, Callback
 from torchvision import  transforms
 import torch
 from function.formal_verify import *
-from function.attack.adv0211 import EvasionAttacker, BackdoorAttacker
+from function.attack.attack_api import EvasionAttacker, BackdoorAttacker
+from model.model_net.lenet import Lenet
+from model.model_net.resnet import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
+from function.attack.attacks.utils import load_mnist, load_cifar10
  
 from function.fairness import api
 from function import concolic, env_test, deepsst, dataclean
@@ -270,14 +273,30 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
     :params methods:list，对抗攻击方法
     :params inputParam:输入参数
     """
+    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
     # 开始执行标记任务状态
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"]=1
     taskinfo[tid]["state"]=1
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-    modelpath = osp.join("./model/ckpt",dataname.upper() + "_" + model.lower()+".pt")
+    modelpath = osp.join("./model/ckpt",dataname.upper() + "_" + model.lower()+".pth")
     device = torch.device(inputParam['device'])
-    a = EvasionAttacker(modelnet=model.lower(), modelpath=modelpath, dataset=dataname.lower(), device=device, datanormalize=True)
+    if (not osp.exists(modelpath)):
+            logging.info("[模型获取]:服务器上模型不存在")
+            result["stop"] = 1
+            IOtool.write_json(result,osp.join(ROOT,"output", tid, stid+"_result.json"))
+            taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+            taskinfo[tid]["function"][stid]["state"] = 3
+            IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+            IOtool.change_task_success_v2(tid)
+            return 0
+    if dataname.lower() == "mnist":
+        channel = 1
+    else:
+        channel = 3
+    
+    a = EvasionAttacker(modelnet=eval(model)(channel), modelpath=modelpath, dataset=dataname.lower(), device=device, datanormalize=True, sample_num=128)
+        
     # 对应关系list
     methoddict={
         "FGSM":"FastGradientMethod",
@@ -298,14 +317,23 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
         "GeoDA":"GeoDA",
         "Fastdrop":"Fastdrop"
     }
+    if not osp.exists(osp.join(ROOT,"output", tid, stid)):
+        os.mkdir(osp.join(ROOT,"output", tid, stid))
     resultlist={}
     for method in methods:
+        logging.info("[执行对抗攻击]:正在执行{:s}对抗攻击".format(method))
         attackparam = inputParam[method]
+        attackparam["save_path"] = osp.join(ROOT,"output", tid, stid)
         print("methoddict[method]--------------",methoddict[method])
-        a.perturb(methoddict[method], 1024, **attackparam)
-        print("********************method**********:",method)
+        res = a.generate(methoddict[method], 32, **attackparam)
+        print("********************method**********:",res)
         a.print_res()
-        resultlist[method]=a.attack_with_eps(epslist=[0.00001, 0.01])
+        resultlist[method]=a.print_res()
+        print(resultlist[method])
+        logging.info("[执行对抗攻击中]:{:s}对抗攻击结束，攻击成功率为{}%".format(method,resultlist[method]["asr"]))
+    logging.info("[执行对抗攻击]:对抗攻击执行完成，数据保存中")
+    resultlist["stop"] = 1
+    IOtool.write_json(resultlist,osp.join(ROOT,"output", tid, stid+"_result.json"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"] = 2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
@@ -322,12 +350,26 @@ def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
     :params inputParam:输入参数
     """
     # 开始执行标记任务状态
+    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"]=1
     taskinfo[tid]["state"]=1
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-    modelpath = osp.join("./model/ckpt",dataname.upper() + "_" + model.lower()+".pt")
-    b = BackdoorAttacker(modelnet=model.lower(), modelpath=modelpath, dataset=dataname.lower(),  datanormalize=True, device=torch.device(inputParam["device"]))
+    modelpath = osp.join("./model/ckpt",dataname.upper() + "_" + model.lower()+".pth")
+    if (not osp.exists(modelpath)):
+            logging.info("[模型获取]:服务器上模型不存在")
+            result["stop"] = 1
+            IOtool.write_json(result,osp.join(ROOT,"output", tid, stid+"_result.json"))
+            taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+            taskinfo[tid]["function"][stid]["state"] = 3
+            IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+            IOtool.change_task_success_v2(tid)
+            return 0
+    if dataname.lower() == "mnist":
+        channel = 1
+    else:
+        channel = 3
+    b = BackdoorAttacker(modelnet=eval(model)(channel), modelpath=modelpath, dataset=dataname.lower(),  datanormalize=True, device=torch.device(inputParam["device"]))
     # 对应关系list
     methoddict={
         "BackdoorAttack":"PoisoningAttackBackdoor",
@@ -336,17 +378,26 @@ def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
         "AdversarialBackdoorEmbedding":"PoisoningAttackAdversarialEmbedding",
     }
     res = {}
+    logging.info("[执行后门攻击]:开始后门攻击")
     for method in methods:
-        res[method]={"asr":[], "pp_poison":[], "loss":[]}
+        logging.info("[执行后门攻击]:正在执行{:s}后门攻击".format(method))
+        res[method]={"asr":[], "pp_poison":[]}
         attackparam = inputParam[method]
         print("methoddict[method]--------------",methoddict[method])
         for i in range(10):
             pp_poison = 0.001 + 0.01 * i
-            accuracy, accuracyonb, attack_success_rate=b.backdoorattack(method=methoddict[method], batch_size=128, pp_poison=pp_poison, target=attackparam["target"], test_sample_num=1024)
+            if i == 1:
+                save_path = osp.join(ROOT,"output", tid, stid)
+                if not osp.exists(save_path):
+                    os.makedirs(save_path)
+            else:
+                save_path = None
+            accuracy, accuracyonb, attack_success_rate=b.backdoorattack(method=methoddict[method], batch_size=128, pp_poison=pp_poison, target=attackparam["target"], test_sample_num=1024,save_path=save_path)
             res[method]["asr"].append(attack_success_rate)
             res[method]["pp_poison"].append(pp_poison)
-        
-    IOtool.write_json(res,osp.join(ROOT,"output", tid, stid+"_result.json")) 
+            logging.info("[执行后门攻击]:{:s}后门攻击运行结束，投毒率为{}时，攻击成功率为{}%".format(method, pp_poison, attack_success_rate))
+    res["stop"] = 1
+    IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"] = 2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
