@@ -33,7 +33,7 @@ CLIP_VALUES_TYPE = Tuple[Union[int, float, np.ndarray], Union[int, float, np.nda
 
 if TYPE_CHECKING:
     # pylint: disable=R0401,C0412
-    from art.defences.preprocessor.preprocessor import Preprocessor
+    from function.attack.estimators.preprocessor import Preprocessor
 
     PREPROCESSING_TYPE = Optional[  # pylint: disable=C0103
         Union[
@@ -54,7 +54,7 @@ if TYPE_CHECKING:
     from function.attack.estimators.classification.ensemble import EnsembleClassifier
     from function.attack.estimators.classification.GPy import GPyGaussianProcessClassifier
     # from function.attack.estimators.classification.keras import KerasClassifier
-    from art.experimental.estimators.classification.jax import JaxClassifier
+    from Attack.experimental.estimators.classification.jax import JaxClassifier
     from function.attack.estimators.classification.lightgbm import LightGBMClassifier
     from function.attack.estimators.classification.mxnet import MXClassifier
     from function.attack.estimators.classification.pytorch import PyTorchClassifier
@@ -1328,12 +1328,12 @@ def _extract(full_path: str, path: str) -> bool:
 def get_file(filename: str, url: str, path: Optional[str] = None, extract: bool = False, verbose: bool = False) -> str:
     """
     Downloads a file from a URL if it not already in the cache. The file at indicated by `url` is downloaded to the
-    path `path` (default is ~/.art/data). and given the name `filename`. Files in tar, tar.gz, tar.bz, and zip formats
+    path `path` (default is ~/.Attack/data). and given the name `filename`. Files in tar, tar.gz, tar.bz, and zip formats
     can also be extracted. This is a simplified version of the function with the same name in Keras.
 
     :param filename: Name of the file.
     :param url: Download URL.
-    :param path: Folder to store the download. If not specified, `~/.art/data` is used instead.
+    :param path: Folder to store the download. If not specified, `~/.Attack/data` is used instead.
     :param extract: If true, tries to extract the archive.
     :param verbose: If true, print download progress bar.
     :return: Path to the downloaded file.
@@ -1343,7 +1343,7 @@ def get_file(filename: str, url: str, path: Optional[str] = None, extract: bool 
     else:
         path_ = os.path.expanduser(path)
     if not os.access(path_, os.W_OK):
-        path_ = os.path.join("/tmp", ".art")
+        path_ = os.path.join("/tmp", ".Attack")
 
     if not os.path.exists(path_):
         os.makedirs(path_)
@@ -1489,8 +1489,8 @@ def performance_diff(
 
     Note: For multi-label classification, f1 scores will use 'micro' averaging unless otherwise specified.
 
-    :param model1: A trained ART classifier.
-    :param model2: Another trained ART classifier.
+    :param model1: A trained Attack classifier.
+    :param model2: Another trained Attack classifier.
     :param test_data: The data to test both model's performance.
     :param test_labels: The labels to the testing data.
     :param perf_function: The performance metric to be used. One of ['accuracy', 'f1'] or a callable function
