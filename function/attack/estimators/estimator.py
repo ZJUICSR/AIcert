@@ -71,8 +71,8 @@ class BaseEstimator(ABC):
         self._clip_values = clip_values
 
         # self.preprocessing = self._set_preprocessing(preprocessing)
-        self.preprocessing_defences = self._set_preprocessing_defences(preprocessing_defences)
-        self.postprocessing_defences = self._set_postprocessing_defences(postprocessing_defences)
+        # self.preprocessing_defences = self._set_preprocessing_defences(preprocessing_defences)
+        # self.postprocessing_defences = self._set_postprocessing_defences(postprocessing_defences)
         self.preprocessing_operations: List["Preprocessor"] = []
         # BaseEstimator._update_preprocessing_operations(self)
         BaseEstimator._check_params(self)
@@ -429,7 +429,7 @@ class NeuralNetworkMixin(ABC):
         :param generator: Batch generator providing `(x, y)` for each epoch.
         :param nb_epochs: Number of training epochs.
         """
-        from art.data_generators import DataGenerator
+        from function.attack.attacks.data_generators import DataGenerator
 
         if not isinstance(generator, DataGenerator):
             raise ValueError(
