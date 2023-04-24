@@ -8,10 +8,10 @@ from function.attack.attacks.utils import load_mnist, load_cifar10
 # 对抗攻击测试
 ## MNIST
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-a = EvasionAttacker(modelnet=ResNet18(1), modelpath="./models/model_ckpt/ckpt-resnet18-mnist_epoch3_acc0.9898.pth", 
+a = EvasionAttacker(modelnet=ResNet18(1), modelpath="./model/model_ckpt/ckpt-resnet18-mnist_epoch3_acc0.9898.pth", 
     dataset="mnist", datasetpath="./datasets/", nb_classes=10, datanormalize = False, 
-    device=device, sample_num=128)
-### white box attack
+    device=device, sample_num=5)
+## white box attack
 # a.generate(method="FastGradientMethod", norm="inf", save_num=32)
 # a.print_res()
 # a.generate(method="ProjectedGradientDescent", norm="inf", save_num=32)
@@ -30,16 +30,24 @@ a = EvasionAttacker(modelnet=ResNet18(1), modelpath="./models/model_ckpt/ckpt-re
 # a.print_res()
 # a.generate(method="CarliniWagner", save_num=32)
 # a.print_res()
-### BlackBox ScoreBased Attak
+# ## BlackBox ScoreBased Attak
 # a.generate(method="PixelAttack", save_num=32)
 # a.print_res()
 # a.generate(method="SimBA", save_num=32)
 # a.print_res()
-a.generate(method="ZooAttack", save_num=32)
-a.print_res()
+# a.generate(method="ZooAttack", save_num=32)
+# a.print_res()
 # a.generate(method="SquareAttack", save_num=32)
 # a.print_res()
-### BlackBox DecesionBased Attak
+# ## BlackBox DecesionBased Attak
+# a.generate(method="BoundaryAttack", save_num=32)
+# a.print_res()
+# a.generate(method="HopSkipJump", save_num=32)
+# a.print_res()
+# a.generate(method="GeoDA", save_num=32)
+# a.print_res()
+# a.generate(method="Fastdrop", save_num=32)
+# a.print_res()
 
 # ## CIFAR10
 # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

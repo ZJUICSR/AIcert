@@ -89,9 +89,16 @@ class EvasionAttacker():
         
         # 第一次计算干净样本上的分类准确率
         print("first accurate:{}".format(compute_predict_accuracy(self.classifier.predict(cln_examples), real_lables)))
-        starttime = time.clock()
+        try:
+            starttime = time.clock()
+        except:
+            starttime = time.perf_counter()
         adv_examples  = self.attack.generate(cln_examples)
-        endtime = time.clock()
+        try:
+            endtime = time.clock()
+        except:
+            endtime = time.perf_counter()
+        
         self.timespend = (endtime - starttime)/len(adv_examples)
         # 性能评估
         clean_predictions = self.classifier.predict(cln_examples)
@@ -148,7 +155,7 @@ class EvasionAttacker():
 
 class BackdoorAttacker():
     def __init__(
-    self, modelnet=None, modelpath: str="./models/model_ckpt/ckpt-resnet18-mnist_epoch3_acc0.9898.pth", 
+    self, modelnet=None, modelpath: str="./model/model_ckpt/ckpt-resnet18-mnist_epoch3_acc0.9898.pth", 
     dataset="mnist", datasetpath="./datasets/", nb_classes=10, datanormalize: bool = False, 
     device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")) -> None:
         self.modelnet = modelnet
