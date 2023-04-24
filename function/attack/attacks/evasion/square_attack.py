@@ -351,7 +351,8 @@ class SquareAttack(EvasionAttack):
         ):
             batch_index_1, batch_index_2 = batch_id * self.batch_size, (batch_id + 1) * self.batch_size
             x_batch = x[batch_index_1:batch_index_2].copy()
-            if y.any() != None:
+
+            if y != None and y.any() != None:
                 y_batch = torch.tensor(np.argmax(y[batch_index_1:batch_index_2], axis=1)).to(self.estimator.device)
             else:
                 if not self.targeted:
