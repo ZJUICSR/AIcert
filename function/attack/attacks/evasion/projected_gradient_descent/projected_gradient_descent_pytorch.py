@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (C) The Adversarial Robustness Toolbox (ART) Authors 2020
+# Copyright (C) The Adversarial Robustness Toolbox (Attack) Authors 2020
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 # documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -32,7 +32,7 @@ import numpy as np
 from tqdm.auto import tqdm
 
 from function.attack.attacks.config import MY_NUMPY_DTYPE
-from art.summary_writer import SummaryWriter
+from Attack.summary_writer import SummaryWriter
 from function.attack.estimators.estimator import BaseEstimator, LossGradientsMixin
 from function.attack.estimators.classification.classifier import ClassifierMixin
 from function.attack.attacks.evasion.projected_gradient_descent.projected_gradient_descent_numpy import (
