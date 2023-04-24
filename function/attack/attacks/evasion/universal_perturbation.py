@@ -149,6 +149,7 @@ class UniversalPerturbation(EvasionAttack):
     @staticmethod
     def _get_class(class_name: str) -> types.ModuleType:
         sub_mods = class_name.split(".")
-        module_ = __import__(".".join(sub_mods[:-1]), fromlist=sub_mods[-1])
+        test = "function.attack." + ".".join(sub_mods[:-1])
+        module_ = __import__(test, fromlist=sub_mods[-1])
         class_module = getattr(module_, sub_mods[-1])
         return class_module
