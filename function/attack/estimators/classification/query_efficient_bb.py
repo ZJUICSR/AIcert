@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (C) The Adversarial Robustness Toolbox (ART) Authors 2018
+# Copyright (C) The Adversarial Robustness Toolbox (Attack) Authors 2018
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 # documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -183,6 +183,6 @@ class QueryEfficientGradientEstimationClassifier(ClassifierLossGradients, Classi
 
         :param filename: Name of the file where to save the model.
         :param path: Path of the directory where to save the model. If no path is specified, the model will be stored in
-                     the default data location of ART at `MY_DATA_PATH`.
+                     the default data location of Attack at `MY_DATA_PATH`.
         """
         raise NotImplementedError

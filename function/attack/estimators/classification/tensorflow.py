@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (C) The Adversarial Robustness Toolbox (ART) Authors 2018
+# Copyright (C) The Adversarial Robustness Toolbox (Attack) Authors 2018
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 # documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -41,9 +41,9 @@ if TYPE_CHECKING:
     import tensorflow.compat.v1 as tf
 
     from function.attack.attacks.utils import CLIP_VALUES_TYPE, PREPROCESSING_TYPE
-    from art.data_generators import DataGenerator
-    from art.defences.preprocessor import Preprocessor
-    from art.defences.postprocessor import Postprocessor
+    from Attack.data_generators import DataGenerator
+    from Attack.defences.preprocessor import Preprocessor
+    from Attack.defences.postprocessor import Postprocessor
 
 logger = logging.getLogger(__name__)
 
@@ -323,13 +323,13 @@ class TensorFlowClassifier(ClassGradientsMixin, ClassifierMixin, TensorFlowEstim
         :param kwargs: Dictionary of framework-specific arguments. This parameter is not currently supported for
                TensorFlow and providing it takes no effect.
         """
-        from art.data_generators import TensorFlowDataGenerator
+        from Attack.data_generators import TensorFlowDataGenerator
 
         if self.learning is not None:
             self.feed_dict[self.learning] = True
 
         # Train directly in TensorFlow
-        from art.preprocessing.standardisation_mean_std.numpy import StandardisationMeanStd
+        from Attack.preprocessing.standardisation_mean_std.numpy import StandardisationMeanStd
 
         if isinstance(generator, TensorFlowDataGenerator) and (
             self.preprocessing is None
@@ -777,7 +777,7 @@ class TensorFlowClassifier(ClassGradientsMixin, ClassifierMixin, TensorFlowEstim
         return repr_
 
 
-# backward compatibility for ART v0.10 and earlier
+# backward compatibility for Attack v0.10 and earlier
 TFClassifier = TensorFlowClassifier
 
 
@@ -971,7 +971,7 @@ class TensorFlowV2Classifier(ClassGradientsMixin, ClassifierMixin, TensorFlowV2E
                TensorFlow and providing it takes no effect.
         """
         import tensorflow as tf  # lgtm [py/repeated-import]
-        from art.data_generators import TensorFlowV2DataGenerator
+        from Attack.data_generators import TensorFlowV2DataGenerator
 
         if self._train_step is None:  # pragma: no cover
             raise TypeError(
@@ -979,7 +979,7 @@ class TensorFlowV2Classifier(ClassGradientsMixin, ClassifierMixin, TensorFlowV2E
             )
 
         # Train directly in TensorFlow
-        from art.preprocessing.standardisation_mean_std.tensorflow import StandardisationMeanStdTensorFlow
+        from Attack.preprocessing.standardisation_mean_std.tensorflow import StandardisationMeanStdTensorFlow
 
         if isinstance(generator, TensorFlowV2DataGenerator) and (
             self.preprocessing is None

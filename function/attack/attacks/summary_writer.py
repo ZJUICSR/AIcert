@@ -83,7 +83,7 @@ class SummaryWriter(ABC):
 
 class SummaryWriterDefault(SummaryWriter):
     """
-    Implementation of the default ART Summary Writer.
+    Implementation of the default Attack Summary Writer.
     """
 
     def __init__(
