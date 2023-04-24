@@ -90,9 +90,16 @@ class EvasionAttacker():
         
         # 第一次计算干净样本上的分类准确率
         print("first accurate:{}".format(compute_predict_accuracy(self.classifier.predict(cln_examples), real_lables)))
-        starttime = time.perf_counter()
+        try:
+            starttime = time.clock()
+        except:
+            starttime = time.perf_counter()
         adv_examples  = self.attack.generate(cln_examples)
-        endtime = time.perf_counter()
+        try:
+            endtime = time.clock()
+        except:
+            endtime = time.perf_counter()
+        
         self.timespend = (endtime - starttime)/len(adv_examples)
         # 性能评估
         clean_predictions = self.classifier.predict(cln_examples)
@@ -132,13 +139,13 @@ class EvasionAttacker():
                         tmpc = clean_example[k].transpose(1,2,0)
                         tmpa = adv_example[k].transpose(1,2,0)
                     clean = Image.fromarray(np.uint8(255*tmpc))
-                    clean.save(path+self.method+"/"+"index{}_clean_l{}_t{}.jpeg".format(i, l[k], d[k]))
+                    clean.save(path+"/"+self.method+"/"+"index{}_clean_l{}_t{}.jpeg".format(i, l[k], d[k]))
                     adv = Image.fromarray(np.uint8(255*tmpa))
-                    adv.save(path+self.method+"/"+"index{}_adv_l{}_t{}.jpeg".format(i, l[k], d[k]))
+                    adv.save(path+"/"+self.method+"/"+"index{}_adv_l{}_t{}.jpeg".format(i, l[k], d[k]))
                     per = np.uint8(255*tmpc) - np.uint8(255*tmpa)
                     per = per + np.abs(np.min(per))
                     per = Image.fromarray(np.uint8(255*per))
-                    per.save(path+self.method+"/"+"index{}_per_l{}_t{}.jpeg".format(i, l[k], d[k]))
+                    per.save(path+"/"+self.method+"/"+"index{}_per_l{}_t{}.jpeg".format(i, l[k], d[k]))
                     break
 
     def print_res(self) -> None:
@@ -162,13 +169,15 @@ class BackdoorAttacker():
         self.datanormalize = datanormalize
         if dataset == "cifar10":
             self.loaddataset = load_cifar10
+            self.backdoor_color = 1
         elif dataset == "mnist":
             self.loaddataset = load_mnist
+            self.backdoor_color = 2
         else:
             raise ValueError("Dataset not supported")
     
     # 添加固定样式的后门
-    def add_backdoor(x: np.ndarray, px=25, py=25, l=2, value=1):
+    def add_backdoor(x: np.ndarray, px=25, py=25, l=2, value=2):
         if px+l >= x.shape[2] or py+l >= x.shape[3]:
             raise ValueError("Invalid px or py!")
         xt = x.copy()
