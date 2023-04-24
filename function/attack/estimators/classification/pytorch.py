@@ -23,9 +23,9 @@ if TYPE_CHECKING:
     import torch
 
     from function.attack.attacks.utils import CLIP_VALUES_TYPE, PREPROCESSING_TYPE
-    from art.data_generators import DataGenerator
-    from art.defences.preprocessor import Preprocessor
-    from art.defences.postprocessor import Postprocessor
+    from Attack.data_generators import DataGenerator
+    from Attack.defences.preprocessor import Preprocessor
+    from Attack.defences.postprocessor import Postprocessor
 
 logger = logging.getLogger(__name__)
 
@@ -428,7 +428,7 @@ class PyTorchClassifier(ClassGradientsMixin, ClassifierMixin, PyTorchEstimator):
                and providing it takes no effect.
         """
         import torch  # lgtm [py/repeated-import]
-        from art.data_generators import PyTorchDataGenerator
+        from Attack.data_generators import PyTorchDataGenerator
 
         # Put the model in the training mode
         self._model.train()
@@ -437,7 +437,7 @@ class PyTorchClassifier(ClassGradientsMixin, ClassifierMixin, PyTorchEstimator):
             raise ValueError("An optimizer is needed to train the model, but none for provided.")
 
         # Train directly in PyTorch
-        from art.preprocessing.standardisation_mean_std.pytorch import StandardisationMeanStdPyTorch
+        from Attack.preprocessing.standardisation_mean_std.pytorch import StandardisationMeanStdPyTorch
 
         if isinstance(generator, PyTorchDataGenerator) and (
             self.preprocessing is None
