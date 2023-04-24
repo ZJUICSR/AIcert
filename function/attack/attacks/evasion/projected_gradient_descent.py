@@ -21,7 +21,7 @@ from function.attack.estimators.classification.classifier import ClassifierMixin
 # from function.attack.attacks.evasion.projected_gradient_descent.projected_gradient_descent_tensorflow_v2 import (
 #     ProjectedGradientDescentTensorFlowV2,
 # )
-from art.summary_writer import SummaryWriter
+from Attack.summary_writer import SummaryWriter
 
 if TYPE_CHECKING:
     from function.attack.attacks.utils import CLASSIFIER_LOSS_GRADIENTS_TYPE, OBJECT_DETECTOR_TYPE

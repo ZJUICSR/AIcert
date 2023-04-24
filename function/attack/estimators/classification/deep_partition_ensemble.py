@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (C) The Adversarial Robustness Toolbox (ART) Authors 2021
+# Copyright (C) The Adversarial Robustness Toolbox (Attack) Authors 2021
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 # documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -89,11 +89,11 @@ class DeepPartitionEnsemble(EnsembleClassifier):
 
             if hasattr(classifiers, "clone_for_refitting"):
                 # Initialize the ensemble based on the provided architecture
-                # Use ART's cloning if possible
+                # Use Attack's cloning if possible
                 try:
                     classifiers = [classifiers.clone_for_refitting() for _ in range(ensemble_size)]  # type: ignore
                 except ValueError as error:
-                    warnings.warn("Switching to deepcopy due to ART Cloning Error: " + str(error))
+                    warnings.warn("Switching to deepcopy due to Attack Cloning Error: " + str(error))
                     classifiers = [copy.deepcopy(classifiers) for _ in range(ensemble_size)]  # type: ignore
             else:
                 classifiers = [copy.deepcopy(classifiers) for _ in range(ensemble_size)]
