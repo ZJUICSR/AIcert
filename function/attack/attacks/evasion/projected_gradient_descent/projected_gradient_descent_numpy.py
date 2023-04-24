@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (C) The Adversarial Robustness Toolbox (ART) Authors 2020
+# Copyright (C) The Adversarial Robustness Toolbox (Attack) Authors 2020
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 # documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -37,7 +37,7 @@ from function.attack.attacks.config import MY_NUMPY_DTYPE
 from function.attack.estimators.classification.classifier import ClassifierMixin
 from function.attack.estimators.estimator import BaseEstimator, LossGradientsMixin
 from function.attack.attacks.utils import compute_success, get_labels_np_array, check_and_transform_label_format, compute_success_array
-from art.summary_writer import SummaryWriter
+from Attack.summary_writer import SummaryWriter
 
 if TYPE_CHECKING:
     from function.attack.attacks.utils import CLASSIFIER_LOSS_GRADIENTS_TYPE, OBJECT_DETECTOR_TYPE
