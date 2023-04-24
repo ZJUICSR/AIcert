@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (C) The Adversarial Robustness Toolbox (ART) Authors 2018
+# Copyright (C) The Adversarial Robustness Toolbox (Attack) Authors 2018
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 # documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -36,9 +36,9 @@ if TYPE_CHECKING:
     import lightgbm  # lgtm [py/import-and-import-from]
 
     from function.attack.attacks.utils import CLIP_VALUES_TYPE, PREPROCESSING_TYPE
-    from art.defences.preprocessor import Preprocessor
-    from art.defences.postprocessor import Postprocessor
-    from art.metrics.verification_decisions_trees import LeafNode
+    from Attack.defences.preprocessor import Preprocessor
+    from Attack.defences.postprocessor import Postprocessor
+    from Attack.metrics.verification_decisions_trees import LeafNode
 
 logger = logging.getLogger(__name__)
 
@@ -157,7 +157,7 @@ class LightGBMClassifier(ClassifierDecisionTree):
 
         :return: A list of decision trees.
         """
-        from art.metrics.verification_decisions_trees import Box, Tree
+        from Attack.metrics.verification_decisions_trees import Box, Tree
 
         booster_dump = self._model.dump_model()["tree_info"]
         trees = []
@@ -181,7 +181,7 @@ class LightGBMClassifier(ClassifierDecisionTree):
         return trees
 
     def _get_leaf_nodes(self, node, i_tree, class_label, box) -> List["LeafNode"]:
-        from art.metrics.verification_decisions_trees import Box, Interval, LeafNode
+        from Attack.metrics.verification_decisions_trees import Box, Interval, LeafNode
 
         leaf_nodes: List[LeafNode] = []
 
