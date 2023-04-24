@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (C) The Adversarial Robustness Toolbox (ART) Authors 2018
+# Copyright (C) The Adversarial Robustness Toolbox (Attack) Authors 2018
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 # documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -37,9 +37,9 @@ if TYPE_CHECKING:
     import mxnet as mx
 
     from function.attack.attacks.utils import CLIP_VALUES_TYPE, PREPROCESSING_TYPE
-    from art.data_generators import DataGenerator
-    from art.defences.preprocessor import Preprocessor
-    from art.defences.postprocessor import Postprocessor
+    from Attack.data_generators import DataGenerator
+    from Attack.defences.preprocessor import Preprocessor
+    from Attack.defences.postprocessor import Postprocessor
 
 logger = logging.getLogger(__name__)
 
@@ -226,7 +226,7 @@ class MXClassifier(ClassGradientsMixin, ClassifierMixin, MXEstimator):  # lgtm [
                and providing it takes no effect.
         """
         import mxnet as mx  # lgtm [py/repeated-import]
-        from art.data_generators import MXDataGenerator
+        from Attack.data_generators import MXDataGenerator
 
         if self.optimizer is None:
             raise ValueError("An MXNet optimizer is required for fitting the model.")

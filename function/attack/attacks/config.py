@@ -16,12 +16,12 @@ MY_DATA_PATH: str
 _folder = os.path.expanduser("~")
 if not os.access(_folder, os.W_OK):  # pragma: no cover
     _folder = "/tmp"  # pylint: disable=C0103
-_folder = os.path.join(_folder, ".art")
+_folder = os.path.join(_folder, ".Attack")
 
 
 def set_data_path(path):
     """
-    Set the path for ART's data directory (MY_DATA_PATH).
+    Set the path for Attack's data directory (MY_DATA_PATH).
     """
     expanded_path = os.path.abspath(os.path.expanduser(path))
     os.makedirs(expanded_path, exist_ok=True)

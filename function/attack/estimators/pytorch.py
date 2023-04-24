@@ -40,7 +40,7 @@ class PyTorchEstimator(NeuralNetworkMixin, LossGradientsMixin, BaseEstimator):
 
         # preprocessing = kwargs.get("preprocessing")
         # if isinstance(preprocessing, tuple):
-        #     from art.preprocessing.standardisation_mean_std.pytorch import StandardisationMeanStdPyTorch
+        #     from Attack.preprocessing.standardisation_mean_std.pytorch import StandardisationMeanStdPyTorch
 
         #     kwargs["preprocessing"] = StandardisationMeanStdPyTorch(
         #         mean=preprocessing[0], std=preprocessing[1], device_type=device_type
@@ -75,7 +75,7 @@ class PyTorchEstimator(NeuralNetworkMixin, LossGradientsMixin, BaseEstimator):
         self._check_params()
 
     def _check_params(self) -> None:
-        from art.defences.preprocessor.preprocessor import PreprocessorPyTorch
+        from function.attack.estimators.preprocessor import PreprocessorPyTorch
         super()._check_params()
         self.all_framework_preprocessing = all(
             (isinstance(p, PreprocessorPyTorch) for p in self.preprocessing_operations)
@@ -84,8 +84,8 @@ class PyTorchEstimator(NeuralNetworkMixin, LossGradientsMixin, BaseEstimator):
     # def _apply_preprocessing(self, x, y, fit: bool = False, no_grad=True) -> Tuple[Any, Any]:  # pylint: disable=W0221
     #     import torch  # lgtm [py/repeated-import]
 
-    #     from art.preprocessing.standardisation_mean_std.numpy import StandardisationMeanStd
-    #     from art.preprocessing.standardisation_mean_std.pytorch import StandardisationMeanStdPyTorch
+    #     from Attack.preprocessing.standardisation_mean_std.numpy import StandardisationMeanStd
+    #     from Attack.preprocessing.standardisation_mean_std.pytorch import StandardisationMeanStdPyTorch
 
     #     if not self.preprocessing_operations:
     #         return x, y
@@ -161,8 +161,8 @@ class PyTorchEstimator(NeuralNetworkMixin, LossGradientsMixin, BaseEstimator):
     #     """
     #     import torch  # lgtm [py/repeated-import]
 
-    #     from art.preprocessing.standardisation_mean_std.numpy import StandardisationMeanStd
-    #     from art.preprocessing.standardisation_mean_std.pytorch import StandardisationMeanStdPyTorch
+    #     from Attack.preprocessing.standardisation_mean_std.numpy import StandardisationMeanStd
+    #     from Attack.preprocessing.standardisation_mean_std.pytorch import StandardisationMeanStdPyTorch
 
     #     if not self.preprocessing_operations:
     #         return gradients
