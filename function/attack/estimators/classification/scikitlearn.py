@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (C) The Adversarial Robustness Toolbox (ART) Authors 2018
+# Copyright (C) The Adversarial Robustness Toolbox (Attack) Authors 2018
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 # documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -45,9 +45,9 @@ if TYPE_CHECKING:
     import sklearn
 
     from function.attack.attacks.utils import CLIP_VALUES_TYPE, PREPROCESSING_TYPE
-    from art.defences.preprocessor import Preprocessor
-    from art.defences.postprocessor import Postprocessor
-    from art.metrics.verification_decisions_trees import LeafNode, Tree
+    from Attack.defences.preprocessor import Preprocessor
+    from Attack.defences.postprocessor import Postprocessor
+    from Attack.metrics.verification_decisions_trees import LeafNode, Tree
 
 logger = logging.getLogger(__name__)
 
@@ -369,7 +369,7 @@ class ScikitlearnDecisionTreeClassifier(ScikitlearnClassifier):
         return self.model.tree_.value[node_id] / np.linalg.norm(self.model.tree_.value[node_id])
 
     def _get_leaf_nodes(self, node_id, i_tree, class_label, box) -> List["LeafNode"]:
-        from art.metrics.verification_decisions_trees import LeafNode, Box, Interval
+        from Attack.metrics.verification_decisions_trees import LeafNode, Box, Interval
 
         leaf_nodes = []
 
@@ -572,7 +572,7 @@ class ScikitlearnExtraTreesClassifier(ScikitlearnClassifier, DecisionTreeMixin):
 
         :return: A list of decision trees.
         """
-        from art.metrics.verification_decisions_trees import Box, Tree
+        from Attack.metrics.verification_decisions_trees import Box, Tree
 
         trees = []
 
@@ -645,7 +645,7 @@ class ScikitlearnGradientBoostingClassifier(ScikitlearnClassifier, DecisionTreeM
 
         :return: A list of decision trees.
         """
-        from art.metrics.verification_decisions_trees import Box, Tree
+        from Attack.metrics.verification_decisions_trees import Box, Tree
 
         trees = []
         num_trees, num_classes = self.model.estimators_.shape
@@ -719,7 +719,7 @@ class ScikitlearnRandomForestClassifier(ScikitlearnClassifier):
 
         :return: A list of decision trees.
         """
-        from art.metrics.verification_decisions_trees import Box, Tree
+        from Attack.metrics.verification_decisions_trees import Box, Tree
 
         trees = []
 

@@ -10,7 +10,7 @@ from function.attack.attacks.utils import (
     get_labels_np_array,
     check_and_transform_label_format,
 )
-# from art.summary_writer import SummaryWriter
+# from Attack.summary_writer import SummaryWriter
 
 if TYPE_CHECKING:
     from function.attack.attacks.utils import CLASSIFIER_LOSS_GRADIENTS_TYPE

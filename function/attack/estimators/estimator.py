@@ -1,23 +1,3 @@
-# MIT License
-#
-# Copyright (C) The Adversarial Robustness Toolbox (ART) Authors 2020
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-# documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
-# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
-# persons to whom the Software is furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
-# Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-# WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-"""
-This module implements abstract base and mixin classes for estimators in ART.
-"""
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Tuple, Union, TYPE_CHECKING
 
@@ -33,8 +13,8 @@ if TYPE_CHECKING:
 
 class BaseEstimator(ABC):
     """
-    The abstract base class `BaseEstimator` defines the basic requirements of an estimator in ART. The BaseEstimator is
-    is the highest abstraction of a machine learning model in ART.
+    The abstract base class `BaseEstimator` defines the basic requirements of an estimator in Attack. The BaseEstimator is
+    is the highest abstraction of a machine learning model in Attack.
     """
 
     estimator_params = [
@@ -71,14 +51,14 @@ class BaseEstimator(ABC):
         self._clip_values = clip_values
 
         # self.preprocessing = self._set_preprocessing(preprocessing)
-        # self.preprocessing_defences = self._set_preprocessing_defences(preprocessing_defences)
-        # self.postprocessing_defences = self._set_postprocessing_defences(postprocessing_defences)
+        self.preprocessing_defences = self._set_preprocessing_defences(preprocessing_defences)
+        self.postprocessing_defences = self._set_postprocessing_defences(postprocessing_defences)
         self.preprocessing_operations: List["Preprocessor"] = []
         # BaseEstimator._update_preprocessing_operations(self)
         BaseEstimator._check_params(self)
 
     def _update_preprocessing_operations(self):
-        from art.defences.preprocessor.preprocessor import Preprocessor
+        from function.attack.estimators.preprocessor import Preprocessor
 
         self.preprocessing_operations.clear()
 
@@ -93,12 +73,12 @@ class BaseEstimator(ABC):
     # def _set_preprocessing(
     #     preprocessing: Optional[Union["PREPROCESSING_TYPE", "Preprocessor"]]
     # ) -> Optional["Preprocessor"]:
-    #     from art.defences.preprocessor.preprocessor import Preprocessor
+    #     from function.attack.estimators.preprocessor import Preprocessor
 
     #     if preprocessing is None:
     #         return None
     #     if isinstance(preprocessing, tuple):
-    #         from art.preprocessing.standardisation_mean_std.numpy import StandardisationMeanStd
+    #         from Attack.preprocessing.standardisation_mean_std.numpy import StandardisationMeanStd
 
     #         return StandardisationMeanStd(mean=preprocessing[0], std=preprocessing[1])  # type: ignore
     #     if isinstance(preprocessing, Preprocessor):
@@ -110,7 +90,7 @@ class BaseEstimator(ABC):
     def _set_preprocessing_defences(
         preprocessing_defences: Optional[Union["Preprocessor", List["Preprocessor"]]]
     ) -> Optional[List["Preprocessor"]]:
-        from art.defences.preprocessor.preprocessor import Preprocessor
+        from function.attack.estimators.preprocessor import Preprocessor
 
         if isinstance(preprocessing_defences, Preprocessor):
             return [preprocessing_defences]
@@ -121,7 +101,7 @@ class BaseEstimator(ABC):
     def _set_postprocessing_defences(
         postprocessing_defences: Optional[Union["Postprocessor", List["Postprocessor"]]]
     ) -> Optional[List["Postprocessor"]]:
-        from art.defences.postprocessor.postprocessor import Postprocessor
+        from function.attack.estimators.postprocessor import Postprocessor
 
         if isinstance(postprocessing_defences, Postprocessor):
             return [postprocessing_defences]
@@ -169,8 +149,8 @@ class BaseEstimator(ABC):
         return params
 
     def _check_params(self) -> None:
-        from art.defences.postprocessor.postprocessor import Postprocessor
-        from art.defences.preprocessor.preprocessor import Preprocessor
+        from function.attack.estimators.postprocessor import Postprocessor
+        from function.attack.estimators.preprocessor import Preprocessor
 
         if self._clip_values is not None:
             if len(self._clip_values) != 2:  # pragma: no cover
@@ -190,12 +170,12 @@ class BaseEstimator(ABC):
                 if not isinstance(preprocess, Preprocessor):  # pragma: no cover
                     raise ValueError(
                         "All preprocessing defences have to be instance of "
-                        "art.defences.preprocessor.preprocessor.Preprocessor."
+                        "functional.attack.estimators.preprocessor.Preprocessor."
                     )
         else:  # pragma: no cover
             raise ValueError(
                 "All preprocessing defences have to be instance of "
-                "art.defences.preprocessor.preprocessor.Preprocessor."
+                "functional.attack.estimators.preprocessor.Preprocessor."
             )
 
         if isinstance(self.postprocessing_defences, list):
@@ -203,14 +183,14 @@ class BaseEstimator(ABC):
                 if not isinstance(postproc_defence, Postprocessor):  # pragma: no cover
                     raise ValueError(
                         "All postprocessing defences have to be instance of "
-                        "art.defences.postprocessor.postprocessor.Postprocessor."
+                        "Attack.defences.postprocessor.postprocessor.Postprocessor."
                     )
         elif self.postprocessing_defences is None:
             pass
         else:  # pragma: no cover
             raise ValueError(
                 "All postprocessing defences have to be instance of "
-                "art.defences.postprocessor.postprocessor.Postprocessor."
+                "Attack.defences.postprocessor.postprocessor.Postprocessor."
             )
 
     @abstractmethod
@@ -429,7 +409,7 @@ class NeuralNetworkMixin(ABC):
         :param generator: Batch generator providing `(x, y)` for each epoch.
         :param nb_epochs: Number of training epochs.
         """
-        from function.attack.attacks.data_generators import DataGenerator
+        from Attack.data_generators import DataGenerator
 
         if not isinstance(generator, DataGenerator):
             raise ValueError(
