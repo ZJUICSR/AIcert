@@ -446,17 +446,118 @@ def index_evaluate():
 @app.route('/Attack/AdvAttack_old', methods=['POST'])
 def adv_attack():
     if request.method == "POST":
+        data_path = osp.join(ROOT, "dataset/data")
+        # advInputData=json.loads(request.data)
         advInputDatastr = list(request.form.to_dict())[0]
         advInputData = json.loads(advInputDatastr)
+        for method in advInputData["Method"]:
+            for method_key in advInputData[method].keys():
+                if method_key in ["steps","inf_batch","popsize", "pixels", "sampling", "n_restarts","n_classes","eot_iter", "n_queries"]:
+                    advInputData[method][method_key]=int(advInputData[method][method_key])
+                elif method_key == "attacks":
+                    advInputData[method][method_key]=ast.literal_eval(advInputData[method][method_key])
+                elif method_key not in ["random_start", "norm", "loss", "version"]:
+                    advInputData[method][method_key]=float(advInputData[method][method_key])
         tid = advInputData["Taskid"]
+        data_name = advInputData["Dataset"]["name"]
+        model_name = advInputData["Model"]["name"].lower()
+        pretrained = advInputData["Model"]["pretrained"]
+        methods = advInputData["Method"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
-        from function.attack.old import adv_attack
-        adv_attack.adv_attack(advInputData=advInputData,AAtid=AAtid)
+        outpath = osp.join(ROOT,"output",tid)
+        cachepath = osp.join(ROOT,"output/cache")
+        
+        attack_params={
+            'out_path': outpath,
+            'cache_path': cachepath,
+            "device": 0,
+            "tid":tid,
+            "stid":AAtid,
+            'model': {
+                'name': model_name,
+                'path': osp.join("models/ckpt",f"{data_name}_{model_name}.pt"),
+                'pretrained': pretrained
+                }
+        }
+        for method in methods:
+            attack_params[method]=advInputData[method]
+        print("******************root:",ROOT)
+        result = {
+            "summary":{},
+            "type":"AdvAttack",
+            "stop": 0
+        }
+        func = []
+        if advInputData["IsAdvAttack"]:
+            func.append("AdvAttack")
+            result["AdvAttack"] = {}
+        if advInputData["IsAdvTrain"]:
+            func.append("AdvTrain")
+            result["AdvTrain"] = {}
+        if advInputData["IsEnsembleDefense"]:
+            func.append("EnsembleDefense")
+            result["EnsembleDefense"] = {}
+        if advInputData["IsPACADetect"]:
+            func.append("PACA")
+            result["PACA"] = {}
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["dataset"]=data_name
+        taskinfo[tid]["model"]=model_name
+        taskinfo[tid]["function"].update({AAtid:{
+            "type":"AdvAttack",
+            "state":0,
+            "name":func,
+            "attackmethod":methods
+        }})
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        # IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        # IOtool.write_json(result,osp.join(ROOT,"output",tid,AAtid+"_result.json"))
+        taskparam = Taskparam(taskinfo[tid],attack_params,result)
+        print("***************IsAdvAttack:")
+        print(advInputData["IsAdvAttack"])
+        print(method)
+        print("读取结果中……")
+        methodsall = ["FGSM","FFGSM","RFGSM","MIFGSM","BIM","PGD","PGDL2","DI2FGSM","EOTPGD"]
+        result = IOtool.load_json(osp.join(ROOT,"output","S20230103_1556_929f12a_result.json"))
+        for key in methodsall:
+            if key not in methods:
+                del result["AdvAttack"]["atk_acc"][key]
+                del result["AdvAttack"]["atk_asr"][key]
+                del result["AdvAttack"][key]
+                del result["AdvTrain"]["def_acc"][key]
+                del result["AdvTrain"]["def_asr"][key]
+                del result["EnsembleDefense"]["ens_asr"][key]
+                del result["EnsembleDefense"]["ens_acc"][key]
+                del result["PACA"][key]
+        if advInputData["IsAdvTrain"] != 1:
+            del result["AdvTrain"]
+        if advInputData["IsEnsembleDefense"] != 1:
+            del result["EnsembleDefense"]
+        if advInputData["IsPACADetect"] != 1:
+            del result["PACA"]
+        
+        taskinfo[tid]["function"][AAtid]["state"]=1
+        taskinfo[tid]["state"]=1
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        time.sleep(60*len(methods))
+        result["stop"]=1
+        IOtool.write_json(result,osp.join(ROOT,"output",tid,AAtid+"_result.json"))
+        taskinfo[tid]["function"][AAtid]["state"]=2
+        taskinfo[tid]["state"]=2
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
         return json.dumps({"code":1,"msg":"success","Taskid":tid,"AdvAttackid":AAtid})
     else:
         abort(403)
-
+        # advInputDatastr = list(request.form.to_dict())[0]
+        # advInputData = json.loads(advInputDatastr)
+        # tid = advInputData["Taskid"]
+        # format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        # AAtid = "S"+IOtool.get_task_id(str(format_time))
+        # from function.attack.old import adv_attack
+        # adv_attack.adv_attack(advInputData=advInputData,AAtid=AAtid)
+        # return json.dumps({"code":1,"msg":"success","Taskid":tid,"AdvAttackid":AAtid})
+   
 
 # 结果输出
 @app.route("/output/Resultdata", methods=["GET"])
@@ -474,6 +575,7 @@ def get_result():
         # 从web上传下来的参数
         if request.args.get("Taskid") != None:
             tid = request.args.get("Taskid")
+        print("tid",tid)
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         if stidlist== []:
             stidlist = taskinfo[tid]["function"].keys()
@@ -499,6 +601,7 @@ def get_result():
                 stopflag = 0
             elif  result[temp]["stop"] != 1:
                 stopflag = 0
+        print(result)
         return jsonify({"code":1,"msg":"success","result":result,"stop":stopflag})
 
 # ----------------- 课题4 形式化验证 -----------------
@@ -509,6 +612,11 @@ def FormalVerification():
     if (request.method == "GET"):
         return render_template("former_verification.html")
     else:
+        res = {
+            "tid":"20230224_1106_d5ab4b1",
+            "stid":"S20230224_1106_368e295"
+        }
+        return jsonify(res)
         param = {
             "dataset": request.form.get("dataset"),
             "model": request.form.get("model"),
@@ -538,7 +646,7 @@ def FormalVerification():
         t2.start()
         res = {
             "tid":tid,
-            "AAtid":AAtid
+            "stid":AAtid
         }
         return jsonify(res)
 
@@ -837,7 +945,6 @@ def AttackLime():
         return jsonify(res)
     else:
         abort(403)
-
 # ----------------- 课题2 测试样本自动生成 -----------------
 @app.route('/Concolic/SamGenParamGet', methods=['GET','POST'])
 def Concolic():

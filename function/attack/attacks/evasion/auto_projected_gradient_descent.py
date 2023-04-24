@@ -127,19 +127,20 @@ class AutoProjectedGradientDescent(EvasionAttack):
 
                 self._loss_object = DifferenceLogitsRatioPyTorch()
 
-            estimator_apgd = PyTorchClassifier(
-                model=estimator.model,
-                loss=self._loss_object,
-                input_shape=estimator.input_shape,
-                nb_classes=estimator.nb_classes,
-                optimizer=None,
-                channels_first=estimator.channels_first,
-                clip_values=estimator.clip_values,
-                preprocessing_defences=estimator.preprocessing_defences,
-                postprocessing_defences=estimator.postprocessing_defences,
-                preprocessing=None,
-                device_type=str(estimator._device),
-            )
+            # estimator_apgd = PyTorchClassifier(
+            #     model=estimator.model,
+            #     loss=self._loss_object,
+            #     input_shape=estimator.input_shape,
+            #     nb_classes=estimator.nb_classes,
+            #     optimizer=None,
+            #     channels_first=estimator.channels_first,
+            #     clip_values=estimator.clip_values,
+            #     preprocessing_defences=estimator.preprocessing_defences,
+            #     postprocessing_defences=estimator.postprocessing_defences,
+            #     preprocessing=None,
+            #     device_type=str(estimator._device),
+            #     device=self.estimator.device,
+            # )
 
         super().__init__(estimator=estimator)
         self.norm = norm
