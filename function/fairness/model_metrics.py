@@ -34,6 +34,8 @@ METRICS_FULL_NAME = {
         "FOr": 'False Omission Ratio',
         "FDd": 'False Discovery Difference',
         "FDr": 'False Discovery Ratio',
+        "PRd": "Precision Difference",
+        "F1d": "F1 Score Difference",
         # prediction fairness metrics
         "PE": 'Predictive Equality',
         "EOP": 'Equal Opportunity',
