@@ -288,10 +288,10 @@ class BackdoorAttacker():
             # 总样本上的准确率
             self.accuracy, _ = compute_accuracy(self.classifier.predict(xs, batch_size=batch_size), ys)
             # 干净样本上的准确率
-            self.accuracyonbm, _ = compute_accuracy(self.classifier.predict(x_clean, batch_size=batch_size), y_clean)
+            self.accuracyonb, _ = compute_accuracy(self.classifier.predict(x_clean, batch_size=batch_size), y_clean)
             # 后门样本上的攻击成功率
             self.attack_success_rate, _ = compute_accuracy(self.classifier.predict(x_poisoned, batch_size=batch_size), y_poisoned)
-        return self.accuracy, self.accuracyonbm, self.attack_success_rate
+        return self.accuracy, self.accuracyonb, self.attack_success_rate
 
     def backdoorattack(self, method: str="PoisoningAttackBackdoor", pp_poison: float=0.5, target: int=3, batch_size:int=700, num_epochs=40, lr=0.01, alpha=50, test_sample_num:int=2048, save_num: int=32, save_path=None):
         """
