@@ -24,8 +24,8 @@ class UniversalPerturbation(EvasionAttack):
         "Simba": "attacks.evasion.simba.SimBA",
     }
     attack_params = EvasionAttack.attack_params + [
-        # "attacker",
-        # "attacker_params",
+        "attacker",
+        "attacker_params",
         "max_iter",
         "eps",
         "norm",
