@@ -69,7 +69,7 @@ def dataset_overall_fairness(result):
     return [overall_group_fairness, overall_individual_fairness, overall_fairness]
 
 def model_overall_fairness(result, metrics=['DP', 'PE', 'EOP','EOD', 'PP', 'OMd', 'FDd', 'FOd']):
-    
+    print(result)
     values = {key: result[METRICS_FULL_NAME[key]] for key in metrics if METRICS_FULL_NAME[key] in result}
     values = list(get_all_values(values))
     overall_group_fairness = 1 - np.mean(values)
@@ -78,7 +78,7 @@ def model_overall_fairness(result, metrics=['DP', 'PE', 'EOP','EOD', 'PP', 'OMd'
     return [overall_group_fairness, overall_individual_fairness, overall_fairness]
 
 # dataset evaluation
-def dataset_evaluate(dataset_name, sensattrs=[], targetattrs=[]):
+def dataset_evaluate(dataset_name, sensattrs=[], targetattrs=[], logger=None):
     """Evaluates fairness of built-in dataset 
 
     Args:
@@ -104,15 +104,15 @@ def dataset_evaluate(dataset_name, sensattrs=[], targetattrs=[]):
     elif dataset_name == 'German':
         dataset_cls = GermanDataset
     else:
-        logger.exception('invalid data set: \'{}\''.format(dataset_name))
+        logger.info('invalid data set: \'{}\''.format(dataset_name))
         raise ValueError('invalid data set: \'{}\''.format(dataset_name))
     
     # check attrs validity
     if not all(attr in dataset_cls.favorable.keys() for attr in targetattrs):
-        logger.exception('invalid target attribute: \'{}\''.format(targetattrs))
+        logger.info('invalid target attribute: \'{}\''.format(targetattrs))
         raise ValueError('invalid target attribute: \'{}\''.format(targetattrs))
     if not all(attr in dataset_cls.privileged for attr in sensattrs):
-        logger.exception('invalid sensitive attribute: \'{}\''.format(sensattrs))
+        logger.info('invalid sensitive attribute: \'{}\''.format(sensattrs))
         raise ValueError('invalid sensitive attribute: \'{}\''.format(sensattrs))
     
     # take all sensitive/target attributes as default
@@ -158,7 +158,7 @@ def dataset_evaluate(dataset_name, sensattrs=[], targetattrs=[]):
 
 # dataset debiasing e.g. the first element in the list is original, the second is improved
 
-def dataset_debias(dataset_name, algorithm_name, sensattrs=[], targetattrs=[]):
+def dataset_debias(dataset_name, algorithm_name, sensattrs=[], targetattrs=[], logger=None):
     """Debias built-in datasets
 
     Args:
@@ -186,7 +186,7 @@ def dataset_debias(dataset_name, algorithm_name, sensattrs=[], targetattrs=[]):
     elif dataset_name == 'German':
         dataset_cls = GermanDataset
     else:
-        logger.exception('invalid data set: \'{}\''.format(dataset_name))
+        logger.info('invalid data set: \'{}\''.format(dataset_name))
         raise ValueError('invalid data set: \'{}\''.format(dataset_name))
 
     if algorithm_name == 'LFR':
@@ -194,15 +194,15 @@ def dataset_debias(dataset_name, algorithm_name, sensattrs=[], targetattrs=[]):
     elif algorithm_name == 'Reweighing':
         algorithm_cls = Reweighing
     else:
-        logger.exception('invalid algoritm: \'{}\''.format(algorithm_name))
+        logger.info('invalid algoritm: \'{}\''.format(algorithm_name))
         raise ValueError('invalid algoritm: \'{}\''.format(algorithm_name))
     
     # check attrs validity
     if not all(attr in dataset_cls.favorable.keys() for attr in targetattrs):
-        logger.exception('invalid target attribute: \'{}\''.format(targetattrs))
+        logger.info('invalid target attribute: \'{}\''.format(targetattrs))
         raise ValueError('invalid target attribute: \'{}\''.format(targetattrs))
     if not all(attr in dataset_cls.privileged for attr in sensattrs):
-        logger.exception('invalid sensitive attribute: \'{}\''.format(sensattrs))
+        logger.info('invalid sensitive attribute: \'{}\''.format(sensattrs))
         raise ValueError('invalid sensitive attribute: \'{}\''.format(sensattrs))
 
     # take all sensitive/target attributes as default
@@ -255,7 +255,7 @@ def dataset_debias(dataset_name, algorithm_name, sensattrs=[], targetattrs=[]):
         return result
 
 # evaluate model fairness
-def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, generalized=False):
+def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, generalized=False, logger=None):
     """Evaluate fairness of model trained on built in dataset
 
     Args:
@@ -284,15 +284,15 @@ def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', '
     elif dataset_name == 'German':
         dataset_cls = GermanDataset
     else:
-        logger.exception('invalid data set: \'{}\''.format(dataset_name))
+        logger.info('invalid data set: \'{}\''.format(dataset_name))
         raise ValueError('invalid data set: \'{}\''.format(dataset_name))
     
     # check attrs validity
     if all((not targetattr in dataset_cls.favorable.keys(), targetattr is not None)):
-        logger.exception('invalid target attribute: \'{}\''.format(targetattr))
+        logger.info('invalid target attribute: \'{}\''.format(targetattr))
         raise ValueError('invalid target attribute: \'{}\''.format(targetattr))
     if not all(attr in dataset_cls.privileged for attr in sensattrs):
-        logger.exception('invalid sensitive attribute: \'{}\''.format(sensattrs))
+        logger.info('invalid sensitive attribute: \'{}\''.format(sensattrs))
         raise ValueError('invalid sensitive attribute: \'{}\''.format(sensattrs))
 
     # take all sensitive attributes as default
@@ -305,7 +305,7 @@ def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', '
     if model_name == '3 Hidden-layer FCN':
         model_cls = Classifier
     else:
-        logger.exception('invalid model: \'{}\''.format(model_name))
+        logger.info('invalid model: \'{}\''.format(model_name))
         raise ValueError('invalid model: \'{}\''.format(model_name))
 
     # training model
@@ -324,7 +324,7 @@ def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', '
         else:
             m = model_metrics.group_fairness_metrics(metrics=metric)
         result[METRICS_FULL_NAME[metric]] = {k: m[k] for k in sensattrs}
-    result['Consistency'] = model_metrics.consistency()
+    result['Consistency'] = float(model_metrics.consistency())
 
     # proportion of groups given favorable prediction
     logger.info(f'calculating proportion of groups given favorable prediction for model: \'{model_name}\' on dataset: \'{dataset_name}\'.')
@@ -338,7 +338,7 @@ def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', '
 
     # overall fairness
     logger.info(f'calculating overall fairness for model: \'{model_name}\' on dataset: \'{dataset_name}\'.')
-    result1 = model_overall_fairness(result=result)
+    result1 = model_overall_fairness(result=result, metrics=metrics)
     result['Overall group fairness'] = result1[0]
     result['Overall individual fairness'] = result1[1]
     result['Overall fairness'] = result1[2]
@@ -348,7 +348,7 @@ def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', '
 
 
 # model debiasing
-def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, generalized=False):
+def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, generalized=False, logger=None):
     """Debias model trained on built-in dataset
 
     Args:
@@ -379,15 +379,15 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
     elif dataset_name == 'German':
         dataset_cls = GermanDataset
     else:
-        logger.exception('invalid data set: \'{}\''.format(dataset_name))
+        logger.info('invalid data set: \'{}\''.format(dataset_name))
         raise ValueError('invalid data set: \'{}\''.format(dataset_name))
     
     # check attrs validity
     if all((not targetattr in dataset_cls.favorable.keys(), targetattr is not None)):
-        logger.exception('invalid target attribute: \'{}\''.format(targetattr))
+        logger.info('invalid target attribute: \'{}\''.format(targetattr))
         raise ValueError('invalid target attribute: \'{}\''.format(targetattr))
     if not all(attr in dataset_cls.privileged for attr in sensattrs):
-        logger.exception('invalid sensitive attribute: \'{}\''.format(sensattrs))
+        logger.info('invalid sensitive attribute: \'{}\''.format(sensattrs))
         raise ValueError('invalid sensitive attribute: \'{}\''.format(sensattrs))
 
     # take all sensitive attributes as default
@@ -400,7 +400,7 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
     if model_name == '3 Hidden-layer FCN':
         model_cls = Classifier
     else:
-        logger.exception('invalid model: \'{}\''.format(model_name))
+        logger.info('invalid model: \'{}\''.format(model_name))
         raise ValueError('invalid model: \'{}\''.format(model_name))
 
     if algorithm_name == 'Domain Independent':
@@ -412,7 +412,7 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
     elif algorithm_name in ['Reject Option-'+c for c in ['SPd', 'AOd', 'EOd']]:
         algorithm_cls = RejectOptionClassification
     else:
-        logger.exception('invalid algorithm: \'{}\''.format(algorithm_name))
+        logger.info('invalid algorithm: \'{}\''.format(algorithm_name))
         raise ValueError('invalid algorithm: \'{}\''.format(algorithm_name))
 
     # training model
@@ -456,7 +456,7 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
             m = model_metrics.group_fairness_metrics(metrics=metric)
             new_m = new_metrics.group_fairness_metrics(metrics=metric)
         result[METRICS_FULL_NAME[metric]] = [{k:d[k] for k in sensattrs} for d in[m, new_m]]
-    result['Consistency'] = [model_metrics.consistency(), new_metrics.consistency()]
+    result['Consistency'] = [float(model_metrics.consistency()), float(new_metrics.consistency())]
     # if result['Consistency'] is None:
     #     result['Consistency'] = [metrics.consistency(), new_metrics.consistency()]
 
@@ -473,8 +473,8 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
     # overall fairness
     logger.info(f'calculating overall fairness for model: \'{model_name}\' on dataset: \'{dataset_name}\'.')
     result1, result2 = split_result(result)
-    result1 = model_overall_fairness(result=result1)
-    result2 = model_overall_fairness(result=result2)
+    result1 = model_overall_fairness(result=result1, metrics=metrics)
+    result2 = model_overall_fairness(result=result2, metrics=metrics)
     result['Overall group fairness'] = [result1[0], result2[0]]
     result['Overall individual fairness'] = [result1[1], result2[1]]
     result['Overall fairness'] = [result1[2], result2[2]]
@@ -482,7 +482,7 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
     logger.info(f'model debiasing done.')
     return result
 
-def dataset_analysis(dataset_name, attrs=[], targetattrs=[], prptn_thd=0.1):
+def dataset_analysis(dataset_name, attrs=[], targetattrs=[], prptn_thd=0.1, logger=None):
     """Analyize statistical characteristics (correlation coefficient and proportion) of built-in datasets. For m attribute and n target attributes there will be m * n pairs of correlation coefficient sets (4 correlation coefficients supported). Categorical attributes among 'attrs' will be given proportion analysis.
 
     Args:
@@ -509,7 +509,7 @@ def dataset_analysis(dataset_name, attrs=[], targetattrs=[], prptn_thd=0.1):
     elif dataset_name == 'German':
         dataset_cls = GermanDataset
     else:
-        logger.exception('invalid data set: \'{}\''.format(dataset_name))
+        logger.info('invalid data set: \'{}\''.format(dataset_name))
         raise ValueError('invalid data set: \'{}\''.format(dataset_name))
     
     # take all sensitive/target attributes as default
@@ -552,8 +552,11 @@ def dataset_analysis(dataset_name, attrs=[], targetattrs=[], prptn_thd=0.1):
     
     # overall analysis
     logger.info('calculating overall analysis of dataset')
-    result['Overall Correlation'] = calculate_overall_correlation(result['Correlation coefficients'])
-    result['Overall uniformity'] = calculate_distribution_uniformity(result['Proportion'])
+    try:
+        result['Overall Correlation'] = calculate_overall_correlation(result['Correlation coefficients'])
+        result['Overall uniformity'] = calculate_distribution_uniformity(result['Proportion'])
+    except:
+        pass
 
     return result
 
