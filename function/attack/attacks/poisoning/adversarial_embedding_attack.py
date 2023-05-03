@@ -58,10 +58,12 @@ class PoisoningAttackAdversarialEmbedding(PoisoningAttackTransformer):
 
     def __init__(
         self,
-        backdoor: PoisoningAttackBackdoor,
+        backdoor: PoisoningAttackBackdoor, device
     ):
         # super().__init__(classifier=classifier)
         self.backdoor = backdoor
+        self.device = device
+        
     
     def poison_estimator(self, x: np.ndarray, y: np.ndarray, **kwargs) -> "CLASSIFIER_TYPE":
         return super().poison_estimator(x, y, **kwargs)
@@ -120,4 +122,4 @@ class PoisoningAttackAdversarialEmbedding(PoisoningAttackTransformer):
                 input_shape=(3, 32, 32),
                 nb_classes=10,
             )
-            print("Epoch [{}/{}], train_loss: {:.6f}, discriminator_loss: {:.16f}, accuracy: {:.6f}".format(epoch+1, num_epochs, train_loss1 / total_step, train_loss2 / total_step, compute_accuracy(self.classifier.predict(x_train, batch_size=batch_size), y_train)))
+            print("Epoch [{}/{}], train_loss: {:.6f}, discriminator_loss: {:.16f}, accuracy: {:.6f}".format(epoch+1, num_epochs, train_loss1 / total_step, train_loss2 / total_step, compute_accuracy(self.classifier.predict(x_train, batch_size=batch_size), y_train)[0]))
