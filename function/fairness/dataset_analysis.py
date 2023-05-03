@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats import pearsonr, spearmanr, kendalltau
 from sklearn.metrics import normalized_mutual_info_score
 import math
-from fairness_datasets import FairnessDataset, intersection
+from .fairness_datasets import FairnessDataset, intersection
 
 def correlation_analysis(dataframe, attr1, attr2, attr1_type, attr2_type):
     """
