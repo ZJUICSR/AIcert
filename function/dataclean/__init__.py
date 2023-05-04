@@ -5,8 +5,8 @@ import os.path as osp
 import json
 import logging
 # from Loader import ArgpLoader
-# import dataloader_clean
-from .dataloader_clean import *
+import dataloader_clean
+# from .dataloader_clean import *
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
@@ -55,15 +55,15 @@ def run(params):
     test_data = datasets.CIFAR10(root="./dataset/data",train=False,download=True,transform=transform)
     # train_data = datasets.CIFAR10(root=ROOT[:-19]+"/dataset/data",train=True,download=True,transform=transform)
     # test_data = datasets.CIFAR10(root=ROOT[:-19]+"/dataset/data",train=False,download=True,transform=transform)
-    train_loader = DataLoader(train_data,batch_size=4)
-    test_loader = DataLoader(test_data,batch_size=4)
+    train_loader = DataLoader(train_data,batch_size=64)
+    test_loader = DataLoader(test_data,batch_size=64)
     logging.info("[模型测试阶段]【指标2.1】即将运行课题二的【异常数据检测】算法：dataloader_clean")
     dataloader_clean.run(train_loader, test_loader, params, log_func=print)
 
 if __name__=='__main__':
     params = {}
     params["dataset"] = {}
-    params["dataset"]["name"] = "CIFAR10"
+    params["dataset"]["name"] = "CIFAR10" # CIFAR10/MNIST/table/
     params["out_path"] = "./"
     params["device"] = 3
 
