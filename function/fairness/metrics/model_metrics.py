@@ -11,7 +11,6 @@ from metrics.metric_utils import *
 #     return result
 
 # select out priviledged and unpriiviledged samples from dataset
-
 METRICS_FULL_NAME = {
         # label-agnostic group fairness metrics
         "DI" : 'Dsiaprate Impact',
@@ -21,18 +20,25 @@ METRICS_FULL_NAME = {
         "OMr": 'Overall Misclassification Ratio',
         "FPd": 'False Positive Difference',
         "FPr": 'False Positive Ratio',
+        "FPn": "False Positive Number",
         "TPd": 'True Positive Difference',
         "TPr": 'True Positive Ratio',
+        "TPn": 'True Positive Number',
         "FNd": 'False Negative Difference',
         "FNr": 'False Negative Ratio',
+        "FNn": 'False Negative Number',
         "TNd": 'True Negative Difference',
         "TNr": 'True Negative Ratio',
+        "TNn": 'True Negative Number',
         "FOd": 'False Omission Difference',
         "FOr": 'False Omission Ratio',
         "FDd": 'False Discovery Difference',
         "FDr": 'False Discovery Ratio',
+        "PRd": "Precision Difference",
+        "F1d": "F1 Score Difference",
         # prediction fairness metrics
         "PE": 'Predictive Equality',
+        "EOP": 'Equal Opportunity',
         "EOD": 'Equal Odds',
         "PP": 'Predictive Parity',
     }
@@ -69,6 +75,7 @@ class ModelMetrics(DatasetMetrics): # binary label and binary group only
 
         # prediction fairness metrics
         "PE": predictive_equality,
+        "EOP": equal_opportunity,
         "EOD": equal_odds,
         "PP": predictive_parity,
         "TEE": treatment_equality,
@@ -178,10 +185,3 @@ class ModelMetrics(DatasetMetrics): # binary label and binary group only
         x = np.array(self.dataset.X)
         y = self.yh
         return consistency(x, y)
-        
-
-
-
-    
-
-    
