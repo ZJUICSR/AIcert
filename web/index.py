@@ -698,6 +698,7 @@ def AdvAttack():
     """
     global LiRPA_LOGS
     if (request.method == "POST"):
+        print(request.data)
         inputParam = json.loads(request.data)
         tid = inputParam["Taskid"]
         inputParam["device"] = "cuda:0"
