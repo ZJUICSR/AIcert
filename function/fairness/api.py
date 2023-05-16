@@ -597,19 +597,19 @@ def test2():
     # print(model_evaluate("Compas", '3 Hidden-layer FCN'))
 
     # exit()
-    for dataset in ['Compas', 'Adult', 'German']:
-    # for dataset in ['Compas']: # go through all data sets
+    # for dataset in ['Compas', 'Adult', 'German']:
+    for dataset in ['Adult']: # go through all data sets
         # print('======dataset evaluation: {}======'.format(dataset))
-        print(dataset_evaluate(dataset_name=dataset))
+        # print(dataset_evaluate(dataset_name=dataset))
         # print(dataset_analysis(dataset_name=dataset))
         # continue
-        for dataset_algorithm in ['LFR', 'Reweighing']: # go through all data set debias algorithms
+        # for dataset_algorithm in ['LFR', 'Reweighing']: # go through all data set debias algorithms
         # for dataset_algorithm in ['LFR']: # go through all data set debias algorithms
-            print('====dataset debiasing: {}, {}===='.format(dataset, dataset_algorithm))
-            result = dataset_debias(dataset_name=dataset, algorithm_name=dataset_algorithm)
-            print(result)
+            # print('====dataset debiasing: {}, {}===='.format(dataset, dataset_algorithm))
+            # result = dataset_debias(dataset_name=dataset, algorithm_name=dataset_algorithm)
+            # print(result)
             # print("transformed debias result: ", split_result(result=result))
-            print("original result: ", result)
+            # print("original result: ", result)
         for model in ['3 Hidden-layer FCN']: # go through all models
             for target_attr in TARGET_ATTR[dataset]:
                 print('====model evaluation: {}-{}, {}===='.format(dataset, target_attr, model))
