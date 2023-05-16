@@ -37,7 +37,7 @@ class SquareAttack(EvasionAttack):
         norm='inf',
         n_queries=5000,
         eps=8/255,
-        p_init=0.3,
+        p_init=0.05,
         loss_type='margin', # "ce"
         n_restarts=1,
         targeted=False,
@@ -164,7 +164,7 @@ class SquareAttack(EvasionAttack):
         return p
 
     def attack_single_run(self, x, y):
-        x_best = None
+        self.norm = "L2" if self.norm == 2 else "Linf"
         with torch.no_grad():
             # adv = x.clone()
             c, h, w = x.shape[1:]
@@ -175,11 +175,11 @@ class SquareAttack(EvasionAttack):
                 x_best = torch.clamp(x + self.eps * self.random_choice(
                     [x.shape[0], c, 1, w]), 0., 1.)
                 margin_min, loss_min = self.margin_and_loss(x_best, y)
-                self.n_queries = torch.ones(x.shape[0]).to(self.estimator.device)
+                n_queries = torch.ones(x.shape[0]).to(self.estimator.device)
                 s_init = int(math.sqrt(self.p_init * n_features / c))
                 
                 if (margin_min < 0.0).all():
-                    return self.n_queries, x_best
+                    return n_queries, x_best
                 
                 for i_iter in range(self.n_queries):
                     idx_to_fool = (margin_min > 0.0).nonzero().squeeze()
@@ -226,7 +226,7 @@ class SquareAttack(EvasionAttack):
                         *[1]*len(x.shape[:-1])])
                     x_best[idx_to_fool] = idx_improved * x_new + (
                         1. - idx_improved) * x_best_curr
-                    self.n_queries[idx_to_fool] += 1.
+                    n_queries[idx_to_fool] += 1.
 
                     ind_succ = (margin_min <= 0.).nonzero().squeeze()
 
@@ -250,11 +250,11 @@ class SquareAttack(EvasionAttack):
                 x_best = torch.clamp(x + self.normalize(delta_init
                     ) * self.eps, 0., 1.)
                 margin_min, loss_min = self.margin_and_loss(x_best, y)
-                self.n_queries = torch.ones(x.shape[0]).to(self.estimator.device)
+                n_queries = torch.ones(x.shape[0]).to(self.estimator.device)
                 s_init = int(math.sqrt(self.p_init * n_features / c))
                 
                 if (margin_min < 0.0).all():
-                    return self.n_queries, x_best
+                    return n_queries, x_best
 
                 for i_iter in range(self.n_queries):
                     idx_to_fool = (margin_min > 0.0).nonzero().squeeze()
@@ -330,7 +330,7 @@ class SquareAttack(EvasionAttack):
                         *[1]*len(x.shape[:-1])])
                     x_best[idx_to_fool] = idx_improved * x_new + (
                         1. - idx_improved) * x_best_curr
-                    self.n_queries[idx_to_fool] += 1.
+                    n_queries[idx_to_fool] += 1.
 
                     ind_succ = (margin_min <= 0.).nonzero().squeeze()
 
@@ -340,7 +340,7 @@ class SquareAttack(EvasionAttack):
                     if ind_succ.numel() == n_ex_total:
                         break
         
-        return self.n_queries, x_best
+        return n_queries, x_best
 
     def generate(self, x, y=None):
         self.orig_dim = list(x.shape[1:])
