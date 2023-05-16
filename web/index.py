@@ -542,7 +542,7 @@ def Concolic():
         concolic_dataset = request.form.get("dataname")
         concolic_model = request.form.get("modelname")
         norm = request.form.get("norm")
-        
+        times = request.form.get("times")
         tid = request.form.get("tid")
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
@@ -558,7 +558,7 @@ def Concolic():
         taskinfo[tid]["dataset"]=concolic_dataset
         taskinfo[tid]["model"]=concolic_model
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        t2 = threading.Thread(target=interface.run_concolic,args=(tid,AAtid,concolic_dataset,concolic_model,norm))
+        t2 = threading.Thread(target=interface.run_concolic,args=(tid,AAtid,concolic_dataset,concolic_model,norm, times))
         t2.setDaemon(True)
         t2.start()
         res = {"code":1,"msg":"success","Taskid":tid,"Concolicid":AAtid}
