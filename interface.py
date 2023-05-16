@@ -195,7 +195,7 @@ def run_verify(tid, AAtid, param):
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
     
     
-def run_concolic(tid, AAtid, dataname, modelname, norm):
+def run_concolic(tid, AAtid, dataname, modelname, norm, times):
     """测试样本自动生成
     :params tid:主任务ID
     :params AAtid:子任务id
@@ -204,7 +204,7 @@ def run_concolic(tid, AAtid, dataname, modelname, norm):
     :params norm:范数约束
     """
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = concolic.run_concolic(dataname.lower(), modelname.lower(), norm.lower(), osp.join(ROOT,"output", tid, AAtid))   
+    res = concolic.run_concolic(dataname.lower(), modelname.lower(), norm.lower(), int(times), osp.join(ROOT,"output", tid, AAtid))   
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
@@ -234,8 +234,7 @@ def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
     :output res:需保存到子任务json中的返回结果/路径
     """
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = env_test.run_env_frame(matchmethod,frameworkname,frameversion, osp.join(ROOT,"output", tid, AAtid))
-    # res = concolic.run_concolic(dataname, modelname, norm)   
+    res = env_test.run_env_frame(matchmethod.lower(), frameworkname.lower(), frameversion, ROOT, osp.join(ROOT,"output", tid, AAtid))
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
