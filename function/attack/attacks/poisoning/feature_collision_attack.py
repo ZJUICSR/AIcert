@@ -73,12 +73,12 @@ class FeatureCollisionAttack(PoisoningAttackWhiteBox):
         if num_poison == 0:  # pragma: no cover
             raise ValueError("Must input at least one poison point")
         target_features = self.estimator.get_activations(self.target, self.feature_layer, 1)
-        for init_attack in x:
+        for init_attack in trange(x, desc="Feature collision"):
             old_attack = np.expand_dims(np.copy(init_attack), axis=0)
             poison_features = self.estimator.get_activations(old_attack, self.feature_layer, 1)
             old_objective = self.objective(poison_features, target_features, init_attack, old_attack)
             last_m_objectives = [old_objective]
-            for i in trange(self.max_iter, desc="Feature collision", disable=not self.verbose):
+            for i in trange(self.max_iter, desc="Feature collision", disable=True):
                 # forward step
                 new_attack = self.forward_step(old_attack)
 
@@ -120,16 +120,17 @@ class FeatureCollisionAttack(PoisoningAttackWhiteBox):
         return np.vstack(final_attacks)
 
     def forward_step(self, poison: np.ndarray) -> np.ndarray:
-        if isinstance(self.estimator, KerasClassifier):
-            (attack_grad,) = self.estimator.custom_loss_gradient(
-                self.attack_loss,
-                [self.poison_placeholder, self.target_placeholder],
-                [poison, self.target],
-                name="feature_collision_" + str(self.feature_layer),
-            )
-        elif isinstance(self.estimator, PyTorchClassifier):
-            attack_grad = self.estimator.custom_loss_gradient(self.attack_loss, poison, self.target, self.feature_layer)
+        # if isinstance(self.estimator, KerasClassifier):
+        #     (attack_grad,) = self.estimator.custom_loss_gradient(
+        #         self.attack_loss,
+        #         [self.poison_placeholder, self.target_placeholder],
+        #         [poison, self.target],
+        #         name="feature_collision_" + str(self.feature_layer),
+        #     )
+        # elif isinstance(self.estimator, PyTorchClassifier):
+        #     attack_grad = self.estimator.custom_loss_gradient(self.attack_loss, poison, self.target, self.feature_layer)
 
+        attack_grad = self.estimator.custom_loss_gradient(self.attack_loss, poison, self.target, self.feature_layer)
         poison -= self.learning_rate * attack_grad[0]
 
         return poison
