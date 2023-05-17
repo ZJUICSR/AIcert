@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 import os.path as osp
-# from function.attack.old.attack import AdvAttack
 import interface
 import os, json, datetime, pickle, io, ast, time
 import pytz,shutil
@@ -12,7 +11,8 @@ from flask import render_template, redirect, url_for, Flask, request, jsonify, s
 from flask import current_app as abort
 from multiprocessing import Process
 from gol import Taskparam
-from function.fairness import api
+from function.fairness import run_model_evaluate
+from function.ex_methods.module.func import Logger
 from flask_cors import *
 import threading
 ROOT = os.getcwd()
@@ -107,20 +107,20 @@ def DataFairnessEvaluate():
             "dataset":dataname,
         }})
         taskinfo[tid]["dataset"]=dataname
-        senAttrList=json.loads(inputParam["senAttrList"])
-        tarAttrList=json.loads(inputParam["tarAttrList"])
-        staAttrList=json.loads(inputParam["staAttrList"])
+        try:
+            senAttrList=json.loads(inputParam["senAttrList"])
+            tarAttrList=json.loads(inputParam["tarAttrList"])
+            staAttrList=json.loads(inputParam["staAttrList"])
+        except:
+            senAttrList=inputParam["senAttrList"]
+            tarAttrList=inputParam["tarAttrList"]
+            staAttrList=inputParam["staAttrList"]
         
+        logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
         # 执行任务，运行时间超过3分钟的请使用多线程，参考DataFairnessDebias函数的执行部分
-        res = api.dataset_evaluate(dataname, sensattrs=senAttrList, targetattrs=tarAttrList)
-        res1 = api.dataset_analysis(dataname, attrs=staAttrList, targetattrs=staAttrList)
-        res['Corelation coefficients'] = res1['Corelation coefficients']
-        for key in res1['Proportion'].keys():
-            if key not in res['Proportion'].keys():
-                res['Proportion'][key] = res1['Proportion'][key]
-        print(res)
+        from function.fairness import run_dataset_evaluate
+        res = run_dataset_evaluate(dataname, sensattrs=senAttrList, targetattrs=tarAttrList, staAttrList=staAttrList, logging=logging)
         # 执行完成，结果中的stop置为1，表示结束
-        
         res["stop"] = 1
         # 保存结果
         IOtool.write_json(res,osp.join(ROOT,"output", tid, stid+"_result.json"))
@@ -144,13 +144,14 @@ def DataFairnessDebias():
     """
     global LiRPA_LOGS
     if (request.method == "POST"):
-        dataname = request.form.get("dataname")
-        datamethod = request.form.get("datamethod")
-        tid = request.form.get("tid")
+        inputParam = json.loads(request.data)
+        dataname = inputParam["dataname"]
+        datamethod = inputParam["datamethod"]
+        tid = inputParam["tid"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
-        AAtid = "S"+IOtool.get_task_id(str(format_time))
+        stid = "S"+IOtool.get_task_id(str(format_time))
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({AAtid:{
+        taskinfo[tid]["function"].update({stid:{
             "type":"data_debias",
             "state":0,
             "name":["data_debias"],
@@ -159,13 +160,21 @@ def DataFairnessDebias():
         }})
         taskinfo[tid]["dataset"]=dataname
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        try:
+            senAttrList=json.loads(inputParam["senAttrList"])
+            tarAttrList=json.loads(inputParam["tarAttrList"])
+            staAttrList=json.loads(inputParam["staAttrList"])
+        except:
+            senAttrList=inputParam["senAttrList"]
+            tarAttrList=inputParam["tarAttrList"]
+            staAttrList=inputParam["staAttrList"]
         # 执行任务
-        t2 = threading.Thread(target=interface.run_data_debias,args=(tid,AAtid,dataname,datamethod))
+        t2 = threading.Thread(target=interface.run_data_debias_api,args=(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList))
         t2.setDaemon(True)
         t2.start()
         res = {
             "tid":tid,
-            "AAtid":AAtid
+            "stid":stid
         }
         return jsonify(res)
     else:
@@ -181,13 +190,14 @@ def ModelFairnessEvaluate():
     """
     global LiRPA_LOGS
     if (request.method == "POST"):
-        dataname = request.form.get("dataname")
-        modelname = request.form.get("modelname")
-        tid = request.form.get("tid")
+        inputParam = json.loads(request.data)
+        dataname = inputParam["dataname"]
+        tid = inputParam["tid"]
+        modelname = inputParam["modelname"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
-        AAtid = "S"+IOtool.get_task_id(str(format_time))
+        stid = "S"+IOtool.get_task_id(str(format_time))
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({AAtid:{
+        taskinfo[tid]["function"].update({stid:{
             "type":"model_evaluate",
             "state":0,
             "name":["model_evaluate"],
@@ -197,11 +207,23 @@ def ModelFairnessEvaluate():
         taskinfo[tid]["dataset"]=dataname
         taskinfo[tid]["model"]=modelname
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        res = api.model_evaluate(dataname,modelname)
+        
+        try:
+            metrics = json.loads(inputParam["metrics"])
+            senAttrList=json.loads(inputParam["senAttrList"])
+            tarAttrList=inputParam["tarAttrList"]
+            staAttrList=json.loads(inputParam["staAttrList"])
+        except:
+            metrics = inputParam["metrics"]
+            senAttrList=inputParam["senAttrList"]
+            tarAttrList=inputParam["tarAttrList"]
+            staAttrList=inputParam["staAttrList"]
+        logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
+        res = run_model_evaluate(dataname, modelname, metrics, senAttrList, tarAttrList, staAttrList, logging=logging)
         res["Consistency"] = float(res["Consistency"])
         res["stop"] = 1
-        IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
-        taskinfo[tid]["function"][AAtid]["state"]=2
+        IOtool.write_json(res,osp.join(ROOT,"output", tid, stid+"_result.json"))
+        taskinfo[tid]["function"][stid]["state"]=2
         taskinfo[tid]["state"]=2
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
         return jsonify(res)
@@ -220,10 +242,13 @@ def ModelFairnessDebias():
     """
     global LiRPA_LOGS
     if (request.method == "POST"):
-        dataname = request.form.get("dataname")
-        modelname = request.form.get("modelname")
-        algorithmname = request.form.get("algorithmname")
-        tid = request.form.get("tid")
+        inputParam = json.loads(request.data)
+        dataname = inputParam["dataname"]
+        modelname = inputParam["modelname"]
+        datamethod = inputParam["datamethod"]
+        tid = inputParam["tid"]
+        algorithmname = inputParam["algorithmname"]
+       
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
@@ -238,7 +263,17 @@ def ModelFairnessDebias():
         taskinfo[tid]["dataset"]=dataname
         taskinfo[tid]["model"]=modelname
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        t2 = threading.Thread(target=interface.run_model_debias,args=(tid,AAtid,dataname,modelname,algorithmname))
+        try:
+            metrics = json.loads(inputParam["metrics"])
+            senAttrList=json.loads(inputParam["senAttrList"])
+            tarAttrList=inputParam["tarAttrList"]
+            staAttrList=json.loads(inputParam["staAttrList"])
+        except:
+            metrics = inputParam["metrics"]
+            senAttrList=inputParam["senAttrList"]
+            tarAttrList=inputParam["tarAttrList"]
+            staAttrList=inputParam["staAttrList"]
+        t2 = threading.Thread(target=interface.run_model_debias_api,args=(tid, AAtid, dataname, modelname, algorithmname, metrics, senAttrList, tarAttrList, staAttrList))
         t2.setDaemon(True)
         t2.start()
         res = {
@@ -663,6 +698,7 @@ def AdvAttack():
     """
     global LiRPA_LOGS
     if (request.method == "POST"):
+        print(request.data)
         inputParam = json.loads(request.data)
         tid = inputParam["Taskid"]
         inputParam["device"] = "cuda:0"
