@@ -37,7 +37,7 @@ class SquareAttack(EvasionAttack):
         norm='inf',
         n_queries=5000,
         eps=8/255,
-        p_init=0.3,
+        p_init=0.05,
         loss_type='margin', # "ce"
         n_restarts=1,
         targeted=False,
@@ -164,6 +164,7 @@ class SquareAttack(EvasionAttack):
         return p
 
     def attack_single_run(self, x, y):
+        self.norm = "L2" if self.norm == 2 else "Linf"
         with torch.no_grad():
             # adv = x.clone()
             c, h, w = x.shape[1:]
