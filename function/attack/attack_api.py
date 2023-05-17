@@ -186,7 +186,8 @@ class BackdoorAttacker():
     
     # 传入整个将用于训练的数据集，按照比例和目标进行自动的投毒
     # 返回投毒后的数据集和一个用来标识投毒样本的列表
-    def poison(self, xs: np.ndarray, ys: np.ndarray, target: np.ndarray, pp_poison: float, backdoor_item: np.ndarray = None, add_backdoor_func = add_backdoor, batch_size=256):
+    def poison(self, xs: np.ndarray, ys: np.ndarray, target: np.ndarray, pp_poison: float, add_backdoor_func = add_backdoor, batch_size=256):
+        
         # backdoor_item是为了应对FeatureCollisionAttack中对于攻击实体的选择
         # 默认将最后一层作为特征层
         name = [item[0] for item in self.model._modules.items()]
@@ -198,19 +199,23 @@ class BackdoorAttacker():
             self.attacker = PoisoningAttackCleanLabelBackdoor(target=target, pp_poison=pp_poison, proxy_classifier=self.classifier, batch_size=batch_size, backdoor=self.attackerbase)
         elif self.method == "FeatureCollisionAttack":
             # 本方法中的target是指作为后门实体的一个样本
-            self.backdoor_item = backdoor_item
+            all_indices = np.arange(len(xs))
+            source_indices = all_indices[np.all(ys == self.source, axis=1)]
+            selected_indices = np.random.choice(len(source_indices), 1)
+            backdoor_item = xs[selected_indices[0]:selected_indices[0]+1,:]
             self.attacker = FeatureCollisionAttack(classifier=self.classifier, target=backdoor_item, feature_layer=name[len(name)-1])
         else:
             # PoisoningAttackAdversarialEmbedding
             self.attackerbase = PoisoningAttackBackdoor(add_backdoor_func)
             self.attacker = PoisoningAttackAdversarialEmbedding(backdoor=self.attackerbase, device=self.device)
+
         # 对于没有自动选择样本进行投毒操作的，这里通过比例和攻击要求为其选择样本进行投毒
         # 防止修改原样本
         x, y = xs.copy(), ys.copy()
         total_num = len(x)
         if self.method == "PoisoningAttackBackdoor":
             select_list = random.sample(range(0, total_num), int(total_num*pp_poison))
-            # print(int(total_num*pp_poison))
+            print(int(total_num*pp_poison))
             x_needp = x.take(select_list, axis=0)
             # y_needp = y.take(select_list, axis=0)
             x_p, y_p = self.attacker.poison(x_needp, target)
@@ -233,9 +238,9 @@ class BackdoorAttacker():
             estimated_labels = np.copy(y)
             all_indices = np.arange(len(data))
             target_indices = all_indices[np.all(estimated_labels == target, axis=1)]
-            print(len(target_indices)*pp_poison)
+            print(int(len(target_indices)*pp_poison))
             num_poison = int(pp_poison * len(target_indices))
-            selected_indices = np.random.choice(target_indices, num_poison)
+            selected_indices = np.random.choice(len(target_indices), num_poison)
             xp = x.take(selected_indices, axis=0)
             xp = self.attacker.poison(xp)
             for i, j in enumerate(selected_indices):
@@ -245,12 +250,16 @@ class BackdoorAttacker():
         else:
             return self.attacker.poison(x, y)
 
-    def finetune(self, x_train: np.ndarray, y_train: np.ndarray, x_test: np.ndarray, y_test: np.ndarray, select_list: list=[], test_list: list=[], num_epochs: int=40, batch_size: int=700, lr=0.001, alpha=50):
+    def finetune(self, x_train: np.ndarray, y_train: np.ndarray, x_test: np.ndarray, y_test: np.ndarray, select_list: list=[], test_list: list=[], num_epochs: int=40, batch_size: int=700, lr=0.001, alpha=500):
         """
         模型在投毒样本上重新训练和微调
         """
+        print("(总体样本准确率，干净样本准确率，投毒样本准确率)")
         if self.method == "PoisoningAttackAdversarialEmbedding":
             self.attacker.fintune(self.model, x_train, y_train, select_list, num_epochs=num_epochs, batch_size=batch_size, lr=0.001, alpha=alpha)
+            all, clean, backdoor = self.evaluate(x_test, y_test, test_list)
+            print((all, clean, backdoor))
+            self.save_model(desc="all{}_clean{}_backdoor{}".format(all, clean, backdoor))
         else:
             num_batch = int(np.ceil(len(x_train) / float(batch_size)))
             for i in tqdm(range(num_epochs), desc="Training"):
@@ -277,23 +286,22 @@ class BackdoorAttacker():
         # 该方法的评价方式较为特殊
         if self.method == "FeatureCollisionAttack":
             # 总样本上的准确率
-            self.accuracy = compute_accuracy(self.classifier.predict(xs, batch_size=batch_size), ys)
+            self.accuracy, _ = compute_accuracy(self.classifier.predict(xs, batch_size=batch_size), ys)
             # 干净样本上的准确率
-            self.accuracyonb = compute_accuracy(self.classifier.predict(x_clean, batch_size=batch_size), y_clean)
+            self.accuracyonbm = self.accuracy
             # 攻击成功率
-            self.attack_success_rate = (compute_accuracy(self.classifier.predict(self.backdoor_item, batch_size=batch_size), self.target[np.newaxis, :]))
-            if self.attack_success_rate == 1:
-                print("攻击成功!")
+            # 对于冲突碰撞攻击，当一个样本的真实标签为原标签且预测标签为目标标签的时候认为攻击成功
+            self.attack_success_rate = np.sum(np.logical_and(np.argmax(ys, axis=1) == np.argmax(self.source, axis=0), np.argmax(self.classifier.predict(xs, batch_size=batch_size), axis=1) == np.argmax(self.target, axis=0)))/ np.sum(np.argmax(ys, axis=1) == np.argmax(self.source, axis=0))
         else:
             # 总样本上的准确率
             self.accuracy, _ = compute_accuracy(self.classifier.predict(xs, batch_size=batch_size), ys)
             # 干净样本上的准确率
-            self.accuracyonbm, _ = compute_accuracy(self.classifier.predict(x_clean, batch_size=batch_size), y_clean)
+            self.accuracyonb, _ = compute_accuracy(self.classifier.predict(x_clean, batch_size=batch_size), y_clean)
             # 后门样本上的攻击成功率
             self.attack_success_rate, _ = compute_accuracy(self.classifier.predict(x_poisoned, batch_size=batch_size), y_poisoned)
-        return self.accuracy, self.accuracyonbm, self.attack_success_rate
+        return self.accuracy, self.accuracyonb, self.attack_success_rate
 
-    def backdoorattack(self, method: str="PoisoningAttackBackdoor", pp_poison: float=0.5, target: int=3, batch_size:int=700, num_epochs=40, lr=0.01, alpha=50, test_sample_num:int=2048, save_num: int=32, save_path=None):
+    def backdoorattack(self, method: str="PoisoningAttackBackdoor", pp_poison: float=0.5, source: int = 0, target: int=3, batch_size:int=700, num_epochs=40, lr=0.01, alpha=50, test_sample_num:int=2048, save_num: int=32, save_path=None):
         """
         为了简化后门攻击接口的使用提出的一个后门攻击样例方法
         该函数按照目标和投毒比例自动完成攻击
@@ -335,24 +343,39 @@ class BackdoorAttacker():
             nb_classes=10,
             device=self.device,
         )
+
+        # 对于特征碰撞攻击，需要设置原目标类
+        self.source = np.zeros((10))
+        self.source[source] = 1
         # 决定目标
         self.target = np.zeros((10))
         self.target[target] = 1
+
         # 测试集用来测试攻击效果，测试集中一般的样本被投毒
         # 主要是为了区分开测试集和训练集
-        x_test, y_test, test_plist = self.poison(x_select_tmp, y_select_tmp, self.target, pp_poison=0.5, backdoor_item=x_select_tmp[random.randint(1,len(x_select_tmp))][np.newaxis, :])
+        # 对于特征碰撞攻击，测试数据集是不需要投毒的
+        if self.method == "FeatureCollisionAttack":
+            x_test = x_select_tmp
+            y_test = y_select_tmp
+            test_plist = [0]
+        else:
+            x_test, y_test, test_plist = self.poison(x_select_tmp, y_select_tmp, self.target, pp_poison=0.5)
+        
         # 根据比例进行训练集投毒
-        x_train, y_train, plist= self.poison(x_train_tmp, y_train_tmp, self.target, pp_poison=pp_poison, backdoor_item=x_select_tmp[random.randint(1,len(x_select_tmp))][np.newaxis, :])
+        x_train, y_train, plist= self.poison(x_train_tmp, y_train_tmp, self.target, pp_poison=pp_poison)
         self.poisoned_num = len(plist)
         print("投毒样本数目:{}".format(self.poisoned_num))
+
         # 保存部分投毒样本
         if save_path != None:
-            self.save_examples(save_num, class_num=self.classifier.nb_classes, label=y_train_tmp[plist], clean_example=x_train_tmp[plist], poisoned_example=x_train[plist], path=save_path)
+            self.save_examples(save_num=32, class_num=self.classifier.nb_classes, label=y_train_tmp[plist], clean_example=x_train_tmp[plist], poisoned_example=x_train[plist], path=save_path)
+        
+        # 测试投毒攻击效果的时候都在测试样本上进行
+        # 对于特征冲突攻击，不需要考虑测试数据集的投毒
         print(self.evaluate(x_test, y_test, test_plist, batch_size=batch_size))
-        self.finetune(x_train, y_train, x_test, y_test, plist, test_plist, batch_size=batch_size)
-        accuracy, accuracyonb, attack_success_rate=self.evaluate(x_test, y_test, test_plist, batch_size=batch_size)
-        print(accuracy, accuracyonb, attack_success_rate)
-        return accuracy, accuracyonb, attack_success_rate
+        self.finetune(x_train, y_train, x_test, y_test, plist, test_plist, batch_size=batch_size, num_epochs=num_epochs)
+        print(self.evaluate(x_test, y_test, test_plist, batch_size=batch_size))
+        return self.evaluate(x_test, y_test, test_plist, batch_size=batch_size)
 
     def save_model(self, path:str="./results/", desc:str="backdoor_model", epoch:int=0):
         path = path+self.method+"/backdoor_model/"
