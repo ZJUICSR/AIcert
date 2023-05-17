@@ -4,13 +4,11 @@
 __author__ = 'chunlai'
 __copyright__ = 'Copyright © 2021/11/01, ZJUICSR'
 
-# from function.attack.old.backdoor.badnets.badnets_v2 import Badnets
 from model import ModelLoader
 from model.trainer import Trainer
 from dataset import ArgpLoader
 from dataset import LoadCustom
 from function.attack.config import Conf
-# from function.attack.old.adv import Attack
 import os, json, copy
 import os.path as osp
 from torch.utils.data import Dataset,DataLoader
@@ -18,17 +16,22 @@ from IOtool import IOtool, Callback
 from torchvision import  transforms
 import torch
 from function.formal_verify import *
-from function.attack.attack_api import EvasionAttacker, BackdoorAttacker
+
 from model.model_net.lenet import Lenet
 from model.model_net.resnet import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
-from function.attack.attacks.utils import load_mnist, load_cifar10
+from function.attack import run_adversarial, run_backdoor
  
-from function.fairness import api
+from function.fairness import run_dataset_debias, run_model_debias
 from function import concolic, env_test, deepsst, dataclean
-
+from function.ex_methods.module.func import get_loader, Logger, recreate_image
+from function.ex_methods.module.generate_adv import get_adv_loader, sample_untargeted_attack
+from function.ex_methods.module.load_model import load_model
+from function.ex_methods import attribution_maps, layer_explain, dim_reduciton_visualize
+from function.ex_methods.module.model_Lenet import lenet
+from function.ex_methods.lime import lime_image_ex
 
 ROOT = osp.dirname(osp.abspath(__file__))
-def run_model_debias(tid,AAtid,dataname,modelname,algorithmname):
+def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList):
     """模型公平性提升
     :params tid:主任务ID
     :params AAtid:子任务id
@@ -36,30 +39,28 @@ def run_model_debias(tid,AAtid,dataname,modelname,algorithmname):
     :params modelname:模型名称
     :params algorithmname:优化算法名称
     """
+    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = api.model_debias(dataname,modelname,algorithmname)
-    conslist = []
-    for cons in res["Consistency"]:
-        conslist.append(float(cons))
-    res["Consistency"] = conslist
+    res = run_model_debias(dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList, logging=logging)
     res["stop"] = 1
-    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
-    taskinfo[tid]["function"][AAtid]["state"]=2
+    IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
+    taskinfo[tid]["function"][stid]["state"]=2
     taskinfo[tid]["state"]=2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
 
-def run_data_debias(tid,AAtid,dataname,datamethod):
+def run_data_debias_api(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList):
     """数据集公平性提升
     :params tid:主任务ID
     :params AAtid:子任务id
     :params dataname:数据集名称
     :params datamethod:优化算法名称
     """
+    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = api.dataset_debias(dataname,datamethod)
+    res = run_dataset_debias(dataname, datamethod, senAttrList, tarAttrList, staAttrList, logging=logging)
     res["stop"] = 1
-    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
-    taskinfo[tid]["function"][AAtid]["state"]=2
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, stid+"_result.json"))
+    taskinfo[tid]["function"][stid]["state"]=2
     taskinfo[tid]["state"]=2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
 
@@ -290,33 +291,6 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
             IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
             IOtool.change_task_success_v2(tid)
             return 0
-    if dataname.lower() == "mnist":
-        channel = 1
-    else:
-        channel = 3
-    
-    a = EvasionAttacker(modelnet=eval(model)(channel), modelpath=modelpath, dataset=dataname.lower(), device=device, datanormalize=True, sample_num=128)
-        
-    # 对应关系list
-    methoddict={
-        "FGSM":"FastGradientMethod",
-        "BIM":"BasicIterativeMethod",
-        "PGD":"ProjectedGradientDescent",
-        "C&W":"CarliniWagner",
-        "DeepFool":"DeepFool",
-        "JacobianSaliencyMap":"SaliencyMapMethod",
-        "Brendel&BethgeAttack":"BoundaryAttack",
-        "UniversalPerturbation":"UniversalPerturbation",
-        "AutoAttack":"AutoAttack",
-        "GD-UAP":"GDUniversarial",
-        "SquareAttack":"SquareAttack",
-        "HSJA":"HopSkipJump",
-        "PixelAttack":"PixelAttack",
-        "SimBA":"SimBA",
-        "ZOO":"ZooAttack",
-        "GeoDA":"GeoDA",
-        "Fastdrop":"Fastdrop"
-    }
     if not osp.exists(osp.join(ROOT,"output", tid, stid)):
         os.mkdir(osp.join(ROOT,"output", tid, stid))
     resultlist={}
@@ -324,12 +298,10 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
         logging.info("[执行对抗攻击]:正在执行{:s}对抗攻击".format(method))
         attackparam = inputParam[method]
         attackparam["save_path"] = osp.join(ROOT,"output", tid, stid)
-        print("methoddict[method]--------------",methoddict[method])
-        res = a.generate(methoddict[method], 32, **attackparam)
-        print("********************method**********:",res)
-        a.print_res()
-        resultlist[method]=a.print_res()
-        print(resultlist[method])
+        if "norm" in attackparam.keys() and attackparam["norm"]=="np.inf":
+            attackparam["norm"]=np.inf
+        print(attackparam)
+        resultlist[method] = run_adversarial(model, modelpath, dataname, method, attackparam, device)
         logging.info("[执行对抗攻击中]:{:s}对抗攻击结束，攻击成功率为{}%".format(method,resultlist[method]["asr"]))
     logging.info("[执行对抗攻击]:对抗攻击执行完成，数据保存中")
     resultlist["stop"] = 1
@@ -365,50 +337,23 @@ def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
             IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
             IOtool.change_task_success_v2(tid)
             return 0
-    if dataname.lower() == "mnist":
-        channel = 1
-    else:
-        channel = 3
-    b = BackdoorAttacker(modelnet=eval(model)(channel), modelpath=modelpath, dataset=dataname.lower(),  datanormalize=True, device=torch.device(inputParam["device"]))
-    # 对应关系list
-    methoddict={
-        "BackdoorAttack":"PoisoningAttackBackdoor",
-        "Clean-LabelBackdoorAttack":"PoisoningAttackCleanLabelBackdoor",
-        "CleanLabelFeatureCollisionAttack":"FeatureCollisionAttack",
-        "AdversarialBackdoorEmbedding":"PoisoningAttackAdversarialEmbedding",
-    }
     res = {}
     logging.info("[执行后门攻击]:开始后门攻击")
     for method in methods:
         logging.info("[执行后门攻击]:正在执行{:s}后门攻击".format(method))
-        res[method]={"asr":[], "pp_poison":[]}
+        res[method]={}
         attackparam = inputParam[method]
-        print("methoddict[method]--------------",methoddict[method])
-        for i in range(10):
-            pp_poison = 0.001 + 0.01 * i
-            if i == 1:
-                save_path = osp.join(ROOT,"output", tid, stid)
-                if not osp.exists(save_path):
-                    os.makedirs(save_path)
-            else:
-                save_path = None
-            accuracy, accuracyonb, attack_success_rate=b.backdoorattack(method=methoddict[method], batch_size=128, pp_poison=pp_poison, target=attackparam["target"], test_sample_num=1024,save_path=save_path)
-            res[method]["asr"].append(attack_success_rate)
-            res[method]["pp_poison"].append(pp_poison)
-            logging.info("[执行后门攻击]:{:s}后门攻击运行结束，投毒率为{}时，攻击成功率为{}%".format(method, pp_poison, attack_success_rate))
+        save_path = osp.join(ROOT,"output", tid, stid)
+        if not osp.exists(save_path):
+            os.makedirs(save_path)
+        res[method]= run_backdoor(model, modelpath, dataname, method, inputParam[method]["pp_poison"], inputParam[method]["target"], inputParam["device"], save_path)
+        logging.info("[执行后门攻击]:{:s}后门攻击运行结束，投毒率为{}时，攻击成功率为{}%".format(method, inputParam[method]["pp_poison"], res[method]["attack_success_rate"]))
     res["stop"] = 1
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"] = 2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
     IOtool.change_task_success_v2(tid)
-    
-from function.ex_methods.module.func import get_loader, Logger, recreate_image
-from function.ex_methods.module.generate_adv import get_adv_loader, sample_untargeted_attack
-from function.ex_methods.module.load_model import load_model
-from function.ex_methods import attribution_maps, layer_explain, dim_reduciton_visualize
-from function.ex_methods.module.model_Lenet import lenet
-from function.ex_methods.lime import lime_image_ex
 
 def run_dim_reduct(tid, stid, datasetparam, modelparam, vis_methods, adv_methods, device):
     """降维可视化
