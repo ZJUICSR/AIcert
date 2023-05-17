@@ -15,9 +15,9 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 class NewModel(torch.nn.Module):
-    def __init__(self, net, input_test):
+    def __init__(self, net, input_test, device):
         super(NewModel, self).__init__()
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = device
         self.net = net
         # 使得self.net.feature被初始化
         # 构建的网络在进行鲁棒测试时必须要在forward中写入self.feature作为特征层的输出
@@ -35,8 +35,8 @@ class NewModel(torch.nn.Module):
         self.softmax = torch.nn.Softmax(dim=1)
 
     def forward(self, x, epoch_num:int):
-        self.net.train(mode=True)
-        self.train(mode=True)
+        # self.net.train(mode=True)
+        # self.train(mode=True)
         y1 = self.net.forward(x)
         x1 = self.fc1(self.net.feature + ((0.1/epoch_num)**0.5)*torch.randn_like(self.net.feature))
         x1 = self.relu(x1)
@@ -59,9 +59,13 @@ class PoisoningAttackAdversarialEmbedding(PoisoningAttackTransformer):
     def __init__(
         self,
         backdoor: PoisoningAttackBackdoor,
+        device: torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     ):
         # super().__init__(classifier=classifier)
+        self.device = device
         self.backdoor = backdoor
+        self.device = device
+        
     
     def poison_estimator(self, x: np.ndarray, y: np.ndarray, **kwargs) -> "CLASSIFIER_TYPE":
         return super().poison_estimator(x, y, **kwargs)
@@ -81,7 +85,7 @@ class PoisoningAttackAdversarialEmbedding(PoisoningAttackTransformer):
         input_test=input_test[np.newaxis, :]
         input_test[0,:] = 1
 
-        self.new_model = NewModel(self.model, input_test=input_test).to(self.device)
+        self.new_model = NewModel(self.model, input_test=input_test, device=self.device).to(self.device)
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = optim.Adam(self.new_model.parameters(), lr=lr)
         # 干净样本和投毒样本的标签
@@ -119,5 +123,7 @@ class PoisoningAttackAdversarialEmbedding(PoisoningAttackTransformer):
                 optimizer=optimizer,
                 input_shape=(3, 32, 32),
                 nb_classes=10,
+                device=self.device
             )
-            print("Epoch [{}/{}], train_loss: {:.6f}, discriminator_loss: {:.16f}, accuracy: {:.6f}".format(epoch+1, num_epochs, train_loss1 / total_step, train_loss2 / total_step, compute_accuracy(self.classifier.predict(x_train, batch_size=batch_size), y_train)))
+            acc, _ = compute_accuracy(self.classifier.predict(x_train, batch_size=batch_size), y_train)
+            print("Epoch [{}/{}], train_loss: {:.6f}, discriminator_loss: {:.16f}, accuracy: {:.6f}".format(epoch+1, num_epochs, train_loss1 / total_step, train_loss2 / total_step, acc))
