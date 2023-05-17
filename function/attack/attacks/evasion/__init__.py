@@ -9,7 +9,7 @@ from function.attack.attacks.evasion.hop_skip_jump import HopSkipJump
 from function.attack.attacks.evasion.iterative_method import BasicIterativeMethod
 from function.attack.attacks.evasion.pixel_threshold import PixelAttack
 from function.attack.attacks.evasion.projected_gradient_descent.projected_gradient_descent import ProjectedGradientDescent
-from function.attack.attacks.evasion.over_the_air_flickering.over_the_air_flickering_pytorch import OverTheAirFlickeringPyTorch
+# from function.attack.attacks.evasion.over_the_air_flickering.over_the_air_flickering_pytorch import OverTheAirFlickeringPyTorch
 from function.attack.attacks.evasion.saliency_map import SaliencyMapMethod
 from function.attack.attacks.evasion.simba import SimBA
 from function.attack.attacks.evasion.square_attack import SquareAttack
