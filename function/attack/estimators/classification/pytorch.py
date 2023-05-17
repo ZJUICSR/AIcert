@@ -824,11 +824,15 @@ class PyTorchClassifier(ClassGradientsMixin, ClassifierMixin, PyTorchEstimator):
                 y_grad = y.clone().detach()
             else:
                 y_grad = torch.tensor(y).to(self._device)
-            inputs_t, _ = self._apply_preprocessing(x_grad, y=None, fit=False, no_grad=False)
-            targets_t, _ = self._apply_preprocessing(y_grad, y=None, fit=False, no_grad=False)
+            # inputs_t, _ = self._apply_preprocessing(x_grad, y=None, fit=False, no_grad=False)
+            # targets_t, _ = self._apply_preprocessing(y_grad, y=None, fit=False, no_grad=False)
+            inputs_t = x_grad
+            targets_t = y_grad
         if isinstance(x, np.ndarray):
-            x_preprocessed, _ = self._apply_preprocessing(x, y=None, fit=False, no_grad=True)
-            y_preprocessed, _ = self._apply_preprocessing(y, y=None, fit=False, no_grad=True)
+            # x_preprocessed, _ = self._apply_preprocessing(x, y=None, fit=False, no_grad=True)
+            # y_preprocessed, _ = self._apply_preprocessing(y, y=None, fit=False, no_grad=True)
+            x_preprocessed = x
+            y_preprocessed = y
             x_grad = torch.from_numpy(x_preprocessed).to(self._device)
             y_grad = torch.from_numpy(y_preprocessed).to(self._device)
             x_grad.requires_grad = True
@@ -885,7 +889,8 @@ class PyTorchClassifier(ClassGradientsMixin, ClassifierMixin, PyTorchEstimator):
             no_grad = False
         else:
             no_grad = True
-        x_preprocessed, _ = self._apply_preprocessing(x=x, y=None, fit=False, no_grad=no_grad)
+        # x_preprocessed, _ = self._apply_preprocessing(x=x, y=None, fit=False, no_grad=no_grad)
+        x_preprocessed = x
 
         # Get index of the extracted layer
         if isinstance(layer, six.string_types):
