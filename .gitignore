@@ -1,6 +1,7 @@
 
 */__pycache__
-
+output/task_list.txt
+output/task_info.json
 datasets/**
 results/**
 *.pth
@@ -9,17 +10,13 @@ results/**
 __pycache__
 model/ckpt/CIFAR10_vgg11.pt
 function/attack/adv0211/datasets/cifar-10-batches-py.tar.gz
-=======
->>>>>>> gitee/develop
 dataset/data/CIFAR10/cifar-10-python.tar.gz
 function/DeepLogic/adv_train/model-resnet18-fashionminist/Standard-fashionminist-model-resnet18-epoch300.pt
 function/concolic/Utils/Models/cifar10_vgg16.pth
 function/env_test/valid_extract.pkl
 output/*
 function/formal_verify/auto_LiRPA_verifiy/vision/data
-output/task_list.txt
-<<<<<<< HEAD
-output/task_info.json
+
 model/ckpt/*
 dataset/cifar10/*
 # C extensions
@@ -166,10 +163,4 @@ model
 dataset
 
 /dev.env
-<<<<<<< HEAD
-=======
 output/task_info.json
->>>>>>> c156776f07b8272d684983de60bf7942f840182b
-=======
-
->>>>>>> gitee/develop
