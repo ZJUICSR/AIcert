@@ -97,7 +97,7 @@ class FairnessDataset():
             mask = np.array(self.Y) < thresh
         # go through sensitive attributes
         for (i, attr) in enumerate(self.privileged.keys()):
-            w_z = self.weights[np.array(self.Z)[:, i] == 1 & np.squeeze(mask)]
+            w_z = self.weights[(np.array(self.Z)[:, i] == 1) & np.squeeze(mask)]
             total = np.sum(self.weights[mask])
             result[attr] = np.sum(w_z) / total
         return result
