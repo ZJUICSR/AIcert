@@ -51,5 +51,22 @@
                 "model": "ResNet18"
             }
         }
+    },
+    "20230517_1408_d5e30b4": {
+        "state": 2,
+        "createtime": "202305171408",
+        "dataset": "German",
+        "model": "3 Hidden-layer FCN",
+        "function": {
+            "S20230517_1408_f29f8eb": {
+                "type": "model_evaluate",
+                "state": 2,
+                "name": [
+                    "model_evaluate"
+                ],
+                "dataset": "German",
+                "model": "3 Hidden-layer FCN"
+            }
+        }
     }
 }
