@@ -69,8 +69,11 @@ def dataset_overall_fairness(result):
     return [overall_group_fairness, overall_individual_fairness, overall_fairness]
 
 def model_overall_fairness(result, metrics=['DP', 'PE', 'EOP','EOD', 'PP', 'OMd', 'FDd', 'FOd']):
-    print(result)
-    values = {key: result[METRICS_FULL_NAME[key]] for key in metrics if METRICS_FULL_NAME[key] in result}
+    # print(result)
+    valid_metrics = ['DP', 'PE', 'EOP','EOD', 'PP', 'OMd', 'FDd', 'FOd', 'FPd', 'TPd', 'FNd', 'TNd']
+    # valid_metrics_name = [METRICS_FULL_NAME[key] for key in valid_metrics]
+    eval_metrics = [key for key in metrics if ((METRICS_FULL_NAME[key] in result) and (key in valid_metrics))]
+    values = {key: result[METRICS_FULL_NAME[key]] for key in eval_metrics}
     values = list(get_all_values(values))
     overall_group_fairness = 1 - np.mean(values)
     overall_individual_fairness = result['Consistency']
