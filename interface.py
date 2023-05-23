@@ -238,9 +238,13 @@ def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
     :params frameversion:框架版本
     :output res:需保存到子任务json中的返回结果/路径
     """
+    logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
+    
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = env_test.run_env_frame(matchmethod,frameworkname,frameversion, osp.join(ROOT,"output", tid, AAtid))
-    # res = concolic.run_concolic(dataname, modelname, norm)   
+    res = env_test.run_env_frame(matchmethod,frameworkname,frameversion, osp.join(ROOT,"output", tid, AAtid), logging)
+    # res = concolic.run_concolic(dataname, modelname, norm)  
+    res["detection_result"]=IOtool.load_json(res["env_test"]["detection_result"]) 
+    res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
