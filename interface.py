@@ -244,6 +244,7 @@ def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
     res = env_test.run_env_frame(matchmethod,frameworkname,frameversion, osp.join(ROOT,"output", tid, AAtid), logging)
     # res = concolic.run_concolic(dataname, modelname, norm)  
     res["detection_result"]=IOtool.load_json(res["env_test"]["detection_result"]) 
+    res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
