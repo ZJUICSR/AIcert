@@ -1024,6 +1024,14 @@ def EnvTest():
         frameworkname = request.form.get("frameworkname")
         frameversion = request.form.get("frameversion")
         tid = request.form.get("tid")
+        try:
+            input_param = json.loads(request.data)
+            tid = input_param["tid"]
+            matchmethod = input_param["matchmethod"]
+            frameworkname = input_param["frameworkname"]
+            frameversion = input_param["frameversion"]
+        except:
+            pass
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
