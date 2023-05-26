@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 class PoisoningAttackCleanLabelBackdoor(PoisoningAttackBlackBox):
     attack_params = PoisoningAttackBlackBox.attack_params + [
-        "backdoor",
         "proxy_classifier",
         "target",
         "pp_poison",
