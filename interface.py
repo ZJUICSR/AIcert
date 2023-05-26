@@ -350,7 +350,7 @@ def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
         save_path = osp.join(ROOT,"output", tid, stid)
         if not osp.exists(save_path):
             os.makedirs(save_path)
-        res[method]= run_backdoor(model, modelpath, dataname, method, inputParam[method]["pp_poison"], inputParam[method]["target"], inputParam["device"], save_path)
+        res[method]= run_backdoor(model, modelpath, dataname, method, pp_poison=inputParam[method]["pp_poison"], source=inputParam[method]["source"], target=inputParam[method]["target"],trigger=inputParam[method]["trigger"], device=inputParam["device"], save_path=save_path)
         logging.info("[执行后门攻击]:{:s}后门攻击运行结束，投毒率为{}时，攻击成功率为{}%".format(method, inputParam[method]["pp_poison"], res[method]["attack_success_rate"]))
     res["stop"] = 1
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
