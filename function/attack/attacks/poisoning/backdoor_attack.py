@@ -7,7 +7,7 @@ class PoisoningAttackBackdoor(PoisoningAttackBlackBox):
     """
     最基本的后门攻击方法
     """
-    attack_params = PoisoningAttackBlackBox.attack_params + ["perturbation"]
+    attack_params = PoisoningAttackBlackBox.attack_params
     _estimator_requirements = ()
 
     def __init__(self, perturbation: Union[Callable, List[Callable]]) -> None:
