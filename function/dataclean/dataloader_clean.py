@@ -402,12 +402,30 @@ class CNN(BaseEstimator):  # Inherits sklearn classifier
     def predict_proba(self, idx=None):
         loader = self.test_loader
         dataset = copy.deepcopy(loader.dataset)
-        if idx is not None:
-            if len(idx) != self.test_size:
-                dataset.data = np.array(dataset.data)[idx]
-                #                 if type(dataset.targets)==list:
-                #                     dataset.targets=np.array(dataset.targets)
-                dataset.targets = np.array(dataset.targets)[idx]
+        if isinstance(dataset.data,np.ndarray): #CIFAR
+        #     dataset.data = torch.from_numpy(dataset.data)
+        #     dataset.targets = torch.tensor(dataset.targets)
+        # # if isinstance(dataset.target,list):
+        # #     dataset.target = torch.tensor(dataset.target)
+            if idx is not None:
+                if len(idx) != self.test_size:
+                    dataset.data = np.array(dataset.data)[idx]
+                    dataset.targets = np.array(dataset.targets)[idx]
+        else: # MNIST
+            if idx is not None:
+                if len(idx) != self.test_size:
+                    dataset.data = dataset.data[idx]
+                    dataset.targets = dataset.targets[idx]
+
+
+        #         dataset.data = torch.from_numpy(np.array(dataset.data)[idx]).float().cuda()
+        #         #                 if type(dataset.targets)==list:
+        #         #                     dataset.targets=np.array(dataset.targets)
+        #         dataset.targets = torch.from_numpy(np.array(dataset.targets)[idx]).float().cuda()
+
+        # for data, _ in loader:
+        #     print(data)
+        #     break
 
         loader = torch.utils.data.DataLoader(
             dataset=dataset,
@@ -546,12 +564,13 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
     cnn = CNN(epochs=1, log_interval=1000, train_loader=train_loader, test_loader=test_loader, dataset=dataset,
               gpu_id=gpu_id)  # pre-train
     print("cnn")
+    print(type(X_test), type(y_test))
     cnn.fit(X_test, y_test)  # pre-train (overfit, not out-of-sample) to entire dataset.
 
     # Out-of-sample cross-validated holdout predicted probabilities
     np.random.seed(4)
     cnn.epochs = 1  # Single epoch for cross-validation (already pre-trained)
-
+    
     jc, psx = cleanlab.latent_estimation.estimate_confident_joint_and_cv_pred_proba(X_test, y_test, cnn, cv_n_folds=2)
     est_py, est_nm, est_inv = cleanlab.latent_estimation.estimate_latent(jc, y_test)
     # algorithmic identification of label errors
