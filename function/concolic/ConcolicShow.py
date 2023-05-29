@@ -112,6 +112,7 @@ class ConcolicShow(object):
         
         # print(json_data['TestCaseGeneration'])
         json_data['allnumber'] = allNumber
+        json_data['newnumber'] = newNumber
         json_data['demopath'] = showimgs
 
         return json_data
