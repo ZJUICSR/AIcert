@@ -539,11 +539,18 @@ def Concolic():
     if (request.method == "GET"):
         return render_template("")
     elif (request.method == "POST"):
-        concolic_dataset = request.form.get("dataname")
-        concolic_model = request.form.get("modelname")
-        norm = request.form.get("norm")
-        times = request.form.get("times")
-        tid = request.form.get("tid")
+        # concolic_dataset = request.form.get("dataname")
+        # concolic_model = request.form.get("modelname")
+        # norm = request.form.get("norm")
+        # times = request.form.get("times")
+        # tid = request.form.get("tid")
+        inputdata = json.loads(request.data)
+        print(inputdata)
+        concolic_dataset = inputdata["dataname"]
+        concolic_model = inputdata["modelname"]
+        norm = inputdata["norm"]
+        times = inputdata["times"]
+        tid = inputdata["tid"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
@@ -561,7 +568,7 @@ def Concolic():
         t2 = threading.Thread(target=interface.run_concolic,args=(tid,AAtid,concolic_dataset,concolic_model,norm, times))
         t2.setDaemon(True)
         t2.start()
-        res = {"code":1,"msg":"success","Taskid":tid,"Concolicid":AAtid}
+        res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
         abort(403)
@@ -594,11 +601,47 @@ def EnvTest():
         t2 = threading.Thread(target=interface.run_envtest,args=(tid,AAtid,matchmethod, frameworkname,frameversion))
         t2.setDaemon(True)
         t2.start()
-        res = {"code":1,"msg":"success","Taskid":tid,"EnvTestid":AAtid}
+        res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
         abort(403)
         
+# ----------------- 课题2 异常数据检测 -----------------
+@app.route('/DataClean/DataCleanParamSet', methods=['GET','POST'])
+def DataClean():
+    '''
+    输入：
+        tid：主任务ID
+        
+    '''
+    if (request.method == "GET"):
+        return render_template("")
+    elif (request.method == "POST"):
+        dataset = request.form.get("dataset")
+        uoload_flag = request.form.get("flag")
+        tid = request.form.get("tid")
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        AAtid = "S"+IOtool.get_task_id(str(format_time))
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["function"].update({AAtid:{
+            "type":"DataClean",
+            "state":0,
+            "name":["DataClean"],
+            "dataset": dataset,
+            "model": "",
+        }})
+        taskinfo[tid]["dataset"]=dataset
+        taskinfo[tid]["model"]=""
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        t2 = threading.Thread(target=interface.run_dataclean,args=(tid,AAtid,dataset))
+        t2.setDaemon(True)
+        t2.start()
+        res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
+        return jsonify(res)
+    else:
+        abort(403) 
+
+
 # ----------------- 课题2 标准化单元测试-- -----------------
 @app.route('/UnitTest/DeepSstParamSet', methods=['GET','POST'])
 def DeepSstParamSet():
@@ -633,39 +676,7 @@ def DeepSstParamSet():
     else:
         abort(403)
 
-# ----------------- 课题2 异常数据检测 -----------------
-@app.route('/DataClean/DataCleanParamSet', methods=['GET','POST'])
-def DataClean():
-    '''
-    输入：
-        tid：主任务ID
-        
-    '''
-    if (request.method == "GET"):
-        return render_template("")
-    elif (request.method == "POST"):
-        dataset = request.form.get("dataset")
-        tid = request.form.get("tid")
-        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
-        AAtid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({AAtid:{
-            "type":"DataClean",
-            "state":0,
-            "name":["DataClean"],
-            "dataset": dataset,
-            "model": "",
-        }})
-        taskinfo[tid]["dataset"]=dataset
-        taskinfo[tid]["model"]=""
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        t2 = threading.Thread(target=interface.run_dataclean,args=(tid,AAtid,dataset))
-        t2.setDaemon(True)
-        t2.start()
-        res = {"code":1,"msg":"success","Taskid":tid,"DataCleanId":AAtid}
-        return jsonify(res)
-    else:
-        abort(403)        
+       
 
 
 def app_run(args):
