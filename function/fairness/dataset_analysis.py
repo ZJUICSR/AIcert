@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 from scipy.stats import pearsonr, spearmanr, kendalltau
-from sklearn.metrics import mutual_info_score
-import copy
-from fairness_datasets import FairnessDataset, intersection
+from sklearn.metrics import normalized_mutual_info_score
+import math
+from .fairness_datasets import FairnessDataset, intersection
 
 def correlation_analysis(dataframe, attr1, attr2, attr1_type, attr2_type):
     """
@@ -50,7 +50,7 @@ def correlation_analysis(dataframe, attr1, attr2, attr1_type, attr2_type):
         results['kendalltau'] = None
 
     # 互信息
-    results['mutual_info'] = mutual_info_score(dataframe[attr1], dataframe[attr2])
+    results['mutual_info'] = normalized_mutual_info_score(dataframe[attr1], dataframe[attr2])
     # if attr1_type == 'discrete' and attr2_type == 'discrete':
     #     results['mutual_info'] = mutual_info_score(dataframe[attr1], dataframe[attr2])
     # else:
@@ -96,6 +96,43 @@ def calculate_category_proportions(df, attribute_names, threshold=0.05):
             print(f"Attribute '{attribute}' not found in the dataset.")
 
     return proportions
+
+def calculate_overall_correlation(correlation_data):
+    total_corr_values = 0
+    count = 0
+
+    for item in correlation_data:
+        for key, value in item["values"].items():
+            if value is not None:
+                total_corr_values += abs(value)
+                count += 1
+
+    if count > 0:
+        overall_correlation = total_corr_values / count
+    else:
+        overall_correlation = None
+
+    return overall_correlation
+
+def calculate_distribution_uniformity(distribution_data):
+    normalized_entropy_sum = 0
+    total_attributes = len(distribution_data)
+
+    for _, category_probs in distribution_data.items():
+        entropy = 0
+        num_categories = len(category_probs)
+        max_entropy = math.log2(num_categories)
+
+        for category, prob in category_probs.items():
+            if prob > 0:
+                entropy -= prob * math.log(prob, 2)
+
+        normalized_entropy = entropy / max_entropy
+        normalized_entropy_sum += normalized_entropy
+
+    average_normalized_entropy = normalized_entropy_sum / total_attributes
+
+    return average_normalized_entropy
 
 def preprocess(self: FairnessDataset, factorize=False):
     # reload data
