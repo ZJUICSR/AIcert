@@ -12,7 +12,6 @@ cleanlab==1.0
 seaborn==0.11.2
 graphviz==0.17
 pyecharts==1.9.1
-adversarial-robustness-toolbox==1.7.2
 ai_benchmark==0.1.2
 gpustat==0.6.0
 networks==0.3.7
@@ -27,3 +26,5 @@ torchaudio==0.10.2+cu113
 chardet-5.1.0
 Flask==2.0.3
 Jinja2==3.1.1
+appdirs 
+pytorch_pretrained_bert
