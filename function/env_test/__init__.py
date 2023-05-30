@@ -4,6 +4,8 @@ from .gpu_test import framework_test
 import sys
 import os.path as osp
 import json
+import pickle
+from function.ex_methods.module.func import Logger
 
 ROOT = osp.dirname(osp.abspath(__file__))
 sys.path.append(ROOT)
@@ -48,17 +50,41 @@ def run_framework(
     '''
     message,cuda_version = framework_test(frame,version)
     if os.path.exists(json_path):
+        # load the framework matching result and system message
         with open(json_path,'r') as f:
             json_result = json.load(f)
         detection_result_path=os.path.join(save_dir,json_result['env_test']['detection_result'])
+        sys_result_path=os.path.join(save_dir,json_result['env_test']['sys_msg'])
     else:
         print('Error! no json path!!!')
         json_result={}
         detection_result_path=os.path.join(save_dir,'keti2/env_test_result/detection.json')
+        sys_result_path=os.path.join(save_dir,'keti2/env_test_result/system_message.pkl')
     with open(detection_result_path,'r') as f:
         detection_result = json.load(f)
+    with open(sys_result_path, 'rb') as f:
+        sys_result = pickle.load(f)
     frame_test = {"Framework Adaptation Result":message,"Current Cuda Version":cuda_version}
     detection_result.update(frame_test)
+
+    if sys_result['env_info']['system']=='Linux':
+        sys_msg = {"System Architecture":f"{sys_result['env_info']['system']}-{sys_result['linux_distribution']}",
+        "Version Message":sys_result['env_info']['sys_version'],
+        "Number Of Libs":len(sys_result['software_lib_list'])}
+    else:
+        sys_msg = {"System Architecture":sys_result['env_info']['system'],
+        "Version Message":sys_result['env_info']['sys_version'],
+        "Number Of Libs":len(sys_result['software_lib_list'])}
+    detection_result.update(sys_msg)
+
+    buggy_lib_amount=len(detection_result['Risk']['Libs'])
+    CVE_list=[]
+    for lib in detection_result['Risk']['Libs']:
+        CVE_list+=list(detection_result['Risk']['CVE Reports'][lib].keys())
+    
+    CVE_result = {"CVE List":CVE_list,
+        "CVE Amount":len(CVE_list)}
+    detection_result.update(CVE_result)
     
     with open(detection_result_path,"w") as f:
         f.write(json.dumps(detection_result,ensure_ascii=False,indent=4,separators=(',',':')))
@@ -66,17 +92,20 @@ def run_framework(
     return json_result
 
 
-def run_env_frame(method, frame, version, cve_path, out_path):
+def run_env_frame(method, frame, version, path, logging=None):
     # out_path = ROOT+"/env"
-    # out_path = path
-    cve_path = cve_path+"/model/ckpt/valid_extract.pkl"
+    if logging == None:
+        logging = Logger(filename=osp.join(path, os.path.split(path)[1] +"_log.txt"))
+    out_path = path
+    cve_path = ROOT[:-17]+"/model/valid_extract.pkl"
     json_path = os.path.join(out_path, "env_results.json")
     save_dir= os.path.join(out_path, "env_test_result")
-    print("Analyzing Evironment.....")
+    logging.info("Analyzing Evironment.....")
+    logging.info("run_env....")
     run_env(json_path=json_path, method=method,cve_path=cve_path,save_dir=save_dir)
-    print("Finish Evironment!! Analyzing Framework.....")
+    logging.info("Finish Evironment!! Analyzing Framework.....")
     res = run_framework(save_dir=out_path,json_path=json_path, frame=frame,version=version)
-    print(f"Finish Framework!! Please Check results in {json_path}")
+    logging.info(f"Finish Framework!! Please Check results")
     return res
 
 def run(params):
@@ -86,7 +115,7 @@ def run(params):
     run_env(json_path=json_path, method='hard',cve_path=params["cve_path"],save_dir=save_dir)
     print("Finish Evironment!! Analyzing Framework.....")
     run_framework(save_dir=params["out_path"],json_path=json_path, frame=params["frame"],version=params["version"])
-    print(f"Finish Framework!! Please Check results in {json_path}")
+    print(f"Finish Framework!! Please Check results")
 
 if __name__=='__main__':
     params={}
