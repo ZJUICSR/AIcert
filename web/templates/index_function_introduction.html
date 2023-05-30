@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>功能介绍</title>
+  <link rel="stylesheet" type="text/css" href="../static/css/common.css" />
+  <link rel="stylesheet" type="text/css" href="../static/css/index_function_introduction.css" />
+  <link href="../static/css/magnific-popup.min.css" rel="stylesheet">
+  <link href="../static/css/tooplate-style.css" rel="stylesheet">
+  <link href="favicon.ico" rel="shortcut icon">
+</head>
+
+<body>
+  <div class="page flex-col">
+    <div class="block_1 flex-row">
+      <div class="section_1 flex-col">
+        <div class="group_1 flex-col"></div>
+      </div>
+
+      <a href="/"><button class="text_start">平台介绍</button></a>
+
+      <a href="/"><button class="text">解决方案</button></a>
+      <!-- <a href="/index_task_center"> -->
+      <img class="image_center" referrerpolicy="no-referrer" src="../static/imgs/head_line_1.png" />
+      <button class="text_center" onclick="open_function_introduction()">在线体验</button>
+      <img class="image_2" referrerpolicy="no-referrer" src="../static/imgs/head_line_2.png" />
+      <!-- </a> -->
+      <a href="../static/pdf/AI平台介绍文档v8.pdf"><button class="text">帮助文档</button></a>
+      <a href="https://icsr.zju.edu.cn"><button class="text">关于我们</button></a>
+      <div class="section_2 flex-col" onclick="window.open('https://github.com/AISecurity2030/Attack', '_self')"></div>
+    </div>
+    <div class="block_2 flex-col">
+      <div class="group_2 flex-row justify-between">
+        <span class="text_6">平台介绍</span>
+        <img class="thumbnail_1" referrerpolicy="no-referrer" src="../static/imgs/thumbnail_1.png" />
+        <span class="text_7">任务中心</span>
+      </div>
+      <div class="group_3 flex-row justify-between">
+        <div class="box_1 flex-col">
+          <button class="section_4 flex-row justify-between" onclick="open_function_introduction()">
+            <img class="thumbnail_3" referrerpolicy="no-referrer" src="../static/imgs/thumbnail_3.png" />
+            <div class="text_9">功能介绍</div>
+          </button>
+          <button class="section_5 flex-row justify-between" onclick="open_task_center()">
+            <img class="thumbnail_4" referrerpolicy="no-referrer" src="../static/imgs/thumbnail_4.png" />
+            <div class="text_10">任务管理</div>
+          </button>
+        </div>
+        <div class="tm-container-fluid">
+          <div class="tm-gallery-section tm-mb-80">
+            <ul class="filters-button-group tm-mb-40">
+              <!-- <li><a href="#" data-filter=".data_management">数据管理</a></li> -->
+              <li><a href="#" data-filter=".evaluation">数据评测</a></li>
+              <li><a href="#" data-filter=".enhancement">模型评测</a></li>
+              <li><a href="#" data-filter=".enhancement2">算法评测</a></li>
+              <li><a href="#" data-filter=".enhancement3" class="disabled">运行环境评测</a></li>
+              <li><a href="#" data-filter=".enhancement4" class="disabled">操作系统评测</a></li>
+              <li><a href="#" data-filter=".hardware" class="disabled">硬件评测</a></li>
+              <li><a href="#" class="active" data-filter="*">全部功能</a></li>
+            </ul>
+            <div class="tm-gallery">
+              <div class="tm-gallery-item">
+                <div class="function_img" onclick="goto_old_version()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                    <line class="top" x1="0" y1="0" x2="100%" y2="0"/>
+                    <line class="left" x1="0" y1="100%" x2="0" y2="0"/>
+                    <line class="bottom" x1="100%" y1="100%" x2="0" y2="100%"/>
+                    <line class="right" x1="99%" y1="0" x2="99%" y2="100%"/>
+                  </svg>
+                     <!-- <img src="../static/imgs/形式化验证.png"> -->
+                  <button class="fairness_button">在线体验</button> 
+                  <p class="function_all">整体功能测试</p>
+                </div>
+              </div>
+
+              <div class="tm-gallery-item evaluation enhancement">
+                <div class="function_img" onclick="goto_fairness()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                    <line class="top" x1="0" y1="0" x2="100%" y2="0"/>
+                    <line class="left" x1="0" y1="100%" x2="0" y2="0"/>
+                    <line class="bottom" x1="100%" y1="100%" x2="0" y2="100%"/>
+                    <line class="right" x1="99%" y1="0" x2="99%" y2="100%"/>
+                  </svg>
+                     <img src="../static/imgs/公平性.png">
+                  <button class="functions_button">在线体验</button> 
+                </div>
+              </div>
+
+              <div class="tm-gallery-item enhancement enhancement2">
+                <div class="function_img" onclick="goto_formal_verification()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                    <line class="top" x1="0" y1="0" x2="100%" y2="0"/>
+                    <line class="left" x1="0" y1="100%" x2="0" y2="0"/>
+                    <line class="bottom" x1="100%" y1="100%" x2="0" y2="100%"/>
+                    <line class="right" x1="99%" y1="0" x2="99%" y2="100%"/>
+                  </svg>
+                     <img src="../static/imgs/形式化验证.png">
+                  <button class="functions_button">在线体验</button> 
+                </div>
+              </div>
+              
+              <div class="tm-gallery-item enhancement enhancement2">
+                <div class="function_img" onclick="goto_robust_enhance()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                    <line class="top" x1="0" y1="0" x2="100%" y2="0"/>
+                    <line class="left" x1="0" y1="100%" x2="0" y2="0"/>
+                    <line class="bottom" x1="100%" y1="100%" x2="0" y2="100%"/>
+                    <line class="right" x1="99%" y1="0" x2="99%" y2="100%"/>
+                  </svg>
+                     <img src="../static/imgs/鲁棒性增强.png">
+                  <button class="functions_button">在线体验</button> 
+                </div>
+              </div>
+
+              <div class="tm-gallery-item enhancement">
+                <div class="function_img" onclick="goto_adv_attack()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                    <line class="top" x1="0" y1="0" x2="100%" y2="0"/>
+                    <line class="left" x1="0" y1="100%" x2="0" y2="0"/>
+                    <line class="bottom" x1="100%" y1="100%" x2="0" y2="100%"/>
+                    <line class="right" x1="99%" y1="0" x2="99%" y2="100%"/>
+                  </svg>
+                     <img src="../static/imgs/对抗攻击评估.png">
+                  <button class="functions_button">在线体验</button> 
+                </div>
+              </div>
+
+              <div class="tm-gallery-item enhancement">
+                <div class="function_img" onclick="goto_bkd_attack()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                    <line class="top" x1="0" y1="0" x2="100%" y2="0"/>
+                    <line class="left" x1="0" y1="100%" x2="0" y2="0"/>
+                    <line class="bottom" x1="100%" y1="100%" x2="0" y2="100%"/>
+                    <line class="right" x1="99%" y1="0" x2="99%" y2="100%"/>
+                  </svg>
+                     <img src="../static/imgs/后门攻击.png">
+                  <button class="functions_button">在线体验</button> 
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="box_2 flex-col">
+              <div class="function_line flex-row">
+                <div class="function_img" onclick="goto_bkd_attack()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                    <line class="top" x1="0" y1="0" x2="100%" y2="0"/>
+                    <line class="left" x1="0" y1="100%" x2="0" y2="0"/>
+                    <line class="bottom" x1="100%" y1="100%" x2="0" y2="100%"/>
+                    <line class="right" x1="100%" y1="0" x2="100%" y2="100%"/>
+                  </svg>
+                  <img src="../static/imgs/后门攻击.png">
+                  <button class="fairness_button">在线体验</button>
+                  <p class="function_des">- 具备检测输入样本中后门触发器和模型中后门攻击的能力</p>
+                  <p class="function_des">- 内置2种数据集，以VGG16模型示例</p>
+                  <p class="function_des">- 支持后门攻击检测方法≥2种</p>
+                </div>
+                <div class="function_img" onclick="goto_old_version()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                    <line class="top" x1="0" y1="0" x2="100%" y2="0"/>
+                    <line class="left" x1="0" y1="100%" x2="0" y2="0"/>
+                    <line class="bottom" x1="100%" y1="100%" x2="0" y2="100%"/>
+                    <line class="right" x1="100%" y1="0" x2="100%" y2="100%"/>
+                  </svg>
+                     <img src="../static/imgs/形式化验证.png">
+                  <button class="fairness_button">在线体验</button> 
+                  <p class="function_all">整体功能测试</p>
+                </div>
+              </div> 
+          </div>
+          </div> -->
+      </div>
+      <div class="block_15 flex-col">
+        <div class="block_16 flex-row justify-between">
+          <div class="box_3 flex-col">
+            <div class="group_5 flex-col"></div>
+          </div>
+          <span class="text_74">人工智能安全理论及验证平台</span>
+        </div>
+        <div class="block_17 flex-row justify-between">
+          <div class="image-text_1 flex-row justify-between">
+            <img class="image_3" referrerpolicy="no-referrer" src="../static/imgs/email.png" />
+            <span class="text-group_1">xxxx&#64;xxxx.com</span>
+          </div>
+          <div class="image-text_2 flex-row justify-between">
+            <img class="thumbnail_9" referrerpolicy="no-referrer" src="../static/imgs/tel.png" />
+            <span class="text-group_2">0571-XXXXXXXXX</span>
+          </div>
+          <div class="image-text_3 flex-row justify-between">
+            <img class="thumbnail_10" referrerpolicy="no-referrer" src="../static/imgs/address.png" />
+            <span class="text-group_3">浙江省杭州市xxxxxxxxxx</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../static/js/echarts.min.js"></script>
+<script type="text/javascript" src="../static/js/jquery-3.6.1.js"></script>
+<script type="text/javascript" src="../static/js/flexible.js"></script>
+<script type="text/javascript" src="../static/js/use.js"></script>
+<script type="text/javascript" src="../static/js/index.js"></script>
+<script type="text/javascript" src="../static/js/imagesloaded.pkgd.min.js"></script>
+<script type="text/javascript" src="../static/js/isotope.pkgd.min.js"></script>
+<script>
+  $(function () {
+    // Init the image gallery
+    var $gallery = $(".tm-gallery").isotope({
+      itemSelector: ".tm-gallery-item",
+      layoutMode: "fitRows"
+    });
+
+    // Layout Isotope after each image loads
+    $gallery.imagesLoaded().progress(function () {
+      $gallery.isotope("layout");
+    });
+
+    $(".filters-button-group").on("click", "a", function (e) {
+      e.preventDefault();
+      var filterValue = $(this).attr("data-filter");
+      $gallery.isotope({ filter: filterValue });
+      $('.filters-button-group a').removeClass('active');
+      $(this).addClass('active');
+    });
+
+    // Magnific Pop up
+    // $('.tm-gallery').magnificPopup({
+    // 	delegate: 'a',
+    //   	type: 'image',
+    // 	  gallery: { enabled: true }
+    // });
+  });
+</script>

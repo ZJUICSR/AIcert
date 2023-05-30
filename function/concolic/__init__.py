@@ -2,14 +2,12 @@ from .ConcolicShow import *
 import shutil
 import os
 import os.path as osp
-import pickle, json
-from function.ex_method.module.func import Logger
 CURR = osp.dirname(osp.abspath(__file__))
 
-def run_concolic(data_name, model_name, norm, times, out_path, loggint=None):
+def run_concolic(data_name, model_name, norm, times, out_path, logging=None):
     # res = ConcolicShow.show_results('a','a', model_name=model_name, data_name=data_name, norm=norm, basepath=CURR, out_path=out_path,Times=3)
     logging.info("Start generation")
-    res = ConcolicShow.show_results('a','a', model_name=model_name, data_name=data_name, norm=norm, basepath=out_path.rsplit("/",2)[0]+"/cache", out_path=out_path,Times=times)
+    res = ConcolicShow.show_results('a','a', model_name=model_name, data_name=data_name, norm=norm, basepath=out_path.rsplit("/",2)[0]+"/cache", out_path=out_path,Times=times, logging=logging)
     logging.info("End generation")
     return res
     # return ConcolicShow.show_results('a','a', model_name=model_name, data_name=data_name, norm=norm, basepath=CURR, out_path=CURR+'/show_path',Times=3)
