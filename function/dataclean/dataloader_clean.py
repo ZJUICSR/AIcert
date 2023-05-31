@@ -51,6 +51,7 @@ matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
+output_dict = {}
 
 def call_bn(bn, x):
     return bn(x)
@@ -478,12 +479,11 @@ def run_format_clean(inputfile,outputfile,filler,root):
     with open(json_path, 'r') as f:
         res_dict = json.load(f)
 
-    res_dict["abnormal_format"]={}
-    res_dict["abnormal_format"]["wrong_txt"] = wrong_txt
-    res_dict["abnormal_format"]["correct_txt"] = correct_txt
-    res_dict["abnormal_format"]["fix_rate"] = 1.00 # 预先测试得到的数据
+    output_dict["before"] = wrong_txt
+    output_dict["after"] = correct_txt
+    output_dict["fix_rate"] = 1.00 # 预先测试得到的数据
     with open(json_path, 'w') as f:
-        json.dump(res_dict, f)
+        json.dump(output_dict, f)
 
 
 def detect_file_encoding(filename):
@@ -519,12 +519,12 @@ def run_encoding_clean(inputfile,outputfile,root):
     json_path = osp.join(root, "output.json")
     with open(json_path, 'r') as f:
         res_dict = json.load(f)
-    res_dict["abnormal_encoding"]={}
-    res_dict["abnormal_encoding"]["wrong_txt"] = wrong_txt
-    res_dict["abnormal_encoding"]["correct_txt"] = correct_txt
-    res_dict["abnormal_encoding"]["fix_rate"] = 1.00 # 预先测试得到的数据
+    # res_dict["abnormal_encoding"]={}
+    output_dict["before"] = wrong_txt
+    output_dict["after"] = correct_txt
+    output_dict["fix_rate"] = 1.00 # 预先测试得到的数据
     with open(json_path, 'w') as f:
-        json.dump(res_dict, f)
+        json.dump(output_dict, f)
 
 
 def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=128, PERT_NUM=100, MAX_IMAGES=32,
@@ -631,7 +631,7 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
     # with open(json_path, 'w') as f:
     #     json.dump(res_dict, f)
     print(fix_rate)
-    return fix_rate
+    output_dict["fix_rate"] = fix_rate
 
 def generate_abnormal_sample(outputfile):
     # 生成异常样本示例
@@ -672,6 +672,7 @@ def run_abnormal_table(inputfile,outputfile,root):
     plt.axis("square")
     plt.legend(handles=handles, labels=["outliers", "inliers"], title="true class")
     plt.savefig(osp.join(root,'Iso.jpg'))
+    output_dict["result"] = str(osp.join(root,'Iso.jpg')) # 绘制图保存路径
 
     # 输出清洁样本
     y_hat = clf.fit_predict(X)
@@ -680,6 +681,10 @@ def run_abnormal_table(inputfile,outputfile,root):
     # -判断准确率
     accuracy = (y_hat==y).sum()/len(y)
     print('清洗率：{}'.format(accuracy))
+    output_dict["fix_rate"] = accuracy
+    json_path = osp.join(root, "output.json")
+    with open(json_path, 'w') as f:
+        json.dump(output_dict, f)       
 
 def run(train_loader, test_loader, params, log_func=None):
     batch_size = test_loader.batch_size
@@ -687,6 +692,11 @@ def run(train_loader, test_loader, params, log_func=None):
     # root = osp.join(params["out_path"], "keti2")
     root = params["out_path"]
     run_cleanlab(train_loader, test_loader, root=root, dataset=dataset, batch_size=batch_size, PERT_NUM=1, MAX_IMAGES=32, log_func=log_func, gpu_id="cuda:0")
+    
+
+    json_path = osp.join(params["out_path"], "output.json")
+    with open(json_path, 'w') as f:
+        json.dump(output_dict, f)    
     # # run_format_clean(inputfile=osp.join(current_dir,'text_sample1.txt'),outputfile=osp.join(root,'text_sample1_benign.txt'),filler=" ",root=root)
     # # run_encoding_clean(inputfile=osp.join(current_dir,'text_sample2.txt'),outputfile=osp.join(root,'text_sample2_benign.txt'),root=root)
     # # generate_abnormal_sample(outputfile=osp.join(current_dir,'abnormal_table.npz'))

@@ -11,8 +11,8 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
 
-ROOT = osp.dirname(osp.abspath(__file__))
-sys.path.append(ROOT)
+# ROOT = osp.dirname(osp.abspath(__file__))
+# sys.path.append(ROOT)
 
 # def run_dataclean(dataset):
 #     if dataset == "CIFAR10":
@@ -53,12 +53,24 @@ def run(params):
     logging.info("[模型测试阶段]【指标2.1】即将运行课题二的【异常数据检测】算法：dataloader_clean")
     transform = transforms.ToTensor()
     if params["dataset"]["name"] == "table":
-        dataloader_clean.generate_abnormal_sample(outputfile=osp.join(ROOT,'abnormal_table.npz'))
-        dataloader_clean.run_abnormal_table(inputfile=osp.join(ROOT,'abnormal_table.npz'),outputfile=osp.join(ROOT,'benign_table.npy'),root=ROOT)
+        ROOT = params["out_path"]
+        if params["dataset"]["upload_flag"] == 0:
+            dataloader_clean.generate_abnormal_sample(outputfile=osp.join(ROOT,'abnormal_table.npz'))
+            dataloader_clean.run_abnormal_table(inputfile=osp.join(ROOT,'abnormal_table.npz'),outputfile=osp.join(ROOT,'benign_table.npy'),root=params["out_path"])
+        else:
+            dataloader_clean.run_abnormal_table(inputfile=params["dataset"]["upload_path"],outputfile=osp.join(ROOT,'benign_table.npy'),root=params["out_path"])
         return
-    if params["dataset"]["name"] == "MNIST":
+    elif params["dataset"]["name"] == "txt_format":
+        ROOT = params["out_path"]
+        dataloader_clean.run_format_clean(inputfile=osp.join(ROOT,'text_sample1.txt'),outputfile=osp.join(ROOT,'text_sample1_benign.txt'),filler=" ",root=ROOT)
+        return
+    elif params["dataset"]["name"] == "txt_encode":
+        ROOT = params["out_path"]
+        dataloader_clean.run_encoding_clean(inputfile=osp.join(ROOT,'text_sample2.txt'),outputfile=osp.join(ROOT,'text_sample2_benign.txt'),root=ROOT)
+        return
+    elif params["dataset"]["name"] == "MNIST":
         train_data = datasets.MNIST(root="./dataset/data",train=True,download=True,transform=transform)
-        test_data = datasets.MNIST(root="./dataset/data",train=False,download=True,transform=transform)
+        test_data = datasets.MNIST(root="./dataset/data",train=False,download=True,transform=transform)         
     elif params["dataset"]["name"] == "CIFAR10":
         train_data = datasets.CIFAR10(root="./dataset/data",train=True,download=True,transform=transform)
         test_data = datasets.CIFAR10(root="./dataset/data",train=False,download=True,transform=transform)
@@ -71,9 +83,10 @@ def run(params):
 if __name__=='__main__':
     params = {}
     params["dataset"] = {}
-    params["dataset"]["name"] = "table" # CIFAR10/MNIST/table/
+    params["dataset"]["name"] = "txt_encode" # CIFAR10/MNIST/table/txt_format/txt_encode
+    params["dataset"]["upload_flag"] = 0
+    params["dataset"]["upload_path"] = ""
     params["out_path"] = "./"
     params["device"] = 3
-
     run(params)
     # run_dataclean('MNIST')
