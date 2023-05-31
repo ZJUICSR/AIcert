@@ -134,12 +134,12 @@ class CalibratedEqOdds(PostProcess):
 class RejectOptionClassification(PostProcess):
     def __init__(self, sensitive=[], low_class_thresh=0.01, high_class_thresh=0.99,
                 num_class_thresh=100, num_ROC_margin=50,
-                metric_name="Statistical parity difference",
-                metric_ub=0.05, metric_lb=-0.05):
+                metric_name="SPd",
+                metric_ub=1, metric_lb=-1):
 
-        allowed_metrics = ["Statistical parity difference",
-                           "Average odds difference",
-                           "Equal opportunity difference"]
+        allowed_metrics = ["SPd",
+                           "AOd",
+                           "EOd"]
         self.sensitive = sensitive
         self.low_class_thresh = low_class_thresh
         self.high_class_thresh = high_class_thresh
@@ -171,6 +171,8 @@ class RejectOptionClassification(PostProcess):
         ROC_margin_arr = np.zeros_like(fair_metric_arr)
         class_thresh_arr = np.zeros_like(fair_metric_arr)
 
+        dataset_pred.Y = (dataset_pred.Y-np.min(dataset_pred.Y))/(np.max(dataset_pred.Y)-np.min(dataset_pred.Y))
+
         cnt = 0
         # Iterate through class thresholds
         for class_thresh in np.linspace(self.low_class_thresh,
@@ -193,7 +195,7 @@ class RejectOptionClassification(PostProcess):
                 self.ROC_margin = ROC_margin
 
                 # Predict using the current threshold and margin
-                dataset_transf_pred = self.transform(dataset_pred)
+                dataset_transf_pred = self.transform(dataset_pred, deepcopy=True)
 
                 dataset_transf_metric_pred = DatasetMetrics(dataset_transf_pred, sensitive=self.sensitive)
                 classified_transf_metric = ModelMetrics(dataset, dataset_transf_pred, sensitive=self.sensitive)
@@ -204,12 +206,12 @@ class RejectOptionClassification(PostProcess):
                 # Balanced accuracy and fairness metric computations
                 balanced_acc_arr[cnt] = 0.5*(classified_transf_metric.base_metrics("TPR")\
                                        +classified_transf_metric.base_metrics("TNR"))
-                if self.metric_name == "Statistical parity difference":
+                if self.metric_name == "SPd":
                     fair_metric_arr[cnt] = dataset_transf_metric_pred.favorable_diff()
-                elif self.metric_name == "Average odds difference":
+                elif self.metric_name == "AOd":
                     # Average of difference in FPR and TPR for unprivileged and privileged groups
                     fair_metric_arr[cnt] = 0.5 * (classified_transf_metric.group_fairness_metrics(metrics="TPd") + classified_transf_metric.group_fairness_metrics(metrics="FPd"))
-                elif self.metric_name == "Equal opportunity difference":
+                elif self.metric_name == "EOd":
                     fair_metric_arr[cnt] = classified_transf_metric.group_fairness_metrics(metrics="TPd")
 
                 cnt += 1
@@ -239,7 +241,7 @@ class RejectOptionClassification(PostProcess):
         idx = available.index(self.sensitive[0])
         return idx
 
-    def transform(self, dataset:FairnessDataset):
+    def transform(self, dataset:FairnessDataset, deepcopy=False):
         """Obtain fair predictions using the ROC method.
         Args:
             dataset (BinaryLabelDataset): Dataset containing scores that will
@@ -248,7 +250,7 @@ class RejectOptionClassification(PostProcess):
             dataset_pred (BinaryLabelDataset): Output dataset with potentially
             fair predictions obtain using the ROC method.
         """
-        dataset_new = dataset.copy(deepcopy=False)
+        dataset_new = dataset.copy(deepcopy=deepcopy)
 
         fav_pred_inds = (dataset.Y > self.classification_threshold)
         unfav_pred_inds = ~fav_pred_inds
