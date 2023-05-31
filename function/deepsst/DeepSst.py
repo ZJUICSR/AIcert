@@ -63,7 +63,7 @@ def load_data(dataset, path, device):
             #transforms.Normalize((0.4914, 0.4822, 0.4465),(0.2023, 0.1994, 0.2010))  # 归一化
             transforms.Normalize((0.5, 0.5, 0.5),(0.5, 0.5, 0.5))
              ])
-        train_dataset = torchvision.datasets.CIFAR10(root='./cf10', train=True, transform=transform, download=True)
+        train_dataset = torchvision.datasets.CIFAR10(root='./dataset/data', train=True, transform=transform, download=True)
         #test_dataset = torchvision.datasets.CIFAR10(root='./cf10', train=False, transform=transform, download=True)
         ref_input = torch.zeros((1, 3, 32, 32))
     
@@ -148,8 +148,10 @@ def fuzz(net_unhook, dataset, trainloader, conv1mpp, conv1mnn, pertube, save_pat
     import time
     time = str(int(time.time()))
     rand_is_adv = 0
-    if not os.path.exists(os.path.join(save_path,time)):
-        os.mkdir(os.path.join(save_path,time))
+    # if not os.path.exists(os.path.join(save_path,time)):
+    #     os.mkdir(os.path.join(save_path,time))
+    if not os.path.exists(save_path):
+        os.mkdir(save_path)
     if dataset == 'mnist':
         mpp = np.abs(torch.sum(torch.tensor(conv1mpp),dim=1).reshape(28,28).detach().numpy())
         mnn = np.abs(torch.sum(torch.tensor(conv1mnn),dim=1).reshape(28,28).detach().numpy())
@@ -157,7 +159,7 @@ def fuzz(net_unhook, dataset, trainloader, conv1mpp, conv1mnn, pertube, save_pat
         ni_s,nj_s = np.where(mnn>=np.sort(mnn.reshape(-1))[int(np.round(mnn.size*(1-pertube)))])
         pidxs = np.concatenate((pi_s.reshape(-1,1),pj_s.reshape(-1,1)),axis=1)
         nidxs = np.concatenate((ni_s.reshape(-1,1),nj_s.reshape(-1,1)),axis=1)
-        for k in range(50000):
+        for k in range(50000): 
             (x,y)=iter(trainloader).next()
             x=x.to(device)
             noisesp = torch.randn(int(np.round(mpp.size*pertube)))*0.3081+0.1307
@@ -179,13 +181,15 @@ def fuzz(net_unhook, dataset, trainloader, conv1mpp, conv1mnn, pertube, save_pat
                 x_p = x_p.cpu().numpy()[0][0]
                 x_p -= x_p.min()
                 x_p *= (255/x_p.max())
-                Image.fromarray(np.uint8(x_p)).save(os.path.join(save_path,time,str(rand_is_adv)+'.png'))
+                Image.fromarray(np.uint8(x_p)).save(os.path.join(save_path,str(rand_is_adv)+'.png'))
+                # Image.fromarray(np.uint8(x_p)).save(os.path.join(save_path,time,str(rand_is_adv)+'.png'))
             if labeln != labelori:
                 rand_is_adv += 1
                 x_n = x_n.cpu().numpy()[0][0]
                 x_n -= x_n.min()
                 x_n *= (255/x_n.max())
-                Image.fromarray(np.uint8(x_n)).save(os.path.join(save_path,time,str(rand_is_adv)+'.png'))
+                # Image.fromarray(np.uint8(x_n)).save(os.path.join(save_path,time,str(rand_is_adv)+'.png'))
+                Image.fromarray(np.uint8(x_n)).save(os.path.join(save_path,str(rand_is_adv)+'.png'))
 
             # if rand_is_adv > 30:
             #     break
@@ -194,10 +198,10 @@ def fuzz(net_unhook, dataset, trainloader, conv1mpp, conv1mnn, pertube, save_pat
         
     
                           
-    return rand_is_adv, os.path.join(save_path,time)
+    return rand_is_adv, save_path
 
 
-def DeepSst(dataset, pertube, gpu, filename=None, save_path=None, model=None, modelname=None, path=None, m_dir=None):
+def DeepSst(dataset, pertube, gpu=None, filename=None, save_path=None, model=None, modelname=None, path=None, m_dir=None, logging=None):
     #DeepSst支持所有顺序结构的CNN/全连接DNN
     
     #输入
@@ -213,18 +217,19 @@ def DeepSst(dataset, pertube, gpu, filename=None, save_path=None, model=None, mo
     #rand_is_adv表示找到了多少个测试样本
     #测试样本保存在save_path中，其中mpp.npy mnn.npy记录了输入层神经元的敏感度，内部子文件夹中保存了所有导致错误的测试样本
     
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu)
+    # os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
-    if save_path is None:
-        save_path = '.'
+    # if save_path is None:
+    #     save_path = '.'
     if model is None:
         if (modelname is not None) and (path is not None):
             model = load_model_from_path(path, modelname,device)
         else:
             raise Exception('模型加载失败')
-    print('模型加载成功')
+    # print('模型加载成功')
+    logging.info('模型加载成功')
     
     model_cp = copy.deepcopy(model)
     trainloader, ref_input = load_data(dataset, save_path, device)
@@ -235,10 +240,12 @@ def DeepSst(dataset, pertube, gpu, filename=None, save_path=None, model=None, mo
     else:
         mpp = np.load(os.path.join(m_dir,'mpp.npy'))
         mnn = np.load(os.path.join(m_dir,'mnn.npy'))
-        print('已读取敏感度数据')
-        
+        # print('已读取敏感度数据')
+        logging.info('已读取敏感度数据')
+    logging.info("开始测试......")    
     rand_is_adv, prepath = fuzz(model, dataset, trainloader, mpp, mnn, pertube, save_path, device)
-    print('共找到引发错误的测试样本 '+ str(rand_is_adv) + '个')    
+    # print('共找到引发错误的测试样本 '+ str(rand_is_adv) + '个')    
+    logging.info('共找到引发错误的测试样本 '+ str(rand_is_adv) + '个') 
     rd = np.random.choice(rand_is_adv-1,9,replace=False)
     
     
