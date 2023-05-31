@@ -1099,7 +1099,7 @@ def DataClean():
 
 
 # ----------------- 课题2 标准化单元测试-- -----------------
-@app.route('/UnitTest/DeepSstParamSet', methods=['GET','POST'])
+@app.route('/UnitTest/DeepSstParamSet', methods=['GET','POST']) # 敏感神经元测试准则
 def DeepSstParamSet():
     if (request.method == "GET"):
         return render_template("")
@@ -1127,7 +1127,7 @@ def DeepSstParamSet():
         t2 = threading.Thread(target=interface.run_deepsst,args=(tid, AAtid, dataset, modelname, pertube, m_dir))
         t2.setDaemon(True)
         t2.start()
-        res = {"code":1,"msg":"success","Taskid":tid,"DeepSstid":AAtid}
+        res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
         abort(403)
