@@ -265,9 +265,10 @@ def run_deepsst(tid,AAtid,dataset,modelname,pertube,m_dir):
     :params m_dir: 敏感度值文件位置
     :output res:需保存到子任务json中的返回结果/路径
     """
+    logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = deepsst.run_deepsst(dataset, modelname, float(pertube), m_dir)
-    # res = concolic.run_concolic(dataname, modelname, norm)   
+    res = deepsst.run_deepsst(dataset.lower(), modelname, float(pertube.strip("%"))/100, m_dir, osp.join(ROOT,"output", tid, AAtid), logging)  
+    res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
