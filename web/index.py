@@ -1099,6 +1099,72 @@ def DataClean():
 
 
 # ----------------- 课题2 标准化单元测试-- -----------------
+@app.route('/UnitTest/CoverageNeuralParamSet', methods=['GET','POST']) # 单神经元覆盖测试准则
+def CoverageNeuralParamSet():
+    if (request.method == "GET"):
+        return render_template("")
+    elif (request.method == "POST"):
+        dataset = request.form.get("dataset")
+        model = request.form.get("model")
+        k = request.form.get("k")
+        N = request.form.get("N")
+        tid = request.form.get("tid")
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        AAtid = "S"+IOtool.get_task_id(str(format_time))
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["function"].update({AAtid:{
+            "type":"CoverageNeural",
+            "state":0,
+            "name":["CoverageNeural"],
+            "dataset": dataset,
+            "model": model,
+            "threshold": k,
+            "number_of_image": N
+        }})
+        taskinfo[tid]["dataset"]=dataset
+        taskinfo[tid]["model"]=model
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        t2 = threading.Thread(target=interface.run_coverage_neural,args=(tid, AAtid, dataset, model, k, N))
+        t2.setDaemon(True)
+        t2.start()
+        res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
+        return jsonify(res)
+    else:
+        abort(403)
+
+@app.route('/UnitTest/CoverageLayerParamSet', methods=['GET','POST']) # 神经层覆盖测试准则
+def CoverageLayerParamSet():
+    if (request.method == "GET"):
+        return render_template("")
+    elif (request.method == "POST"):
+        dataset = request.form.get("dataset")
+        model = request.form.get("model")
+        k = request.form.get("k")
+        N = request.form.get("N")
+        tid = request.form.get("tid")
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        AAtid = "S"+IOtool.get_task_id(str(format_time))
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["function"].update({AAtid:{
+            "type":"CoverageLayer",
+            "state":0,
+            "name":["CoverageLayer"],
+            "dataset": dataset,
+            "model": model,
+            "threshold": k,
+            "number_of_image": N
+        }})
+        taskinfo[tid]["dataset"]=dataset
+        taskinfo[tid]["model"]=model
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        t2 = threading.Thread(target=interface.run_coverage_layer,args=(tid, AAtid, dataset, model, k, N))
+        t2.setDaemon(True)
+        t2.start()
+        res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
+        return jsonify(res)
+    else:
+        abort(403)
+
 @app.route('/UnitTest/DeepSstParamSet', methods=['GET','POST']) # 敏感神经元测试准则
 def DeepSstParamSet():
     if (request.method == "GET"):
