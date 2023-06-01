@@ -44,9 +44,11 @@ def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics,
     res = run_model_debias(dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList, logging=logging)
     res["stop"] = 1
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
+    print("******************end*************")
     taskinfo[tid]["function"][stid]["state"]=2
     taskinfo[tid]["state"]=2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    
 
 def run_data_debias_api(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList):
     """数据集公平性提升
