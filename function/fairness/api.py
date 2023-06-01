@@ -443,6 +443,8 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
             algorithm = algorithm_cls(cost_constraint=constraint)
         if issubclass(algorithm_cls, RejectOptionClassification):
             metric_name = algorithm_name.split('-')[1]
+            print("+++++++++metric_name+++++++++++:",metric_name)
+            print("+++++++++algorithm_name+++++++++++:",algorithm_name)
             algorithm = algorithm_cls(metric_name=metric_name)
         algorithm.fit(dataset=dataset, dataset_pred=pred_dataset)
         new_pred_dataset = algorithm.transform(pred_dataset)

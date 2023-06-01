@@ -114,7 +114,7 @@ class EvasionAttacker():
     
     def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, clean_prediction: np.ndarray, adv_example: np.ndarray, adv_prediction: np.ndarray, path:str="./results/"):
         
-        path = path+self.method+"/"
+        path = os.path.join(path, self.method)
         try:
             os.makedirs(os.path.join(path,self.method))
         except Exception as e:
@@ -139,13 +139,13 @@ class EvasionAttacker():
                     tmpc = clean_example[random_index[i]].transpose(1,2,0)
                     tmpa = adv_example[random_index[i]].transpose(1,2,0)
                 clean = Image.fromarray(np.uint8(255*tmpc))
-                clean.save(path+"index{}_clean_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]]))
+                clean.save(os.path.join(path, "index{}_clean_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]])))
                 adv = Image.fromarray(np.uint8(255*tmpa))
-                adv.save(path+"index{}_adv_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]]))
+                adv.save(os.path.join(path, "index{}_adv_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]])))
                 per = np.uint8(255*tmpc) - np.uint8(255*tmpa)
                 per = per + np.abs(np.min(per))
                 per = Image.fromarray(np.uint8(255*per))
-                per.save(path+"index{}_per_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]]))
+                per.save(os.path.join(path, "index{}_per_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]])))
                 if i >= save_num - 1:
                     break
 
@@ -205,7 +205,7 @@ class BackdoorAttacker():
             # 总样本上的准确率
             self.accuracy, _ = compute_accuracy(self.classifier.predict(xs, batch_size=batch_size), ys)
             # 干净样本上的准确率
-            self.accuracyonbm, _ = compute_accuracy(self.classifier.predict(x_clean, batch_size=batch_size), y_clean)
+            self.accuracyonb, _ = compute_accuracy(self.classifier.predict(x_clean, batch_size=batch_size), y_clean)
             # 攻击成功率
             # 对于冲突碰撞攻击，当一个样本的真实标签为原标签且预测标签为目标标签的时候认为攻击成功
             self.attack_success_rate = np.sum(np.logical_and(np.argmax(ys, axis=1) == np.argmax(self.source, axis=0), np.argmax(self.classifier.predict(xs, batch_size=batch_size), axis=1) == np.argmax(self.target, axis=0)))/ np.sum(np.argmax(ys, axis=1) == np.argmax(self.source, axis=0))
@@ -303,18 +303,27 @@ class BackdoorAttacker():
         return self.evaluate(x_test, y_test, test_plist, batch_size=batch_size)
 
     def save_model(self, path:str="./results/", desc:str="backdoor_model", epoch:int=0):
-        path = path+self.method+"/backdoor_model/"
-        if epoch == 0:
-            try:
-                os.makedirs(path)
-            except Exception as e:
-                shutil.rmtree(path)
-                os.makedirs(path)
-        path = path + desc + ".pth"
+        path = os.path.join(path, self.method, "backdoor_model")
+        print("--------------------------------path------------------",path)
+        print(os.path.exists(path))
+        try:
+            os.makedirs(path)
+        except Exception as e:
+            shutil.rmtree(path)
+            os.makedirs(path)
+        # if epoch == 0 :
+        #     print("--------------------------------path------------------",path)
+        #     print(os.path.exists(path))
+        #     try:
+        #         os.makedirs(path)
+        #     except Exception as e:
+        #         shutil.rmtree(path)
+        #         os.makedirs(path)
+        path =os.path.join( path , desc + ".pth")
         torch.save(self.classifier.model.state_dict(), path)
 
     def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, poisoned_example: np.ndarray, path:str="./results/"):
-        path = path+self.method+"/example/"
+        path = os.path.join(path, self.method)
         try:
             os.makedirs(path)
         except Exception as e:
@@ -334,13 +343,13 @@ class BackdoorAttacker():
                     tmpc = clean_example[random_index[i]].transpose(1,2,0)
                     tmpa = poisoned_example[random_index[i]].transpose(1,2,0)
                 clean = Image.fromarray(np.uint8(255*tmpc))
-                clean.save(path+"index{}_clean.jpeg".format(i, l[i]))
+                clean.save(os.path.join(path,"index{}_clean.jpeg".format(i, l[i])))
                 adv = Image.fromarray(np.uint8(255*tmpa))
-                adv.save(path+"index{}_poisoned.jpeg".format(i, l[i]))
+                adv.save(os.path.join(path, "index{}_poisoned.jpeg".format(i, l[i])))
                 backdoor = np.uint8(255*tmpc) - np.uint8(255*tmpa)
                 backdoor = backdoor + np.abs(np.min(backdoor))
                 backdoor = Image.fromarray(np.uint8(255*backdoor))
-                backdoor.save(path+"index{}_backdoor.jpeg".format(i, l[i]))
+                backdoor.save(os.path.join(path, "index{}_backdoor.jpeg".format(i, l[i])))
                 if i >= save_num - 1:
                     break
     
