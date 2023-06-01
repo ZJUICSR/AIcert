@@ -245,7 +245,6 @@ def ModelFairnessDebias():
         inputParam = json.loads(request.data)
         dataname = inputParam["dataname"]
         modelname = inputParam["modelname"]
-        datamethod = inputParam["datamethod"]
         tid = inputParam["tid"]
         algorithmname = inputParam["algorithmname"]
        
