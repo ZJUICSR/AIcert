@@ -459,10 +459,91 @@ def run(model, test_loader, params, log_func=None):
     run_visualize(model, dataloader=test_loader, result_file=result_file, model_type=model_name,
                   outputdir=root, number_of_image=show_size, log_func=log_func)
 
+def run_visualize_layer(
+        model_path = './vgg19.pt.1', # 模型路径, 需要可以使用torch.load加载
+        dataset = 'mnist',           # 数据集名称, 支持mnist,cifar10
+        model_type='lenet5',         # 模型类型,支持lenet5, resnet18, vgg11,vgg13,vgg19   
+        k=0.1,                       # 算法参数,范围[0,1],例如k=0.1时,每层前10%的神经元被算作激活
+        outputdir="./output",
+        number_of_image=None,          # 总共计算多少张图片,None值时会计算整个数据集
+        logging=None):
+    
+
+    # result_file = './converage_layer_result.json'
+    # outputdir='image_layer'
 
 
 
-if __name__ == '__main__':
+    model = torch.load(model_path)
+    dataloader = load_dataset(dataset)
+    log_func=None
+    if not osp.exists(outputdir):
+        os.makedirs(outputdir)
+    if model_type == 'lenet5':
+        threshold = [0.2, 0.3, 0.3, 0.4, 0.6]
+        num_list = [10, 6, 12, 12, 10]
+    elif 'vgg' in model_type:
+        num = int(model_type[3:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+    elif 'resnet' in model_type:
+        num = int(model_type[6:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 2) + [12, 10]
+    else:
+        num = int(model_type[6:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+
+
+    x, y = next(iter(dataloader))
+    C, W, H = x.shape[1:]
+    NC = NCoverage_with_output_of_conv_kernel(model=model, model_type=model_type, k=k,
+                                              input_size=(C, W, H), dataloader=dataloader)
+    best_conv = 0
+    saves = []
+    for i, (x, y) in enumerate(dataloader):
+        x = x[0:2]
+        # x = torch.unsqueeze(x[0], dim=0)
+        # x = x.expand(x.shape[0],3,x.shape[2], x.shape[2])
+        result = NC.curr_cov_dict()
+        result, number_per_dot = afterprocess(result, num_list=num_list)
+ 
+        now_conv = NC.curr_neuron_cov()
+        if now_conv > best_conv + 0.05 or i %50==0:
+            best_conv = now_conv
+            saves.append((i, now_conv))
+            g = DrawNet_overlap(result, format='svg', type_net=model_type, outputdir=outputdir, imagename=str(i),
+                            number_per_dot=number_per_dot)
+
+        NC.update_coverage_step(x)
+        print('conv:', now_conv)
+
+        json_data = {}
+        if 'coverage_test_yz' not in json_data.keys():
+            json_data['coverage_test_yz'] = {}
+        json_data['coverage_test_yz']['coverage_layer'] = []
+        for idx, conv in saves:
+            json_data['coverage_test_yz']['coverage_layer'].append([conv, f'image_layer/{idx}.svg'])
+    
+        # with open(result_file, 'r') as file_obj:
+        #     json_data = json.load(file_obj)
+        # with open(result_file, 'w') as file_obj:
+        #     if 'coverage_test_yz' not in json_data.keys():
+        #         json_data['coverage_test_yz'] = {}
+        #     json_data['coverage_test_yz']['coverage_layer'] = []
+
+        #     for idx, conv in saves:
+        #         json_data['coverage_test_yz']['coverage_layer'].append([conv, f'image_layer/{idx}.svg'])
+
+        #     json.dump(json_data, file_obj)
+
+        if number_of_image is not None and i == number_of_image:
+            break
+
+        info = "[模型测试阶段] 运行课题二的模型标准化测试准则：coverage_visualize [{:d}/{:d}]".format(i, len(dataloader))
+        if log_func is not None:
+            log_func(info)
+    return json_data
+
+# if __name__ == '__main__':
     # # from resnet import resnet18
 
     # # model = torchvision.models.resnet34(False)
@@ -476,7 +557,7 @@ if __name__ == '__main__':
     # dataloader = get_dataloader_cifar(False, batch_size=4, input_size=input_size)
     # dataloader = get_dataloader_mnist(False, batch_size=4, input_size=input_size)
     # model_type参数有lenet和vgg两种取值
-    run_visualize('./lenet5.pth','mnist', 'lenet5', 0.1, 100)
+    # run_visualize('./lenet5.pth','mnist', 'lenet5', 0.1, 100)
 
 
 
