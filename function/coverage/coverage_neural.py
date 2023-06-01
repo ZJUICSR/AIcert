@@ -9,6 +9,7 @@ import torch.nn as nn
 from torchvision.transforms import ToTensor, Compose, Resize
 import torchvision.datasets as datasets
 from tqdm import tqdm
+import os
 import json
 import torchvision
 
@@ -334,23 +335,58 @@ def DrawNet_overlap(net, outputdir='', imagename='test', format='png', type_net=
 
     return g
 
+class LeNet5(nn.Module):
+    def __init__(self):
+        super(LeNet5, self).__init__()
+        self.conv1=nn.Sequential(
+            nn.Conv2d(3,6,5,1),#input_size=(1*28*28)
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2,stride=2)#input_size=(6*24*24)
+        )
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(6, 16, 5),#input_size=(6*12*12)
+            nn.ReLU(),      #input_size=(16*8*8)
+            nn.MaxPool2d(2, 2)  #output_size=(16*4*4)
+        )
+        self.fc1 = nn.Sequential(
+            nn.Linear(16 * 4 * 4, 120),
+            nn.ReLU()
+        )
+        self.fc2 = nn.Sequential(
+            nn.Linear(120, 84),
+            nn.ReLU()
+        )
+        self.fc3 = nn.Linear(84, 10)
 
-def run_visualize(
-        model_path = './lenet5.pth', # 模型路径, 需要可以使用torch.load加载
-        dataset = 'mnist',           # 数据集名称, 支持mnist,cifar10
-        model_type='lenet5',         # 模型类型,支持lenet5, resnet18, vgg11,vgg13,vgg19   
-        k=0.1,                       # 算法参数,范围[0,＋∞],例如k=0时, 输出值大于0的神经元被看作激活
-        number_of_image=None,          # 总共计算多少张图片,None值时会计算整个数据集
-        ):
+        # 定义前向传播过程，输入为x
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        # nn.Linear()的输入输出都是维度为一的值，所以要把多维度的tensor展平成一维
+        x = x.view(x.size()[0], -1)
+        x = self.fc1(x)
+        x = self.fc2(x)
+        x = self.fc3(x)
+        return torch.log_softmax(x, dim=-1)
     
-    result_file = CURR+'/converage_neural_result.json'
-    outputdir=CURR+'/image_neural'
-
-
-
+    
+def run_visualize_neural(
+        model_path, # 模型路径, 需要可以使用torch.load加载
+        dataset,           # 数据集名称, 支持mnist,cifar10
+        model_type,         # 模型类型,支持lenet5, resnet18, vgg11,vgg13,vgg19   
+        k=0.1,                       # 算法参数,范围[0,＋∞],例如k=0时, 输出值大于0的神经元被看作激活
+        outputdir="./output",
+        number_of_image=None,          # 总共计算多少张图片,None值时会计算整个数据集
+        logging=None):
+    
+    # result_file = CURR+'/converage_neural_result.json'
+    # outputdir=CURR+'/image_neural'
+    if not os.path.exists(outputdir):
+        os.mkdir(outputdir)
     model = torch.load(model_path)
     dataloader = load_dataset(dataset)
-    log_func=None
+    
+    # log_func=None
 
     
     if model_type == 'lenet5':
@@ -385,89 +421,20 @@ def run_visualize(
 
         NC.update_coverage_step(x)
         print('conv:', now_conv)
+        # logging.info('conv:', now_conv)
 
-        with open(result_file, 'r') as file_obj:
-            json_data = json.load(file_obj)
-        with open(result_file, 'w') as file_obj:
-            if 'coverage_test_yz' not in json_data.keys():
-                json_data['coverage_test_yz'] = {}
-
-            json_data['coverage_test_yz']['coverage_neural'] = []
-
-            for idx, conv in saves:
-                json_data['coverage_test_yz']['coverage_neural'].append([conv, f'image_neural/{idx}.svg'])
-            json.dump(json_data, file_obj)
+        json_data = {}
+        if 'coverage_test_yz' not in json_data.keys():
+            json_data['coverage_test_yz'] = {}
+        json_data['coverage_test_yz']['coverage_neural'] = []
+        for idx, conv in saves:
+            json_data['coverage_test_yz']['coverage_neural'].append([conv, f'image_neural/{idx}.svg'])
 
         if i == number_of_image:
             break
+        
 
-        info = "[模型测试阶段] 运行课题二的模型标准化测试准则：coverage_visualize [{:d}/{:d}]".format(i, len(dataloader))
-        if log_func is not None:
-            log_func(info)
-
-class LeNet5(nn.Module):
-    def __init__(self):
-        super(LeNet5, self).__init__()
-        self.conv1=nn.Sequential(
-            nn.Conv2d(3,6,5,1),#input_size=(1*28*28)
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2,stride=2)#input_size=(6*24*24)
-        )
-        self.conv2 = nn.Sequential(
-            nn.Conv2d(6, 16, 5),#input_size=(6*12*12)
-            nn.ReLU(),      #input_size=(16*8*8)
-            nn.MaxPool2d(2, 2)  #output_size=(16*4*4)
-        )
-        self.fc1 = nn.Sequential(
-            nn.Linear(16 * 4 * 4, 120),
-            nn.ReLU()
-        )
-        self.fc2 = nn.Sequential(
-            nn.Linear(120, 84),
-            nn.ReLU()
-        )
-        self.fc3 = nn.Linear(84, 10)
-
-        # 定义前向传播过程，输入为x
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        # nn.Linear()的输入输出都是维度为一的值，所以要把多维度的tensor展平成一维
-        x = x.view(x.size()[0], -1)
-        x = self.fc1(x)
-        x = self.fc2(x)
-        x = self.fc3(x)
-        return torch.log_softmax(x, dim=-1)
-
-import os.path as osp
-def run(model, test_loader, params, log_func=None):
-    root = osp.join(params["out_path"], "keti2")
-    result_file = osp.join(root, "keti2.json")
-    model_name = params["model"]["name"].lower()
-    show_size = params["coverage"]["show_size"]
-    run_visualize(model, dataloader=test_loader, result_file=result_file, model_type=model_name,
-                  outputdir=root, number_of_image=show_size, log_func=log_func)
-
-
-
-
-if __name__ == '__main__':
-    # # from resnet import resnet18
-
-    # # model = torchvision.models.resnet34(False)
-    # model = torchvision.models.vgg16(False)
-    # # model = torch.load('model.pt.1',map_location=torch.device('cpu'))
-    # # print(model)
-    # # exit()
-    # input_size = (32, 32)
-    # dataloader = get_dataloader_cifar(False, batch_size=4, input_size=input_size)
-
-    # model_type参数有lenet和vgg两种取值
-    CURR = osp.dirname(osp.abspath(__file__))
-    run_visualize(CURR+'/lenet5.pth', 'cifar10', 'lenet5', k=0, number_of_image=100)
-
-
-
-
-
-
+        # logging.info("[模型测试阶段] 运行课题二的模型标准化测试准则：coverage_visualize [{:d}/{:d}]".format(i, len(dataloader)))
+        # if log_func is not None:
+        #     log_func(info)
+    return json_data
