@@ -82,16 +82,16 @@ def load_model_from_path(path, modelname,device):
         
         
     #需要修改！vgg是上个系统中集成的文件，需要import
-    elif modelname == 'VGG11':
-        net = vgg.vgg11()
-    elif modelname == 'VGG13':
-        net = vgg.vgg13()
-    elif modelname == 'VGG16':
-        net = vgg.vgg16()
-    elif modelname == 'VGG19':
-        net = vgg.vgg19()        
-    else:
-        raise ValueError('仅支持LeNet，VGG11，VGG13与VGG19')
+    # elif modelname == 'VGG11':
+    #     net = vgg.vgg11()
+    # elif modelname == 'VGG13':
+    #     net = vgg.vgg13()
+    # elif modelname == 'VGG16':
+    #     net = vgg.vgg16()
+    # elif modelname == 'VGG19':
+    #     net = vgg.vgg19()        
+    # else:
+    #     raise ValueError('仅支持LeNet，VGG11，VGG13与VGG19')
         
     net.load_state_dict(torch.load(path))
     net = net.to(device)
