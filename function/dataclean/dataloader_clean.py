@@ -241,6 +241,7 @@ def get_pert(PERT_NUM, y_ori, y_pert):
         while rand_num == y_pert[data_index]:
             rand_num = random.randint(0, 9)
         y_pert[data_index] = rand_num
+        # print(pert_list)
     # red_box_idxs=random.sample(pert_list,8)
     return y_pert, pert_list
 
@@ -475,15 +476,16 @@ def run_format_clean(inputfile,outputfile,filler,root):
         correct_txt = f.read()
 
 
-    json_path = osp.join(root, "output.json")
-    with open(json_path, 'r') as f:
-        res_dict = json.load(f)
+    # json_path = osp.join(root, "output.json")
+    # with open(json_path, 'r') as f:
+    #     res_dict = json.load(f)
 
     output_dict["before"] = wrong_txt
     output_dict["after"] = correct_txt
     output_dict["fix_rate"] = 1.00 # 预先测试得到的数据
-    with open(json_path, 'w') as f:
-        json.dump(output_dict, f)
+    return output_dict 
+    # with open(json_path, 'w') as f:
+    #     json.dump(output_dict, f)
 
 
 def detect_file_encoding(filename):
@@ -516,16 +518,16 @@ def run_encoding_clean(inputfile,outputfile,root):
         wrong_txt = f.read().decode('utf-8','ignore')
     with open(outputfile, 'r',encoding='utf-8') as f:
         correct_txt = f.read()
-    json_path = osp.join(root, "output.json")
-    with open(json_path, 'r') as f:
-        res_dict = json.load(f)
+    # json_path = osp.join(root, "output.json")
+    # with open(json_path, 'r') as f:
+    #     res_dict = json.load(f)
     # res_dict["abnormal_encoding"]={}
     output_dict["before"] = wrong_txt
     output_dict["after"] = correct_txt
     output_dict["fix_rate"] = 1.00 # 预先测试得到的数据
-    with open(json_path, 'w') as f:
-        json.dump(output_dict, f)
-
+    # with open(json_path, 'w') as f:
+    #     json.dump(output_dict, f)
+    return output_dict
 
 def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=128, PERT_NUM=100, MAX_IMAGES=32,
                  log_func=None, gpu_id='cuda:0'):
@@ -552,9 +554,11 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
     X_test_data = X_test_data.numpy()
 
     y_ori = y_test.copy()
-    print("pert")
+    log_func.info("Starting pert...")
+    # print("pert")
     y_test, red_box_idxs = get_pert(PERT_NUM, y_ori, y_test)  # get noisy label for testing
-    print("pert end")
+    # print("pert end")
+    log_func.info("Pert end...")
     np.random.seed(43)
     savefig = False
     prune_method = 'prune_by_noise_rate'
@@ -563,8 +567,9 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
 
     cnn = CNN(epochs=1, log_interval=1000, train_loader=train_loader, test_loader=test_loader, dataset=dataset,
               gpu_id=gpu_id)  # pre-train
-    print("cnn")
-    print(type(X_test), type(y_test))
+    # print("cnn")
+    log_func.info("Running CNN...")
+    # print(type(X_test), type(y_test))
     cnn.fit(X_test, y_test)  # pre-train (overfit, not out-of-sample) to entire dataset.
 
     # Out-of-sample cross-validated holdout predicted probabilities
@@ -575,17 +580,18 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
     est_py, est_nm, est_inv = cleanlab.latent_estimation.estimate_latent(jc, y_test)
     # algorithmic identification of label errors
     noise_idx = cleanlab.pruning.get_noise_indices(y_test, psx, est_inv, prune_method=prune_method)
-    print('Number of estimated errors in test set:', sum(noise_idx))
-
+    # print('Number of estimated errors in test set:', sum(noise_idx))
+    log_func.info('Number of estimated errors in test set:'+ str(sum(noise_idx)))
     noise_idx = np.asarray(
         [i in red_box_idxs for i in range(len(y_test))])  # hand-picked digits from rankpruning alg's results
     pred = np.argmax(psx, axis=1)
     t_end = time.time()
     fix_rate = sum((pred == y_ori) & (y_test != y_ori)) / PERT_NUM
-    print('fix rate:', fix_rate)
+    # print('fix rate:', fix_rate)
+    log_func.info('fix rate:'+ str(fix_rate))
     all_time = (t_end - t_begin) * 1000
-    print('time usage:{} ms'.format(all_time))
-
+    # print('time usage:{} ms'.format(all_time))
+    log_func.info('time usage:{} ms'.format(all_time))
     ordered_noise_idx = np.argsort(np.asarray([psx[i][j] for i, j in enumerate(y_test)])[noise_idx])
     prob_given = np.asarray([psx[i][j] for i, j in enumerate(y_test)])[noise_idx][ordered_noise_idx][:MAX_IMAGES]
     prob_pred = np.asarray([psx[i][j] for i, j in enumerate(pred)])[noise_idx][ordered_noise_idx][:MAX_IMAGES]
@@ -649,7 +655,7 @@ def generate_abnormal_sample(outputfile):
     np.savez(outputfile,*data)
 
 
-def run_abnormal_table(inputfile,outputfile,root):
+def run_abnormal_table(inputfile,outputfile,root, logging=None):
     # 读取
     data = np.load(inputfile,allow_pickle=True)
     X,y = [data[key] for key in data]
@@ -680,11 +686,12 @@ def run_abnormal_table(inputfile,outputfile,root):
     np.save(outputfile,X_clean)
     # -判断准确率
     accuracy = (y_hat==y).sum()/len(y)
-    print('清洗率：{}'.format(accuracy))
+    logging.info('清洗率：{}'.format(accuracy))
     output_dict["fix_rate"] = accuracy
-    json_path = osp.join(root, "output.json")
-    with open(json_path, 'w') as f:
-        json.dump(output_dict, f)       
+    return output_dict
+    # json_path = osp.join(root, "output.json")
+    # with open(json_path, 'w') as f:
+    #     json.dump(output_dict, f)       
 
 def run(train_loader, test_loader, params, log_func=None):
     batch_size = test_loader.batch_size
@@ -707,3 +714,7 @@ def run(train_loader, test_loader, params, log_func=None):
     # generate_abnormal_sample(outputfile=osp.join(current_dir,'abnormal_table.npz'))
     # run_abnormal_table(inputfile=osp.join(current_dir,'abnormal_table.npz'),outputfile=osp.join(current_dir,'benign_table.npy'),root=current_dir)
 """异常数据检测"""
+def run_image(dataset, train_loader, test_loader, out_path, log_func=None):
+    batch_size = test_loader.batch_size
+    run_cleanlab(train_loader, test_loader, root=out_path, dataset=dataset.upper(), batch_size=batch_size, PERT_NUM=64, MAX_IMAGES=32, log_func=log_func, gpu_id="cuda:0")
+    return output_dict
