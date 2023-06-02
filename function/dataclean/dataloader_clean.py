@@ -51,6 +51,7 @@ matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
+output_dict = {}
 
 def call_bn(bn, x):
     return bn(x)
@@ -372,6 +373,8 @@ class CNN(BaseEstimator):  # Inherits sklearn classifier
         for epoch in range(1, self.epochs + 1):
 
             # Enable dropout and batch norm layers
+            print("EPOCH:",epoch)
+
             self.model.train()
             for batch_idx, (data, target) in enumerate(train_loader):
                 if self.cuda:  # pragma: no cover
@@ -400,12 +403,30 @@ class CNN(BaseEstimator):  # Inherits sklearn classifier
     def predict_proba(self, idx=None):
         loader = self.test_loader
         dataset = copy.deepcopy(loader.dataset)
-        if idx is not None:
-            if len(idx) != self.test_size:
-                dataset.data = np.array(dataset.data)[idx]
-                #                 if type(dataset.targets)==list:
-                #                     dataset.targets=np.array(dataset.targets)
-                dataset.targets = np.array(dataset.targets)[idx]
+        if isinstance(dataset.data,np.ndarray): #CIFAR
+        #     dataset.data = torch.from_numpy(dataset.data)
+        #     dataset.targets = torch.tensor(dataset.targets)
+        # # if isinstance(dataset.target,list):
+        # #     dataset.target = torch.tensor(dataset.target)
+            if idx is not None:
+                if len(idx) != self.test_size:
+                    dataset.data = np.array(dataset.data)[idx]
+                    dataset.targets = np.array(dataset.targets)[idx]
+        else: # MNIST
+            if idx is not None:
+                if len(idx) != self.test_size:
+                    dataset.data = dataset.data[idx]
+                    dataset.targets = dataset.targets[idx]
+
+
+        #         dataset.data = torch.from_numpy(np.array(dataset.data)[idx]).float().cuda()
+        #         #                 if type(dataset.targets)==list:
+        #         #                     dataset.targets=np.array(dataset.targets)
+        #         dataset.targets = torch.from_numpy(np.array(dataset.targets)[idx]).float().cuda()
+
+        # for data, _ in loader:
+        #     print(data)
+        #     break
 
         loader = torch.utils.data.DataLoader(
             dataset=dataset,
@@ -458,12 +479,11 @@ def run_format_clean(inputfile,outputfile,filler,root):
     with open(json_path, 'r') as f:
         res_dict = json.load(f)
 
-    res_dict["abnormal_format"]={}
-    res_dict["abnormal_format"]["wrong_txt"] = wrong_txt
-    res_dict["abnormal_format"]["correct_txt"] = correct_txt
-    res_dict["abnormal_format"]["fix_rate"] = 1.00 # 预先测试得到的数据
+    output_dict["before"] = wrong_txt
+    output_dict["after"] = correct_txt
+    output_dict["fix_rate"] = 1.00 # 预先测试得到的数据
     with open(json_path, 'w') as f:
-        json.dump(res_dict, f)
+        json.dump(output_dict, f)
 
 
 def detect_file_encoding(filename):
@@ -499,12 +519,12 @@ def run_encoding_clean(inputfile,outputfile,root):
     json_path = osp.join(root, "output.json")
     with open(json_path, 'r') as f:
         res_dict = json.load(f)
-    res_dict["abnormal_encoding"]={}
-    res_dict["abnormal_encoding"]["wrong_txt"] = wrong_txt
-    res_dict["abnormal_encoding"]["correct_txt"] = correct_txt
-    res_dict["abnormal_encoding"]["fix_rate"] = 1.00 # 预先测试得到的数据
+    # res_dict["abnormal_encoding"]={}
+    output_dict["before"] = wrong_txt
+    output_dict["after"] = correct_txt
+    output_dict["fix_rate"] = 1.00 # 预先测试得到的数据
     with open(json_path, 'w') as f:
-        json.dump(res_dict, f)
+        json.dump(output_dict, f)
 
 
 def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=128, PERT_NUM=100, MAX_IMAGES=32,
@@ -532,23 +552,26 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
     X_test_data = X_test_data.numpy()
 
     y_ori = y_test.copy()
+    print("pert")
     y_test, red_box_idxs = get_pert(PERT_NUM, y_ori, y_test)  # get noisy label for testing
-
+    print("pert end")
     np.random.seed(43)
     savefig = False
     prune_method = 'prune_by_noise_rate'
     t_begin = time.time()
     # Pre-train
 
-    cnn = CNN(epochs=10, log_interval=1000, train_loader=train_loader, test_loader=test_loader, dataset=dataset,
+    cnn = CNN(epochs=1, log_interval=1000, train_loader=train_loader, test_loader=test_loader, dataset=dataset,
               gpu_id=gpu_id)  # pre-train
+    print("cnn")
+    print(type(X_test), type(y_test))
     cnn.fit(X_test, y_test)  # pre-train (overfit, not out-of-sample) to entire dataset.
 
     # Out-of-sample cross-validated holdout predicted probabilities
     np.random.seed(4)
     cnn.epochs = 1  # Single epoch for cross-validation (already pre-trained)
-
-    jc, psx = cleanlab.latent_estimation.estimate_confident_joint_and_cv_pred_proba(X_test, y_test, cnn, cv_n_folds=5)
+    
+    jc, psx = cleanlab.latent_estimation.estimate_confident_joint_and_cv_pred_proba(X_test, y_test, cnn, cv_n_folds=2)
     est_py, est_nm, est_inv = cleanlab.latent_estimation.estimate_latent(jc, y_test)
     # algorithmic identification of label errors
     noise_idx = cleanlab.pruning.get_noise_indices(y_test, psx, est_inv, prune_method=prune_method)
@@ -575,21 +598,21 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
             torch.from_numpy(np.concatenate([X_test_data[img_idx][:, None]] * 3, axis=1).squeeze()))
     elif dataset == 'CIFAR10':
         graphic = torchvision.utils.make_grid(torch.from_numpy(np.array([X_test_data[img_idx][:, None]]).squeeze()))
-    img_labels = ["given: " + str(label4viz[w]) + " | conf: " + str(np.round(prob_given[w], 3)) for w in
-                  range(len(label4viz))]
-    img_pred = ["convnet guess: " + str(pred4viz[w]) + " | conf: " + str(np.round(prob_pred[w], 3)) for w in
-                range(len(pred4viz))]
-    img_fns = ["train img #: " + str(item) for item in img_idx]
-    # Display image
-    imshow(
-        graphic,
-        img_labels=img_labels,
-        img_pred=img_pred,
-        img_fns=img_fns,
-        figsize=(40, MAX_IMAGES / 1.1),
-        red_boxes=False,
-        #     savefig = savefig,
-    )
+    # img_labels = ["given: " + str(label4viz[w]) + " | conf: " + str(np.round(prob_given[w], 3)) for w in
+    #               range(len(label4viz))]
+    # img_pred = ["convnet guess: " + str(pred4viz[w]) + " | conf: " + str(np.round(prob_pred[w], 3)) for w in
+    #             range(len(pred4viz))]
+    # img_fns = ["train img #: " + str(item) for item in img_idx]
+    # # Display image
+    # imshow(
+    #     graphic,
+    #     img_labels=img_labels,
+    #     img_pred=img_pred,
+    #     img_fns=img_fns,
+    #     figsize=(40, MAX_IMAGES / 1.1),
+    #     red_boxes=False,
+    #     #     savefig = savefig,
+    # )
     # plt.savefig('/data2/gxq/SecPlat/SecAladdin/static/img/{}_example.png'.format(filename))
     # plt.show()
 
@@ -601,13 +624,14 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
     # clean_heatmap=sns.heatmap(wr_matrix,annot=True,mask=mask,annot_kws={"fontsize":8})
     # clean_heatmap.get_figure().savefig('/data2/gxq/SecPlat/SecAladdin/static/img/{}_heatmap.png'.format(filename))
 
-    json_path = osp.join(root, "output.json")
-    with open(json_path, 'r') as f:
-        res_dict = json.load(f)
-    res_dict["abnormal_data"]["fix_rate"] = fix_rate
-    with open(json_path, 'w') as f:
-        json.dump(res_dict, f)
-    return fix_rate
+    # json_path = osp.join(root, "output.json")
+    # with open(json_path, 'r') as f:
+    #     res_dict = json.load(f)
+    # res_dict["abnormal_data"]["fix_rate"] = fix_rate
+    # with open(json_path, 'w') as f:
+    #     json.dump(res_dict, f)
+    print(fix_rate)
+    output_dict["fix_rate"] = fix_rate
 
 def generate_abnormal_sample(outputfile):
     # 生成异常样本示例
@@ -648,6 +672,7 @@ def run_abnormal_table(inputfile,outputfile,root):
     plt.axis("square")
     plt.legend(handles=handles, labels=["outliers", "inliers"], title="true class")
     plt.savefig(osp.join(root,'Iso.jpg'))
+    output_dict["result"] = str(osp.join(root,'Iso.jpg')) # 绘制图保存路径
 
     # 输出清洁样本
     y_hat = clf.fit_predict(X)
@@ -656,19 +681,29 @@ def run_abnormal_table(inputfile,outputfile,root):
     # -判断准确率
     accuracy = (y_hat==y).sum()/len(y)
     print('清洗率：{}'.format(accuracy))
+    output_dict["fix_rate"] = accuracy
+    json_path = osp.join(root, "output.json")
+    with open(json_path, 'w') as f:
+        json.dump(output_dict, f)       
 
 def run(train_loader, test_loader, params, log_func=None):
     batch_size = test_loader.batch_size
     dataset = params["dataset"]["name"].upper()
     # root = osp.join(params["out_path"], "keti2")
     root = params["out_path"]
-    # run_cleanlab(train_loader, test_loader, root=root, dataset=dataset, batch_size=batch_size, PERT_NUM=100, MAX_IMAGES=32, log_func=log_func, gpu_id=params["device"])
-    # run_format_clean(inputfile=osp.join(current_dir,'text_sample1.txt'),outputfile=osp.join(root,'text_sample1_benign.txt'),filler=" ",root=root)
-    # run_encoding_clean(inputfile=osp.join(current_dir,'text_sample2.txt'),outputfile=osp.join(root,'text_sample2_benign.txt'),root=root)
+    run_cleanlab(train_loader, test_loader, root=root, dataset=dataset, batch_size=batch_size, PERT_NUM=1, MAX_IMAGES=32, log_func=log_func, gpu_id="cuda:0")
+    
+
+    json_path = osp.join(params["out_path"], "output.json")
+    with open(json_path, 'w') as f:
+        json.dump(output_dict, f)    
+    # # run_format_clean(inputfile=osp.join(current_dir,'text_sample1.txt'),outputfile=osp.join(root,'text_sample1_benign.txt'),filler=" ",root=root)
+    # # run_encoding_clean(inputfile=osp.join(current_dir,'text_sample2.txt'),outputfile=osp.join(root,'text_sample2_benign.txt'),root=root)
+    # # generate_abnormal_sample(outputfile=osp.join(current_dir,'abnormal_table.npz'))
+    # # run_abnormal_table(inputfile=osp.join(current_dir,'abnormal_table.npz'),outputfile=osp.join(root,'benign_table.npy'),root=root)
+
+    # run_format_clean(inputfile=osp.join(current_dir,'text_sample1.txt'),outputfile=osp.join(current_dir,'text_sample1_benign.txt'),filler=" ",root=current_dir)
+    # run_encoding_clean(inputfile=osp.join(current_dir,'text_sample2.txt'),outputfile=osp.join(current_dir,'text_sample2_benign.txt'),root=current_dir)
     # generate_abnormal_sample(outputfile=osp.join(current_dir,'abnormal_table.npz'))
-    # run_abnormal_table(inputfile=osp.join(current_dir,'abnormal_table.npz'),outputfile=osp.join(root,'benign_table.npy'),root=root)
-    run_format_clean(inputfile=osp.join(current_dir,'text_sample1.txt'),outputfile=osp.join(current_dir,'text_sample1_benign.txt'),filler=" ",root=current_dir)
-    run_encoding_clean(inputfile=osp.join(current_dir,'text_sample2.txt'),outputfile=osp.join(current_dir,'text_sample2_benign.txt'),root=current_dir)
-    generate_abnormal_sample(outputfile=osp.join(current_dir,'abnormal_table.npz'))
-    run_abnormal_table(inputfile=osp.join(current_dir,'abnormal_table.npz'),outputfile=osp.join(current_dir,'benign_table.npy'),root=current_dir)
+    # run_abnormal_table(inputfile=osp.join(current_dir,'abnormal_table.npz'),outputfile=osp.join(current_dir,'benign_table.npy'),root=current_dir)
 """异常数据检测"""
