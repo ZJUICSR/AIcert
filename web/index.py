@@ -1074,7 +1074,8 @@ def DataClean():
         return render_template("")
     elif (request.method == "POST"):
         dataset = request.form.get("dataset")
-        uoload_flag = request.form.get("flag")
+        upload_flag = request.form.get("upload_flag")
+        upload_path = "" #上传路径，单独接口获取路径（待定）
         tid = request.form.get("tid")
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
@@ -1084,12 +1085,13 @@ def DataClean():
             "state":0,
             "name":["DataClean"],
             "dataset": dataset,
+            "uoload": upload_flag,
             "model": "",
         }})
         taskinfo[tid]["dataset"]=dataset
         taskinfo[tid]["model"]=""
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        t2 = threading.Thread(target=interface.run_dataclean,args=(tid,AAtid,dataset))
+        t2 = threading.Thread(target=interface.run_dataclean,args=(tid,AAtid,dataset, upload_flag, upload_path))
         t2.setDaemon(True)
         t2.start()
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
