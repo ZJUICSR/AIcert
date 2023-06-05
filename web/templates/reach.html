@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-hans">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <!-- 新 Bootstrap4 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.highcharts.com.cn/highcharts/highcharts.js"></script>
+    <script src="https://cdn.highcharts.com.cn/highcharts/highcharts-more.js"></script>
+    <script src="../static/js/layer/layer.js"></script>
+
+    <title>AI安全攻防对抗平台</title>
+</head>
+
+<body>
+    <div class="header">
+        <h1 class="tittle">模型知识一致性检测系统</h1>
+    </div>
+    
+
+    <div class="container">
+        <div class="user-operate">
+            <div class="top-bar">
+                <div class="box-top">
+                    <ul class="top-ui">
+            
+                        <li>
+                            <a href="/">主页</a>
+                        </li>
+                        <li>
+                            <a href="/task_list">任务列表</a>
+                        </li>
+                        <li>
+                            <a href="#">帮助</a>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+            </div>
+        <div class="user-operate">
+            <div class="operate-head">
+                <!-- <div class="operate-head"> -->
+                <!-- <h3 class="">用户选择任务区：</h3> -->
+            </div>
+            <div class="operate-content justify-content-center">
+                <div class="col-md-8 d-flex justify-content-around">
+                    <!-- <label class="sub-tittle">样本选择区</label> -->
+                    <div class="nor_example">
+                        <div class="nor-image" id="nor">
+                            <input class="bg" type="file" accept="image/*" id="nor_image" style="opacity: 0;"
+                                z-index="10">
+                            <img src="" class="fileImgUpload">
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column align-items-center align-self-center">
+                        <select class="ml-0" id="dataset">
+                            <option value="mnist">MNIST</option>
+                            <option value="cifar10">CIFAR10</option>
+                        </select>
+                        <select class="ml-0" id="models">
+                            <option value="resnet18">Resnet18</option>
+                            <option value="vgg16_bn">VGG16</option>
+                        </select>
+                        <button class="btn btn-info" onclick="submit()">提交</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="user-operate">
+            <div class="operate-head">
+                <!-- <h3 class="">用户选择任务区：</h3> -->
+            </div>
+            <div class="operate-content">
+                <div class="col-md-3 m-auto d-flex flex-column align-items-center">
+                    <div>Input</div>
+                    <div class="nor_example d-block">
+                        <div class="nor-image" id="nor">
+                            <!-- <input class="bg" type="file" accept="image/*" id="nor_image" style="opacity: 0;"
+                                z-index="10"> -->
+                            <img src="" class="fileImg" id="input" width="200px">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 m-auto d-flex flex-column align-items-center">
+                    <div>Target</div>
+                    <div class="nor_example d-block">
+                        <div class="nor-image" id="nor">
+                            <!-- <input class="bg" type="file" accept="image/*" id="nor_image" style="opacity: 0;"
+                                z-index="10"> -->
+                            <img src="" class="fileImg" id="target" width="200px">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 m-auto d-flex flex-column align-items-center">
+                    <div>Output</div>
+                    <div class="nor_example d-block">
+                        <div class="nor-image" id="nor">
+                            <!-- <input class="bg" type="file" accept="image/*" id="nor_image" style="opacity: 0;"
+                                z-index="10"> -->
+                            <img src="" class="fileImg" id="output" width="200px">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 m-auto d-flex flex-column align-items-center">
+                    <div>Delta</div>
+                    <div class="nor_example d-block">
+                        <div class="nor-image" id="nor">
+                            <!-- <input class="bg" type="file" accept="image/*" id="nor_image" style="opacity: 0;"
+                                z-index="10"> -->
+                            <img src="" class="fileImg" id="delta" width="200px">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="user-operate">
+            <div class="operate-head">
+                <!-- <h3 class="">用户选择任务区：</h3> -->
+            </div>
+            <div class="operate-content flex-column p-3 ">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">指标</span>
+                    </div>
+                    <text class="form-control h-auto text-break" aria-label="With textarea"></text>
+                </div>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">说明</span>
+                    </div>
+                    <text class="form-control h-auto text-break" aria-label="With textarea">
+                        
+                    </text>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script>
+    function submit(){
+        var storage = window.localStorage; 
+        $.ajax({
+            type: 'POST',
+            dataType: 'JSON',
+            url:'/Task/CreateTask',
+            async: false,
+            // 目前无论是否选中功能都会有tid产生
+            data: {"AttackAndDefenseTask":1},
+            success: function(results) {
+            storage["Taskid"] = results["Taskid"];
+            },
+            error: function (jqXHR) {
+            console.error(jqXHR);
+            }
+        });
+        var img= new Image();
+        img.src=$(".fileImgUpload").attr("src"); 
+        var base64 = image2Base64(img);
+        data={"net":$("#models").find("option:selected").val(),"layer":1,
+             "dataset":"CIFAR10","pic":base64,"label":0,"target":9,
+             "tid":storage["Taskid"]}
+        $.ajax({
+             type: "POST",
+             url: "/reach",
+             data: JSON.stringify(data),
+             dataType: "json",
+             contentType: "application/json",
+             success: function(data){
+                 console.log(data)
+                 var fileImgInput=$('#input')
+                 fileImgInput.attr("src",data['input']); 
+                 $("#input").show();
+
+                 var output=$('#output')
+                 output.attr("src",data['output']); 
+                 $("#output").show();
+
+                 var target=$('#target')
+                 target.attr("src",data['target']); 
+                 $("#target").show();
+
+                 var delta=$('#delta')
+                 delta.attr("src",data['delta']); 
+                 $("#delta").show();
+                 
+             },
+              error:function(){
+            	  $("#msg_span").html('<font color="red">network connect error</font>');
+              }
+        })
+    }
+    function image2Base64(img) {
+		    var canvas = document.createElement("canvas");
+		    canvas.width = img.width;
+		    canvas.height = img.height;
+		    var ctx = canvas.getContext("2d");
+		    ctx.drawImage(img, 0, 0, img.width, img.height);
+		    var dataURL = canvas.toDataURL("image/png");
+		    return dataURL;
+	}
+    $(function(){  
+        $(".bg").change(function(){  
+            var fileImgUpload = $(".fileImgUpload"); 
+            //$(".bg").hide() 
+            var explorer = navigator.userAgent;  
+            var imgSrc = $(this)[0].value;  
+            if (explorer.indexOf('MSIE') >= 0) {  
+                if (!/\.(jpg|jpeg|png|JPG|PNG|JPEG)$/.test(imgSrc)) {  
+                    imgSrc = "";  
+                    fileImgUpload.attr("src","/img/default.png");  
+                    return false;  
+                }else{  
+                    fileImgUpload.attr("src",imgSrc);  
+                }  
+            }else{  
+                if (!/\.(jpg|jpeg|png|JPG|PNG|JPEG)$/.test(imgSrc)) {  
+                    imgSrc = "";  
+                    fileImgUpload.attr("src","/img/default.png");  
+                    return false;  
+                }else{  
+                    var file = $(this)[0].files[0];  
+                    var url = URL.createObjectURL(file);  
+                    fileImgUpload.attr("src",url);  
+                }  
+            }  
+            $(".fileImgUpload").show();
+
+        })  
+    }) 
+
+</script>
+
+
+
+<style>
+    .top-bar {
+    width: 100%;
+    height: 50px;
+    margin: 0;
+    display: flex;
+}
+.box-top {
+    width: 100%;
+    min-width: 1350px;
+    background-color: rgba(255,255,255,0.5);
+    padding: 20px;
+    /*border-bottom-left-radius: 8px;*/
+    /*border-bottom-right-radius: 8px;*/
+}
+.box-top-right{
+}
+.top-ui {
+    width: 100%;
+    min-width: 800px;
+    height: 50px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.top-ui li{
+    width:10%;
+    min-width: 50px;
+    margin:-5px 50px 0 70px;
+    float: left;
+    text-align: center;
+    display: block;
+}
+.top-ui a{
+    color: black;
+    text-decoration: none;
+}
+.top-ui a:hover{
+    color: white;
+}
+.top-ui img{
+    height: 40px;
+    margin: 0;
+    padding: 0;
+    display: inline;
+    position: relative;
+    top: -10px;
+}
+    .tittle {
+        font-size: 50px;
+        margin-left: 90px;
+        color: white;
+    }
+
+    .header {
+        background: black;
+        width: 100%;
+        height: 80px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
+    }
+
+    .operate-content {
+        display: flex;
+        padding-bottom: 20px;
+    }
+
+    .train-area {
+        margin-top: 50px;
+        background: #e6e6e6;
+        border-radius: 10px;
+    }
+
+    .operate-content .col-md-6 {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .user-operate {
+        background: #e6e6e6;
+        border-radius: 10px;
+    }
+
+    .operate-head {
+        /* border-bottom: 2px solid black; */
+        margin: 20px 10px 10px 10px;
+        /* margin: 20px 10px 10px 10px; */
+        padding-left: 20px;
+        padding-top: 10px;
+    }
+
+    .operate-body {
+        margin: 20px 10px 10px 10px;
+        padding-left: 20px;
+    }
+
+    .operation {
+        display: flex;
+    }
+
+    .result-area {
+        margin-top: 50px;
+        background: #e6e6e6;
+        border-radius: 10px;
+    }
+
+    .dashed_separate {
+        margin-top: 40px;
+        width: 2px;
+        height: 200px;
+        border: 2px dashed #aaaaaa;
+    }
+
+    .btn-analysis {
+        background: black;
+        color: #fff;
+        border: black;
+        height: 50px;
+        width: 200px;
+    }
+
+    .button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .btn:focus,
+    .btn:active:focus,
+    .btn.active:focus,
+    .btn.focus,
+    .btn:active.focus,
+    .btn.active.focus {
+        outline: none;
+        border-color: transparent;
+        box-shadow: none;
+    }
+
+    .sub-tittle {
+        font-size: 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+
+    .table-bordered td,
+    .table-bordered th,
+    .table-bordered thead>tr>th {
+        border: 2px solid black;
+        text-align: center;
+    }
+
+    .table-bordered {
+        height: 90%;
+        width: 90%;
+        margin-left: 20px;
+    }
+
+    .table-bordered td>img {
+        height: 180px;
+    }
+
+    .user-operate select {
+        width: 150px;
+        padding-left: 10px;
+        margin-left: 10px;
+    }
+
+    .train-area select {
+        width: 50px;
+        padding-left: 10px;
+        margin-left: 10px;
+    }
+
+    .adv_select {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .btn-info {
+        width: 150px;
+        margin-top: 10px;
+    }
+
+    .nor_example,
+    .adv_example {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .bg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .nor-image {
+        width: 200px;
+        height: 200px;
+        cursor: pointer;
+        background-size: cover;
+        background: url("../static/images/web_images/upload.png");
+        border: 4px dashed gray;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+
+
+        
+    }
+
+    .adv-image {
+        width: 200px;
+        height: 200px;
+        cursor: pointer;
+        background-size: cover;
+        background: url("../static/images/web_images/upload.png");
+        border: 4px dashed gray;
+
+    }
+
+    .fileImg {
+
+        width: 100%;
+        height: auto;
+        display: none;
+
+    }
+    .fileImgUpload {
+        width:200px; height:200px;
+        pointer-events: none;
+        display: none;
+    }
+</style>
+
+</html>
