@@ -22,9 +22,9 @@ from model.model_net.resnet import ResNet18, ResNet34, ResNet50, ResNet101, ResN
 from function.attack import run_adversarial, run_backdoor
 import cv2 
 from function.fairness import run_dataset_debias, run_model_debias
-# from function import concolic, env_test, deepsst, dataclean
+from function import concolic, env_test, deepsst, dataclean
 from function.ex_methods.module.func import get_loader, Logger, recreate_image
-# from function.ex_methods.module.generate_adv import get_adv_loader, sample_untargeted_attack
+from function.ex_methods.module.generate_adv import get_adv_loader, sample_untargeted_attack
 from function.ex_methods.module.load_model import load_model
 from function.ex_methods import attribution_maps, layer_explain, dim_reduciton_visualize
 from function.ex_methods.module.model_Lenet import lenet
