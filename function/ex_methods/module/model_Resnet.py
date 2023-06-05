@@ -336,8 +336,7 @@ def resnet18(pretrained=False, reference_model=None, **kwargs):
     if pretrained:
         dummy_model = None
         if reference_model == None:
-            dummy_model = torchvision.models.resnet18(
-                weights=torchvision.models.ResNet18_Weights.IMAGENET1K_V1)
+            dummy_model = torchvision.models.resnet18(pretrained=True)
         else:
             dummy_model = reference_model
         for key1, key2 in zip(model.state_dict().keys(), dummy_model.state_dict().keys()):
@@ -358,8 +357,7 @@ def resnet34(pretrained=False, reference_model=None, **kwargs):
     if pretrained:
         dummy_model = None
         if reference_model == None:
-            dummy_model = torchvision.models.resnet34(
-                weights=torchvision.models.ResNet34_Weights.IMAGENET1K_V1)
+            dummy_model = torchvision.models.resnet34(pretrained=True)
         else:
             dummy_model = reference_model
         for key1, key2 in zip(model.state_dict().keys(), dummy_model.state_dict().keys()):
@@ -380,8 +378,7 @@ def resnet50(pretrained=False, reference_model=None, **kwargs):
     if pretrained:
         dummy_model = None
         if reference_model == None:
-            dummy_model = torchvision.models.resnet50(
-                weights=torchvision.models.ResNet50_Weights.IMAGENET1K_V1)
+            dummy_model = torchvision.models.resnet50(pretrained=True)
         else:
             dummy_model = reference_model
         for key1, key2 in zip(model.state_dict().keys(), dummy_model.state_dict().keys()):
@@ -402,8 +399,7 @@ def resnet101(pretrained=False, reference_model=None, **kwargs):
     if pretrained:
         dummy_model = None
         if reference_model == None:
-            dummy_model = torchvision.models.resnet101(
-                weights=torchvision.models.ResNet101_Weights.IMAGENET1K_V1)
+            dummy_model = torchvision.models.resnet101(pretrained=True)
         else:
             dummy_model = reference_model
         for key1, key2 in zip(model.state_dict().keys(), dummy_model.state_dict().keys()):
@@ -424,8 +420,7 @@ def resnet152(pretrained=False, reference_model=None, **kwargs):
     if pretrained:
         dummy_model = None
         if reference_model == None:
-            dummy_model = torchvision.models.resnet152(
-                weights=torchvision.models.ResNet152_Weights.IMAGENET1K_V1)
+            dummy_model = torchvision.models.resnet152(pretrained=True)
         else:
             dummy_model = reference_model
         for key1, key2 in zip(model.state_dict().keys(), dummy_model.state_dict().keys()):
