@@ -83,7 +83,7 @@ def run(params):
 if __name__=='__main__':
     params = {}
     params["dataset"] = {}
-    params["dataset"]["name"] = "txt_encode" # CIFAR10/MNIST/table/txt_format/txt_encode
+    params["dataset"]["name"] = "MNIST" # CIFAR10/MNIST/table/txt_format/txt_encode
     params["dataset"]["upload_flag"] = 0
     params["dataset"]["upload_path"] = ""
     params["out_path"] = "./"
