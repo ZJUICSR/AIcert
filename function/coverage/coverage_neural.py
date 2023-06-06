@@ -214,7 +214,7 @@ def get_dataloader_cifar(train, batch_size=2, input_size=(32, 32)):
 
 def load_dataset(dataset_type):
     if dataset_type == 'mnist':
-        return get_dataloader_mnist(False, 1, input_size=(28,28))
+        return get_dataloader_mnist(False, 2, input_size=(28,28))
     elif dataset_type == 'cifar10':
         return get_dataloader_cifar(False, batch_size=2, input_size=(32,32))
     assert 0
@@ -392,19 +392,38 @@ def run_visualize_neural(
         num_list = [10, 6, 12, 12, 10]
         model = LeNet5()
         model.load_state_dict(torch.load(model_path))
-    elif 'vgg' in model_type:
+    elif model_type == "vgg11":
         num = int(model_type[3:])
         num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
         model = torchvision.models.vgg11(num_classes=10)
-    elif 'resnet' in model_type:
+    elif model_type == "vgg13":
+        num = int(model_type[3:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+        model = torchvision.models.vgg13(num_classes=10)
+    elif model_type == "vgg19":
+        num = int(model_type[3:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+        model = torchvision.models.vgg19(num_classes=10)
+    elif model_type == "resnet18":
         num = int(model_type[6:])
         num_list = [10, 8] + [12, 8] * (num // 2 - 2) + [12, 10]
         model = torchvision.models.resnet18(num_classes=10)
+    elif model_type == "resnet34":
+        num = int(model_type[6:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 2) + [12, 10]
+        model = torchvision.models.resnet34(num_classes=10)
+    # elif 'vgg' in model_type:
+    #     num = int(model_type[3:])
+    #     num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+    #     model = torchvision.models.vgg11(num_classes=10)
+    # elif 'resnet' in model_type:
+    #     num = int(model_type[6:])
+    #     num_list = [10, 8] + [12, 8] * (num // 2 - 2) + [12, 10]
+    #     model = torchvision.models.resnet18(num_classes=10)
     else:
         num = int(model_type[6:])
         num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
         model = torch.load(model_path)
-    # model.load_state_dict(torch.load(model_path))
 
     x, y = next(iter(dataloader))
     C, W, H = x.shape[1:]
@@ -421,20 +440,21 @@ def run_visualize_neural(
         if now_conv > best_conv + 0.05:
             best_conv = now_conv
             saves.append((i, now_conv))
-            g = DrawNet_overlap(result, format='png', type_net=model_type, outputdir=outputdir, imagename=str(i),
+            g = DrawNet_overlap(result, format='pdf', type_net=model_type, outputdir=outputdir, imagename=str(i),
                             number_per_dot=number_per_dot)
-            print('conv:', now_conv)
+            # print('conv:', now_conv)
+            # break
 
         NC.update_coverage_step(x)
         # print('conv:', now_conv)
-        # logging.info('conv:', now_conv)
+        logging.info('conv:'+str(now_conv))
 
         json_data = {}
         if 'coverage_test_yz' not in json_data.keys():
             json_data['coverage_test_yz'] = {}
         json_data['coverage_test_yz']['coverage_neural'] = []
         for idx, conv in saves:
-            json_data['coverage_test_yz']['coverage_neural'].append([conv, f'image_neural/{((idx+1)*2)}.svg']) 
+            json_data['coverage_test_yz']['coverage_neural'].append([conv, f'{outputdir}/{idx}.pdf']) 
 
         if i == number_of_image:
             break

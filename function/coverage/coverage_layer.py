@@ -203,23 +203,23 @@ def coverage_visualize(model_dir, dataset, batch_size, input_size):
 
 def get_dataloader_mnist(train, batch_size=16, input_size=(32, 32)):
     transform_fn = Compose([Resize(input_size), ToTensor(), ])
-    dataset = datasets.MNIST('./data/mnist', download=True, train=train, transform=transform_fn)
+    dataset = datasets.MNIST('./dataset/data', download=True, train=train, transform=transform_fn)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
     return dataloader
 
 
 def get_dataloader_cifar(train, batch_size=2, input_size=(32, 32)):
     transform_fn = Compose([Resize(input_size), ToTensor(), ])
-    dataset = datasets.CIFAR10('./data/cifar10', download=True, train=train, transform=transform_fn)
+    dataset = datasets.CIFAR10('./dataset/data', download=True, train=train, transform=transform_fn)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
     return dataloader
 
 
 def load_dataset(dataset_type):
     if dataset_type == 'mnist':
-        return get_dataloader_mnist(False, 1, input_size=(28,28))
+        return get_dataloader_mnist(False, 2, input_size=(28,28))
     elif dataset_type == 'cifar10':
-        return get_dataloader_cifar(False, batch_size=1, input_size=(32,32))
+        return get_dataloader_cifar(False, batch_size=2, input_size=(32,32))
     assert 0
 
 
@@ -391,7 +391,7 @@ def run_visualize(
         if now_conv > best_conv + 0.05 or i %50==0:
             best_conv = now_conv
             saves.append((i, now_conv))
-            g = DrawNet_overlap(result, format='svg', type_net=model_type, outputdir=outputdir, imagename=str(i),
+            g = DrawNet_overlap(result, format='png', type_net=model_type, outputdir=outputdir, imagename=str(i),
                             number_per_dot=number_per_dot)
 
         NC.update_coverage_step(x)
@@ -460,40 +460,47 @@ def run(model, test_loader, params, log_func=None):
                   outputdir=root, number_of_image=show_size, log_func=log_func)
 
 def run_visualize_layer(
-        model_path = './vgg19.pt.1', # 模型路径, 需要可以使用torch.load加载
-        dataset = 'mnist',           # 数据集名称, 支持mnist,cifar10
-        model_type='lenet5',         # 模型类型,支持lenet5, resnet18, vgg11,vgg13,vgg19   
+        model_path, # 模型路径, 需要可以使用torch.load加载
+        dataset,           # 数据集名称, 支持mnist,cifar10
+        model_type,         # 模型类型,支持lenet5, resnet18, vgg11,vgg13,vgg19   
         k=0.1,                       # 算法参数,范围[0,1],例如k=0.1时,每层前10%的神经元被算作激活
         outputdir="./output",
         number_of_image=None,          # 总共计算多少张图片,None值时会计算整个数据集
         logging=None):
     
 
-    # result_file = './converage_layer_result.json'
-    # outputdir='image_layer'
-
-
-    net = LeNet5()
-    torch.save(net.state_dict(), model_path.rsplit('/',1)[0])
-    model = net.load_state_dict(torch.load(model_path))
-    # model = torch.load(model_path)
+    if not os.path.exists(outputdir):
+        os.mkdir(outputdir)
     dataloader = load_dataset(dataset)
-    log_func=None
-    if not osp.exists(outputdir):
-        os.makedirs(outputdir)
+
     if model_type == 'lenet5':
-        threshold = [0.2, 0.3, 0.3, 0.4, 0.6]
         num_list = [10, 6, 12, 12, 10]
-    elif 'vgg' in model_type:
+        model = LeNet5()
+        model.load_state_dict(torch.load(model_path))
+    elif model_type == "vgg11":
         num = int(model_type[3:])
         num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
-    elif 'resnet' in model_type:
+        model = torchvision.models.vgg11(num_classes=10)
+    elif model_type == "vgg13":
+        num = int(model_type[3:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+        model = torchvision.models.vgg13(num_classes=10)
+    elif model_type == "vgg19":
+        num = int(model_type[3:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+        model = torchvision.models.vgg19(num_classes=10)
+    elif model_type == "resnet18":
         num = int(model_type[6:])
         num_list = [10, 8] + [12, 8] * (num // 2 - 2) + [12, 10]
+        model = torchvision.models.resnet18(num_classes=10)
+    elif model_type == "resnet34":
+        num = int(model_type[6:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 2) + [12, 10]
+        model = torchvision.models.resnet34(num_classes=10)
     else:
         num = int(model_type[6:])
         num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
-
+        model = torch.load(model_path)
 
     x, y = next(iter(dataloader))
     C, W, H = x.shape[1:]
@@ -510,20 +517,22 @@ def run_visualize_layer(
  
         now_conv = NC.curr_neuron_cov()
         # if now_conv > best_conv + 0.05 or i %50==0:
-        best_conv = now_conv
-        saves.append((i, now_conv))
-        g = DrawNet_overlap(result, format='svg', type_net=model_type, outputdir=outputdir, imagename=str(i),
-                        number_per_dot=number_per_dot)
+        if now_conv > best_conv + 0.05:
+            best_conv = now_conv
+            saves.append((i, now_conv))
+            g = DrawNet_overlap(result, format='pdf', type_net=model_type, outputdir=outputdir, imagename=str(i),
+                            number_per_dot=number_per_dot)
 
         NC.update_coverage_step(x)
-        print('conv:', now_conv)
+        # print('conv:', now_conv)
+        logging.info('conv:'+str(now_conv))
 
         json_data = {}
         if 'coverage_test_yz' not in json_data.keys():
             json_data['coverage_test_yz'] = {}
         json_data['coverage_test_yz']['coverage_layer'] = []
         for idx, conv in saves:
-            json_data['coverage_test_yz']['coverage_layer'].append([conv, f'image_layer/{idx}.svg'])
+            json_data['coverage_test_yz']['coverage_layer'].append([conv, f'{outputdir}/{idx}.pdf']) 
     
         # with open(result_file, 'r') as file_obj:
         #     json_data = json.load(file_obj)
@@ -540,9 +549,9 @@ def run_visualize_layer(
         if number_of_image is not None and i == number_of_image:
             break
 
-        info = "[模型测试阶段] 运行课题二的模型标准化测试准则：coverage_visualize [{:d}/{:d}]".format(i, len(dataloader))
-        if log_func is not None:
-            log_func(info)
+        # info = "[模型测试阶段] 运行课题二的模型标准化测试准则：coverage_visualize [{:d}/{:d}]".format(i, len(dataloader))
+        # if log_func is not None:
+        #     log_func(info)
     return json_data
 
 # if __name__ == '__main__':
