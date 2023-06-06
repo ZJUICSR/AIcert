@@ -268,7 +268,7 @@ def run_coverage_neural(tid,AAtid,dataset,model, k, N):
     """
     logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = coverage.run_coverage_neural_func(dataset.lower(), model.lower(), float(k), N, osp.join(ROOT,"output", tid, AAtid), logging)  
+    res = coverage.run_coverage_neural_func(dataset.lower(), model.lower(), float(k), int(N), osp.join(ROOT,"output", tid, AAtid), logging)  
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
@@ -287,7 +287,7 @@ def run_coverage_layer(tid,AAtid,dataset,model, k, N):
     """
     logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = coverage.run_coverage_layer_func(dataset.lower(), model.lower(), float(k), N, osp.join(ROOT,"output", tid, AAtid), logging)  
+    res = coverage.run_coverage_layer_func(dataset.lower(), model.lower(), float(k), int(N), osp.join(ROOT,"output", tid, AAtid), logging)  
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
