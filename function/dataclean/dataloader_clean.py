@@ -619,7 +619,8 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
         red_boxes=False,
         #     savefig = savefig,
     )
-    plt.savefig(osp.join(current_dir,'sample.png'))
+    # plt.savefig(osp.join(current_dir,'sample.png'))
+    plt.savefig(osp.join(root,'sample.png'))
 
     # plt.show()
 
@@ -637,9 +638,10 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
     # res_dict["abnormal_data"]["fix_rate"] = fix_rate
     # with open(json_path, 'w') as f:
     #     json.dump(res_dict, f)
-    print(fix_rate)
+    # print(fix_rate)
     output_dict["fix_rate"] = fix_rate
-    output_dict["result"] = str(osp.join(current_dir,'sample.png'))
+    # output_dict["result"] = str(osp.join(current_dir,'sample.png'))
+    output_dict["result"] = str(osp.join(root,'sample.png'))
 
 
 def generate_abnormal_sample(outputfile):
@@ -719,5 +721,5 @@ def run(train_loader, test_loader, params, log_func=None):
 """异常数据检测"""
 def run_image(dataset, train_loader, test_loader, out_path, log_func=None):
     batch_size = test_loader.batch_size
-    run_cleanlab(train_loader, test_loader, root=out_path, dataset=dataset.upper(), batch_size=batch_size, PERT_NUM=64, MAX_IMAGES=32, log_func=log_func, gpu_id="cuda:0")
+    run_cleanlab(train_loader, test_loader, root=out_path, dataset=dataset, batch_size=batch_size, PERT_NUM=32, MAX_IMAGES=32, log_func=log_func, gpu_id="cuda:0")
     return output_dict

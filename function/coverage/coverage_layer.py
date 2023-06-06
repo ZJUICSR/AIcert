@@ -473,8 +473,10 @@ def run_visualize_layer(
     # outputdir='image_layer'
 
 
-
-    model = torch.load(model_path)
+    net = LeNet5()
+    torch.save(net.state_dict(), model_path.rsplit('/',1)[0])
+    model = net.load_state_dict(torch.load(model_path))
+    # model = torch.load(model_path)
     dataloader = load_dataset(dataset)
     log_func=None
     if not osp.exists(outputdir):
@@ -507,11 +509,11 @@ def run_visualize_layer(
         result, number_per_dot = afterprocess(result, num_list=num_list)
  
         now_conv = NC.curr_neuron_cov()
-        if now_conv > best_conv + 0.05 or i %50==0:
-            best_conv = now_conv
-            saves.append((i, now_conv))
-            g = DrawNet_overlap(result, format='svg', type_net=model_type, outputdir=outputdir, imagename=str(i),
-                            number_per_dot=number_per_dot)
+        # if now_conv > best_conv + 0.05 or i %50==0:
+        best_conv = now_conv
+        saves.append((i, now_conv))
+        g = DrawNet_overlap(result, format='svg', type_net=model_type, outputdir=outputdir, imagename=str(i),
+                        number_per_dot=number_per_dot)
 
         NC.update_coverage_step(x)
         print('conv:', now_conv)

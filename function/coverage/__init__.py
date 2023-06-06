@@ -13,7 +13,7 @@ def run_coverage_neural_func(dataset, model, k, N, out_path, logging):
     
     model_path: 模型路径
     """
-    model_path = CURR.rsplit('/',2)[0]+"/model/ckpt/lenet5_dict.pth"
+    model_path = CURR.rsplit('/',2)[0]+"/model/ckpt/lenet_test_dict.pth"
     # res = run_visualize_neural(dataset=dataset, model_type=model, k=0.1, model_path=model_path, outputdir=out_path, logging=logging,number_of_image=N)
     res = run_visualize_neural(dataset=dataset, model_type=model, k=0.1, model_path=model_path, outputdir=out_path, logging=logging,number_of_image=N)
 
@@ -26,7 +26,7 @@ def run_coverage_layer_func(dataset, model, k, N, out_path, logging):
     k: 激活阈值
     model_path: 模型路径
     """
-    model_path = CURR.rsplit('/',2)[0]+"/model/ckpt/lenet5.pth"
+    model_path = CURR.rsplit('/',2)[0]+"/model/ckpt/lenet_test.pth"
     res = run_visualize_neural(dataset=dataset, model_type=model, k=0.1, model_path=model_path, outputdir=out_path, logging=logging,number_of_image=N)
     return res
 
