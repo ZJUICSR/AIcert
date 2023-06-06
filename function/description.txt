@@ -4,16 +4,17 @@
 开源版本1.0内容
 env_test          课题2 系统环境分析 valid_extract.pkl保存在~/model/ckpt目录下，下载链接【待定】
 concolic          课题2 测试样本自动生成  cifar10_vgg16.pth保存在~/model/ckpt目录下；MNIST_lenet.pth保存在~/model/mnist目录下；下载链接【待定】
-dataclean         课题2 异常数据检测
+dataclean         课题2 异常数据检测 保存在文本异常示例保存在~/dataset/data/txt目录下；下载链接【待定】
 deepsst           课题2 敏感神经元测试准则 mnist_lenet5.pth保存在~/model/ckpt目录下
-converage         课题2 多粒度神经元覆盖准则
+converage         课题2 多粒度神经元覆盖准则 lenet5_dict.pth, resnet18/34_dict.pth, vgg11/16/19_dict.pth保存在~/model/ckpt目录下
 dnn_coverage      课题2 重要神经元覆盖准则
 DeepLogic         课题2 逻辑神经元测试
+framework_test    课题2 ai开发框架安全度量
 
 后续版本内容
-ai开发框架安全度量
 ai模型安全度量
 ai模型模块化开发
+lenet_test.pth lenet5.pth多粒度测试暂存
 ----------------------课题2--------------------
 
 课题3
