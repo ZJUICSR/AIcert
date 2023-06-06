@@ -216,7 +216,7 @@ def load_dataset(dataset_type):
     if dataset_type == 'mnist':
         return get_dataloader_mnist(False, 1, input_size=(28,28))
     elif dataset_type == 'cifar10':
-        return get_dataloader_cifar(False, batch_size=1, input_size=(32,32))
+        return get_dataloader_cifar(False, batch_size=2, input_size=(32,32))
     assert 0
 
 def draw_note(g, name, label='', color='blue', fillcolor='blue'):
@@ -269,7 +269,7 @@ def DrawNet_overlap(net, outputdir='', imagename='test', format='png', type_net=
     :param net:网络结构，形如{'layer1':[True,False, False, True], 'layer2':[True, True]}
     :param outputdir:可视化图像的输出路径
     :param imagename:可视化图像名称
-    :param formate:可视化图像的格式，可为png、pdf、svg等
+    :param format:可视化图像的格式，可为png、pdf、svg等
     '''
     if type(imagename) == list:
         g = Digraph(outputdir + imagename[0], format=format,
@@ -339,7 +339,8 @@ class LeNet5(nn.Module):
     def __init__(self):
         super(LeNet5, self).__init__()
         self.conv1=nn.Sequential(
-            nn.Conv2d(3,6,5,1),#input_size=(1*28*28)
+            nn.Conv2d(1,6,5,1),#input_size=(1*28*28)
+            # nn.Conv2d(3,6,5,1),#input_size=(1*28*28)
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2)#input_size=(6*24*24)
         )
@@ -378,29 +379,32 @@ def run_visualize_neural(
         outputdir="./output",
         number_of_image=None,          # 总共计算多少张图片,None值时会计算整个数据集
         logging=None):
-    
     # result_file = CURR+'/converage_neural_result.json'
     # outputdir=CURR+'/image_neural'
     if not os.path.exists(outputdir):
         os.mkdir(outputdir)
-    model = torch.load(model_path)
     dataloader = load_dataset(dataset)
     
     # log_func=None
-
+    # model_path = CURR.rsplit('/',2)[0]+"/model/ckpt/lenet5.pth"
     
     if model_type == 'lenet5':
         num_list = [10, 6, 12, 12, 10]
+        model = LeNet5()
+        model.load_state_dict(torch.load(model_path))
     elif 'vgg' in model_type:
         num = int(model_type[3:])
         num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+        model = torchvision.models.vgg11(num_classes=10)
     elif 'resnet' in model_type:
         num = int(model_type[6:])
         num_list = [10, 8] + [12, 8] * (num // 2 - 2) + [12, 10]
+        model = torchvision.models.resnet18(num_classes=10)
     else:
         num = int(model_type[6:])
         num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
-
+        model = torch.load(model_path)
+    # model.load_state_dict(torch.load(model_path))
 
     x, y = next(iter(dataloader))
     C, W, H = x.shape[1:]
@@ -413,14 +417,16 @@ def run_visualize_neural(
         result = NC.curr_cov_dict()
         result, number_per_dot = afterprocess(result, num_list=num_list)
         now_conv = NC.curr_neuron_cov()
-        if now_conv > best_conv + 0.05 or i %50==0:
+        # if now_conv > best_conv + 0.05 or i %50==0:
+        if now_conv > best_conv + 0.05:
             best_conv = now_conv
             saves.append((i, now_conv))
-            g = DrawNet_overlap(result, format='svg', type_net=model_type, outputdir=outputdir, imagename=str(i),
+            g = DrawNet_overlap(result, format='png', type_net=model_type, outputdir=outputdir, imagename=str(i),
                             number_per_dot=number_per_dot)
+            print('conv:', now_conv)
 
         NC.update_coverage_step(x)
-        print('conv:', now_conv)
+        # print('conv:', now_conv)
         # logging.info('conv:', now_conv)
 
         json_data = {}
@@ -428,7 +434,7 @@ def run_visualize_neural(
             json_data['coverage_test_yz'] = {}
         json_data['coverage_test_yz']['coverage_neural'] = []
         for idx, conv in saves:
-            json_data['coverage_test_yz']['coverage_neural'].append([conv, f'image_neural/{idx}.svg'])
+            json_data['coverage_test_yz']['coverage_neural'].append([conv, f'image_neural/{((idx+1)*2)}.svg']) 
 
         if i == number_of_image:
             break
