@@ -340,7 +340,7 @@ class LeNet5(nn.Module):
         super(LeNet5, self).__init__()
         self.conv1=nn.Sequential(
             nn.Conv2d(1,6,5,1),#input_size=(1*28*28)
-            # nn.Conv2d(3,6,5,1),#input_size=(1*28*28)
+            # nn.Conv2d(1,6,5,1),#input_size=(1*28*28)
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2)#input_size=(6*24*24)
         )
