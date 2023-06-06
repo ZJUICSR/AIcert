@@ -228,7 +228,7 @@ def run_dataclean(tid, AAtid, dataname, upload_flag, upload_path):
     """
     logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = dataclean.run_dataclean(dataname, int(upload_flag), upload_path, osp.join(ROOT,"output", tid, AAtid), logging)   
+    res = dataclean.run_dataclean(dataname.upper(), int(upload_flag), upload_path, osp.join(ROOT,"output", tid, AAtid), logging)   
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
