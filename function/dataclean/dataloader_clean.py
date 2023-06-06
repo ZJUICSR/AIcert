@@ -185,7 +185,7 @@ def imshow(inp, img_labels=None, img_pred=None, img_fns=None, figsize=(10, 10), 
         prediction = img_pred[idx]
         label = img_labels[idx]
         img_fn = img_fns[idx]
-        image_index = int(img_fn[13:])
+        # image_index = int(img_fn[13:])
 
         plt.hlines([j * ybin_height - .5], xmin=i * xbin_width, xmax=i * xbin_width + xbin_width, color='lightgray',
                    linewidth=2)
@@ -209,16 +209,16 @@ def imshow(inp, img_labels=None, img_pred=None, img_fns=None, figsize=(10, 10), 
             plt.vlines([i * xbin_width + 0.5, (i + 1) * xbin_width - 1.5], ymin=j * ybin_height + 0.5,
                        ymax=j * ybin_height + ybin_height - 0.5, color='gray', linewidth=5)
 
-        if red_boxes and image_index in red_box_idxs:
-            # Draw red bounding box
-            num_red_boxes += 1
-            plt.hlines([j * ybin_height + 0.5, (j + 1) * ybin_height - 1.5], xmin=i * xbin_width - 0.3,
-                       xmax=i * xbin_width + xbin_width - 0.65, color='red', linewidth=15)
-            plt.vlines([i * xbin_width + 0.5, (i + 1) * xbin_width - 1.5], ymin=j * ybin_height + 0.5,
-                       ymax=j * ybin_height + ybin_height - 0.5, color='red', linewidth=15)
+    #     if red_boxes and image_index in red_box_idxs:
+    #         # Draw red bounding box
+    #         num_red_boxes += 1
+    #         plt.hlines([j * ybin_height + 0.5, (j + 1) * ybin_height - 1.5], xmin=i * xbin_width - 0.3,
+    #                    xmax=i * xbin_width + xbin_width - 0.65, color='red', linewidth=15)
+    #         plt.vlines([i * xbin_width + 0.5, (i + 1) * xbin_width - 1.5], ymin=j * ybin_height + 0.5,
+    #                    ymax=j * ybin_height + ybin_height - 0.5, color='red', linewidth=15)
 
-    if red_boxes:
-        print('Number of red boxes:', num_red_boxes)
+    # if red_boxes:
+    #     print('Number of red boxes:', num_red_boxes)
     plt.axis('off')
     if savefig:
         plt.savefig('figs/mnist_test_label_errors' + str(len(img_labels)) + '.pdf', pad_inches=0.0, bbox_inches='tight')
@@ -604,22 +604,23 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
             torch.from_numpy(np.concatenate([X_test_data[img_idx][:, None]] * 3, axis=1).squeeze()))
     elif dataset == 'CIFAR10':
         graphic = torchvision.utils.make_grid(torch.from_numpy(np.array([X_test_data[img_idx][:, None]]).squeeze()))
-    # img_labels = ["given: " + str(label4viz[w]) + " | conf: " + str(np.round(prob_given[w], 3)) for w in
-    #               range(len(label4viz))]
-    # img_pred = ["convnet guess: " + str(pred4viz[w]) + " | conf: " + str(np.round(prob_pred[w], 3)) for w in
-    #             range(len(pred4viz))]
-    # img_fns = ["train img #: " + str(item) for item in img_idx]
-    # # Display image
-    # imshow(
-    #     graphic,
-    #     img_labels=img_labels,
-    #     img_pred=img_pred,
-    #     img_fns=img_fns,
-    #     figsize=(40, MAX_IMAGES / 1.1),
-    #     red_boxes=False,
-    #     #     savefig = savefig,
-    # )
-    # plt.savefig('/data2/gxq/SecPlat/SecAladdin/static/img/{}_example.png'.format(filename))
+    img_labels = ["given: " + str(label4viz[w]) + " | conf: " + str(np.round(prob_given[w], 3)) for w in
+                  range(len(label4viz))]
+    img_pred = ["convnet guess: " + str(pred4viz[w]) + " | conf: " + str(np.round(prob_pred[w], 3)) for w in
+                range(len(pred4viz))]
+    img_fns = ["train img #: " + str(item) for item in img_idx]
+    # Display image
+    imshow(
+        graphic,
+        img_labels=img_labels,
+        img_pred=img_pred,
+        img_fns=img_fns,
+        figsize=(40, MAX_IMAGES / 1.1),
+        red_boxes=False,
+        #     savefig = savefig,
+    )
+    plt.savefig(osp.join(current_dir,'sample.png'))
+
     # plt.show()
 
     wr_matrix = np.zeros((10, 10))
@@ -628,7 +629,7 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
         wr_matrix[pred[i], y_ori[i]] += 1
 
     # clean_heatmap=sns.heatmap(wr_matrix,annot=True,mask=mask,annot_kws={"fontsize":8})
-    # clean_heatmap.get_figure().savefig('/data2/gxq/SecPlat/SecAladdin/static/img/{}_heatmap.png'.format(filename))
+    # clean_heatmap.get_figure().savefig('/data2/gxq/Se  cPlat/SecAladdin/static/img/{}_heatmap.png'.format(filename))
 
     # json_path = osp.join(root, "output.json")
     # with open(json_path, 'r') as f:
@@ -638,6 +639,8 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
     #     json.dump(res_dict, f)
     print(fix_rate)
     output_dict["fix_rate"] = fix_rate
+    output_dict["result"] = str(osp.join(current_dir,'sample.png'))
+
 
 def generate_abnormal_sample(outputfile):
     # 生成异常样本示例
@@ -698,7 +701,7 @@ def run(train_loader, test_loader, params, log_func=None):
     dataset = params["dataset"]["name"].upper()
     # root = osp.join(params["out_path"], "keti2")
     root = params["out_path"]
-    run_cleanlab(train_loader, test_loader, root=root, dataset=dataset, batch_size=batch_size, PERT_NUM=1, MAX_IMAGES=32, log_func=log_func, gpu_id="cuda:0")
+    run_cleanlab(train_loader, test_loader, root=root, dataset=dataset, batch_size=batch_size, PERT_NUM=8, MAX_IMAGES=32, log_func=log_func, gpu_id="cuda:0")
     
 
     json_path = osp.join(params["out_path"], "output.json")
