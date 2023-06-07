@@ -26,3 +26,5 @@ torchaudio==0.10.2+cu113
 chardet-5.1.0
 Flask==2.0.3
 Jinja2==3.1.1
+appdirs 
+pytorch_pretrained_bert
