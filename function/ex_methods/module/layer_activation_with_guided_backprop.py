@@ -111,10 +111,10 @@ def get_model_and_layers(model_name):
     model = None
     
     if model_name == "vgg19":
-        model = torchvision.models.vgg19(weights=torchvision.models.VGG19_Weights.IMAGENET1K_V1)
+        model = torchvision.models.vgg19(pretrained=True)
         cnn_layers = [1, 3, 6, 8, 11, 13, 15, 17, 20, 22, 24, 26, 29, 31, 33, 35]
     elif model_name == "alexnet":
-        model = torchvision.models.alexnet(weights=torchvision.models.AlexNet_Weights.IMAGENET1K_V1)
+        model = torchvision.models.alexnet(pretrained=True)
         cnn_layers = [1, 4, 7, 9, 11]
     return model, cnn_layers
 
