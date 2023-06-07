@@ -16,11 +16,11 @@ from IOtool import IOtool, Callback
 from torchvision import  transforms
 import torch
 from function.formal_verify import *
-
+from PIL import Image
 from model.model_net.lenet import Lenet
 from model.model_net.resnet import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
 from function.attack import run_adversarial, run_backdoor
- 
+import cv2 
 from function.fairness import run_dataset_debias, run_model_debias
 from function import concolic, env_test, deepsst, dataclean
 from function.ex_methods.module.func import get_loader, Logger, recreate_image
@@ -29,7 +29,14 @@ from function.ex_methods.module.load_model import load_model
 from function.ex_methods import attribution_maps, layer_explain, dim_reduciton_visualize
 from function.ex_methods.module.model_Lenet import lenet
 from function.ex_methods.lime import lime_image_ex
-
+ feature_dingwenbing
+from function.formal_verify.auto_verify import auto_verify_img
+from function.formal_verify.knowledge_consistency import load_checkpoint,get_feature
+from function.formal_verify.knowledge_consistency import Model_zoo as models
+import matplotlib.pyplot as plt
+from function.formal_verify.veritex import Net as reachNet
+from function.formal_verify.veritex.networks.cnn import Method as ReachMethod
+from function.formal_verify.veritex.utils.plot_poly import plot_polytope2d
 ROOT = osp.dirname(osp.abspath(__file__))
 def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList):
     """模型公平性提升
@@ -201,7 +208,7 @@ def run_verify(tid, AAtid, param):
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
     
     
-def run_concolic(tid, AAtid, dataname, modelname, norm):
+def run_concolic(tid, AAtid, dataname, modelname, norm, times):
     """测试样本自动生成
     :params tid:主任务ID
     :params AAtid:子任务id
@@ -209,8 +216,10 @@ def run_concolic(tid, AAtid, dataname, modelname, norm):
     :params modelname:模型名称
     :params norm:范数约束
     """
+    logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = concolic.run_concolic(dataname, modelname, norm, osp.join(ROOT,"output", tid, AAtid))   
+    res = concolic.run_concolic(dataname.lower(), modelname.lower(), norm.lower(), int(times), osp.join(ROOT,"output", tid, AAtid), logging)  
+    res["stop"]=1 
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
@@ -250,7 +259,10 @@ def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-    
+
+def run_coverage(tid,AAtid,dataset,modelname):
+    pass
+  
 def run_deepsst(tid,AAtid,dataset,modelname,pertube,m_dir):
     """敏感神经元测试准则
     :params tid:主任务ID
@@ -261,9 +273,10 @@ def run_deepsst(tid,AAtid,dataset,modelname,pertube,m_dir):
     :params m_dir: 敏感度值文件位置
     :output res:需保存到子任务json中的返回结果/路径
     """
+    logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = deepsst.run_deepsst(dataset, modelname, float(pertube), m_dir)
-    # res = concolic.run_concolic(dataname, modelname, norm)   
+    res = deepsst.run_deepsst(dataset.lower(), modelname, float(pertube.strip("%"))/100, m_dir, osp.join(ROOT,"output", tid, AAtid), logging)  
+    res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
@@ -603,3 +616,319 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, device):
     taskinfo[tid]["function"][stid]["state"] = 2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
     IOtool.change_task_success_v2(tid)
+
+def verify_img(tid, stid, net, dataset, eps, pic_path):
+    b1=[]
+    b2=[]
+    model=''
+    if net=='cnn_7layer_bn':
+        model='cnn_7layer_bn'
+    elif net=='Densenet' and dataset=='CIFAR':
+        model='Densenet_cifar_32'
+    elif net=='Resnet' and dataset=='MNIST':
+        model='resnet'
+    elif net=='Resnet' and dataset=='CIFAR':
+        model='ResNeXt_cifar'
+    elif net=='Wide Resnet' and dataset=='CIFAR':
+        model='wide_resnet_cifar_bn_wo_pooling'
+    print(model,net)
+    lb1,ub1,lb2,ub2,predicted,score_IBP,score_CROWN=auto_verify_img(net, dataset, eps, pic_path)
+    categories=[]
+    for i in range(len(lb1)):
+        b1.append([round(lb1[i],4),round(ub1[i],4)])
+        b2.append([round(lb2[i],4),round(ub2[i],4)])
+        categories.append(f'f_{i}')
+    resp={'boundary1':b1,'boundary2':b2,'categories':categories,'predicted':predicted,
+          'score_IBP':score_IBP,'score_CROWN':score_CROWN}
+    IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"][stid]["state"] = 2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_task_success_v2(tid)
+    return resp
+
+def knowledge_consistency(tid, stid, arch,dataset,img_path,layer):
+    base=os.path.join(os.getcwd(),"model","ckpt")
+    base_path=os.path.join(base,'knowledge_consistency_checkpoints')
+    if arch=='vgg16_bn' and dataset=='mnist':
+        conv_layer=30
+        model_path1=os.path.join(base_path,'checkpoint_mnist_vgg16_bn_lr-2_sd0.pth.tar')
+        model_path2=os.path.join(base_path,'checkpoint_mnist_vgg16_bn_lr-2_sd5.pth.tar')
+        resume=os.path.join(base_path,f'{dataset}_{arch}','checkpoint_L30__a0.1_lr-4.pth.tar')
+    elif arch=='vgg16_bn' and dataset=='cifar10':
+        conv_layer=30
+        model_path1=os.path.join(base_path,'checkpoint_cifar10_vgg16_bn_lr-2_sd0.pth.tar')
+        model_path2=os.path.join(base_path,'checkpoint_cifar10_vgg16_bn_lr-2_sd5.pth.tar')
+        resume=os.path.join(base_path,f'{dataset}_{arch}','checkpoint_L30__a0.1_lr-4.pth.tar')
+    elif arch=='resnet18' and dataset=='mnist':
+        conv_layer=3
+        model_path1=os.path.join(base_path,'checkpoint_mnist_resnet18_lr-2_sd0.pth.tar')
+        model_path2=os.path.join(base_path,'checkpoint_mnist_resnet18_lr-2_sd5.pth.tar')
+        resume=os.path.join(base_path,f'{dataset}_{arch}','checkpoint_L3__a0.1_lr-4.pth.tar')
+    elif arch=='resnet18' and dataset=='cifar10':
+        conv_layer=3
+        model_path1=os.path.join(base_path,'checkpoint_cifar10_resnet18_lr-2_sd0.pth.tar')
+        model_path2=os.path.join(base_path,'checkpoint_cifar10_resnet18_lr-2_sd5.pth.tar')
+        resume=os.path.join(base_path,f'{dataset}_{arch}','checkpoint_L3__a0.1_lr-3.pth.tar')
+    else:
+        print(arch,dataset)
+        return None
+    if dataset=='mnist':
+        transform=transforms.Compose([transforms.Resize((224,224)),transforms.Grayscale(num_output_channels=3),
+            transforms.ToTensor(), 
+            transforms.Normalize((0.1307,), (0.3081,))])
+    elif dataset=='cifar10':
+        transform=transforms.Compose([transforms.Resize((224,224)),transforms.ToTensor(), 
+                                  transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])])
+    net1 = models.__dict__[arch](num_classes=10)
+    load_checkpoint(model_path1, net1)
+    net2 = models.__dict__[arch](num_classes=10)
+    load_checkpoint(model_path2, net2)
+    img = Image.open(img_path)
+    img = img.convert('RGB')
+
+    x_ori = transform(img)
+    y = net1(x_ori.unsqueeze(0))
+    y = np.argmax(y.cpu().detach().numpy())
+    print(y)
+    x = get_feature(x_ori, net1,arch,conv_layer)
+    input_size = x.shape
+    output_size = x.shape
+    model = models.LinearTester(input_size,output_size, affine=False, bn = False, instance_bn=True).cuda()
+    checkpoint = torch.load(resume, map_location=torch.device(0))
+    model.load_state_dict(checkpoint['state_dict'])
+    del checkpoint
+    input = get_feature(x_ori,net1,arch,conv_layer)
+    target = get_feature(x_ori,net2,arch,conv_layer)
+    model.eval()
+    output, output_n, output_contrib, res = model.val_linearity(input.unsqueeze(0).cuda())
+    t=0
+    img_name=os.path.basename(img_path).split('.')[0]
+    pic_dir=os.path.dirname(img_path)
+    delta = target - output
+    # for t in range(len(output)):
+    t=layer
+    plt.figure(frameon=False)
+    plt.axis('off')
+    plt.imshow(output[t], cmap='jet', norm=None, vmin=output.min(), vmax=output.max())
+    plt.savefig(os.path.join(pic_dir,stid+f'_output_{t}.png'),bbox_inches='tight')
+    plt.close()
+    plt.figure(frameon=False)
+    plt.axis('off')
+    plt.imshow(input[t], cmap='jet', norm=None, vmin=input.min(), vmax=input.max())
+    plt.savefig(os.path.join(pic_dir,stid+f'_input_{t}.png'),bbox_inches='tight')
+    plt.close()
+    plt.figure(frameon=False)
+    plt.axis('off')
+    plt.imshow(target[t], cmap='jet', norm=None, vmin=target.min(), vmax=target.max())
+    plt.savefig(os.path.join(pic_dir,stid+f'_target_{t}.png'),bbox_inches='tight')
+    plt.close()
+    plt.figure(frameon=False)
+    plt.axis('off')
+    plt.imshow(delta[t], cmap='jet', norm=None, vmin=delta.min(), vmax=delta.max())
+    plt.savefig(os.path.join(pic_dir,stid+f'_delta_{t}.png'),bbox_inches='tight')
+    plt.close()
+    return torch.norm(delta, p=2).numpy().tolist(),len(target)
+def reach(tid,stid,dataset,pic_path,label,target_label):
+    base=os.path.join(os.getcwd(),"model","ckpt")
+    base_path=os.path.join(base,'reach_checkpoints')
+    model = reachNet()
+    if dataset=='CIFAR10':  
+        model.load_state_dict(torch.load(os.path.join(base_path,'cifar_torch_net.pth'), map_location=torch.device('cpu')))
+    else:
+        model.load_state_dict(torch.load(os.path.join(base_path,'mnist_torch_net.pth'), map_location=torch.device('cpu')))
+    model.eval()
+    transf = transforms.ToTensor()
+    img = cv2.imread(pic_path)
+    image=transf(img)
+    image=torch.unsqueeze(image, 0)
+    print(image.shape)
+    label=torch.tensor(int(label))
+    target_label=torch.tensor(int(target_label))
+    # [image, label, target_label, _] = torch.load("/mnt/data/ai/veritex/examples/CIFAR10/data/images/0.pt")
+    print(image.shape)
+
+    attack_block = (1,1)
+    epsilon = 0.02
+    relaxation = 0.01
+    reach_model = ReachMethod(model, image, label, 'logs',
+                         attack_block=attack_block,
+                         epsilon=epsilon,
+                         relaxation=relaxation)
+    output_sets = reach_model.reach()
+
+    sims = reach_model.simulate(num=100)
+
+    # Plot output reachable sets and simulations
+    dim0, dim1 = label.numpy(), target_label.numpy()
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    for item in output_sets:
+        out_vertices = item[0]
+        plot_polytope2d(out_vertices[:, [dim0, dim1]], ax, color='b', alpha=1.0, edgecolor='k', linewidth=0.0,zorder=2)
+    ax.plot(sims[:,dim0], sims[:,dim1],'k.',zorder=1)
+    ax.autoscale()
+    # ax.set_xlabel(f'Correct class: $y_{dim0}$', fontsize=16)
+    # ax.set_ylabel(f'Adversarial class: $y_{dim1}$', fontsize=16)
+    # plt.title('Reachability analysis of CNNs with input pixels under perturbation. \nBlue area represents the reachable domain. \nBlack dots represent simultations')
+    plt.tight_layout()
+    plt.show()
+    pt_dir=os.path.dirname(pic_path)
+    plt.savefig(os.path.join(pt_dir,stid+'.png'))
+    plt.close()
+    resp={
+        
+    }
+    return resp
+
+ROOT = osp.dirname(osp.abspath(__file__))
+
+"""对抗样本加载计算，绘制解释图接口"""
+# if __name__ == '__main__':
+#     # m = lenet(None,1)
+#     # m.load_state_dict(torch.load("./model/ckpt/mnist_lenet.pt"))
+
+#     params = {
+#         "dataset": {"name": "imagenet"},
+#         "model": {"name": "densenet121","ckpt":None},
+#         "out_path": "./output",
+#         "device": torch.device("cuda:1"),
+#         "ex_methods":{"methods":["lrp", "gradcam", "integrated_grad"]},
+#         "adv_methods":{"methods":["FGSM"]},
+#         "root":ROOT
+#     }
+
+#     logging = Logger(filename=osp.join(params["out_path"], "kt1_logs.txt"))
+
+#     root = params["root"]
+#     dataset = params["dataset"]["name"]
+#     nor_data = torch.load(osp.join(root, f"dataset/{dataset}/data/{dataset}_NOR.pt"))
+#     nor_loader = get_loader(nor_data, batchsize=16)
+#     logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
+
+#     model_name = params["model"]["name"]
+#     device = params["device"]
+#     model = params["model"]["ckpt"]
+#     logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
+#     net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
+#     net = net.eval().to(device)
+#     logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
+
+#     adv_loader = {}
+#     adv_methods = params["adv_methods"]["methods"]
+#     for adv_method in adv_methods:
+#         adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=16, logging=logging)
+#     logging.info("[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
+
+#     ex_methods = params["ex_methods"]["methods"]
+#     logging.info("[注意力分布图计算]：选择了{:s}解释算法".format(", ".join(ex_methods)))
+#     ex_images = attribution_maps(net, nor_loader, adv_loader, ex_methods, params, 20, logging)
+
+
+"""模型每层特征图可视化，支持vgg和alexnet"""
+# if __name__ == '__main__':
+#     params = {
+#         "dataset": {"name": "imagenet"},
+#         "model": {"name": "vgg19"},
+#         "out_path": "./output",
+#         "device": torch.device("cuda:6"),
+#         "ex_methods":{"dataset":"ImageNet"},
+#         "root": ROOT
+#     }
+#     logging = Logger(filename=osp.join(params["out_path"], "kt1_logs.txt"))
+
+#     dataset = params["dataset"]["name"]
+
+#     nor_loader = get_loader(osp.join(ROOT,"dataset",dataset,"data"))
+#     logging.info("[数据集获取]：获取正常样本已完成.")
+
+#     adv_loader = {}
+#     adv_dataloader_path = osp.join(ROOT,"imagenet_adv_data")
+#     for data in os.listdir(adv_dataloader_path):
+#         adv_method = data.split("_")[1]
+#         adv_loader[adv_method] = get_loader(osp.join(adv_dataloader_path, data))
+#     logging.info("[获取数据集]：获取对抗样本已完成")
+
+#     # 执行卷积层解释运算
+#     model_name = params["model"]["name"]
+#     logging.info("[特征层可视化]:对{:s}模型逐层提取特征并进行可视化分析".format(model_name))
+#     layer_explain(model_name, nor_loader, adv_loader["BIM"], params)
+
+
+''''五种降维方法'''
+if __name__ == "__main__":
+
+    params = {
+        "dataset": {"name": "cifar10"},
+        "model": {"name": "resnet50","ckpt":None},
+        "out_path": "./output",
+        "device": torch.device("cuda:4"),
+        "ex_methods":{"methods":["lrp", "gradcam", "integrated_grad"]},
+        "adv_methods":{"methods":["PGD"]},
+        "root":ROOT
+    }
+
+    logging = Logger(filename=osp.join(params["out_path"], "kt1_logs.txt"))
+
+    root = params["root"]
+    dataset = params["dataset"]["name"]
+    nor_data = torch.load(osp.join(root, f"dataset/{dataset}/data/{dataset}_NOR.pt"))
+    nor_loader = get_loader(nor_data, batchsize=128)
+    logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
+
+    model_name = params["model"]["name"]
+    device = params["device"]
+    model = params["model"]["ckpt"]
+    logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
+    net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
+    # net = torchvision.models.densenet121(weights=torchvision.models.DenseNet121_Weights.DEFAULT)
+    adv_methods = params["adv_methods"]["methods"]
+    for adv_method in adv_methods:
+        adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=128, logging=logging)
+    logging.info("[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
+
+    save_path = params["out_path"]
+    vis_type_list = ['pca', 'ss', 'tsne', 'svm', 'mean_diff']
+    dim_reduciton_visualize(vis_type_list, nor_loader, adv_loader["PGD"], net, model_name, dataset, device, save_path)
+
+
+'''lime的图像文本接口'''
+# if __name__ == "__main__":
+
+#     params = {
+#         "dataset": {"name": "imagenet"},
+#         "model": {"name": "vgg16","ckpt":None},
+#         "out_path": "./output",
+#         "device": torch.device("cuda:7"),
+#         "ex_methods":{"methods":["lrp", "gradcam", "integrated_grad"]},
+#         "adv_methods":{"methods":["FGSM"]},
+#         "root":ROOT
+#     }
+
+#     logging = Logger(filename=osp.join(params["out_path"], "kt1_logs.txt"))
+
+#     root = params["root"]
+#     dataset = params["dataset"]["name"]
+#     nor_data = torch.load(osp.join(root, f"dataset/{dataset}/data/{dataset}_NOR.pt"))
+#     nor_img_x = nor_data["x"][2]
+#     label = nor_data['y'][2]
+#     img = recreate_image(nor_img_x.squeeze())
+#     logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
+
+#     model_name = params["model"]["name"]
+#     device = params["device"]
+#     model = params["model"]["ckpt"]
+#     logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
+#     net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
+#     # net = torchvision.models.inception_v3(num_classes=10)
+#     net = net.eval().to(device)
+#     logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
+
+#     adv_loader = {}
+#     adv_methods = params["adv_methods"]["methods"]
+#     adv_img_x = sample_untargeted_attack(dataset, adv_methods[0], net, nor_img_x, label, device, root)
+#     logging.info("[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
+
+#     save_path = params["out_path"]
+#     lime_image_ex(img, net, model_name, dataset, device, root, save_path)
+
