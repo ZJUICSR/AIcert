@@ -32,7 +32,7 @@ class ConcolicShow(object):
 
     # def run(model:Module, data:DataLoader, model_name:str, data_name:str, norm:str='l0')
 
-    def show_results(model, data, model_name: str, data_name: str, norm: str, basepath: str, out_path:str,Times:int=0):
+    def show_results(model, data, model_name: str, data_name: str, norm: str, basepath: str, out_path:str,Times:int=0, logging:str=None):
         '''
         model_name: a string of the name of the model.
         data_name: name of the dataset: 'cifar10','mnist'
@@ -61,7 +61,7 @@ class ConcolicShow(object):
         # ## dynamic generating sample cases
         if Times!=0:
             # try:
-            ConcolicShow.Dynamic_run(model, data, model_name, data_name, norm, basepath, times=Times)
+            ConcolicShow.Dynamic_run(model, data, model_name, data_name, norm, basepath, times=Times, logging=logging)
             # except:
                 
             #     pass
@@ -80,7 +80,8 @@ class ConcolicShow(object):
         if not os.path.exists(out_path):
             os.mkdir(out_path)
 
-        demofilespath = basepath + '/demoimgs/' + data_name + "_" + norm + "/"
+        # demofilespath = basepath + '/demoimgs/' + data_name + "_" + norm + "/"
+        demofilespath = './dataset/data/demoimgs/' + data_name + "_" + norm + "/"
 
         imglist = os.listdir(demofilespath)
 
@@ -111,13 +112,14 @@ class ConcolicShow(object):
         
         # print(json_data['TestCaseGeneration'])
         json_data['allnumber'] = allNumber
+        json_data['newnumber'] = newNumber
         json_data['demopath'] = showimgs
 
         return json_data
 
 
 
-    def Dynamic_run(model, data, model_name: str, data_name: str, norm: str, basepath: str, times):
+    def Dynamic_run(model, data, model_name: str, data_name: str, norm: str, basepath: str, times, logging: None):
         '''
         times : [1,inf], performing algorithms one time needs around 30-45s...
         '''
@@ -133,7 +135,7 @@ class ConcolicShow(object):
             net, loadr = Cifar10.get_back(basepath)
             for i in range(times):
                 try:
-                    TestMachine = InvConcolic()
+                    TestMachine = InvConcolic(logging)
                     TestMachine.run(model=net, seedsLoader=loadr, datasetLoader=loadr, device="cpu",
                                     outdir=basepath + '/GeneratedCases/' + data_name + "_" + norm + "/",
                                     norm=norm, initnumber=8, reset=0, metric='nc', maxiteration=40,
@@ -339,7 +341,7 @@ class MNIST(object):
         test_iter = Data.DataLoader(mnist_test, batch_size=batch_size, shuffle=False, num_workers=num_workers)
         net = LeNet()
         # net.load_state_dict(torch.load(basepath + '/Utils/Models/MNIST_lenet.pth'))
-        net.load_state_dict(torch.load(basepath[:-18] + '/model/ckpt/MNIST_lenet.pth'))
+        net.load_state_dict(torch.load('./model/ckpt/MNIST_lenet.pth'))
         return net, test_iter
 
     def ReNormalization(inputs):
@@ -370,7 +372,7 @@ class Cifar10(object):
         test_iter = Data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
         net = VGG16_torch()
         # net.load_state_dict(torch.load(basepath + '/Utils/Models/cifar10_vgg16.pth'))
-        net.load_state_dict(torch.load(basepath[:-18] + '/model/ckpt/cifar10_vgg16.pth'))
+        net.load_state_dict(torch.load('./model/ckpt/cifar10_vgg16.pth'))
         return net, test_iter
 
     def ReNormalization(inputs):
@@ -408,9 +410,10 @@ class InvConcolic(object):
     Report：records of print information
 
     '''
-    def __init__(self):
+    def __init__(self, logging):
         super(InvConcolic, self).__init__()
         self.Report=[]
+        self.logging = logging
 
     def run(self, model:Module, seedsLoader:DataLoader, datasetLoader:DataLoader, outdir:str,norm:str="l0", device:str='cpu', \
         maxiteration:int=-1, initnumber:int=1, metric='nc',feature_area:list=[0,1],testTargetLayer=[],reset=0,postpre=None,RandSeed=None):
@@ -437,7 +440,7 @@ class InvConcolic(object):
         self.Rp('Initializing the testing framework......')
         self.device = torch.device(device if torch.cuda.is_available() else "cpu")
         self.randomSeed=RandSeed     # 随机种子，为了实验的可复现性
-        self.Rp("device is "+str(self.device))
+        # self.Rp("device is "+str(self.device))
         self.feature_area=feature_area
         self.model = model.to(device)
         self.model.eval()
@@ -459,10 +462,10 @@ class InvConcolic(object):
     def add_sample(self,X,Types:str="seed",others:str=""):
         for x in X:
             self.testSuite.append(x.copy())
-            if Types=="seed":
-                self.Rp(Types+" images, id = "+str(len(self.testSuite)-1)+"!  ")
-            else:
-                self.Rp(Types+" images, id = "+str(len(self.testSuite)-1)+"!  "+others+"  (Coverage is "+str(self.coverage)+")")
+            # if Types=="seed":
+            #     self.Rp(Types+" images, id = "+str(len(self.testSuite)-1)+"!  ")
+            # else:
+            #     self.Rp(Types+" images, id = "+str(len(self.testSuite)-1)+"!  "+others+"  (Coverage is "+str(self.coverage)+")")
 
             # if not os.path.exists(self.outdir+'/'+Types+'/'):
             #     os.mkdir(self.outdir+'/'+Types+'/')
@@ -541,7 +544,7 @@ class InvConcolic(object):
             while True and (maxiteration < 0 or iters<maxiteration):
                 iters+=1
                 r,t = self.requirement_execuation()
-                self.Rp("Aim to cover :"+r)
+                # self.Rp("Aim to cover :"+r)
             
                 t_new= self.symbolic_analysis(r,copy.deepcopy(self.testSuite[t]))
                
@@ -581,7 +584,7 @@ class InvConcolic(object):
                     self.update_coverage(t_new,len(self.testSuite)-1)
                     break
                 else:
-                    self.Rp("failed!")
+                    # self.Rp("failed!")
                     self.Remove_failed_r(r)
                     break
                    
@@ -1332,7 +1335,8 @@ class InvConcolic(object):
 
     def Rp(self, strs: str):
         self.Report.append(strs)
-        print(strs)
+        # print(strs)
+        self.logging.info(strs)
         return None
 
     def layers_detection(self, model:Module):
