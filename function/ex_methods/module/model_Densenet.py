@@ -181,7 +181,7 @@ def densenet121(pretrained=False, reference_model=None, **kwargs):
     model = DenseNet(num_init_features=64, growth_rate=32, block_config=([6, 12, 24, 16]), **kwargs).forward()
     if pretrained:
         if reference_model == None :
-            net = torchvision.models.densenet121(weights=torchvision.models.DenseNet121_Weights.DEFAULT)
+            net = torchvision.models.densenet121(pretrained=True)
         else:
             net = reference_model
         for key1, key2 in zip(model.state_dict().keys(), net.state_dict().keys()):
@@ -203,7 +203,7 @@ def densenet169(pretrained=False, reference_model=None, **kwargs):
                      **kwargs).forward()
     if pretrained:
         if reference_model == None :
-            net = torchvision.models.densenet169(weights=torchvision.models.DenseNet169_Weights.DEFAULT)
+            net = torchvision.models.densenet169(pretrained=True)
         else:
             net = reference_model
         for key1, key2 in zip(model.state_dict().keys(), net.state_dict().keys()):
@@ -225,7 +225,7 @@ def densenet201(pretrained=False, reference_model=None, **kwargs):
                      **kwargs).forward()
     if pretrained:
         if reference_model == None :
-            net = torchvision.models.densenet201(weights=torchvision.models.DenseNet201_Weights.DEFAULT)
+            net = torchvision.models.densenet201(pretrained=True)
         else:
             net = reference_model
         for key1, key2 in zip(model.state_dict().keys(), net.state_dict().keys()):
@@ -247,7 +247,7 @@ def densenet161(pretrained=False, reference_model=None,**kwargs):
                      **kwargs).forward()
     if pretrained:
         if reference_model == None :
-            net = torchvision.models.densenet161(weights=torchvision.models.DenseNet161_Weights.DEFAULT)
+            net = torchvision.models.densenet161(pretrained=True)
         else:
             net = reference_model
         for key1, key2 in zip(model.state_dict().keys(), net.state_dict().keys()):
