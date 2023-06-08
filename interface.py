@@ -293,6 +293,25 @@ def run_coverage_layer(tid,AAtid,dataset,model, k, N):
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+
+def run_coverage_importance(tid,AAtid,dataset,model, n_imp, clus):
+    """神经层测试准则
+    :params tid:主任务ID
+    :params AAtid:子任务id
+    :params dataset: 数据集名称
+    :params model: 模型名称
+    :params n_imp: 重要神经元数目
+    :params clus: 聚类数
+    :output res:需保存到子任务json中的返回结果/路径
+    """
+    logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    res = coverage.run_coverage_importance_func(dataset.lower(), model.lower(), int(n_imp), int(clus), osp.join(ROOT,"output", tid, AAtid), logging)  
+    res["stop"] = 1
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+    taskinfo[tid]["function"][AAtid]["state"]=2
+    taskinfo[tid]["state"]=2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
   
 def run_deepsst(tid,AAtid,dataset,modelname,pertube,m_dir):
     """敏感神经元测试准则
