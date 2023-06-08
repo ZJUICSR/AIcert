@@ -1166,6 +1166,39 @@ def CoverageLayerParamSet():
         return jsonify(res)
     else:
         abort(403)
+        
+@app.route('/UnitTest/CoverageImportanceParamSet', methods=['GET','POST']) # 重要神经元覆盖测试准则
+def CoverageImportanceParamSet():
+    if (request.method == "GET"):
+        return render_template("")
+    elif (request.method == "POST"):
+        dataset = request.form.get("dataset")
+        model = request.form.get("model")
+        n_imp = request.form.get("n_imp")
+        clus = request.form.get("clus")
+        tid = request.form.get("tid")
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        AAtid = "S"+IOtool.get_task_id(str(format_time))
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["function"].update({AAtid:{
+            "type":"CoverageLayer",
+            "state":0,
+            "name":["CoverageLayer"],
+            "dataset": dataset,
+            "model": model,
+            "number_of_importance": n_imp,
+            "clus": clus
+        }})
+        taskinfo[tid]["dataset"]=dataset
+        taskinfo[tid]["model"]=model
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        t2 = threading.Thread(target=interface.run_coverage_importance,args=(tid, AAtid, dataset, model, n_imp, clus))
+        t2.setDaemon(True)
+        t2.start()
+        res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
+        return jsonify(res)
+    else:
+        abort(403)
 
 @app.route('/UnitTest/DeepSstParamSet', methods=['GET','POST']) # 敏感神经元测试准则
 def DeepSstParamSet():
