@@ -10,7 +10,7 @@ import pyecharts.options as opts
 from pyecharts.charts import Timeline, Bar, Line
 import os
 import torchvision
-from torchvision.datasets import FashionMNIST, CIFAR10
+from torchvision.datasets import MNIST, FashionMNIST, CIFAR10
 from torchvision.transforms import ToTensor, Compose, Resize
 from torch.utils.data import DataLoader, dataloader
 import torch
@@ -188,21 +188,57 @@ def Cover(INCC, net, testloader, imp_neus, layer_names, kmeans):
     return Coverage_history
 
 
+# class LeNet5(nn.Module):
+#     def __init__(self):
+#         super(LeNet5, self).__init__()
+#         self.conv1 = nn.Sequential(
+#             nn.Conv2d(3, 6, 5, 1),  # input_size=(1*28*28) 
+#             nn.ReLU(),
+#             nn.MaxPool2d(kernel_size=2, stride=2)  # input_size=(6*24*24)
+#         )
+#         self.conv2 = nn.Sequential(
+#             nn.Conv2d(6, 16, 5),  # input_size=(6*12*12)
+#             nn.ReLU(),  # input_size=(16*8*8)
+#             nn.MaxPool2d(2, 2)  # output_size=(16*4*4)
+#         )
+#         self.fc1 = nn.Sequential(
+#             nn.Linear(16 * 5 * 5, 120),
+#             nn.ReLU()
+#         )
+#         self.fc2 = nn.Sequential(
+#             nn.Linear(120, 84),
+#             nn.ReLU()
+#         )
+#         self.fc3 = nn.Linear(84, 10)
+
+#     def forward(self, x):
+#         x = self.conv1(x)
+        
+#         x = self.conv2(x)
+
+#         # nn.Linear()的输入输出都是维度为一的值，所以要把多维度的tensor展平成一维
+        
+#         x = x.view(x.size()[0], -1)
+#         x = self.fc1(x)
+#         x = self.fc2(x)
+        
+#         x = self.fc3(x)
+#         return torch.log_softmax(x, dim=-1)
 class LeNet5(nn.Module):
     def __init__(self):
         super(LeNet5, self).__init__()
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(3, 6, 5, 1),  # input_size=(1*28*28) 
+        self.conv1=nn.Sequential(
+            nn.Conv2d(1,6,5,1),#input_size=(1*28*28)
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)  # input_size=(6*24*24)
+            nn.MaxPool2d(kernel_size=2,stride=2)#input_size=(6*24*24)
         )
         self.conv2 = nn.Sequential(
-            nn.Conv2d(6, 16, 5),  # input_size=(6*12*12)
-            nn.ReLU(),  # input_size=(16*8*8)
-            nn.MaxPool2d(2, 2)  # output_size=(16*4*4)
+            nn.Conv2d(6, 16, 5),#input_size=(6*12*12)
+            nn.ReLU(),      #input_size=(16*8*8)
+            nn.MaxPool2d(2, 2)  #output_size=(16*4*4)
         )
         self.fc1 = nn.Sequential(
-            nn.Linear(16 * 5 * 5, 120),
+            nn.Linear(16 * 4 * 4, 120),
             nn.ReLU()
         )
         self.fc2 = nn.Sequential(
@@ -211,22 +247,24 @@ class LeNet5(nn.Module):
         )
         self.fc3 = nn.Linear(84, 10)
 
+        # 定义前向传播过程，输入为x
     def forward(self, x):
         x = self.conv1(x)
-        
         x = self.conv2(x)
-
         # nn.Linear()的输入输出都是维度为一的值，所以要把多维度的tensor展平成一维
-        
         x = x.view(x.size()[0], -1)
         x = self.fc1(x)
         x = self.fc2(x)
-        
         x = self.fc3(x)
         return torch.log_softmax(x, dim=-1)
 
-
 def get_dataloader_mnist(train, batch_size=2, input_size=(28, 28)):
+    transform_fn = Compose([Resize(input_size), ToTensor(), ])
+    dataset = MNIST('./dataset/data', download=True, train=train, transform=transform_fn)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    return dataloader
+
+def get_dataloader_fashionmnist(train, batch_size=2, input_size=(28, 28)):
     transform_fn = Compose([Resize(input_size), ToTensor(), ])
     dataset = FashionMNIST('./dataset/data', download=True, train=train, transform=transform_fn)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
@@ -242,7 +280,9 @@ def get_dataloader_cifar(train, batch_size=2, input_size=(32, 32)):
 
 def load_dataset(dataset_type):
     if dataset_type == 'fashionmnist':
-        return get_dataloader_mnist(True, 2, input_size=(28,28)), get_dataloader_mnist(False, 2, input_size=(28,28))
+        return get_dataloader_fashionmnist(True, 2, input_size=(28,28)), get_dataloader_fashionmnist(False, 2, input_size=(28,28))
+    elif dataset_type == 'mnist':
+        return get_dataloader_mnist(True, batch_size=2, input_size=(28,28)), get_dataloader_mnist(False, batch_size=2, input_size=(28,28))
     elif dataset_type == 'cifar10':
         return get_dataloader_cifar(True, batch_size=2, input_size=(32,32)), get_dataloader_cifar(False, batch_size=2, input_size=(32,32))
     assert 0
