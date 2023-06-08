@@ -43,7 +43,13 @@ def run_coverage_importance_func(dataset, model, n_imp, clus, out_path, logging)
     model_path: 模型路径
     """
     logging.info("Starting running......")
-    model_path = CURR.rsplit('/',2)[0]+"/model/ckpt/model.pth"
+    if dataset == "mnist":
+        model_path = CURR.rsplit('/',2)[0]+"/model/ckpt/lenet5_dict.pth"
+    elif dataset == "fashionmnist":
+        model_path = CURR.rsplit('/',2)[0]+"/model/ckpt/lenet5_fmnist.pth"
+    else:
+        model_path = ""
+    # model_path = CURR.rsplit('/',2)[0]+"/model/ckpt/model.pth"
     res = run_visualize_importance(dataset=dataset, model_type=model, n_imp=n_imp, clus=clus, model_path=model_path, out_path=out_path, logging=logging)
     logging.info("Finishing......")
     return res
