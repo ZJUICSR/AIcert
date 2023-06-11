@@ -303,87 +303,87 @@ class BackdoorAttacker():
             self.attack_success_rate, _ = compute_accuracy(self.classifier.predict(x_poisoned, batch_size=batch_size), y_poisoned)
         return self.accuracy, self.accuracyonbm, self.attack_success_rate
 
-    def backdoorattack(self, method: str="PoisoningAttackBackdoor", pp_poison: float=0.5, source: int = 0, target: int=3, batch_size:int=700, num_epochs=40, lr=0.01, alpha=50, test_sample_num:int=2048, save_num: int=32):
-        """
-        为了简化后门攻击接口的使用提出的一个后门攻击样例方法
-        该函数按照目标和投毒比例自动完成攻击
-        """
+    # def backdoorattack(self, method: str="PoisoningAttackBackdoor", pp_poison: float=0.5, source: int = 0, target: int=3, batch_size:int=700, num_epochs=40, lr=0.01, alpha=50, test_sample_num:int=2048, save_num: int=32):
+    #     """
+    #     为了简化后门攻击接口的使用提出的一个后门攻击样例方法
+    #     该函数按照目标和投毒比例自动完成攻击
+    #     """
 
-        self.px=25
-        self.py=25
-        self.l=2
-        self.value=1
+    #     self.px=25
+    #     self.py=25
+    #     self.l=2
+    #     self.value=1
 
-        self.support_method = ["PoisoningAttackBackdoor", "PoisoningAttackCleanLabelBackdoor", "FeatureCollisionAttack", "PoisoningAttackAdversarialEmbedding"]
-        if method not in self.support_method:
-            raise ValueError("This method is not supported")
-        self.method = method
+    #     self.support_method = ["PoisoningAttackBackdoor", "PoisoningAttackCleanLabelBackdoor", "FeatureCollisionAttack", "PoisoningAttackAdversarialEmbedding"]
+    #     if method not in self.support_method:
+    #         raise ValueError("This method is not supported")
+    #     self.method = method
 
-        self.model = self.modelnet
-        checkpoint = torch.load(self.modelpath)
-        try:
-            self.model.load_state_dict(checkpoint)
-        except:
-            self.model.load_state_dict(checkpoint['net'])
+    #     self.model = self.modelnet
+    #     checkpoint = torch.load(self.modelpath)
+    #     try:
+    #         self.model.load_state_dict(checkpoint)
+    #     except:
+    #         self.model.load_state_dict(checkpoint['net'])
         
-        self.model.to(self.device)
-        self.datasetpath = self.datasetpath
-        self.batch_size = batch_size
+    #     self.model.to(self.device)
+    #     self.datasetpath = self.datasetpath
+    #     self.batch_size = batch_size
 
-        # 训练参数
-        self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
+    #     # 训练参数
+    #     self.criterion = nn.CrossEntropyLoss()
+    #     self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
 
-        # 数据集加载
-        input_shape, (x_select, y_select), (x_train, y_train), _, min_pixel_value, max_pixel_value = self.loaddataset(self.datasetpath, test_sample_num)
-        # 数据集规范
-        x_train_tmp = x_train.astype(MY_NUMPY_DTYPE)
-        y_train_tmp = y_train.astype(MY_NUMPY_DTYPE)
-        x_select_tmp = x_select.astype(MY_NUMPY_DTYPE)
-        y_select_tmp = y_select.astype(MY_NUMPY_DTYPE)
-        # 构造分类器方便使用
-        self.classifier = PyTorchClassifier (
-            model=self.model,
-            clip_values=(min_pixel_value, max_pixel_value),
-            loss=self.criterion,
-            optimizer=self.optimizer,
-            input_shape=input_shape,
-            nb_classes=10,
-            device=self.device,
-        )
+    #     # 数据集加载
+    #     input_shape, (x_select, y_select), (x_train, y_train), _, min_pixel_value, max_pixel_value = self.loaddataset(self.datasetpath, test_sample_num)
+    #     # 数据集规范
+    #     x_train_tmp = x_train.astype(MY_NUMPY_DTYPE)
+    #     y_train_tmp = y_train.astype(MY_NUMPY_DTYPE)
+    #     x_select_tmp = x_select.astype(MY_NUMPY_DTYPE)
+    #     y_select_tmp = y_select.astype(MY_NUMPY_DTYPE)
+    #     # 构造分类器方便使用
+    #     self.classifier = PyTorchClassifier (
+    #         model=self.model,
+    #         clip_values=(min_pixel_value, max_pixel_value),
+    #         loss=self.criterion,
+    #         optimizer=self.optimizer,
+    #         input_shape=input_shape,
+    #         nb_classes=10,
+    #         device=self.device,
+    #     )
 
-        # 对于特征碰撞攻击，需要设置原目标类
-        self.source = np.zeros((10))
-        self.source[source] = 1
-        # 决定目标
-        self.target = np.zeros((10))
-        self.target[target] = 1
+    #     # 对于特征碰撞攻击，需要设置原目标类
+    #     self.source = np.zeros((10))
+    #     self.source[source] = 1
+    #     # 决定目标
+    #     self.target = np.zeros((10))
+    #     self.target[target] = 1
 
-        # 测试集用来测试攻击效果，测试集中一般的样本被投毒
-        # 主要是为了区分开测试集和训练集
-        # 对于特征碰撞攻击，测试数据集是不需要投毒的
-        if self.method == "FeatureCollisionAttack":
-            x_test = x_select_tmp
-            y_test = y_select_tmp
-            test_plist = np.arange(len(x_select))[np.all(y_select == self.source, axis=1)]
-        else:
-            x_test, y_test, test_plist = self.data_poison(x_select_tmp, y_select_tmp, self.target, self.source, pp_poison=0.5)
-        # 根据比例进行训练集投毒
-        if self.method in ["PoisoningAttackBackdoor", "PoisoningAttackAdversarialEmbedding"]:
-            self.poisoned_num = int(pp_poison*len(x_train_tmp))
-        else:
-            self.poisoned_num = int(pp_poison*np.sum(np.argmax(y_train_tmp, axis=1) == np.argmax(self.target, axis=0)))
-        print("投毒样本数目:{}".format(self.poisoned_num))
-        x_train, y_train, plist= self.data_poison(x_train_tmp, y_train_tmp, self.target, self.source, pp_poison=pp_poison)
-        # 保存部分投毒样本
-        self.save_examples(save_num=60, label=y_train_tmp[plist], clean_example=x_train_tmp[plist], poisoned_example=x_train[plist])
+    #     # 测试集用来测试攻击效果，测试集中一般的样本被投毒
+    #     # 主要是为了区分开测试集和训练集
+    #     # 对于特征碰撞攻击，测试数据集是不需要投毒的
+    #     if self.method == "FeatureCollisionAttack":
+    #         x_test = x_select_tmp
+    #         y_test = y_select_tmp
+    #         test_plist = np.arange(len(x_select))[np.all(y_select == self.source, axis=1)]
+    #     else:
+    #         x_test, y_test, test_plist = self.data_poison(x_select_tmp, y_select_tmp, self.target, self.source, pp_poison=0.5)
+    #     # 根据比例进行训练集投毒
+    #     if self.method in ["PoisoningAttackBackdoor", "PoisoningAttackAdversarialEmbedding"]:
+    #         self.poisoned_num = int(pp_poison*len(x_train_tmp))
+    #     else:
+    #         self.poisoned_num = int(pp_poison*np.sum(np.argmax(y_train_tmp, axis=1) == np.argmax(self.target, axis=0)))
+    #     print("投毒样本数目:{}".format(self.poisoned_num))
+    #     x_train, y_train, plist= self.data_poison(x_train_tmp, y_train_tmp, self.target, self.source, pp_poison=pp_poison)
+    #     # 保存部分投毒样本
+    #     self.save_examples(save_num=60, label=y_train_tmp[plist], clean_example=x_train_tmp[plist], poisoned_example=x_train[plist])
         
-        # 测试投毒攻击效果的时候都在测试样本上进行
-        # 对于特征冲突攻击，不需要考虑测试数据集的投毒
-        print("(总体样本准确率，干净样本准确率，投毒样本准确率)")
-        print(self.evaluate(x_test, y_test, test_plist, batch_size=batch_size))
-        self.finetune(x_train, y_train, x_test, y_test, plist, test_plist, batch_size=batch_size, num_epochs=num_epochs)
-        print(self.evaluate(x_test, y_test, test_plist, batch_size=batch_size))
+    #     # 测试投毒攻击效果的时候都在测试样本上进行
+    #     # 对于特征冲突攻击，不需要考虑测试数据集的投毒
+    #     print("(总体样本准确率，干净样本准确率，投毒样本准确率)")
+    #     print(self.evaluate(x_test, y_test, test_plist, batch_size=batch_size))
+    #     self.finetune(x_train, y_train, x_test, y_test, plist, test_plist, batch_size=batch_size, num_epochs=num_epochs)
+    #     print(self.evaluate(x_test, y_test, test_plist, batch_size=batch_size))
 
     def save_model(self, path:str="./results/", desc:str="backdoor_model", epoch:int=0):
         path = path+self.method+"/backdoor_model/"
@@ -429,7 +429,7 @@ class BackdoorAttacker():
     
     # 训练集投毒函数
     # **kwargs中是除了poision函数参数以外的其他投毒参数
-    def poision(self, pp_poison: float=0.001, method: str="PoisoningAttackBackdoor", save_num: int=32, test_sample_num: int = 4096, source: int = 0, target: int=3, trigger: List=[25, 25, 2, 1], **kwargs):
+    def poision(self, method: str="PoisoningAttackBackdoor", pp_poison: float=0.001, save_num: int=32, test_sample_num: int = 4096, target: int=3, trigger: List=[25, 25, 2, 1], **kwargs):
         
         self.support_method = ["PoisoningAttackBackdoor", "PoisoningAttackCleanLabelBackdoor", "FeatureCollisionAttack", "PoisoningAttackAdversarialEmbedding"]
         if method not in self.support_method:
@@ -476,7 +476,7 @@ class BackdoorAttacker():
         
         # 对于特征碰撞攻击，需要设置原目标类
         self.source = np.zeros((10))
-        self.source[source] = 1
+        self.source[(target+1)%self.classifier.nb_classes] = 1
         self.target = np.zeros((10))
         self.target[target] = 1
 

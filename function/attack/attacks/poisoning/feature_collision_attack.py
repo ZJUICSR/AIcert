@@ -23,7 +23,6 @@ class FeatureCollisionAttack(PoisoningAttackWhiteBox):
         "max_iter",
         "similarity_coeff",
         "watermark",
-        "verbose",
     ]
     _estimator_requirements = (BaseEstimator, NeuralNetworkMixin, ClassifierMixin)
 
