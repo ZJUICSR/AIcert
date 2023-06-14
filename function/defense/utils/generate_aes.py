@@ -3,8 +3,8 @@ import numpy as np
 import torch.nn as nn
 from function.defense.utils.get_clean_data import get_clean_loader
 from advertorch.attacks import GradientSignAttack, MomentumIterativeAttack, SparseL1DescentAttack, CarliniWagnerL2Attack, LinfPGDAttack
-def generate_adv_examples(model, adv_method, adv_dataset, adv_nums, device):
-    clean_loader, num_classes = get_clean_loader(adv_dataset)
+def generate_adv_examples(model, adv_method, adv_dataset, adv_nums, device, normalize=False):
+    clean_loader, num_classes = get_clean_loader(adv_dataset, normalize)
     if adv_dataset == 'CIFAR10':
         eps = 0.031
         nb_iter = 20
