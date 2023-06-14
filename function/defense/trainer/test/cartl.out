@@ -1,0 +1,111 @@
+nohup: ignoring input
+2023-05-30 09:09:56 | FileLogger | INFO => load cifar100 train dataset
+2023-05-30 09:09:59 | FileLogger | INFO => load cifar100 test dataset
+2023-05-30 09:10:00 | FileLogger | INFO => initialize trainer
+2023-05-30 09:10:00 | FileLogger | WARNING => trainer that needed reset blocks may not support load from checkpoint!
+2023-05-30 09:10:00 | FileLogger | INFO => initialize finished
+2023-05-30 09:10:00 | FileLogger | INFO => training parameters: 
+network: ResNet
+device: cuda
+train_epochs: 1
+warm_up_epochs: 1
+batch_size: 128
+optimizer: SGD (
+Parameter Group 0
+    dampening: 0
+    initial_lr: 0.1
+    lr: 0.09999999999744245
+    momentum: 0.9
+    nesterov: False
+    weight_decay: 0.0005
+)
+criterion: CrossEntropyLoss()
+2023-05-30 09:10:00 | FileLogger | INFO => using attack: LinfPGDAttack
+2023-05-30 09:10:00 | FileLogger | INFO => attack parameters: 
+min: tensor([[[-1.8968]],
+
+        [[-1.8973]],
+
+        [[-1.5967]]], device='cuda:0')
+max: tensor([[[1.8439]],
+
+        [[2.0022]],
+
+        [[2.0246]]], device='cuda:0')
+epsilon: tensor([[[0.1174]],
+
+        [[0.1223]],
+
+        [[0.1136]]], device='cuda:0')
+step_size: tensor([[[0.0293]],
+
+        [[0.0306]],
+
+        [[0.0284]]], device='cuda:0')
+num_steps: 7
+random_init: True
+2023-05-30 09:10:00 | FileLogger | INFO => tensorboard log dir: ../../../function/defense/trainer/cartl/runs/cartl_res18_cifar100_6_0.01
+/home/ubuntu/.local/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:516: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint8 = np.dtype([("qint8", np.int8, 1)])
+/home/ubuntu/.local/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:517: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_quint8 = np.dtype([("quint8", np.uint8, 1)])
+/home/ubuntu/.local/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:518: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint16 = np.dtype([("qint16", np.int16, 1)])
+/home/ubuntu/.local/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:519: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_quint16 = np.dtype([("quint16", np.uint16, 1)])
+/home/ubuntu/.local/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:520: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint32 = np.dtype([("qint32", np.int32, 1)])
+/home/ubuntu/.local/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:525: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  np_resource = np.dtype([("resource", np.ubyte, 1)])
+2023-05-30 09:10:02 | FileLogger | INFO => starting epoch: 2
+2023-05-30 09:10:02 | FileLogger | INFO => start lr: 0.09999999999744245
+2023-05-30 09:10:02 | FileLogger | INFO => best robustness: 0.0447170716112532
+2023-05-30 09:10:02 | FileLogger | INFO => finished training
+2023-05-30 09:10:02 | FileLogger | INFO => best robustness on test set: 0.0447170716112532
+2023-05-30 09:10:02 | FileLogger | INFO => load cifar10 train dataset
+2023-05-30 09:10:02 | FileLogger | WARNING => Using mean and std of cifar100 for dataset cifar10!
+2023-05-30 09:10:05 | FileLogger | INFO => load cifar10 test dataset
+2023-05-30 09:10:05 | FileLogger | WARNING => Using mean and std of cifar100 for dataset cifar10!
+2023-05-30 09:10:06 | FileLogger | INFO => initialize trainer
+2023-05-30 09:10:06 | FileLogger | WARNING => We don't load checkpoint at this moment
+2023-05-30 09:10:06 | FileLogger | INFO => initialize finished
+2023-05-30 09:10:06 | FileLogger | INFO => training parameters: 
+network: ResNet
+device: cuda
+train_epochs: 1
+warm_up_epochs: 1
+batch_size: 128
+optimizer: SGD (
+Parameter Group 0
+    dampening: 0
+    initial_lr: 0.1
+    lr: 0.0
+    momentum: 0.9
+    nesterov: False
+    weight_decay: 0.0005
+)
+criterion: CrossEntropyLoss()
+2023-05-30 09:10:06 | FileLogger | INFO => load from old checkpoint, no need for teacher model!
+2023-05-30 09:10:06 | FileLogger | INFO => tensorboard log dir: ../../../function/defense/trainer/cartl/runs/sntl_1_1.0_False_res18_cifar10_6_cartl_res18_cifar100_6_0.01-best_robust_751
+2023-05-30 09:10:06 | FileLogger | WARNING => We load checkpoint here
+2023-05-30 09:10:06 | FileLogger | WARNING => trainer that needed reset blocks may not support load from checkpoint!
+2023-05-30 09:10:06 | FileLogger | WARNING => loaded random state from '../../../function/defense/trainer/cartl/checkpoint/sntl_1_1.0_False_res18_cifar10_6_cartl_res18_cifar100_6_0.01-best_robust_751.pth.rand'
+2023-05-30 09:10:06 | FileLogger | WARNING => ****************************************************************************************************
+ResNet Detected.
+In current code, it is hard to freeze the batch norm layer in the 'self.conv1'.
+I will manually freeze it!
+****************************************************************************************************
+2023-05-30 09:10:06 | FileLogger | INFO => starting epoch: 2
+2023-05-30 09:10:06 | FileLogger | INFO => start lr: 0.09999999999744245
+2023-05-30 09:10:06 | FileLogger | INFO => best accuracy: 0.4011
+2023-05-30 09:10:06 | FileLogger | INFO => finished training
+2023-05-30 09:10:06 | FileLogger | INFO => best accuracy on test set: 0.4011
+using seed: 751
+got GPU
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+acc:  0.5399999618530273
+detect rate:  0.17000000178813934
