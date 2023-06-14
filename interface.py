@@ -9,10 +9,11 @@ from function.defense.preprocessor.preprocessor import *
 from function.defense.trainer.trainer import *
 from function.defense.detector.poison.detect_poison import *
 from function.defense.transformer.poisoning.transformer_poison import *
+from function.defense.sage.sage import *
 from function.defense.models import *
 
 def detect(adv_dataset, adv_method, adv_nums, defense_methods):
-    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "7"
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu") 
     if torch.cuda.is_available():
         print("got GPU")
@@ -26,7 +27,7 @@ def detect(adv_dataset, adv_method, adv_nums, defense_methods):
     elif adv_dataset == 'MNIST':
         mean = (0.1307,)
         std = (0.3081,)
-        model = Net()
+        model = SmallCNN()
         checkpoint = torch.load('/mnt/data2/yxl/AI-platform/model/model-mnist-smallCNN/model-nn-epoch61.pt')
         model.load_state_dict(checkpoint)
         model = model.to(device).eval()    
@@ -65,6 +66,10 @@ def detect(adv_dataset, adv_method, adv_nums, defense_methods):
         detector =  FreeAT(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'MART':
         detector =  Mart(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'CARTL':
+        detector =  Cartl(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'SAGE':
+        detector =  Sage(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Activation':
         detector =  Activation_defence(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Spectral Signature':

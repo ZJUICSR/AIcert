@@ -1,12 +1,16 @@
-from audioop import reverse
 import numpy as np
 from typing import List, Optional
 from typing import Union
 import torch
 from torch.nn import Module
 import torchvision.transforms as transforms
-from keras.models import Sequential
-from keras.layers import Dense, Flatten, Conv2D, MaxPooling2D, Dropout
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+from keras.models import Sequential, Model
+from keras import layers
+from keras.layers import Dense, Flatten, Conv2D, MaxPooling2D, Dropout, AveragePooling2D, BatchNormalization, MaxPool2D, Input, Activation
+from keras.regularizers import l2
+from art import config
 from art.utils import load_mnist
 from art.attacks.poisoning.perturbations.image_perturbations import add_pattern_bd, add_single_bd
 from art.estimators.classification import KerasClassifier
@@ -15,23 +19,6 @@ from art.attacks.poisoning import PoisoningAttackBackdoor
 from art.attacks.poisoning.perturbations import add_pattern_bd, add_single_bd, insert_image
 from art.defences.transformer.poisoning.neural_cleanse import NeuralCleanse
 from art.defences.transformer.transformer import Transformer
-
-from keras.layers import GlobalAveragePooling2D,  BatchNormalization, Add
-from keras.models import Model
-import tensorflow as tf
-
-from keras import layers
-from keras.layers import Dense
-from keras.layers import Conv2D
-from keras.layers import AveragePooling2D
-from keras.layers import Flatten
-from keras.layers import MaxPool2D
-from keras.layers import Input
-from keras.layers import BatchNormalization
-from keras.layers import Activation
-from keras.models import Model
-from keras.regularizers import l2
-
 
 def conv2d_bn(x, filters, kernel_size, weight_decay=.0, strides=(1, 1)):
     layer = Conv2D(filters=filters,
@@ -131,8 +118,10 @@ class Transformerpoison(object):
     def train(self, detect_poison:Transformer):
         print('Read {} dataset (x_raw contains the original images):'.format(self.adv_dataset))
         if self.adv_dataset == 'CIFAR10':
+            config.ART_DATA_PATH = '/mnt/data2/yxl/AI-platform/dataset/CIFAR10'
             load_dataset = load_cifar10
         elif self.adv_dataset == 'MNIST':
+            config.ART_DATA_PATH = '/mnt/data2/yxl/AI-platform/dataset/MNIST'
             load_dataset = load_mnist
         (x_raw, y_raw), (x_raw_test, y_raw_test), min_, max_ = load_dataset(raw=True)
 
@@ -231,7 +220,7 @@ class Transformerpoison(object):
         clean_y_test = y_test[is_poison_test == 0]
         poison_x_test = x_test[is_poison_test]
         poison_y_test = y_test[is_poison_test]
-        cleanse = detect_poison(classifier)
+        cleanse = detect_poison(classifier, norm = 2)
         defence_cleanse = cleanse(classifier, steps=10, learning_rate=0.1)
         defence_cleanse.mitigate(clean_x_test, clean_y_test, mitigation_types=["filtering"])
         poison_pred = defence_cleanse.predict(poison_x_test)
