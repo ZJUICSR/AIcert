@@ -12,6 +12,7 @@ from function.defense.trainer.trades import * #
 from function.defense.trainer.freeat import freeat_train, freeat_adjust_learning_rate
 from function.defense.trainer.mart import * #
 from function.defense.trainer.madry import * #
+from function.defense.trainer.cartl.cartl import * #
 from function.defense.models import *
 from function.defense.utils.generate_aes import generate_adv_examples
 
@@ -253,6 +254,43 @@ class FastAT(at):
                 opt.zero_grad()
                 loss.backward()
                 opt.step()
+        with torch.no_grad():
+            model.eval()
+            predictions = model(cln_imgs)
+            predictions_adv = model(adv_imgs)
+        acc = torch.sum(torch.argmax(predictions, dim = 1) == true_labels) / float(len(adv_imgs))
+        print('acc: ', float(acc.cpu()))
+        detect_rate = torch.sum(torch.argmax(predictions_adv, dim = 1) == true_labels) / float(len(adv_imgs))
+        self.detect_rate = float(detect_rate.cpu())
+        if self.adv_examples is None:
+            attack_method = 'from user'
+        else:
+            attack_method = self.adv_method
+
+        return attack_method, self.detect_num, self.detect_rate
+    
+class Cartl(at):
+    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+
+    def generate_adv_examples(self):
+        return generate_adv_examples(self.model, self.adv_method, self.adv_dataset, self.adv_nums, self.device, normalize=True)
+
+    def detect(self):
+        if self.adv_examples is None:
+            adv_imgs, cln_imgs, true_labels = self.generate_adv_examples()
+        else:
+            adv_imgs, adv_labels = self.load_adv_examples() 
+        source_dataset = 'cifar100'
+        source_num_classes = 100
+        if self.adv_dataset == 'CIFAR10':
+            target_dataset = 'cifar10'
+            target_num_classes = 10
+        elif self.adv_dataset == 'MNIST':
+            target_dataset = 'mnist'
+            target_num_classes = 10
+        model = cartl(source_dataset, source_num_classes, target_dataset, target_num_classes)
+
         with torch.no_grad():
             model.eval()
             predictions = model(cln_imgs)

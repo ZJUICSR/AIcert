@@ -1,0 +1,156 @@
+nohup: ignoring input
+2023-05-30 09:11:39 | FileLogger | INFO => load cifar100 train dataset
+2023-05-30 09:11:42 | FileLogger | INFO => load cifar100 test dataset
+2023-05-30 09:11:43 | FileLogger | INFO => initialize trainer
+2023-05-30 09:11:43 | FileLogger | WARNING => trainer that needed reset blocks may not support load from checkpoint!
+2023-05-30 09:11:43 | FileLogger | INFO => initialize finished
+2023-05-30 09:11:43 | FileLogger | INFO => training parameters: 
+network: ResNet
+device: cuda
+train_epochs: 10
+warm_up_epochs: 1
+batch_size: 128
+optimizer: SGD (
+Parameter Group 0
+    dampening: 0
+    initial_lr: 0.1
+    lr: 0.09999999999744245
+    momentum: 0.9
+    nesterov: False
+    weight_decay: 0.0005
+)
+criterion: CrossEntropyLoss()
+2023-05-30 09:11:43 | FileLogger | INFO => using attack: LinfPGDAttack
+2023-05-30 09:11:43 | FileLogger | INFO => attack parameters: 
+min: tensor([[[-1.8968]],
+
+        [[-1.8973]],
+
+        [[-1.5967]]], device='cuda:0')
+max: tensor([[[1.8439]],
+
+        [[2.0022]],
+
+        [[2.0246]]], device='cuda:0')
+epsilon: tensor([[[0.1174]],
+
+        [[0.1223]],
+
+        [[0.1136]]], device='cuda:0')
+step_size: tensor([[[0.0293]],
+
+        [[0.0306]],
+
+        [[0.0284]]], device='cuda:0')
+num_steps: 7
+random_init: True
+2023-05-30 09:11:43 | FileLogger | INFO => tensorboard log dir: ../../../function/defense/trainer/cartl/runs/cartl_res18_cifar100_6_0.01
+/home/ubuntu/.local/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:516: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint8 = np.dtype([("qint8", np.int8, 1)])
+/home/ubuntu/.local/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:517: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_quint8 = np.dtype([("quint8", np.uint8, 1)])
+/home/ubuntu/.local/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:518: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint16 = np.dtype([("qint16", np.int16, 1)])
+/home/ubuntu/.local/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:519: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_quint16 = np.dtype([("quint16", np.uint16, 1)])
+/home/ubuntu/.local/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:520: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint32 = np.dtype([("qint32", np.int32, 1)])
+/home/ubuntu/.local/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:525: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  np_resource = np.dtype([("resource", np.ubyte, 1)])
+2023-05-30 09:11:44 | FileLogger | INFO => starting epoch: 2
+2023-05-30 09:11:44 | FileLogger | INFO => start lr: 0.09999999999744245
+2023-05-30 09:11:44 | FileLogger | INFO => best robustness: 0.0447170716112532
+using seed: 751
+got GPU
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+2023-05-30 09:14:22 | FileLogger | INFO => epoch: 2   loss: 4.117152   train accuracy: 0.11997682225826146   test accuracy: 0.1403   robust accuracy: 0.07790521099744245   time: 155.66s
+2023-05-30 09:14:22 | FileLogger | INFO => 25.109420342213664
+2023-05-30 09:14:22 | FileLogger | INFO => better robustness: 0.07790521099744245
+2023-05-30 09:14:22 | FileLogger | INFO => corresponding accuracy on test set: 0.1403
+2023-05-30 09:17:03 | FileLogger | INFO => epoch: 3   loss: 3.977230   train accuracy: 0.15781649615606078   test accuracy: 0.1704   robust accuracy: 0.09630354859716142   time: 157.28s
+2023-05-30 09:17:03 | FileLogger | INFO => 18.903239994097852
+2023-05-30 09:17:03 | FileLogger | INFO => better robustness: 0.09630354859716142
+2023-05-30 09:17:03 | FileLogger | INFO => corresponding accuracy on test set: 0.1704
+2023-05-30 09:19:44 | FileLogger | INFO => epoch: 4   loss: 3.880888   train accuracy: 0.18648897058061323   test accuracy: 0.2086   robust accuracy: 0.11141304347826086   time: 157.20s
+2023-05-30 09:19:44 | FileLogger | INFO => 18.768115002176035
+2023-05-30 09:19:44 | FileLogger | INFO => better robustness: 0.11141304347826086
+2023-05-30 09:19:44 | FileLogger | INFO => corresponding accuracy on test set: 0.2086
+2023-05-30 09:22:26 | FileLogger | INFO => epoch: 5   loss: 3.796684   train accuracy: 0.2123241687903319   test accuracy: 0.2337   robust accuracy: 0.12434462917125438   time: 157.80s
+2023-05-30 09:22:26 | FileLogger | INFO => 19.145823895778804
+2023-05-30 09:22:26 | FileLogger | INFO => better robustness: 0.12434462917125438
+2023-05-30 09:22:26 | FileLogger | INFO => corresponding accuracy on test set: 0.2337
+2023-05-30 09:25:07 | FileLogger | INFO => epoch: 6   loss: 3.726276   train accuracy: 0.2355378836469577   test accuracy: 0.2606   robust accuracy: 0.13746403453066525   time: 157.73s
+2023-05-30 09:25:07 | FileLogger | INFO => 18.42024850479477
+2023-05-30 09:25:07 | FileLogger | INFO => better robustness: 0.13746403453066525
+2023-05-30 09:25:07 | FileLogger | INFO => corresponding accuracy on test set: 0.2606
+2023-05-30 09:27:49 | FileLogger | INFO => epoch: 7   loss: 3.659230   train accuracy: 0.2574808184448106   test accuracy: 0.2659   robust accuracy: 0.14616368287969428   time: 157.71s
+2023-05-30 09:27:49 | FileLogger | INFO => 18.54329752129362
+2023-05-30 09:27:49 | FileLogger | INFO => better robustness: 0.14616368287969428
+2023-05-30 09:27:49 | FileLogger | INFO => corresponding accuracy on test set: 0.2659
+2023-05-30 09:30:30 | FileLogger | INFO => epoch: 8   loss: 3.603909   train accuracy: 0.27786524936823587   test accuracy: 0.305   robust accuracy: 0.1556146099896687   time: 157.78s
+2023-05-30 09:30:30 | FileLogger | INFO => 18.710457706695323
+2023-05-30 09:30:30 | FileLogger | INFO => better robustness: 0.1556146099896687
+2023-05-30 09:30:30 | FileLogger | INFO => corresponding accuracy on test set: 0.305
+2023-05-30 09:33:11 | FileLogger | INFO => epoch: 9   loss: 3.556157   train accuracy: 0.2939138427338637   test accuracy: 0.3017   robust accuracy: 0.16531329924035865   time: 156.82s
+2023-05-30 09:33:11 | FileLogger | INFO => 18.045928272139996
+2023-05-30 09:33:11 | FileLogger | INFO => better robustness: 0.16531329924035865
+2023-05-30 09:33:11 | FileLogger | INFO => corresponding accuracy on test set: 0.3017
+2023-05-30 09:35:51 | FileLogger | INFO => epoch: 10   loss: 3.518143   train accuracy: 0.3053468670076726   test accuracy: 0.3156   robust accuracy: 0.1714673913119699   time: 156.93s
+2023-05-30 09:35:52 | FileLogger | INFO => 18.72652767991166
+2023-05-30 09:35:52 | FileLogger | INFO => better robustness: 0.1714673913119699
+2023-05-30 09:35:52 | FileLogger | INFO => corresponding accuracy on test set: 0.3156
+2023-05-30 09:35:53 | FileLogger | INFO => finished training
+2023-05-30 09:35:53 | FileLogger | INFO => best robustness on test set: 0.1714673913119699
+2023-05-30 09:35:53 | FileLogger | INFO => load cifar10 train dataset
+2023-05-30 09:35:53 | FileLogger | WARNING => Using mean and std of cifar100 for dataset cifar10!
+2023-05-30 09:35:58 | FileLogger | INFO => load cifar10 test dataset
+2023-05-30 09:35:58 | FileLogger | WARNING => Using mean and std of cifar100 for dataset cifar10!
+2023-05-30 09:35:59 | FileLogger | INFO => initialize trainer
+2023-05-30 09:35:59 | FileLogger | WARNING => We don't load checkpoint at this moment
+2023-05-30 09:35:59 | FileLogger | INFO => initialize finished
+2023-05-30 09:35:59 | FileLogger | INFO => training parameters: 
+network: ResNet
+device: cuda
+train_epochs: 10
+warm_up_epochs: 1
+batch_size: 128
+optimizer: SGD (
+Parameter Group 0
+    dampening: 0
+    initial_lr: 0.1
+    lr: 0.0
+    momentum: 0.9
+    nesterov: False
+    weight_decay: 0.0005
+)
+criterion: CrossEntropyLoss()
+2023-05-30 09:35:59 | FileLogger | INFO => load from old checkpoint, no need for teacher model!
+2023-05-30 09:35:59 | FileLogger | INFO => tensorboard log dir: ../../../function/defense/trainer/cartl/runs/sntl_1_1.0_False_res18_cifar10_6_cartl_res18_cifar100_6_0.01-best_robust_751
+2023-05-30 09:35:59 | FileLogger | WARNING => We load checkpoint here
+2023-05-30 09:35:59 | FileLogger | WARNING => trainer that needed reset blocks may not support load from checkpoint!
+2023-05-30 09:35:59 | FileLogger | WARNING => loaded random state from '../../../function/defense/trainer/cartl/checkpoint/sntl_1_1.0_False_res18_cifar10_6_cartl_res18_cifar100_6_0.01-best_robust_751.pth.rand'
+2023-05-30 09:35:59 | FileLogger | WARNING => ****************************************************************************************************
+ResNet Detected.
+In current code, it is hard to freeze the batch norm layer in the 'self.conv1'.
+I will manually freeze it!
+****************************************************************************************************
+2023-05-30 09:35:59 | FileLogger | INFO => starting epoch: 2
+2023-05-30 09:35:59 | FileLogger | INFO => start lr: 0.09999999999744245
+2023-05-30 09:35:59 | FileLogger | INFO => best accuracy: 0.4011
+Files already downloaded and verified
+Files already downloaded and verified
+2023-05-30 09:36:22 | FileLogger | INFO => epoch: 2   loss: 1.459596   train accuracy: 0.47156729539641945   test accuracy: 0.4713   time: 20.07s
+2023-05-30 09:36:45 | FileLogger | INFO => epoch: 3   loss: 1.299278   train accuracy: 0.5365728900560638   test accuracy: 0.5156   time: 19.22s
+2023-05-30 09:37:08 | FileLogger | INFO => epoch: 4   loss: 1.196100   train accuracy: 0.5768702046950455   test accuracy: 0.5464   time: 18.81s
+2023-05-30 09:37:31 | FileLogger | INFO => epoch: 5   loss: 1.113222   train accuracy: 0.6076206842346874   test accuracy: 0.627   time: 19.24s
+2023-05-30 09:37:54 | FileLogger | INFO => epoch: 6   loss: 1.025842   train accuracy: 0.6379715474060429   test accuracy: 0.6394   time: 19.22s
+2023-05-30 09:38:17 | FileLogger | INFO => epoch: 7   loss: 0.972626   train accuracy: 0.6553029091766728   test accuracy: 0.672   time: 18.74s
+2023-05-30 09:38:40 | FileLogger | INFO => epoch: 8   loss: 0.921518   train accuracy: 0.6771099744245525   test accuracy: 0.6647   time: 19.60s
+2023-05-30 09:39:02 | FileLogger | INFO => epoch: 9   loss: 0.887721   train accuracy: 0.6914482096881818   test accuracy: 0.7153   time: 18.92s
+2023-05-30 09:39:25 | FileLogger | INFO => epoch: 10   loss: 0.872805   train accuracy: 0.6956122122762148   test accuracy: 0.6728   time: 19.13s
+2023-05-30 09:39:26 | FileLogger | INFO => finished training
+2023-05-30 09:39:26 | FileLogger | INFO => best accuracy on test set: 0.7153
+acc:  0.6599999666213989
+detect rate:  0.28999999165534973
