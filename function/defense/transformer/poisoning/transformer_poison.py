@@ -220,7 +220,7 @@ class Transformerpoison(object):
         clean_y_test = y_test[is_poison_test == 0]
         poison_x_test = x_test[is_poison_test]
         poison_y_test = y_test[is_poison_test]
-        cleanse = detect_poison(classifier)
+        cleanse = detect_poison(classifier, norm = 2)
         defence_cleanse = cleanse(classifier, steps=10, learning_rate=0.1)
         defence_cleanse.mitigate(clean_x_test, clean_y_test, mitigation_types=["filtering"])
         poison_pred = defence_cleanse.predict(poison_x_test)
