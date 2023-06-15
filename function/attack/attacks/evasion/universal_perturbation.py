@@ -24,8 +24,8 @@ class UniversalPerturbation(EvasionAttack):
         "Simba": "attacks.evasion.simba.SimBA",
     }
     attack_params = EvasionAttack.attack_params + [
-        # "attacker",
-        # "attacker_params",
+        "attacker",
+        "attacker_params",
         "max_iter",
         "eps",
         "norm",
@@ -47,6 +47,10 @@ class UniversalPerturbation(EvasionAttack):
         super().__init__(estimator=classifier)
         self.attacker = attacker
         self.attacker_params = attacker_params
+        if self.attack_params == None:
+            self.attack_params["norm"] = norm
+            self.attack_params["eps"] = eps
+            self.attack_params["eps_step"] = eps/10
         self.max_iter = max_iter
         self.eps = eps
         self.norm = norm
