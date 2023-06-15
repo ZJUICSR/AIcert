@@ -22,6 +22,8 @@ import shutil
 import os
 from tqdm import tqdm
 
+# norm [1,2,"inf",np.inf]
+
 class EvasionAttacker():
     def __init__(self, modelnet=None, modelpath: str="ckpt-resnet18-mnist_epoch3_acc0.9898.pth", 
     dataset="mnist", datasetpath="./datasets/", nb_classes=10, datanormalize: bool = False, 
