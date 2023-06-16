@@ -5,12 +5,14 @@ from PIL import Image
 from function.defense.utils.get_clean_data import get_clean_loader
 from advertorch.attacks import GradientSignAttack, MomentumIterativeAttack, SparseL1DescentAttack, CarliniWagnerL2Attack, LinfPGDAttack
 
-def save_jepg(adv_examples, output_path, count):
+def save_jepg(adv_examples, output_path, adv_dataset):
     # 将torch加载的图像转换为PIL图像
-    image = adv_examples.cpu().numpy().transpose(1, 2, 0)
+    if adv_dataset == 'MNIST':
+        image = adv_examples.squeeze().cpu().numpy()
+    elif adv_dataset == 'CIFAR10':
+        image = adv_examples.cpu().numpy().transpose(1, 2, 0)
     image_uint8 = (image * 255).astype(np.uint8)
     pil_image = Image.fromarray(image_uint8)
-
     # 保存为JPEG图像
     pil_image.save(output_path, "JPEG")
 
@@ -83,9 +85,9 @@ def generate_adv_examples(model, adv_method, adv_dataset, adv_nums, device, norm
         if not os.path.exists(output_dir):
             # 如果文件夹不存在，则创建文件夹
             os.makedirs(output_dir)
-        save_jepg(adv_examples[i], output_dir + '/adv.jpeg', count)
-        save_jepg(clean_examples[i], output_dir + '/clean.jpeg', count)
-        save_jepg(adv_examples[i] - clean_examples[i], output_dir + '/noise.jpeg', count)
+        save_jepg(adv_examples[i], output_dir + '/adv.jpeg', adv_dataset)
+        save_jepg(clean_examples[i], output_dir + '/clean.jpeg', adv_dataset)
+        save_jepg(adv_examples[i] - clean_examples[i], output_dir + '/noise.jpeg', adv_dataset)
     # np.save('/mnt/data2/yxl/AI-platform/adv_' + adv_dataset + '_' + adv_method + '.npy', adv_examples.cpu().numpy())
     # torch.save({
     #     'adv_img': adv_examples,
