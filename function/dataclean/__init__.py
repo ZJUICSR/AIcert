@@ -16,31 +16,38 @@ def run_dataclean(dataset, upload_flag, upload_path, out_path, logging=None):
     transform = transforms.ToTensor()
     if dataset == "table":
         if upload_flag == 0:
-            dataloader_clean.generate_abnormal_sample(outputfile=osp.join(out_path,'abnormal_table.npz'))
+            dataloader_clean.generate_abnormal_sample(outputfile=osp.join(out_path,'abnormal_table.npz'),logging=logging)
             res = dataloader_clean.run_abnormal_table(inputfile=osp.join(out_path,'abnormal_table.npz'),outputfile=osp.join(out_path,'benign_table.npy'),root=out_path, logging=logging)
             res["input_file"] = osp.join(out_path,'abnormal_table.npz')
         else:
+            logging.info('已选择上传样本，进行读取')
             res = dataloader_clean.run_abnormal_table(inputfile=upload_path,outputfile=osp.join(out_path,'benign_table.npy'),root=out_path, logging=logging)
             res["input_file"] = upload_path
         res["output_file"]=osp.join(out_path,'benign_table.npy')
         logging.info("运行完成【异常数据检测】算法：dataloader_clean")
         return res
     elif dataset == "txt_format":
-        shutil.copy(ROOT.rsplit("/",2)[0]+"/dataset/data/txt/text_sample1.txt",osp.join(out_path,"text_sample1.txt"))
+        logging.info('文本标点格式清洗中')
+        shutil.copy(ROOT.rsplit("/",2)[0]+"/dataset/data/ckpt/text_sample1.txt",osp.join(out_path,"text_sample1.txt"))
         res = dataloader_clean.run_format_clean(inputfile=osp.join(out_path,'text_sample1.txt'),outputfile=osp.join(out_path,'text_sample1_benign.txt'),filler=" ",root=out_path)
         res["input_file"],  res["output_file"] = osp.join(out_path,'text_sample1.txt'), osp.join(out_path,'text_sample1_benign.txt')
+        logging.info("清洗前后结果分别存放至{}与{}".format(res["input_file"],  res["output_file"]))
         logging.info("运行完成【异常数据检测】算法：dataloader_clean")
         return res
     elif dataset == "txt_encode":
-        shutil.copy(ROOT.rsplit("/",2)[0]+"/dataset/data/txt/text_sample2.txt",osp.join(out_path,"text_sample2.txt"))
+        logging.info('文本编码错误清洗中')
+        shutil.copy(ROOT.rsplit("/",2)[0]+"/dataset/data/ckpt/text_sample2.txt",osp.join(out_path,"text_sample2.txt"))
         res = dataloader_clean.run_encoding_clean(inputfile=osp.join(out_path,'text_sample2.txt'),outputfile=osp.join(out_path,'text_sample2_benign.txt'),root=out_path)
         res["input_file"],  res["output_file"] = osp.join(out_path,'text_sample2.txt'), osp.join(out_path,'text_sample2_benign.txt')
+        logging.info("清洗前后结果分别存放至{}与{}".format(res["input_file"],  res["output_file"]))
         logging.info("运行完成【异常数据检测】算法：dataloader_clean")
         return res
     elif dataset == "MNIST":
+        logging.info('MNIST标签错误清洗中')
         train_data = datasets.MNIST(root="./dataset/data",train=True,download=True,transform=transform)
         test_data = datasets.MNIST(root="./dataset/data",train=False,download=True,transform=transform)         
     elif dataset == "CIFAR10":
+        logging.info('CIFAR10标签错误清洗中')
         train_data = datasets.CIFAR10(root="./dataset/data",train=True,download=True,transform=transform)
         test_data = datasets.CIFAR10(root="./dataset/data",train=False,download=True,transform=transform)
     train_loader = DataLoader(train_data,batch_size=64)
