@@ -25,6 +25,6 @@ elif adv_dataset == 'MNIST':
     checkpoint = torch.load('/mnt/data2/yxl/AI-platform/model/model-mnist-smallCNN/model-nn-epoch61.pt')
 model.load_state_dict(checkpoint)
 model = model.to(device)
-deflection = Jpeg(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=100, device=device, adv_examples='/mnt/data2/yxl/AI-platform/dataset/adv_CIFAR10_FGSM.pt')
+deflection = Jpeg(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=10, device=device)#, adv_examples='/mnt/data2/yxl/AI-platform/dataset/adv_CIFAR10_FGSM.pt')
 deflection.detect()
 deflection.print_res()

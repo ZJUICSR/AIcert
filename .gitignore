@@ -1,1 +1,8 @@
+# 忽略.pyc文件
 *.*.pyc
+
+# 忽略__pycache__目录
+__pycache__/
+
+# 忽略所有子目录中的__pycache__目录
+**/__pycache__/
