@@ -48,14 +48,8 @@ class feature_squeeze(object):
 
     def load_adv_examples(self):
         data = torch.load(self.adv_examples)
-        adv_dst = TensorDataset(data["x"].float().cpu(), data["y"].long().cpu())
-        adv_loader = DataLoader(
-        adv_dst,
-        batch_size=1,
-        shuffle=False,
-        num_workers=2
-        )
-        return adv_loader
+        print('successfully load adversarial examples!')
+        return data['adv_img'], data['cln_img'], data['y']
 
 
     # 假设传入的是两张没有norm的[0-1]内的图片
@@ -216,7 +210,7 @@ class feature_squeeze(object):
         if self.adv_examples is None:
             adv_imgs, cln_imgs, true_labels = self.generate_adv_examples()
         else:
-            adv_imgs, adv_labels = self.load_adv_examples()
+            adv_imgs, cln_imgs, true_labels = self.load_adv_examples()
 
         for i in range(len(adv_imgs)):
             self.total_num += 1
