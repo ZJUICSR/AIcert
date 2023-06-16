@@ -569,6 +569,7 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
               gpu_id=gpu_id)  # pre-train
     # print("cnn")
     log_func.info("Running CNN...")
+    log_func.info("The estimated execution time is 10 minutes")
     # print(type(X_test), type(y_test))
     cnn.fit(X_test, y_test)  # pre-train (overfit, not out-of-sample) to entire dataset.
 
@@ -639,13 +640,16 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
     # with open(json_path, 'w') as f:
     #     json.dump(res_dict, f)
     # print(fix_rate)
+    output_dict["num_images"] = str(10000)
+    output_dict["num_detect"] = str(sum(noise_idx))
     output_dict["fix_rate"] = fix_rate
     # output_dict["result"] = str(osp.join(current_dir,'sample.png'))
     output_dict["result"] = str(osp.join(root,'sample.png'))
 
 
-def generate_abnormal_sample(outputfile):
+def generate_abnormal_sample(outputfile, logging=None):
     # 生成异常样本示例
+    logging.info('未上传数据，生成默认低维数据')
     n_samples, n_outliers = 120, 40
     rng = np.random.RandomState(1)
     covariance = np.array([[0.5, -0.1], [0.7, 0.4]])
@@ -657,11 +661,13 @@ def generate_abnormal_sample(outputfile):
         [np.ones((2 * n_samples), dtype=int), -np.ones((n_outliers), dtype=int)]
     )
     data = [X,y]
+    logging.info('低维数据已生成，存放至{}'.format(outputfile))
     np.savez(outputfile,*data)
 
 
 def run_abnormal_table(inputfile,outputfile,root, logging=None):
     # 读取
+    logging.info('正在读取数据')
     data = np.load(inputfile,allow_pickle=True)
     X,y = [data[key] for key in data]
     # 清洗
@@ -683,12 +689,38 @@ def run_abnormal_table(inputfile,outputfile,root, logging=None):
     plt.axis("square")
     plt.legend(handles=handles, labels=["outliers", "inliers"], title="true class")
     plt.savefig(osp.join(root,'Iso.jpg'))
-    output_dict["result"] = str(osp.join(root,'Iso.jpg')) # 绘制图保存路径
+    output_dict["result_origin"] = str(osp.join(root,'Iso.jpg')) # 绘制图保存路径
 
     # 输出清洁样本
+    logging.info('正在清洗数据')
     y_hat = clf.fit_predict(X)
     X_clean = X[y_hat==1]
     np.save(outputfile,X_clean)
+    Y = y[y_hat==1]
+    
+    # 清洗
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=42)
+    # clf_1 = IsolationForest(max_samples=100, random_state=0)
+    # clf_1.fit(X_clean)
+
+    # -画图
+    disp_1 = DecisionBoundaryDisplay.from_estimator(
+        # clf_1,
+        clf,
+        X_clean,
+        response_method="predict",
+        alpha=0.5,
+    )
+    disp_1.ax_.scatter(X_clean[:, 0], X_clean[:, 1], c=Y, s=20, edgecolor="k")
+    disp_1.ax_.set_title("Binary decision boundary \nof IsolationForest")
+    scatter_1 = plt.scatter(X_clean[:, 0], X_clean[:, 1], c=Y, s=20, edgecolor="k")
+    handles_1, labels = scatter_1.legend_elements()
+    plt.axis("square")
+    plt.legend(handles=handles_1, labels=["outliers", "inliers"], title="true class")
+    plt.savefig(osp.join(root,'Iso_clean.jpg'))
+    output_dict["result_clean"] = str(osp.join(root,'Iso_clean.jpg')) # 绘制图保存路径
+    
+    
     # -判断准确率
     accuracy = (y_hat==y).sum()/len(y)
     logging.info('清洗率：{}'.format(accuracy))
