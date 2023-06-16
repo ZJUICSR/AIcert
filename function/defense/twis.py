@@ -53,12 +53,9 @@ class Twis(object):
 
 
     def load_adv_examples(self):
-        clean_examples_path = os.path.dirname(self.adv_examples) + '/clean_' + self.adv_dataset + '.npy'
-        label_path = os.path.dirname(self.adv_examples) + '/label_' + self.adv_dataset + '.npy'
-        clean_examples = torch.from_numpy(np.load(clean_examples_path)).to(self.device)[:self.adv_nums]
-        labels = torch.from_numpy(np.load(label_path)).to(self.device)[:self.adv_nums]
-        adv_examples = torch.from_numpy(np.load(self.adv_examples)).to(self.device)[:self.adv_nums]
-        return adv_examples, clean_examples, labels
+        data = torch.load(self.adv_examples)
+        print('successfully load adversarial examples!')
+        return data['adv_img'], data['cln_img'], data['y']
 
         """Normalize the data given the dataset. Only ImageNet and CIFAR-10 are supported"""
     def transform(self, img):
