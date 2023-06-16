@@ -12,8 +12,8 @@ from function.defense.transformer.poisoning.transformer_poison import *
 from function.defense.sage.sage import *
 from function.defense.models import *
 
-def detect(adv_dataset, adv_method, adv_nums, defense_methods):
-    os.environ["CUDA_VISIBLE_DEVICES"] = "7"
+def detect(adv_dataset, adv_method, adv_nums, defense_methods, adv_examples=None):
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu") 
     if torch.cuda.is_available():
         print("got GPU")
@@ -33,51 +33,51 @@ def detect(adv_dataset, adv_method, adv_nums, defense_methods):
         model = model.to(device).eval()    
 
     if defense_methods == 'JPEG':
-        detector =  Jpeg(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Jpeg(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Feature Squeeze':
-        detector =  feature_squeeze(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  feature_squeeze(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Twis':
-        detector =  Twis(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Twis(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Rgioned-based':
-        detector =  RegionBased(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  RegionBased(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Pixel Deflection':
-        detector =  Pixel_Deflection(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Pixel_Deflection(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Label Smoothing':
-        detector =  Label_smoothing(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Label_smoothing(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Spatial Smoothing':
-        detector =  Spatial_smoothing(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Spatial_smoothing(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Gaussian Data Augmentation':
-        detector =  Gaussian_augmentation(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Gaussian_augmentation(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Total Variance Minimization':
-        detector =  Total_var_min(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Total_var_min(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Pixel Defend':
-        detector =  Pixel_defend(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Pixel_defend(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'InverseGAN':
-        detector =  Inverse_gan(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Inverse_gan(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'DefenseGAN':
-        detector =  Defense_gan(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Defense_gan(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Madry':
-        detector =  Madry(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Madry(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'FastAT':
-        detector =  FastAT(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  FastAT(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'TRADES':
-        detector =  Trades(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Trades(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'FreeAT':
-        detector =  FreeAT(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  FreeAT(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'MART':
-        detector =  Mart(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Mart(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'CARTL':
-        detector =  Cartl(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Cartl(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'SAGE':
-        detector =  Sage(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Sage(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Activation':
-        detector =  Activation_defence(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Activation_defence(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Spectral Signature':
-        detector =  Spectral_signature(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Spectral_signature(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Provenance':
-        detector =  Provenance_defense(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Provenance_defense(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Neural Cleanse':
-        detector =  Neural_cleanse(model, mean, std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector =  Neural_cleanse(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
 
     _, _, detect_rate = detector.detect()
     return detect_rate

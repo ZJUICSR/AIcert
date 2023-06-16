@@ -66,4 +66,9 @@ def generate_adv_examples(model, adv_method, adv_dataset, adv_nums, device, norm
     # adv_examples = adversary.perturb(clean_examples, true_labels)
     adv_examples = adv_examples[:adv_nums]
     # np.save('/mnt/data2/yxl/AI-platform/adv_' + adv_dataset + '_' + adv_method + '.npy', adv_examples.cpu().numpy())
+    # torch.save({
+    #     'adv_img': adv_examples,
+    #     'cln_img': clean_examples,
+    #     'y': true_labels
+    # }, '/mnt/data2/yxl/AI-platform/dataset/adv_' + adv_dataset + '_' + adv_method + '.pt')
     return adv_examples, clean_examples, true_labels
