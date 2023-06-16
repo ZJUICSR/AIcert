@@ -46,6 +46,8 @@
                             <option>CIFAR10</option>
                             <option>MNIST</option>
                         </select>
+                        <div>请上传对抗样本</div>
+                        <input type="file" id="adv_examples" accept=".pt">
                         <div>请选择攻击方法</div>
                         <select id="adv_method">
                             <option>FGSM</option>
@@ -122,12 +124,23 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
 <script>
     function Detect() {
-        var data = {
-            adv_dataset: $("#adv_dataset option:selected").val(),
-            adv_method: $("#adv_method option:selected").val(),
-            adv_nums:$("#adv_nums").val(),
-            defense_methods:$("#defense_methods").val()
-        };
+        // 获取文件输入字段
+        var fileInput = document.getElementById('adv_examples');
+        var file = fileInput.files[0];
+        // 创建FormData对象并将文件添加到其中
+        var data = new FormData();
+        data.append('adv_dataset', $("#adv_dataset option:selected").val());
+        data.append('adv_method', $("#adv_method option:selected").val());
+        data.append('adv_nums', $("#adv_nums").val())
+        data.append('defense_methods', JSON.stringify($("#defense_methods").val()));
+        // data.append('defense_methods', $("#defense_methods").val());
+        data.append('adv_examples', file);
+        // var data = {
+        //     adv_dataset: $("#adv_dataset option:selected").val(),
+        //     adv_method: $("#adv_method option:selected").val(),
+        //     adv_nums:$("#adv_nums").val(),
+        //     defense_methods:$("#defense_methods").val()
+        // };
         console.log(data);
         $.ajax({
             type: "POST",
@@ -135,6 +148,8 @@
             data: data,
             url: "/detect",
             dataType: "json",
+            processData: false,
+            contentType: false,
             success: function (res) {
                 console.log(res);
                 var detectRates = [];

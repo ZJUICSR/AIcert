@@ -46,14 +46,8 @@ class Pixel_Deflection(object):
 
     def load_adv_examples(self):
         data = torch.load(self.adv_examples)
-        adv_dst = TensorDataset(data["x"].float().cpu(), data["y"].long().cpu())
-        adv_loader = DataLoader(
-            adv_dst,
-            batch_size=64,
-            shuffle=False,
-            num_workers=2
-        )
-        return adv_loader
+        print('successfully load adversarial examples!')
+        return data['adv_img'], data['cln_img'], data['y']
     
     def denoiser(self, denoiser_name, img, sigma):
         from skimage.restoration import (denoise_tv_chambolle, denoise_bilateral, denoise_wavelet, denoise_nl_means, wiener)
