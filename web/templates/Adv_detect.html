@@ -78,11 +78,13 @@
                             <option>FreeAT</option>
                             <option>MART</option>
                             <option>CARTL</option>
-                            <option>SAGE</option>
                             <option>Activation</option>
                             <option>Spectral Signature</option>
                             <option>Provenance</option>
-                            <option>Neural Cleanse</option>
+                            <option>Neural Cleanse L1</option>
+                            <option>Neural Cleanse L2</option>
+                            <option>Neural Cleanse Linf</option>
+                            <option>SAGE</option>
                         </select>
                         <button type="submit" class="btn btn-info" onclick="info('是否开始检测', 4)">对抗攻击防御</button>
                     </div>
@@ -152,6 +154,7 @@
             contentType: false,
             success: function (res) {
                 console.log(res);
+                console.log(res.no_defense_accuracy);
                 var detectRates = [];
                 var defenseMethods = [];
                 $.each(res.detect_rates, function (defense_method, detect_rate) {
@@ -186,6 +189,21 @@
                             yAxes: [{
                                 ticks: {
                                     beginAtZero: true
+                                }
+                            }]
+                        },
+                        annotation: {
+                            annotations: [{
+                                type: 'line',
+                                mode: 'horizontal',
+                                scaleID: 'y-axis-0',
+                                value: 0.2,
+                                borderColor: 'red',
+                                borderWidth: 2,
+                                label: {
+                                    enabled: true,
+                                    content: 'no_defense_accuracy',
+                                    position: 'right'
                                 }
                             }]
                         }
