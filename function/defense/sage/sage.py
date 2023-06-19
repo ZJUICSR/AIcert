@@ -202,6 +202,7 @@ class Sage(object):
         self.total_num = 0
         self.detect_num = 0
         self.detect_rate = 0
+        self.no_defense_accuracy = 0
 
     def generate_adv_examples(self):
         return generate_adv_examples(self.model, self.adv_method, self.adv_dataset, self.adv_nums, self.device)
@@ -267,12 +268,13 @@ class Sage(object):
         results = sage(model, 'cifar10', test_clean_loader, test_bad_loader, train_loader, cuda = 1, epochs=2)
         detect_rate = (100 - results[1]) / 100
         self.detect_rate = float(detect_rate)
+        self.no_defense_accuracy = (100 - float(results[3])) / 100
         if self.adv_examples is None:
             attack_method = 'from user'
         else:
             attack_method = self.adv_method
 
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
     
     def print_res(self):
         print('detect rate: ', self.detect_rate)

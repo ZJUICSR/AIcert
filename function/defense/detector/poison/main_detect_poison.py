@@ -8,4 +8,5 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 deflection = Provenance_defense(model = None, mean = mean, std = std, adv_method='FGSM', adv_dataset='CIFAR10', adv_nums=1000, device=device)
 deflection.detect()
+print(deflection.no_defense_accuracy)
 deflection.print_res()

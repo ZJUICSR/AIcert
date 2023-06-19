@@ -38,6 +38,7 @@ class Pixel_Deflection(object):
         self.total_num = 0
         self.detect_num = 0
         self.detect_rate = 0
+        self.no_defense_accuracy = 0
 
 
     def generate_adv_examples(self):
@@ -98,7 +99,10 @@ class Pixel_Deflection(object):
             adv_imgs, clean_examples, true_labels = self.generate_adv_examples()
         else:
             adv_imgs, adv_labels = self.load_adv_examples()
-
+        with torch.no_grad():
+            adv_predictions = self.model(adv_imgs)
+        no_defense_accuracy = torch.sum(torch.argmax(adv_predictions, dim = 1) == true_labels) / float(len(adv_imgs))
+        self.no_defense_accuracy = no_defense_accuracy.cpu().numpy()
         for i in range(len(adv_imgs)):
             
             test_img = adv_imgs[i]
@@ -131,7 +135,7 @@ class Pixel_Deflection(object):
         else:
             attack_method = self.adv_method
 
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
                 
     def print_res(self):
         print('detect rate: ', self.detect_rate)
@@ -140,4 +144,4 @@ class Pixel_Deflection(object):
         else:
             attack_method = self.adv_method
 
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
