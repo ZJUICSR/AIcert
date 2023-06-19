@@ -104,6 +104,7 @@ class Detectpoison(object):
         self.total_num = 0
         self.detect_num = 0
         self.detect_rate = 0
+        self.no_defense_accuracy = 0
 
     def train(self, detect_poison:PoisonFilteringDefence):
         print("Read {} dataset (x_raw contains the original images)".format(self.adv_dataset))
@@ -114,7 +115,7 @@ class Detectpoison(object):
             config.ART_DATA_PATH = '/mnt/data2/yxl/AI-platform/dataset/MNIST'
             load_dataset = load_mnist
         (x_raw, y_raw), (x_raw_test, y_raw_test), min_, max_ = load_dataset(raw=True)
-        print(x_raw.shape, x_raw[0])
+        # print(x_raw.shape, x_raw[0])
         n_train = np.shape(x_raw)[0]
         num_selection = 5000
         random_selection_indices = np.random.choice(n_train, num_selection)
@@ -131,8 +132,9 @@ class Detectpoison(object):
         perc_poison = 0.33
         (is_poison_train, x_poisoned_raw, y_poisoned_raw) = generate_backdoor(x_raw, y_raw, perc_poison)
         x_train, y_train = preprocess(x_poisoned_raw, y_poisoned_raw)
-        print("Add channel axis")
+
         if self.adv_dataset == 'MNIST':
+            print("Add channel axis")
             x_train = np.expand_dims(x_train, axis=3)
 
         print("Poison test data")
@@ -169,6 +171,11 @@ class Detectpoison(object):
         x_test = np.transpose(x_test, (0, 3, 1, 2)).astype(np.float32)
         classifier.fit(x_train, y_train, nb_epochs=4, batch_size=128) #nb_epochs=30
 
+        with torch.no_grad():
+            adv_predictions = classifier.predict(x_test)
+        no_defense_accuracy = np.sum(np.argmax(adv_predictions, axis=1) == np.argmax(y_test, axis=1)) / len(y_test)
+        self.no_defense_accuracy = no_defense_accuracy
+
         print("Calling poisoning defence")
         defence = detect_poison(classifier, x_test, y_test)
 
@@ -193,7 +200,7 @@ class Detectpoison(object):
             attack_method = 'from user'
         else:
             attack_method = self.adv_method
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
 
     def print_res(self):
         print('detect rate: ', self.detect_rate)
@@ -303,6 +310,11 @@ class Provenance_defense(Detectpoison):
         classifier = SklearnClassifier(model=model, clip_values=(min_, max_))
 
         classifier.fit(all_data, all_labels)
+        
+        with torch.no_grad():
+            adv_predictions = classifier.predict(x_test)
+        no_defense_accuracy = np.sum(np.argmax(adv_predictions, axis=1) == np.argmax(y_test, axis=1)) / len(y_test)
+        self.no_defense_accuracy = no_defense_accuracy
 
         defence_no_trust = ProvenanceDefense(classifier, all_data, all_labels, all_p, eps=0.1)
         
@@ -329,4 +341,4 @@ class Provenance_defense(Detectpoison):
             attack_method = 'from user'
         else:
             attack_method = self.adv_method
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy

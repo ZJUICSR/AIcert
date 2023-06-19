@@ -8,6 +8,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 if torch.cuda.is_available():
     print("got GPU")
-deflection = Neural_cleanse(model = None, mean = mean, std = std, adv_method='PGD', adv_dataset='MNIST', adv_nums=1000, device=device)
+deflection = Neural_cleanse_l1(model = None, mean = mean, std = std, adv_method='PGD', adv_dataset='MNIST', adv_nums=1000, device=device)
 deflection.detect()
+print(deflection.no_defense_accuracy)
 deflection.print_res()
