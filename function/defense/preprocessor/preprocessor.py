@@ -48,6 +48,7 @@ class Prepro(object):
         self.total_num = 0
         self.detect_num = 0
         self.detect_rate = 0
+        self.no_defense_accuracy = 0
 
     def generate_adv_examples(self):
         return generate_adv_examples(self.model, self.adv_method, self.adv_dataset, self.adv_nums, self.device)
@@ -62,6 +63,10 @@ class Prepro(object):
             adv_imgs, cln_imgs, true_labels = self.generate_adv_examples()
         else:
             adv_imgs, cln_imgs, true_labels = self.load_adv_examples() 
+        with torch.no_grad():
+            adv_predictions = self.model(adv_imgs)
+        no_defense_accuracy = torch.sum(torch.argmax(adv_predictions, dim = 1) == true_labels) / float(len(adv_imgs))
+        self.no_defense_accuracy = no_defense_accuracy.cpu().numpy()
         with torch.no_grad():
             predictions = self.model(cln_imgs)
             predictions_adv = self.model(adv_imgs)
@@ -98,7 +103,7 @@ class Prepro(object):
         else:
             attack_method = self.adv_method
 
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
 
     def dataset(self):
         print("Step 1: Load the {} dataset".format(self.adv_dataset))
@@ -142,6 +147,10 @@ class Prepro(object):
             adv_imgs, cln_imgs, true_labels = self.generate_adv_examples()
         else:
             adv_imgs, cln_imgs, true_labels = self.load_adv_examples() 
+        with torch.no_grad():
+            adv_predictions = self.model(adv_imgs)
+        no_defense_accuracy = torch.sum(torch.argmax(adv_predictions, dim = 1) == true_labels) / float(len(adv_imgs))
+        self.no_defense_accuracy = no_defense_accuracy.cpu().numpy()
         print("Step 1: Load the dataset")
         _, _, train_loader = self.dataset()
 
@@ -196,7 +205,7 @@ class Prepro(object):
         else:
             attack_method = self.adv_method
 
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
     
     def print_res(self):
         print('detect rate: ', self.detect_rate)
@@ -289,6 +298,10 @@ class Pixel_defend(Prepro):
             adv_imgs, cln_imgs, true_labels = self.generate_adv_examples()
         else:
             adv_imgs, cln_imgs, true_labels = self.load_adv_examples() 
+        with torch.no_grad():
+            adv_predictions = self.model(adv_imgs)
+        no_defense_accuracy = torch.sum(torch.argmax(adv_predictions, dim = 1) == true_labels) / float(len(adv_imgs))
+        self.no_defense_accuracy = no_defense_accuracy.cpu().numpy() 
         if self.adv_dataset == 'CIFAR10':
             model = ModelImageCIFAR10()
         elif self.adv_dataset == 'MNIST':
@@ -328,7 +341,7 @@ class Pixel_defend(Prepro):
         else:
             attack_method = self.adv_method
 
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
 
 def load_model(sess, model_name, model_path):
     saver = tf.train.import_meta_graph(os.path.join(model_path, model_name + ".meta"))
