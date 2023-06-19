@@ -16,6 +16,7 @@ ai_benchmark==0.1.2
 gpustat==0.6.0
 networks==0.3.7
 opencv-python==4.5.5.64
+thop==0.1.1
 
 --find-links https://download.pytorch.org/whl/cu113/torch_stable.html
 torch==1.10.2+cu113
