@@ -31,7 +31,8 @@ def index():
 @app.route('/index_function_introduction', methods=['GET'])
 def index_function_introduction():
     if request.method == "GET":
-        return render_template("index_function_introduction.html")
+        # return render_template("index_function_introduction.html")
+        return render_template("knowledge_consistency.html")
 
 @app.route('/index_task_center', methods=['GET'])
 def index_task_center():
@@ -647,41 +648,42 @@ def FormalVerification():
     if (request.method == "GET"):
         return render_template("former_verification.html")
     else:
-        res = {
-            "tid":"20230224_1106_d5ab4b1",
-            "stid":"S20230224_1106_368e295"
-        }
-        return jsonify(res)
+        # res = {
+        #     "tid":"20230224_1106_d5ab4b1",
+        #     "stid":"S20230224_1106_368e295"
+        # }
+        # return jsonify(res)
+        inputParam = json.loads(request.data)
         param = {
-            "dataset": request.form.get("dataset"),
-            "model": request.form.get("model"),
-            "size": int(request.form.get("size")),
-            "up_eps": float(request.form.get("up_eps")),
-            "down_eps": float(request.form.get("down_eps")),
-            "steps": int(request.form.get("steps")),
-            "task_id": request.form.get("tid"),
+            "dataset": inputParam["dataset"],
+            "model": inputParam['model'],
+            "size": int(inputParam["size"]),
+            "up_eps": float(inputParam["up_eps"]),
+            "down_eps": float(inputParam["down_eps"]),
+            "steps": int(inputParam["steps"]),
+            "task_id": inputParam["task_id"],
         }
-        tid = request.form.get("tid")
+        tid = inputParam["task_id"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
-        AAtid = "S"+IOtool.get_task_id(str(format_time))
+        stid = "S"+IOtool.get_task_id(str(format_time))
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         print("*************************************add stid******************")
-        taskinfo[tid]["function"].update({AAtid:{
+        taskinfo[tid]["function"].update({stid:{
             "type":"formal_verification",
             "state":0,
             "name":["formal_verification"],
-            "dataset":request.form.get("dataset"),
-            "model":request.form.get("model")
+            "dataset":inputParam["dataset"],
+            "model":inputParam['model']
         }})
-        taskinfo[tid]["dataset"]=request.form.get("dataset")
-        taskinfo[tid]["model"]=request.form.get("model")
+        taskinfo[tid]["dataset"]=inputParam["dataset"]
+        taskinfo[tid]["model"]=inputParam['model']
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        t2 = threading.Thread(target=interface.run_verify, args=(tid, AAtid, param))
+        t2 = threading.Thread(target=interface.run_verify, args=(tid, stid, param))
         t2.setDaemon(True)
         t2.start()
         res = {
             "tid":tid,
-            "stid":AAtid
+            "stid":stid
         }
         return jsonify(res)
 
@@ -848,10 +850,12 @@ def model_reach():
             os.mkdir(os.path.join(img_dir,tid))
         except:
             pass
-        pic_path=os.path.join(img_dir,tid,stid+'.pt')
-        with open(pic_path, 'wb') as f:
-            f.write(base64.b64decode(pic.replace('data:image/png;base64,','')))
-            f.close()
+        # pic_path=os.path.join(img_dir,tid,stid+'.pt')
+        pic_path=os.path.join(img_dir,tid,pic+'.png')
+        print("********************image.png*************",pic_path)
+        # with open(pic_path, 'wb') as f:
+        #     f.write(base64.b64decode(pic.replace('data:image/png;base64,','')))
+        #     f.close()
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         taskinfo[tid]["function"].update({stid:{
             "type":"attack_dim_reduciton",
@@ -878,6 +882,7 @@ def model_reach():
 @app.route('/knowledge_consistency',methods=["GET","POST"])
 def model_consistency():
     if request.method=='POST':
+        print("***********************knowledge_consistency*********\n")
         inputParam = json.loads(request.data)
         tid = inputParam["tid"]
         net=inputParam['net']
@@ -938,24 +943,21 @@ def auto_verify_img():
         pic=inputParam['pic']
         dataset=inputParam['dataset']
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({stid:{
-            "type":"attack_dim_reduciton",
-            "state":0,
-            "dataset":dataset,
-            "model":net,
-            "eps":eps
-        }})
-        taskinfo[tid]["dataset"] = dataset
-        taskinfo[tid]["model"] = net
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
         img_dir=os.path.join(os.getcwd(),"web/static/imgs/tmp_imgs")
         try:
             os.mkdir(os.path.join(img_dir,tid))
         except:
             pass
-        
-        pic_path=os.path.join(img_dir,tid,stid+'.png')
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        if "image/jpeg;" in pic:
+            pic_path=os.path.join(img_dir,tid,stid+'.png')
+            with open( pic_path, 'wb') as f:
+                f.write(base64.b64decode(pic.replace('data:image/jpeg;base64,','')))
+                f.close()
+        else:
+            pic_path=os.path.join(img_dir,tid,stid+'.png')
+            with open( pic_path, 'wb') as f:
+                f.write(base64.b64decode(pic.replace('data:image/png;base64,','')))
+                f.close()
         taskinfo[tid]["function"].update({stid:{
             "type":"formal_verify_1",
             "state":0,
@@ -965,9 +967,15 @@ def auto_verify_img():
             'model':net
         }})
         taskinfo[tid]["dataset"] = dataset
-        with open( pic_path, 'wb') as f:
-            f.write(base64.b64decode(pic.replace('data:image/png;base64,','')))
-            f.close()
+        taskinfo[tid]["model"] = net
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        if "cifar" in dataset.lower():
+            dataset="CIFAR"
+        print("net:",net)
+        print("dataset:",dataset)
+        print("eps:",eps)
+        print("pic_path:",pic_path)
+        print("pic:",pic)
         resp=interface.verify_img(tid, stid, net, dataset, eps, pic_path)
         IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
@@ -975,8 +983,8 @@ def auto_verify_img():
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
         IOtool.change_task_success_v2(tid)
         return json.dumps(resp,ensure_ascii=False)
-
     return render_template('index_auto_verify.html')
+
 @app.route('/Attack/AttackAttrbutionAnalysis', methods=['POST'])
 def AttackAttrbutionAnalysis():
     """
