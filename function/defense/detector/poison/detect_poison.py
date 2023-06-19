@@ -5,17 +5,20 @@ import torch
 from torch.nn import Module
 import torchvision.transforms as transforms
 import json
-from keras.models import Sequential
-from keras.layers import Dense, Flatten, Conv2D, MaxPooling2D, Dropout
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 from sklearn.svm import SVC
 from art.attacks.poisoning.perturbations.image_perturbations import add_pattern_bd, add_single_bd
-from art.estimators.classification import KerasClassifier
+from art.estimators.classification import PyTorchClassifier
 from art import config
 from art.utils import load_mnist, preprocess, load_cifar10
 from art.defences.detector.poison import ActivationDefence, ProvenanceDefense, SpectralSignatureDefense
 from art.defences.detector.poison import PoisonFilteringDefence
 from art.attacks.poisoning.poisoning_attack_svm import PoisoningAttackSVM
 from art.estimators.classification.scikitlearn import SklearnClassifier, ScikitlearnSVC
+import sys
+sys.path.append('../../../..')
+from function.defense.models import *
 
 import logging
 logging.getLogger('tensorflow').disabled = True
@@ -101,9 +104,10 @@ class Detectpoison(object):
         self.total_num = 0
         self.detect_num = 0
         self.detect_rate = 0
+        self.no_defense_accuracy = 0
 
     def train(self, detect_poison:PoisonFilteringDefence):
-        # Read MNIST dataset (x_raw contains the original images):
+        print("Read {} dataset (x_raw contains the original images)".format(self.adv_dataset))
         if self.adv_dataset == 'CIFAR10':
             config.ART_DATA_PATH = '/mnt/data2/yxl/AI-platform/dataset/CIFAR10'
             load_dataset = load_cifar10
@@ -111,7 +115,7 @@ class Detectpoison(object):
             config.ART_DATA_PATH = '/mnt/data2/yxl/AI-platform/dataset/MNIST'
             load_dataset = load_mnist
         (x_raw, y_raw), (x_raw_test, y_raw_test), min_, max_ = load_dataset(raw=True)
-
+        # print(x_raw.shape, x_raw[0])
         n_train = np.shape(x_raw)[0]
         num_selection = 5000
         random_selection_indices = np.random.choice(n_train, num_selection)
@@ -124,22 +128,23 @@ class Detectpoison(object):
         x_raw_test = x_raw_test[random_selection_indices]
         y_raw_test = np.array(y_raw_test)[random_selection_indices]
 
-        # Poison training data
+        print("Poison training data")
         perc_poison = 0.33
         (is_poison_train, x_poisoned_raw, y_poisoned_raw) = generate_backdoor(x_raw, y_raw, perc_poison)
         x_train, y_train = preprocess(x_poisoned_raw, y_poisoned_raw)
-        # Add channel axis:
+
         if self.adv_dataset == 'MNIST':
+            print("Add channel axis")
             x_train = np.expand_dims(x_train, axis=3)
 
-        # Poison test data
+        print("Poison test data")
         (is_poison_test, x_poisoned_raw_test, y_poisoned_raw_test) = generate_backdoor(x_raw_test, y_raw_test, perc_poison)
         x_test, y_test = preprocess(x_poisoned_raw_test, y_poisoned_raw_test)
-        # Add channel axis:
+        print("Add channel axis")
         if self.adv_dataset == 'MNIST':
             x_test = np.expand_dims(x_test, axis=3)
 
-        # Shuffle training data so poison is not together
+        print("Shuffle training data so poison is not together")
         n_train = np.shape(y_train)[0]
         shuffled_indices = np.arange(n_train)
         np.random.shuffle(shuffled_indices)
@@ -147,36 +152,40 @@ class Detectpoison(object):
         y_train = y_train[shuffled_indices]
         is_poison_train = is_poison_train[shuffled_indices]
 
-        # Create Keras convolutional neural network - basic architecture from Keras examples
-        # Source here: https://github.com/keras-team/keras/blob/master/examples/mnist_cnn.py
-        model = Sequential()
-        model.add(Conv2D(32, kernel_size=(3, 3), activation="relu", input_shape=x_train.shape[1:]))
-        model.add(Conv2D(64, (3, 3), activation="relu"))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.25))
-        model.add(Flatten())
-        model.add(Dense(128, activation="relu"))
-        model.add(Dropout(0.5))
-        model.add(Dense(10, activation="softmax"))
+        if self.adv_dataset == 'CIFAR10':
+            model = ResNet18()
+            input_shape = (3, 32, 32)
+        elif self.adv_dataset == 'MNIST':
+            model = SmallCNN()
+            input_shape = (1, 28, 28)
 
-        model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
-
-        classifier = KerasClassifier(model=model, clip_values=(min_, max_))
-
+        classifier = PyTorchClassifier(
+            model=model,
+            loss=torch.nn.CrossEntropyLoss(), 
+            optimizer=torch.optim.Adam(model.parameters(), lr=0.1), 
+            input_shape=input_shape, 
+            nb_classes=10, 
+            clip_values=(min_, max_)
+        )
+        x_train = np.transpose(x_train, (0, 3, 1, 2)).astype(np.float32)
+        x_test = np.transpose(x_test, (0, 3, 1, 2)).astype(np.float32)
         classifier.fit(x_train, y_train, nb_epochs=4, batch_size=128) #nb_epochs=30
 
-        # Calling poisoning defence:
+        with torch.no_grad():
+            adv_predictions = classifier.predict(x_test)
+        no_defense_accuracy = np.sum(np.argmax(adv_predictions, axis=1) == np.argmax(y_test, axis=1)) / len(y_test)
+        self.no_defense_accuracy = no_defense_accuracy
+
+        print("Calling poisoning defence")
         defence = detect_poison(classifier, x_test, y_test)
 
-        # End-to-end method:
-        # print("------------------- Results using size metric -------------------")
-        # print(defence.get_params())
-        defence.detect_poison(nb_clusters=2, nb_dims=10, reduce="PCA")
+        print("End-to-end method")
+        defence.detect_poison(nb_clusters=3, nb_dims=9, reduce="PCA") #nb_dims=10
 
-        # Evaluate method when ground truth is known:
+        print("Evaluate method when ground truth is known")
         is_clean = is_poison_test == 0
         confusion_matrix = defence.evaluate_defence(is_clean)
-        # print("Evaluation defence results for size-based metric: ")
+        
         jsonObject = json.loads(confusion_matrix)
         numerator = 0
         denominator = 0
@@ -185,13 +194,13 @@ class Detectpoison(object):
             numerator += jsonObject[label]['TrueNegative']['numerator']
             denominator += jsonObject[label]['TruePositive']['denominator']
             denominator += jsonObject[label]['TrueNegative']['denominator']
-        # print('detect_rate: ', numerator / denominator)
+
         self.detect_rate = numerator / denominator
         if self.adv_examples is None:
             attack_method = 'from user'
         else:
             attack_method = self.adv_method
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
 
     def print_res(self):
         print('detect rate: ', self.detect_rate)
@@ -223,8 +232,10 @@ class Provenance_defense(Detectpoison):
         NB_DEVICES = 10
         kernel = "linear"
         if self.adv_dataset == 'CIFAR10':
+            config.ART_DATA_PATH = '/mnt/data2/yxl/AI-platform/dataset/CIFAR10'
             load_dataset = load_cifar10()
         elif self.adv_dataset == 'MNIST':
+            config.ART_DATA_PATH = '/mnt/data2/yxl/AI-platform/dataset/MNIST'
             load_dataset = load_mnist()
         (x_train, y_train), (x_test, y_test), min_, max_ = load_dataset
         y_train = np.argmax(y_train, axis=1)
@@ -299,15 +310,12 @@ class Provenance_defense(Detectpoison):
         classifier = SklearnClassifier(model=model, clip_values=(min_, max_))
 
         classifier.fit(all_data, all_labels)
-        defence_trust = ProvenanceDefense(
-            classifier,
-            all_data,
-            all_labels,
-            all_p,
-            x_val=trusted_data,
-            y_val=trusted_labels,
-            eps=0.1,
-        )
+        
+        with torch.no_grad():
+            adv_predictions = classifier.predict(x_test)
+        no_defense_accuracy = np.sum(np.argmax(adv_predictions, axis=1) == np.argmax(y_test, axis=1)) / len(y_test)
+        self.no_defense_accuracy = no_defense_accuracy
+
         defence_no_trust = ProvenanceDefense(classifier, all_data, all_labels, all_p, eps=0.1)
         
         # End-to-end method:
@@ -333,4 +341,4 @@ class Provenance_defense(Detectpoison):
             attack_method = 'from user'
         else:
             attack_method = self.adv_method
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy

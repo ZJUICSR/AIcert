@@ -42,20 +42,15 @@ class at(object):
         self.total_num = 0
         self.detect_num = 0
         self.detect_rate = 0
+        self.no_defense_accuracy = 0
 
     def generate_adv_examples(self):
         return generate_adv_examples(self.model, self.adv_method, self.adv_dataset, self.adv_nums, self.device)
 
     def load_adv_examples(self):
         data = torch.load(self.adv_examples)
-        adv_dst = TensorDataset(data["x"].float().cpu(), data["y"].long().cpu())
-        adv_loader = DataLoader(
-        adv_dst,
-        batch_size=1,
-        shuffle=False,
-        num_workers=2
-        )
-        return adv_loader
+        print('successfully load adversarial examples!')
+        return data['adv_img'], data['cln_img'], data['y']
 
     def dataset(self):
         print("Step 1: Load the {} dataset".format(self.adv_dataset))
@@ -83,7 +78,11 @@ class at(object):
         if self.adv_examples is None:
             adv_imgs, cln_imgs, true_labels = self.generate_adv_examples()
         else:
-            adv_imgs, adv_labels = self.load_adv_examples() 
+            adv_imgs, cln_imgs, true_labels = self.load_adv_examples() 
+        with torch.no_grad():
+            adv_predictions = self.model(adv_imgs)
+        no_defense_accuracy = torch.sum(torch.argmax(adv_predictions, dim = 1) == true_labels) / float(len(adv_imgs))
+        self.no_defense_accuracy = no_defense_accuracy.cpu().numpy()
         train_loader = self.dataset()
         print("Step 2: Create the model")
         if self.adv_dataset == 'CIFAR10':
@@ -128,7 +127,7 @@ class at(object):
         else:
             attack_method = self.adv_method
 
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
 
     def print_res(self):
         print('detect rate: ', self.detect_rate)
@@ -155,7 +154,11 @@ class FreeAT(at):
         if self.adv_examples is None:
             adv_imgs, cln_imgs, true_labels = self.generate_adv_examples()
         else:
-            adv_imgs, adv_labels = self.load_adv_examples() 
+            adv_imgs, cln_imgs, true_labels = self.load_adv_examples() 
+        with torch.no_grad():
+            adv_predictions = self.model(adv_imgs)
+        no_defense_accuracy = torch.sum(torch.argmax(adv_predictions, dim = 1) == true_labels) / float(len(adv_imgs))
+        self.no_defense_accuracy = no_defense_accuracy.cpu().numpy()
         train_loader = self.dataset()
 
         print("Step 2: Create the model")
@@ -192,7 +195,7 @@ class FreeAT(at):
         else:
             attack_method = self.adv_method
 
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
 
 class Mart(at):
     def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
@@ -209,7 +212,11 @@ class FastAT(at):
         if self.adv_examples is None:
             adv_imgs, cln_imgs, true_labels = self.generate_adv_examples()
         else:
-            adv_imgs, adv_labels = self.load_adv_examples() 
+            adv_imgs, cln_imgs, true_labels = self.load_adv_examples() 
+        with torch.no_grad():
+            adv_predictions = self.model(adv_imgs)
+        no_defense_accuracy = torch.sum(torch.argmax(adv_predictions, dim = 1) == true_labels) / float(len(adv_imgs))
+        self.no_defense_accuracy = no_defense_accuracy.cpu().numpy()
         train_loader = self.dataset()
         if self.adv_dataset == 'CIFAR10':
             model = ResNet18().to(self.device)
@@ -267,7 +274,7 @@ class FastAT(at):
         else:
             attack_method = self.adv_method
 
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
     
 class Cartl(at):
     def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
@@ -280,7 +287,11 @@ class Cartl(at):
         if self.adv_examples is None:
             adv_imgs, cln_imgs, true_labels = self.generate_adv_examples()
         else:
-            adv_imgs, adv_labels = self.load_adv_examples() 
+            adv_imgs, cln_imgs, true_labels = self.load_adv_examples() 
+        with torch.no_grad():
+            adv_predictions = self.model(adv_imgs)
+        no_defense_accuracy = torch.sum(torch.argmax(adv_predictions, dim = 1) == true_labels) / float(len(adv_imgs))
+        self.no_defense_accuracy = no_defense_accuracy.cpu().numpy()
         source_dataset = 'cifar100'
         source_num_classes = 100
         if self.adv_dataset == 'CIFAR10':
@@ -304,4 +315,4 @@ class Cartl(at):
         else:
             attack_method = self.adv_method
 
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy

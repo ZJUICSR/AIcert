@@ -40,6 +40,7 @@ class feature_squeeze(object):
         self.total_num = 0
         self.detect_num = 0
         self.detect_rate = 0
+        self.no_defense_accuracy = 0
 
 
     def generate_adv_examples(self):
@@ -48,14 +49,8 @@ class feature_squeeze(object):
 
     def load_adv_examples(self):
         data = torch.load(self.adv_examples)
-        adv_dst = TensorDataset(data["x"].float().cpu(), data["y"].long().cpu())
-        adv_loader = DataLoader(
-        adv_dst,
-        batch_size=1,
-        shuffle=False,
-        num_workers=2
-        )
-        return adv_loader
+        print('successfully load adversarial examples!')
+        return data['adv_img'], data['cln_img'], data['y']
 
 
     # 假设传入的是两张没有norm的[0-1]内的图片
@@ -216,8 +211,11 @@ class feature_squeeze(object):
         if self.adv_examples is None:
             adv_imgs, cln_imgs, true_labels = self.generate_adv_examples()
         else:
-            adv_imgs, adv_labels = self.load_adv_examples()
-
+            adv_imgs, cln_imgs, true_labels = self.load_adv_examples()
+        with torch.no_grad():
+            adv_predictions = self.model(adv_imgs)
+        no_defense_accuracy = torch.sum(torch.argmax(adv_predictions, dim = 1) == true_labels) / float(len(adv_imgs))
+        self.no_defense_accuracy = no_defense_accuracy.cpu().numpy()
         for i in range(len(adv_imgs)):
             self.total_num += 1
             test_img = adv_imgs[i]
@@ -234,7 +232,7 @@ class feature_squeeze(object):
         else:
             attack_method = self.adv_method
 
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
                 
     def print_res(self):
         print('detect rate: ', self.detect_rate)
@@ -243,4 +241,4 @@ class feature_squeeze(object):
         else:
             attack_method = self.adv_method
 
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy

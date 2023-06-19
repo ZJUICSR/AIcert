@@ -37,7 +37,7 @@ class RegionBased(object):
         self.detect_num = 0
         self.detect_rate = 0
         self.un_norm = UnNorm(mean, std)
-
+        self.no_defense_accuracy = 0
 
     def generate_adv_examples(self):
         return generate_adv_examples(self.model, self.adv_method, self.adv_dataset, self.adv_nums, self.device)
@@ -45,14 +45,8 @@ class RegionBased(object):
 
     def load_adv_examples(self):
         data = torch.load(self.adv_examples)
-        adv_dst = TensorDataset(data["x"].float().cpu(), data["y"].long().cpu())
-        adv_loader = DataLoader(
-        adv_dst,
-        batch_size=1,
-        shuffle=False,
-        num_workers=2
-        )
-        return adv_loader
+        print('successfully load adversarial examples!')
+        return data['adv_img'], data['cln_img'], data['y']
 
 
     def region_based(self, img):
@@ -129,8 +123,11 @@ class RegionBased(object):
         if self.adv_examples is None:
             adv_imgs, clean_imgs, true_labels = self.generate_adv_examples()
         else:
-            adv_imgs, adv_labels = self.load_adv_examples()
-
+            adv_imgs, clean_imgs, true_labels = self.load_adv_examples()
+        with torch.no_grad():
+            adv_predictions = self.model(adv_imgs)
+        no_defense_accuracy = torch.sum(torch.argmax(adv_predictions, dim = 1) == true_labels) / float(len(adv_imgs))
+        self.no_defense_accuracy = no_defense_accuracy.cpu().numpy()
         for i in range(len(adv_imgs)):
             self.total_num += 1
             test_img = adv_imgs[i]
@@ -152,7 +149,7 @@ class RegionBased(object):
         else:
             attack_method = self.adv_method
 
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
                 
     def print_res(self):
         print('detect rate: ', self.detect_rate)
@@ -161,5 +158,5 @@ class RegionBased(object):
         else:
             attack_method = self.adv_method
 
-        return attack_method, self.detect_num, self.detect_rate
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
 
