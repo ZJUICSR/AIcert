@@ -172,8 +172,8 @@ def run_verify(tid, AAtid, param):
     if param['dataset'] == 'mnist':
         mn_model = get_mnist_cnn_model()
         test_data, n_class = get_mnist_data(number=N, batch_size=10)
-    if param['dataset'] == 'cifar':
-        mn_model = get_cifar_resnet18()
+    if param['dataset'] == 'cifar10':
+        mn_model = get_cifar_resnet18() if param['model']!= 'densenet' else get_cifar_densenet_model()
         test_data, n_class = get_cifar_data(number=N, batch_size=10)
     if param['dataset'] == 'gtsrb':
         mn_model = get_gtsrb_resnet18()
@@ -181,8 +181,8 @@ def run_verify(tid, AAtid, param):
     if param['dataset'] == 'mtfl':
         mn_model = get_MTFL_resnet18()
         test_data, n_class = get_MTFL_data(number=N, batch_size=10)
-    if param['dataset'] == 'sst':
-        mn_model = get_lstm_demo_model()
+    if param['dataset'] == 'sst2':
+        mn_model = get_lstm_demo_model() if param['model'] != 'transformer' else get_transformer_model()
         test_data, _ = get_sst_data(ver_num=N)
         n_class = 2
         verify = language_verify
