@@ -29,7 +29,7 @@ from function.ex_methods.module.load_model import load_model
 from function.ex_methods import attribution_maps, layer_explain, dim_reduciton_visualize
 from function.ex_methods.module.model_Lenet import lenet
 from function.ex_methods.lime import lime_image_ex
- feature_dingwenbing
+
 from function.formal_verify.auto_verify import auto_verify_img
 from function.formal_verify.knowledge_consistency import load_checkpoint,get_feature
 from function.formal_verify.knowledge_consistency import Model_zoo as models
