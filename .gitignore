@@ -1,7 +1,7 @@
 
 */__pycache__
-./output/task_info.json
-./output/task_list.txt
+output/*
+web/static/imgs/tmp_imgs/*
 datasets/**
 results/**
 *.pth
