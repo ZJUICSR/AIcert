@@ -1,4 +1,5 @@
 import json
+import numpy as np
 from flask import request
 from flask import Blueprint, render_template
 from interface import detect
@@ -31,8 +32,14 @@ def Detect():
         adv_examples.save(adv_file_path)
     else:
         adv_file_path = None
+    _, no_defense_accuracy = detect(adv_dataset, adv_method, adv_nums, defense_methods[0], adv_file_path)
+    no_defense_accuracy_list = no_defense_accuracy.tolist() if isinstance(no_defense_accuracy, np.ndarray) else no_defense_accuracy
     detect_rate_dict = {}
     for defense_method in defense_methods:
-        detect_rate = detect(adv_dataset, adv_method, adv_nums, defense_method, adv_file_path)
+        detect_rate, _ = detect(adv_dataset, adv_method, adv_nums, defense_method, adv_file_path)
         detect_rate_dict[defense_method] = round(detect_rate, 4)
-    return json.dumps({"detect_rates": detect_rate_dict})
+    response_data = {
+        "detect_rates": detect_rate_dict,
+        "no_defense_accuracy": no_defense_accuracy_list
+    }
+    return json.dumps(response_data)
