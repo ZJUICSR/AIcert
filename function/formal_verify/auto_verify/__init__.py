@@ -61,7 +61,6 @@ def auto_verify_img(net,data,eps,input_file='./test.jpg',device='cuda'):
     else:
         print(model)
         model_ori = Models[model](in_ch=3, in_dim=32)
-    
     checkpoint = torch.load(load)
     epoch, state_dict = checkpoint['epoch'], checkpoint['state_dict']
     opt_state = None
