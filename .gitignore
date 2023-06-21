@@ -4,11 +4,14 @@ output/*
 web/static/imgs/tmp_imgs/*
 datasets/**
 results/**
+log.txt
 *.pth
 *.pyc
 **/__pycache__
 __pycache__
 model/ckpt/CIFAR10_vgg11.pt
+dataset/auto_LiRPA_dataset
+
 function/attack/adv0211/datasets/cifar-10-batches-py.tar.gz
 dataset/data/CIFAR10/cifar-10-python.tar.gz
 function/DeepLogic/adv_train/model-resnet18-fashionminist/Standard-fashionminist-model-resnet18-epoch300.pt
