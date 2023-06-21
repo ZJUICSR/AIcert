@@ -15,7 +15,7 @@ parent=os.path.dirname(parent)
 dict=(os.path.join(parent,'auto_LiRPA'))
 print(parent)
 sys.path.append(parent)
-from  auto_LiRPA import BoundedModule, BoundedTensor, BoundDataParallel, CrossEntropyWrapper
+
 # from  auto_LiRPA.perturbations import *
 from  auto_LiRPA import *
 import numpy as np

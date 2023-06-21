@@ -2,11 +2,12 @@ import random
 import json
 import os
 
+data_path = r"dataset/auto_LiRPA_dataset/"
 
 def load_data_sst():
     data = []
     for split in ['train_all_nodes', 'train', 'dev', 'test']:
-        name = os.path.join(os.path.dirname(__file__), 'data/sst')
+        name = os.path.join(data_path, 'data/sst')
         with open(f'{name}{os.sep}{split}.json') as file:
             data.append(json.loads(file.read()))
     return data
