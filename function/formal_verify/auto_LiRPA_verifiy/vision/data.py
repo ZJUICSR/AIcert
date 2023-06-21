@@ -5,9 +5,9 @@ from torchvision import datasets, transforms
 from torch.utils.data import TensorDataset, DataLoader
 
 
-DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
-gtsrb_data_path = os.path.join(os.path.dirname(__file__), 'data', 'gtsrb', 'Train')
-MTFL_DATA_PATH = os.path.join(os.path.dirname(__file__), 'data', 'MTFL', 'AFLW')
+DATA_PATH = os.path.join("dataset/auto_LiRPA_dataset/", 'data')
+gtsrb_data_path = os.path.join("dataset/auto_LiRPA_dataset/", 'data', 'gtsrb', 'Train')
+MTFL_DATA_PATH = os.path.join("dataset/auto_LiRPA_dataset/", 'data', 'MTFL', 'AFLW')
 
 
 def get_mnist_data(path=DATA_PATH, number=100, batch_size=1, device='cpu'):
