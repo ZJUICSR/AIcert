@@ -165,6 +165,7 @@ def get_model_loader(dataset, modelparam, logging, train_loader=None, test_loade
     return model, trainer, summary
 
 def run_verify(tid, AAtid, param):
+    logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     N = param['size']
     device = 'cpu'
@@ -197,6 +198,7 @@ def run_verify(tid, AAtid, param):
                                     'down_eps': param['down_eps'],
                                     'steps': param['steps'],
                                     'device': device,
+                                    "log_func":logging,
                                     'output_path': osp.join('output',tid,AAtid,"formal_img"),
                                     'task_id': f"{param['task_id']}"}}
     global result
