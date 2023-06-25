@@ -46,7 +46,7 @@ class Twis(object):
         self.device = device
         self.tpr = 0
         self.criterions = {0.1: (0.009, 119, untargeted_step_threshold), 0.2: (0.0006, 89, untargeted_step_threshold)}
-
+        self.no_defense_accuracy = 0
 
     def generate_adv_examples(self):
         return generate_adv_examples(self.model, self.adv_method, self.adv_dataset, self.adv_nums, self.device)
@@ -233,14 +233,17 @@ class Twis(object):
             adv_imgs, clean_examples, true_labels = self.generate_adv_examples()
         else:
             adv_imgs, clean_examples, true_labels = self.load_adv_examples()
-
+        with torch.no_grad():
+            adv_predictions = self.model(adv_imgs)
+        no_defense_accuracy = torch.sum(torch.argmax(adv_predictions, dim = 1) == true_labels) / float(len(adv_imgs))
+        self.no_defense_accuracy = no_defense_accuracy.cpu().numpy()
         a_target_1 = self.l1_vals(adv_imgs, true_labels)
         a_target_2 = self.targeted_vals(adv_imgs, true_labels)
         a_target_3 = self.untargeted_vals(adv_imgs, true_labels)
         self.tpr = len(a_target_1[np.logical_or(np.logical_or(a_target_1 > self.criterions[self.fpr][0], a_target_2 > \
             self.criterions[self.fpr][1]),a_target_3 > self.criterions[self.fpr][2])]) * 1.0 / len(a_target_1)
         print("corresponding tpr for " + self.adv_method + " of this threshold is", self.tpr)
-        return self.noise_radius, self.fpr, self.tpr
+        return self.noise_radius, self.fpr, self.tpr, self.no_defense_accuracy
                 
     def print_res(self):
         print('detect rate: ', self.tpr)
