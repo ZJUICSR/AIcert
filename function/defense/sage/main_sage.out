@@ -1,0 +1,30 @@
+nohup: ignoring input
+/mnt/data1/miniconda3/envs/art/lib/python3.7/site-packages/torch/nn/functional.py:3458: UserWarning: Default upsampling behavior when mode=trilinear is changed to align_corners=False since 0.4.0. Please specify align_corners=True if the old behavior is desired. See the documentation of nn.Upsample for details.
+  "See the documentation of nn.Upsample for details.".format(mode)
+got GPU
+Files already downloaded and verified
+Loading Model from /mnt/data2/yxl/AI-platform/model/robnet-resnet18-cifar10.pth
+Files already downloaded and verified
+full_train: 10000
+test_size: 10000 drop_size: 0
+Files already downloaded and verified
+full_train: 50000
+train_size: 5000 drop_size: 45000
+[epoch]: 0
+[clean]Prec@1: 81.69
+[bad]Prec@1: 98.85
+Epoch[1]:[020/079] AT_loss:2.9932(3.6809)  prec@1:60.94(62.66)  prec@5:93.75(94.53)
+Epoch[1]:[040/079] AT_loss:2.4930(2.9758)  prec@1:56.25(61.88)  prec@5:98.44(95.16)
+Epoch[1]:[060/079] AT_loss:1.3801(2.5343)  prec@1:68.75(64.61)  prec@5:100.00(95.99)
+testing the models......
+[epoch]: 1
+[clean]Prec@1: 56.00
+[bad]Prec@1: 18.45
+Epoch[2]:[020/079] AT_loss:0.9771(1.4116)  prec@1:81.25(74.38)  prec@5:100.00(97.11)
+Epoch[2]:[040/079] AT_loss:0.9605(1.2536)  prec@1:82.81(77.50)  prec@5:100.00(98.16)
+Epoch[2]:[060/079] AT_loss:1.2171(1.1819)  prec@1:76.56(78.98)  prec@5:98.44(98.49)
+testing the models......
+[epoch]: 2
+[clean]Prec@1: 64.47
+[bad]Prec@1: 40.55
+detect rate:  0.594475
