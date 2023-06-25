@@ -4,9 +4,16 @@ output/*
 web/static/imgs/tmp_imgs/*
 datasets/**
 results/**
+dataset/CIFAR10/*
+dataset/MNIST/*
+dataset/adv_examples/*
+function/defense/trainer/test/*
+web/static/images/adv_images
+output/images/*
 log.txt
 *.pth
 *.pyc
+*.*.pyc
 **/__pycache__
 __pycache__
 model/ckpt/CIFAR10_vgg11.pt
