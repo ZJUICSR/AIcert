@@ -1,6 +1,8 @@
 import numpy as np
 from sklearn.metrics import confusion_matrix
 
+# model metrics
+
 def get_confusion_components(y_true, y_pred, attr):
     """Calculate confusion matrix components for each demographic group using numpy operations"""
     
@@ -120,23 +122,67 @@ FAIRNESS_METRICS = {
     "mTNR": mean_tnr,
     "mTPR": mean_tpr,
     "mAcc": mean_accuracy,
-    "mRec": mean_recall,
-    "mSpec": mean_specificity,
     "mF1": mean_f1_score,
     "mBA": mean_balanced_accuracy
 }
 
 METRICS_FULL_NAME = {
-    "mPre": "Mean Precision",
-    "mFPR": "Mean False Positive Rate",
-    "mFNR": "Mean False Negative Rate",
-    "mTNR": "Mean True Negative Rate",
-    "mTPR": "Mean True Positive Rate",
-    "mAcc": "Mean Accuracy",
-    "mRec": "Mean Recall",
-    "mSpec": "Mean Specificity",
-    "mF1": "Mean F1 Score",
-    "mBA": "Mean Balanced Accuracy"
+    "mPre": "Mean Precision Difference",
+    "mFPR": "Mean False Positive Rate Difference",
+    "mFNR": "Mean False Negative Rate Difference",
+    "mTNR": "Mean True Negative Rate Difference",
+    "mTPR": "Mean True Positive Rate Difference",
+    "mAcc": "Mean Accuracy Difference",
+    "mF1": "Mean F1 Score Difference",
+    "mBA": "Mean Balanced Accuracy Difference"
 }
 
+# dataset metrics
+import pandas as pd
+from scipy.stats import entropy
+from sklearn.metrics import roc_auc_score
+import math
 
+def calculate_weighted_entropy(dist, weights):
+    return entropy(dist.values, base=dist.shape[0], weights=weights)
+
+def calculate_weighted_gini(dist, weights):
+    # Weighted Gini coefficient using the ROC AUC scoring function
+    return roc_auc_score(np.arange(len(dist)), dist.values, sample_weight=weights) * 2 - 1
+
+def calculate_data_metrics(demographic_data, label_data, weights_data):
+    # Create a DataFrame
+    df = pd.DataFrame({
+        'demographic': demographic_data,
+        'label': label_data,
+        'weights': weights_data
+    })
+
+    # Calculate distribution per class label, taking weights into account
+    class_distribution = df.groupby('label').apply(lambda x: (x['demographic'].value_counts() * x['weights']).sum() / x['weights'].sum()).unstack().fillna(0)
+
+    # Calculate weighted entropy and weighted Gini coefficient for each class
+    entropy_values = class_distribution.apply(calculate_weighted_entropy, weights=df['weights'], axis=1)
+    gini_values = class_distribution.apply(calculate_weighted_gini, weights=df['weights'], axis=1)
+
+    # Calculate average weighted entropy and weighted Gini coefficient
+    avg_entropy = entropy_values.mean()
+    avg_gini = gini_values.mean()
+
+    # Normalize
+    num_demographics = len(df['demographic'].unique())
+    normalized_entropy = avg_entropy / math.log(num_demographics)
+    normalized_gini = (avg_gini + 1) / 2
+
+    return normalized_entropy, normalized_gini
+
+if __name__ == "__main__":
+    # Assuming your data is in three numpy arrays
+    demographic_data = np.array([...])  # replace with your demographic data
+    label_data = np.array([...])  # replace with your label data
+    weights_data = np.array([...])  # replace with your weights data
+
+    normalized_entropy, normalized_gini = calculate_data_metrics(demographic_data, label_data, weights_data)
+
+    print("Weighted Normalized Entropy:", normalized_entropy)
+    print("Weighted Normalized Gini Coefficient:", normalized_gini)

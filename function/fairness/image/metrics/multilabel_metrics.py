@@ -118,23 +118,19 @@ FAIRNESS_METRICS = {
     "mTNR": mean_tnr,
     "mTPR": mean_tpr,
     "mAcc": mean_accuracy,
-    "mRec": mean_recall,
-    "mSpec": mean_specificity,
     "mF1": mean_f1_score,
     "mBA": mean_balanced_accuracy
 }
 
 METRICS_FULL_NAME = {
-    "mPre": "Mean Precision",
-    "mFPR": "Mean False Positive Rate",
-    "mFNR": "Mean False Negative Rate",
-    "mTNR": "Mean True Negative Rate",
-    "mTPR": "Mean True Positive Rate",
-    "mAcc": "Mean Accuracy",
-    "mRec": "Mean Recall",
-    "mSpec": "Mean Specificity",
-    "mF1": "Mean F1 Score",
-    "mBA": "Mean Balanced Accuracy"
+    "mPre": "Mean Precision Difference",
+    "mFPR": "Mean False Positive Rate Difference",
+    "mFNR": "Mean False Negative Rate Difference",
+    "mTNR": "Mean True Negative Rate Difference",
+    "mTPR": "Mean True Positive Rate Difference",
+    "mAcc": "Mean Accuracy Difference",
+    "mF1": "Mean F1 Score Difference",
+    "mBA": "Mean Balanced Accuracy Difference"
 }
 
 
