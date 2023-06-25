@@ -211,43 +211,43 @@ class Prepro(object):
         print('detect rate: ', self.detect_rate)
 
 # class Feature_squeezing(Prepro):
-#     def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-#         super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+#     def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+#         super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
 #     def detect(self):
 #         return self.detect_base(FeatureSqueezing)
 
 # class Jpeg_compression(Prepro):
-#     def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-#         super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+#     def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+#         super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
 #     def detect(self):
 #         return self.detect_base(JpegCompression)
 
 class Label_smoothing(Prepro):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.train(LabelSmoothing)
 
 class Spatial_smoothing(Prepro):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.detect_base(SpatialSmoothing)
 
 class Gaussian_augmentation(Prepro):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.train(GaussianAugmentation)
 
 class Total_var_min(Prepro):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.detect_base(TotalVarMin)
@@ -290,8 +290,8 @@ def bpda(model, adv_dataset, examples, labels):
     return adv_examples
 
 class Pixel_defend(Prepro):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         if self.adv_examples is None:
@@ -386,13 +386,13 @@ class SmoothCrossEntropyLoss(nn.Module):
 
 
 class Inverse_gan(Prepro):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     def detect(self):
         return self.detect_base(InverseGAN)
     
 class Defense_gan(Inverse_gan):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     def detect(self):
         return self.detect_base(DefenseGAN)
