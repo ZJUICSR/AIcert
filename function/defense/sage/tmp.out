@@ -1,0 +1,713 @@
+nohup: ignoring input
+/mnt/data/miniconda3/envs/cartl/lib/python3.9/site-packages/torch/nn/functional.py:3060: UserWarning: Default upsampling behavior when mode=trilinear is changed to align_corners=False since 0.4.0. Please specify align_corners=True if the old behavior is desired. See the documentation of nn.Upsample for details.
+  warnings.warn("Default upsampling behavior when mode={} is changed "
+Loading Model from ./robnet-resnet18-cifar10.pth
+Files already downloaded and verified
+full_train: 10000
+test_size: 10000 drop_size: 0
+Files already downloaded and verified
+full_train: 50000
+train_size: 5000 drop_size: 45000
+[epoch]: 0
+[clean]Prec@1: 81.69
+[bad]Prec@1: 98.85
+Epoch[1]:[020/079] AT_loss:2.2025(3.5148)  prec@1:70.31(64.06)  prec@5:96.88(95.62)
+Epoch[1]:[040/079] AT_loss:2.7805(2.9055)  prec@1:54.69(61.88)  prec@5:89.06(95.04)
+Epoch[1]:[060/079] AT_loss:2.0761(2.5360)  prec@1:65.62(63.12)  prec@5:89.06(95.47)
+testing the models......
+[epoch]: 1
+[clean]Prec@1: 68.31
+[bad]Prec@1: 2.67
+Epoch[2]:[020/079] AT_loss:0.9517(1.1740)  prec@1:79.69(77.19)  prec@5:100.00(99.14)
+Epoch[2]:[040/079] AT_loss:1.0312(1.1429)  prec@1:81.25(78.63)  prec@5:96.88(99.10)
+Epoch[2]:[060/079] AT_loss:0.9354(1.0958)  prec@1:85.94(79.66)  prec@5:98.44(99.14)
+testing the models......
+[epoch]: 2
+[clean]Prec@1: 73.05
+[bad]Prec@1: 4.51
+Epoch[3]:[020/079] AT_loss:0.6173(0.6953)  prec@1:89.06(88.83)  prec@5:100.00(99.53)
+Epoch[3]:[040/079] AT_loss:0.9940(0.6951)  prec@1:78.12(88.36)  prec@5:100.00(99.65)
+Epoch[3]:[060/079] AT_loss:0.6502(0.6859)  prec@1:87.50(88.52)  prec@5:100.00(99.66)
+testing the models......
+[epoch]: 3
+[clean]Prec@1: 71.35
+[bad]Prec@1: 7.88
+Epoch[4]:[020/079] AT_loss:0.5921(0.6645)  prec@1:89.06(89.69)  prec@5:100.00(99.69)
+Epoch[4]:[040/079] AT_loss:0.5399(0.6265)  prec@1:92.19(90.78)  prec@5:100.00(99.73)
+Epoch[4]:[060/079] AT_loss:0.5676(0.6042)  prec@1:87.50(91.12)  prec@5:100.00(99.77)
+testing the models......
+[epoch]: 4
+[clean]Prec@1: 72.90
+[bad]Prec@1: 9.81
+Epoch[5]:[020/079] AT_loss:0.2981(0.3891)  prec@1:100.00(96.41)  prec@5:100.00(99.92)
+Epoch[5]:[040/079] AT_loss:0.4329(0.3752)  prec@1:93.75(96.33)  prec@5:100.00(99.96)
+Epoch[5]:[060/079] AT_loss:0.3090(0.3691)  prec@1:98.44(96.35)  prec@5:100.00(99.97)
+testing the models......
+[epoch]: 5
+[clean]Prec@1: 67.08
+[bad]Prec@1: 13.31
+Epoch[6]:[020/079] AT_loss:0.6456(0.4688)  prec@1:87.50(92.89)  prec@5:100.00(100.00)
+Epoch[6]:[040/079] AT_loss:0.2711(0.4504)  prec@1:98.44(93.75)  prec@5:100.00(99.96)
+Epoch[6]:[060/079] AT_loss:0.6280(0.4349)  prec@1:90.62(94.27)  prec@5:100.00(99.97)
+testing the models......
+[epoch]: 6
+[clean]Prec@1: 76.64
+[bad]Prec@1: 9.07
+Epoch[7]:[020/079] AT_loss:0.2908(0.3096)  prec@1:98.44(96.33)  prec@5:100.00(100.00)
+Epoch[7]:[040/079] AT_loss:0.2610(0.3004)  prec@1:96.88(96.80)  prec@5:100.00(100.00)
+Epoch[7]:[060/079] AT_loss:0.2506(0.2930)  prec@1:96.88(97.01)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 7
+[clean]Prec@1: 77.20
+[bad]Prec@1: 13.07
+Epoch[8]:[020/079] AT_loss:0.2218(0.2323)  prec@1:98.44(98.28)  prec@5:100.00(100.00)
+Epoch[8]:[040/079] AT_loss:0.2266(0.2508)  prec@1:98.44(97.81)  prec@5:100.00(100.00)
+Epoch[8]:[060/079] AT_loss:0.1929(0.2518)  prec@1:100.00(97.76)  prec@5:100.00(99.97)
+testing the models......
+[epoch]: 8
+[clean]Prec@1: 77.82
+[bad]Prec@1: 12.84
+Epoch[9]:[020/079] AT_loss:0.2216(0.2509)  prec@1:98.44(97.27)  prec@5:100.00(100.00)
+Epoch[9]:[040/079] AT_loss:0.1911(0.2333)  prec@1:98.44(97.77)  prec@5:100.00(100.00)
+Epoch[9]:[060/079] AT_loss:0.1929(0.2280)  prec@1:98.44(97.94)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 9
+[clean]Prec@1: 78.54
+[bad]Prec@1: 8.61
+Epoch[10]:[020/079] AT_loss:0.1826(0.1889)  prec@1:98.44(98.59)  prec@5:100.00(100.00)
+Epoch[10]:[040/079] AT_loss:0.1539(0.1816)  prec@1:100.00(99.02)  prec@5:100.00(100.00)
+Epoch[10]:[060/079] AT_loss:0.1526(0.1850)  prec@1:100.00(98.96)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 10
+[clean]Prec@1: 78.74
+[bad]Prec@1: 9.95
+Epoch[11]:[020/079] AT_loss:0.1637(0.1564)  prec@1:98.44(99.22)  prec@5:100.00(100.00)
+Epoch[11]:[040/079] AT_loss:0.1427(0.1576)  prec@1:100.00(99.26)  prec@5:100.00(100.00)
+Epoch[11]:[060/079] AT_loss:0.1302(0.1673)  prec@1:100.00(99.11)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 11
+[clean]Prec@1: 72.15
+[bad]Prec@1: 14.67
+Epoch[12]:[020/079] AT_loss:0.2469(0.3658)  prec@1:95.31(94.92)  prec@5:100.00(100.00)
+Epoch[12]:[040/079] AT_loss:0.2181(0.3464)  prec@1:96.88(95.00)  prec@5:100.00(100.00)
+Epoch[12]:[060/079] AT_loss:0.2370(0.3330)  prec@1:98.44(95.31)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 12
+[clean]Prec@1: 72.14
+[bad]Prec@1: 15.69
+Epoch[13]:[020/079] AT_loss:0.4231(0.5878)  prec@1:92.19(89.45)  prec@5:100.00(99.92)
+Epoch[13]:[040/079] AT_loss:0.5082(0.5023)  prec@1:90.62(91.29)  prec@5:100.00(99.92)
+Epoch[13]:[060/079] AT_loss:0.1637(0.4627)  prec@1:100.00(91.74)  prec@5:100.00(99.95)
+testing the models......
+[epoch]: 13
+[clean]Prec@1: 72.34
+[bad]Prec@1: 20.61
+Epoch[14]:[020/079] AT_loss:0.3290(0.3297)  prec@1:95.31(95.23)  prec@5:100.00(100.00)
+Epoch[14]:[040/079] AT_loss:0.2537(0.3084)  prec@1:95.31(95.82)  prec@5:100.00(100.00)
+Epoch[14]:[060/079] AT_loss:0.1908(0.2905)  prec@1:98.44(95.99)  prec@5:100.00(99.97)
+testing the models......
+[epoch]: 14
+[clean]Prec@1: 76.74
+[bad]Prec@1: 10.27
+Epoch[15]:[020/079] AT_loss:0.1880(0.2079)  prec@1:98.44(97.73)  prec@5:100.00(100.00)
+Epoch[15]:[040/079] AT_loss:0.1584(0.1889)  prec@1:98.44(98.36)  prec@5:100.00(100.00)
+Epoch[15]:[060/079] AT_loss:0.1711(0.1824)  prec@1:98.44(98.52)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 15
+[clean]Prec@1: 76.76
+[bad]Prec@1: 11.92
+Epoch[16]:[020/079] AT_loss:0.1374(0.1693)  prec@1:100.00(98.36)  prec@5:100.00(100.00)
+Epoch[16]:[040/079] AT_loss:0.1194(0.1753)  prec@1:100.00(98.52)  prec@5:100.00(100.00)
+Epoch[16]:[060/079] AT_loss:0.1252(0.1636)  prec@1:100.00(98.78)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 16
+[clean]Prec@1: 78.05
+[bad]Prec@1: 9.36
+Epoch[17]:[020/079] AT_loss:0.1142(0.1575)  prec@1:100.00(98.36)  prec@5:100.00(100.00)
+Epoch[17]:[040/079] AT_loss:0.1286(0.1515)  prec@1:98.44(98.67)  prec@5:100.00(100.00)
+Epoch[17]:[060/079] AT_loss:0.1094(0.1474)  prec@1:100.00(98.88)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 17
+[clean]Prec@1: 78.32
+[bad]Prec@1: 11.56
+Epoch[18]:[020/079] AT_loss:0.1273(0.1537)  prec@1:100.00(98.98)  prec@5:100.00(100.00)
+Epoch[18]:[040/079] AT_loss:0.1103(0.1509)  prec@1:100.00(98.83)  prec@5:100.00(100.00)
+Epoch[18]:[060/079] AT_loss:0.1192(0.1433)  prec@1:98.44(98.96)  prec@5:100.00(99.97)
+testing the models......
+[epoch]: 18
+[clean]Prec@1: 78.52
+[bad]Prec@1: 8.08
+Epoch[19]:[020/079] AT_loss:0.1589(0.1174)  prec@1:95.31(99.22)  prec@5:100.00(100.00)
+Epoch[19]:[040/079] AT_loss:0.1174(0.1128)  prec@1:100.00(99.34)  prec@5:100.00(100.00)
+Epoch[19]:[060/079] AT_loss:0.1008(0.1101)  prec@1:100.00(99.43)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 19
+[clean]Prec@1: 78.15
+[bad]Prec@1: 9.43
+Epoch[20]:[020/079] AT_loss:0.0913(0.0948)  prec@1:100.00(99.84)  prec@5:100.00(100.00)
+Epoch[20]:[040/079] AT_loss:0.0876(0.0918)  prec@1:100.00(99.84)  prec@5:100.00(100.00)
+Epoch[20]:[060/079] AT_loss:0.0837(0.0900)  prec@1:100.00(99.87)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 20
+[clean]Prec@1: 75.31
+[bad]Prec@1: 6.55
+Epoch[21]:[020/079] AT_loss:0.1784(0.2441)  prec@1:96.88(96.17)  prec@5:100.00(99.92)
+Epoch[21]:[040/079] AT_loss:0.2948(0.2040)  prec@1:93.75(97.15)  prec@5:100.00(99.96)
+Epoch[21]:[060/079] AT_loss:0.0973(0.1761)  prec@1:100.00(97.76)  prec@5:100.00(99.97)
+testing the models......
+[epoch]: 21
+[clean]Prec@1: 75.40
+[bad]Prec@1: 10.39
+Epoch[22]:[020/079] AT_loss:0.2308(0.2296)  prec@1:96.88(96.88)  prec@5:100.00(99.92)
+Epoch[22]:[040/079] AT_loss:0.1040(0.1798)  prec@1:100.00(97.93)  prec@5:100.00(99.96)
+Epoch[22]:[060/079] AT_loss:0.0872(0.1558)  prec@1:100.00(98.46)  prec@5:100.00(99.97)
+testing the models......
+[epoch]: 22
+[clean]Prec@1: 78.96
+[bad]Prec@1: 11.19
+Epoch[23]:[020/079] AT_loss:0.0897(0.0929)  prec@1:100.00(99.69)  prec@5:100.00(100.00)
+Epoch[23]:[040/079] AT_loss:0.1045(0.0955)  prec@1:98.44(99.53)  prec@5:100.00(100.00)
+Epoch[23]:[060/079] AT_loss:0.0778(0.0931)  prec@1:100.00(99.58)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 23
+[clean]Prec@1: 74.39
+[bad]Prec@1: 8.76
+Epoch[24]:[020/079] AT_loss:0.1789(0.2193)  prec@1:98.44(96.64)  prec@5:100.00(99.92)
+Epoch[24]:[040/079] AT_loss:0.1553(0.2326)  prec@1:96.88(96.02)  prec@5:100.00(99.92)
+Epoch[24]:[060/079] AT_loss:0.1081(0.2056)  prec@1:100.00(96.64)  prec@5:100.00(99.95)
+testing the models......
+[epoch]: 24
+[clean]Prec@1: 75.48
+[bad]Prec@1: 8.12
+Epoch[25]:[020/079] AT_loss:0.2186(0.1971)  prec@1:96.88(97.19)  prec@5:100.00(99.92)
+Epoch[25]:[040/079] AT_loss:0.1690(0.1690)  prec@1:95.31(97.66)  prec@5:100.00(99.96)
+Epoch[25]:[060/079] AT_loss:0.0970(0.1509)  prec@1:100.00(98.07)  prec@5:100.00(99.97)
+testing the models......
+[epoch]: 25
+[clean]Prec@1: 77.37
+[bad]Prec@1: 9.74
+Epoch[26]:[020/079] AT_loss:0.0984(0.1104)  prec@1:100.00(99.22)  prec@5:100.00(100.00)
+Epoch[26]:[040/079] AT_loss:0.0835(0.1011)  prec@1:100.00(99.41)  prec@5:100.00(100.00)
+Epoch[26]:[060/079] AT_loss:0.0808(0.0959)  prec@1:100.00(99.51)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 26
+[clean]Prec@1: 76.29
+[bad]Prec@1: 9.90
+Epoch[27]:[020/079] AT_loss:0.0680(0.0755)  prec@1:100.00(99.77)  prec@5:100.00(100.00)
+Epoch[27]:[040/079] AT_loss:0.0686(0.0755)  prec@1:100.00(99.73)  prec@5:100.00(100.00)
+Epoch[27]:[060/079] AT_loss:0.0729(0.0760)  prec@1:100.00(99.71)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 27
+[clean]Prec@1: 78.33
+[bad]Prec@1: 10.56
+Epoch[28]:[020/079] AT_loss:0.0756(0.0773)  prec@1:100.00(99.53)  prec@5:100.00(100.00)
+Epoch[28]:[040/079] AT_loss:0.0798(0.0722)  prec@1:100.00(99.77)  prec@5:100.00(100.00)
+Epoch[28]:[060/079] AT_loss:0.0588(0.0717)  prec@1:100.00(99.74)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 28
+[clean]Prec@1: 77.00
+[bad]Prec@1: 9.79
+Epoch[29]:[020/079] AT_loss:0.0686(0.0775)  prec@1:100.00(99.30)  prec@5:100.00(100.00)
+Epoch[29]:[040/079] AT_loss:0.0690(0.0747)  prec@1:100.00(99.45)  prec@5:100.00(100.00)
+Epoch[29]:[060/079] AT_loss:0.0645(0.0735)  prec@1:100.00(99.53)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 29
+[clean]Prec@1: 78.64
+[bad]Prec@1: 9.14
+Epoch[30]:[020/079] AT_loss:0.0580(0.0614)  prec@1:100.00(99.92)  prec@5:100.00(100.00)
+Epoch[30]:[040/079] AT_loss:0.0533(0.0597)  prec@1:100.00(99.96)  prec@5:100.00(100.00)
+Epoch[30]:[060/079] AT_loss:0.0520(0.0588)  prec@1:100.00(99.95)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 30
+[clean]Prec@1: 79.14
+[bad]Prec@1: 9.21
+Epoch[31]:[020/079] AT_loss:0.0515(0.0541)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[31]:[040/079] AT_loss:0.0510(0.0536)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[31]:[060/079] AT_loss:0.0473(0.0527)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 31
+[clean]Prec@1: 78.70
+[bad]Prec@1: 9.69
+Epoch[32]:[020/079] AT_loss:0.0449(0.0477)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[32]:[040/079] AT_loss:0.0481(0.0476)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[32]:[060/079] AT_loss:0.0467(0.0476)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 32
+[clean]Prec@1: 78.50
+[bad]Prec@1: 8.37
+Epoch[33]:[020/079] AT_loss:0.0535(0.0450)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[33]:[040/079] AT_loss:0.0432(0.0451)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[33]:[060/079] AT_loss:0.0440(0.0443)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 33
+[clean]Prec@1: 78.35
+[bad]Prec@1: 9.43
+Epoch[34]:[020/079] AT_loss:0.0432(0.0464)  prec@1:100.00(99.77)  prec@5:100.00(100.00)
+Epoch[34]:[040/079] AT_loss:0.0442(0.0457)  prec@1:100.00(99.84)  prec@5:100.00(100.00)
+Epoch[34]:[060/079] AT_loss:0.0401(0.0445)  prec@1:100.00(99.90)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 34
+[clean]Prec@1: 65.96
+[bad]Prec@1: 7.11
+Epoch[35]:[020/079] AT_loss:0.1499(0.1632)  prec@1:98.44(96.56)  prec@5:100.00(100.00)
+Epoch[35]:[040/079] AT_loss:0.0565(0.1318)  prec@1:100.00(97.58)  prec@5:100.00(99.96)
+Epoch[35]:[060/079] AT_loss:0.1050(0.1166)  prec@1:98.44(97.99)  prec@5:100.00(99.97)
+testing the models......
+[epoch]: 35
+[clean]Prec@1: 77.00
+[bad]Prec@1: 9.57
+Epoch[36]:[020/079] AT_loss:0.0540(0.1011)  prec@1:100.00(98.98)  prec@5:100.00(100.00)
+Epoch[36]:[040/079] AT_loss:0.0530(0.0877)  prec@1:100.00(99.10)  prec@5:100.00(100.00)
+Epoch[36]:[060/079] AT_loss:0.0519(0.0823)  prec@1:100.00(99.22)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 36
+[clean]Prec@1: 77.65
+[bad]Prec@1: 11.89
+Epoch[37]:[020/079] AT_loss:0.0487(0.0590)  prec@1:100.00(99.53)  prec@5:100.00(100.00)
+Epoch[37]:[040/079] AT_loss:0.0483(0.0608)  prec@1:100.00(99.53)  prec@5:100.00(100.00)
+Epoch[37]:[060/079] AT_loss:0.0456(0.0571)  prec@1:100.00(99.64)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 37
+[clean]Prec@1: 66.76
+[bad]Prec@1: 4.70
+Epoch[38]:[020/079] AT_loss:0.3124(0.3447)  prec@1:90.62(92.89)  prec@5:98.44(99.92)
+Epoch[38]:[040/079] AT_loss:0.1974(0.2642)  prec@1:95.31(94.34)  prec@5:100.00(99.96)
+Epoch[38]:[060/079] AT_loss:0.4532(0.2410)  prec@1:98.44(94.97)  prec@5:98.44(99.92)
+testing the models......
+[epoch]: 38
+[clean]Prec@1: 68.77
+[bad]Prec@1: 12.59
+Epoch[39]:[020/079] AT_loss:0.1416(0.3128)  prec@1:96.88(94.53)  prec@5:100.00(99.92)
+Epoch[39]:[040/079] AT_loss:0.1194(0.2508)  prec@1:98.44(95.55)  prec@5:100.00(99.96)
+Epoch[39]:[060/079] AT_loss:0.1700(0.2300)  prec@1:96.88(95.99)  prec@5:100.00(99.97)
+testing the models......
+[epoch]: 39
+[clean]Prec@1: 70.72
+[bad]Prec@1: 6.17
+Epoch[40]:[020/079] AT_loss:0.1262(0.1496)  prec@1:96.88(97.66)  prec@5:100.00(99.92)
+Epoch[40]:[040/079] AT_loss:0.0792(0.1331)  prec@1:100.00(98.20)  prec@5:100.00(99.96)
+Epoch[40]:[060/079] AT_loss:0.0782(0.1188)  prec@1:100.00(98.52)  prec@5:100.00(99.97)
+testing the models......
+[epoch]: 40
+[clean]Prec@1: 77.34
+[bad]Prec@1: 11.37
+Epoch[41]:[020/079] AT_loss:0.0630(0.0810)  prec@1:100.00(99.69)  prec@5:100.00(100.00)
+Epoch[41]:[040/079] AT_loss:0.0755(0.0769)  prec@1:98.44(99.61)  prec@5:100.00(100.00)
+Epoch[41]:[060/079] AT_loss:0.0634(0.0768)  prec@1:100.00(99.61)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 41
+[clean]Prec@1: 77.25
+[bad]Prec@1: 12.14
+Epoch[42]:[020/079] AT_loss:0.0503(0.0573)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[42]:[040/079] AT_loss:0.0480(0.0555)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[42]:[060/079] AT_loss:0.0534(0.0553)  prec@1:100.00(99.95)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 42
+[clean]Prec@1: 78.61
+[bad]Prec@1: 11.18
+Epoch[43]:[020/079] AT_loss:0.0497(0.0482)  prec@1:100.00(99.92)  prec@5:100.00(100.00)
+Epoch[43]:[040/079] AT_loss:0.0471(0.0476)  prec@1:100.00(99.96)  prec@5:100.00(100.00)
+Epoch[43]:[060/079] AT_loss:0.0471(0.0471)  prec@1:100.00(99.97)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 43
+[clean]Prec@1: 79.02
+[bad]Prec@1: 10.49
+Epoch[44]:[020/079] AT_loss:0.0450(0.0437)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[44]:[040/079] AT_loss:0.0426(0.0435)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[44]:[060/079] AT_loss:0.0432(0.0431)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 44
+[clean]Prec@1: 78.06
+[bad]Prec@1: 10.22
+Epoch[45]:[020/079] AT_loss:0.0409(0.0406)  prec@1:100.00(99.92)  prec@5:100.00(100.00)
+Epoch[45]:[040/079] AT_loss:0.0377(0.0416)  prec@1:100.00(99.88)  prec@5:100.00(100.00)
+Epoch[45]:[060/079] AT_loss:0.0383(0.0409)  prec@1:100.00(99.92)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 45
+[clean]Prec@1: 79.07
+[bad]Prec@1: 10.23
+Epoch[46]:[020/079] AT_loss:0.0365(0.0373)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[46]:[040/079] AT_loss:0.0360(0.0368)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[46]:[060/079] AT_loss:0.0363(0.0369)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 46
+[clean]Prec@1: 78.96
+[bad]Prec@1: 9.82
+Epoch[47]:[020/079] AT_loss:0.0360(0.0348)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[47]:[040/079] AT_loss:0.0335(0.0343)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[47]:[060/079] AT_loss:0.0324(0.0342)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 47
+[clean]Prec@1: 78.92
+[bad]Prec@1: 9.61
+Epoch[48]:[020/079] AT_loss:0.0340(0.0326)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[48]:[040/079] AT_loss:0.0291(0.0324)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[48]:[060/079] AT_loss:0.0294(0.0322)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 48
+[clean]Prec@1: 78.46
+[bad]Prec@1: 8.93
+Epoch[49]:[020/079] AT_loss:0.0307(0.0314)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[49]:[040/079] AT_loss:0.0300(0.0308)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[49]:[060/079] AT_loss:0.0301(0.0307)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 49
+[clean]Prec@1: 78.13
+[bad]Prec@1: 9.24
+Epoch[50]:[020/079] AT_loss:0.0285(0.0303)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[50]:[040/079] AT_loss:0.0336(0.0301)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[50]:[060/079] AT_loss:0.0275(0.0299)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 50
+[clean]Prec@1: 78.66
+[bad]Prec@1: 9.78
+Epoch[51]:[020/079] AT_loss:0.0319(0.0293)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[51]:[040/079] AT_loss:0.0251(0.0284)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[51]:[060/079] AT_loss:0.0286(0.0285)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 51
+[clean]Prec@1: 78.53
+[bad]Prec@1: 9.15
+Epoch[52]:[020/079] AT_loss:0.0264(0.0264)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[52]:[040/079] AT_loss:0.0339(0.0264)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[52]:[060/079] AT_loss:0.0255(0.0263)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 52
+[clean]Prec@1: 78.21
+[bad]Prec@1: 10.59
+Epoch[53]:[020/079] AT_loss:0.0284(0.0424)  prec@1:100.00(99.45)  prec@5:100.00(100.00)
+Epoch[53]:[040/079] AT_loss:0.0325(0.0395)  prec@1:100.00(99.57)  prec@5:100.00(100.00)
+Epoch[53]:[060/079] AT_loss:0.0305(0.0385)  prec@1:100.00(99.58)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 53
+[clean]Prec@1: 78.48
+[bad]Prec@1: 9.86
+Epoch[54]:[020/079] AT_loss:0.0274(0.0337)  prec@1:100.00(99.84)  prec@5:100.00(100.00)
+Epoch[54]:[040/079] AT_loss:0.0268(0.0317)  prec@1:100.00(99.88)  prec@5:100.00(100.00)
+Epoch[54]:[060/079] AT_loss:0.0266(0.0315)  prec@1:100.00(99.87)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 54
+[clean]Prec@1: 78.30
+[bad]Prec@1: 10.12
+Epoch[55]:[020/079] AT_loss:0.0271(0.0266)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[55]:[040/079] AT_loss:0.0257(0.0268)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[55]:[060/079] AT_loss:0.0300(0.0267)  prec@1:100.00(99.97)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 55
+[clean]Prec@1: 78.55
+[bad]Prec@1: 9.95
+Epoch[56]:[020/079] AT_loss:0.0249(0.0267)  prec@1:100.00(99.92)  prec@5:100.00(100.00)
+Epoch[56]:[040/079] AT_loss:0.0235(0.0258)  prec@1:100.00(99.96)  prec@5:100.00(100.00)
+Epoch[56]:[060/079] AT_loss:0.0250(0.0256)  prec@1:100.00(99.97)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 56
+[clean]Prec@1: 78.53
+[bad]Prec@1: 9.43
+Epoch[57]:[020/079] AT_loss:0.0239(0.0232)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[57]:[040/079] AT_loss:0.0231(0.0234)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[57]:[060/079] AT_loss:0.0225(0.0234)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 57
+[clean]Prec@1: 78.25
+[bad]Prec@1: 10.32
+Epoch[58]:[020/079] AT_loss:0.0292(0.0302)  prec@1:100.00(99.84)  prec@5:100.00(100.00)
+Epoch[58]:[040/079] AT_loss:0.0246(0.0297)  prec@1:100.00(99.84)  prec@5:100.00(100.00)
+Epoch[58]:[060/079] AT_loss:0.0230(0.0281)  prec@1:100.00(99.90)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 58
+[clean]Prec@1: 77.38
+[bad]Prec@1: 10.21
+Epoch[59]:[020/079] AT_loss:0.0418(0.0471)  prec@1:98.44(99.22)  prec@5:100.00(100.00)
+Epoch[59]:[040/079] AT_loss:0.0429(0.0408)  prec@1:98.44(99.41)  prec@5:100.00(100.00)
+Epoch[59]:[060/079] AT_loss:0.0294(0.0386)  prec@1:100.00(99.53)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 59
+[clean]Prec@1: 76.61
+[bad]Prec@1: 9.57
+Epoch[60]:[020/079] AT_loss:0.0250(0.0281)  prec@1:100.00(99.92)  prec@5:100.00(100.00)
+Epoch[60]:[040/079] AT_loss:0.0232(0.0272)  prec@1:100.00(99.92)  prec@5:100.00(100.00)
+Epoch[60]:[060/079] AT_loss:0.0225(0.0265)  prec@1:100.00(99.95)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 60
+[clean]Prec@1: 59.72
+[bad]Prec@1: 5.74
+Epoch[61]:[020/079] AT_loss:0.1460(0.2478)  prec@1:95.31(94.61)  prec@5:100.00(99.92)
+Epoch[61]:[040/079] AT_loss:0.0626(0.1828)  prec@1:98.44(96.29)  prec@5:100.00(99.92)
+Epoch[61]:[060/079] AT_loss:0.0476(0.1466)  prec@1:100.00(97.19)  prec@5:100.00(99.95)
+testing the models......
+[epoch]: 61
+[clean]Prec@1: 75.73
+[bad]Prec@1: 10.18
+Epoch[62]:[020/079] AT_loss:0.0807(0.1817)  prec@1:96.88(96.48)  prec@5:100.00(100.00)
+Epoch[62]:[040/079] AT_loss:0.0522(0.1310)  prec@1:100.00(97.62)  prec@5:100.00(100.00)
+Epoch[62]:[060/079] AT_loss:0.0505(0.1092)  prec@1:100.00(98.12)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 62
+[clean]Prec@1: 76.51
+[bad]Prec@1: 10.47
+Epoch[63]:[020/079] AT_loss:0.0486(0.1051)  prec@1:100.00(97.73)  prec@5:100.00(100.00)
+Epoch[63]:[040/079] AT_loss:0.1126(0.1022)  prec@1:96.88(97.89)  prec@5:100.00(100.00)
+Epoch[63]:[060/079] AT_loss:0.0677(0.0903)  prec@1:98.44(98.31)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 63
+[clean]Prec@1: 77.38
+[bad]Prec@1: 7.96
+Epoch[64]:[020/079] AT_loss:0.0369(0.0419)  prec@1:100.00(99.84)  prec@5:100.00(100.00)
+Epoch[64]:[040/079] AT_loss:0.0356(0.0421)  prec@1:100.00(99.73)  prec@5:100.00(100.00)
+Epoch[64]:[060/079] AT_loss:0.0385(0.0418)  prec@1:100.00(99.77)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 64
+[clean]Prec@1: 78.93
+[bad]Prec@1: 9.29
+Epoch[65]:[020/079] AT_loss:0.0331(0.0339)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[65]:[040/079] AT_loss:0.0313(0.0331)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[65]:[060/079] AT_loss:0.0310(0.0324)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 65
+[clean]Prec@1: 77.31
+[bad]Prec@1: 5.01
+Epoch[66]:[020/079] AT_loss:0.0583(0.0746)  prec@1:98.44(98.98)  prec@5:100.00(100.00)
+Epoch[66]:[040/079] AT_loss:0.0343(0.0634)  prec@1:100.00(99.14)  prec@5:100.00(100.00)
+Epoch[66]:[060/079] AT_loss:0.0355(0.0570)  prec@1:100.00(99.32)  prec@5:100.00(99.97)
+testing the models......
+[epoch]: 66
+[clean]Prec@1: 77.66
+[bad]Prec@1: 10.00
+Epoch[67]:[020/079] AT_loss:0.0297(0.0413)  prec@1:100.00(99.69)  prec@5:100.00(100.00)
+Epoch[67]:[040/079] AT_loss:0.0333(0.0398)  prec@1:100.00(99.69)  prec@5:100.00(100.00)
+Epoch[67]:[060/079] AT_loss:0.0286(0.0398)  prec@1:100.00(99.71)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 67
+[clean]Prec@1: 78.09
+[bad]Prec@1: 9.32
+Epoch[68]:[020/079] AT_loss:0.0302(0.0306)  prec@1:100.00(99.92)  prec@5:100.00(100.00)
+Epoch[68]:[040/079] AT_loss:0.0277(0.0296)  prec@1:100.00(99.96)  prec@5:100.00(100.00)
+Epoch[68]:[060/079] AT_loss:0.0290(0.0293)  prec@1:100.00(99.97)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 68
+[clean]Prec@1: 78.16
+[bad]Prec@1: 9.90
+Epoch[69]:[020/079] AT_loss:0.0294(0.0606)  prec@1:100.00(99.06)  prec@5:100.00(99.92)
+Epoch[69]:[040/079] AT_loss:0.0389(0.0519)  prec@1:100.00(99.30)  prec@5:100.00(99.96)
+Epoch[69]:[060/079] AT_loss:0.0325(0.0485)  prec@1:100.00(99.45)  prec@5:100.00(99.97)
+testing the models......
+[epoch]: 69
+[clean]Prec@1: 76.83
+[bad]Prec@1: 9.57
+Epoch[70]:[020/079] AT_loss:0.1267(0.1245)  prec@1:95.31(97.81)  prec@5:100.00(99.84)
+Epoch[70]:[040/079] AT_loss:0.0389(0.1011)  prec@1:100.00(98.28)  prec@5:100.00(99.92)
+Epoch[70]:[060/079] AT_loss:0.0713(0.0807)  prec@1:98.44(98.78)  prec@5:100.00(99.95)
+testing the models......
+[epoch]: 70
+[clean]Prec@1: 77.98
+[bad]Prec@1: 10.59
+Epoch[71]:[020/079] AT_loss:0.0281(0.0315)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[71]:[040/079] AT_loss:0.0284(0.0324)  prec@1:100.00(99.92)  prec@5:100.00(100.00)
+Epoch[71]:[060/079] AT_loss:0.0287(0.0313)  prec@1:100.00(99.95)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 71
+[clean]Prec@1: 78.91
+[bad]Prec@1: 9.47
+Epoch[72]:[020/079] AT_loss:0.0272(0.0336)  prec@1:100.00(99.61)  prec@5:100.00(100.00)
+Epoch[72]:[040/079] AT_loss:0.0257(0.0314)  prec@1:100.00(99.80)  prec@5:100.00(100.00)
+Epoch[72]:[060/079] AT_loss:0.0418(0.0309)  prec@1:98.44(99.82)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 72
+[clean]Prec@1: 78.63
+[bad]Prec@1: 11.36
+Epoch[73]:[020/079] AT_loss:0.0243(0.0260)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[73]:[040/079] AT_loss:0.0249(0.0256)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[73]:[060/079] AT_loss:0.0223(0.0253)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 73
+[clean]Prec@1: 78.50
+[bad]Prec@1: 8.91
+Epoch[74]:[020/079] AT_loss:0.0228(0.0237)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[74]:[040/079] AT_loss:0.0234(0.0233)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[74]:[060/079] AT_loss:0.0214(0.0229)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 74
+[clean]Prec@1: 78.66
+[bad]Prec@1: 9.62
+Epoch[75]:[020/079] AT_loss:0.0221(0.0219)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[75]:[040/079] AT_loss:0.0197(0.0216)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[75]:[060/079] AT_loss:0.0205(0.0215)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 75
+[clean]Prec@1: 78.49
+[bad]Prec@1: 11.04
+Epoch[76]:[020/079] AT_loss:0.0196(0.0208)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[76]:[040/079] AT_loss:0.0208(0.0207)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[76]:[060/079] AT_loss:0.0283(0.0207)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 76
+[clean]Prec@1: 78.03
+[bad]Prec@1: 12.28
+Epoch[77]:[020/079] AT_loss:0.0208(0.0249)  prec@1:100.00(99.84)  prec@5:100.00(100.00)
+Epoch[77]:[040/079] AT_loss:0.0204(0.0234)  prec@1:100.00(99.88)  prec@5:100.00(100.00)
+Epoch[77]:[060/079] AT_loss:0.0204(0.0227)  prec@1:100.00(99.90)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 77
+[clean]Prec@1: 78.57
+[bad]Prec@1: 8.52
+Epoch[78]:[020/079] AT_loss:0.0185(0.0194)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[78]:[040/079] AT_loss:0.0199(0.0193)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[78]:[060/079] AT_loss:0.0201(0.0192)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 78
+[clean]Prec@1: 78.53
+[bad]Prec@1: 10.40
+Epoch[79]:[020/079] AT_loss:0.0173(0.0187)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[79]:[040/079] AT_loss:0.0167(0.0184)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[79]:[060/079] AT_loss:0.0175(0.0182)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 79
+[clean]Prec@1: 78.35
+[bad]Prec@1: 8.14
+Epoch[80]:[020/079] AT_loss:0.0185(0.0262)  prec@1:100.00(99.84)  prec@5:100.00(100.00)
+Epoch[80]:[040/079] AT_loss:0.0178(0.0222)  prec@1:100.00(99.92)  prec@5:100.00(100.00)
+Epoch[80]:[060/079] AT_loss:0.0176(0.0212)  prec@1:100.00(99.95)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 80
+[clean]Prec@1: 78.10
+[bad]Prec@1: 8.78
+Epoch[81]:[020/079] AT_loss:0.0194(0.0181)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[81]:[040/079] AT_loss:0.0163(0.0177)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[81]:[060/079] AT_loss:0.0178(0.0176)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 81
+[clean]Prec@1: 77.31
+[bad]Prec@1: 9.35
+Epoch[82]:[020/079] AT_loss:0.0258(0.0283)  prec@1:100.00(99.69)  prec@5:100.00(100.00)
+Epoch[82]:[040/079] AT_loss:0.0338(0.0304)  prec@1:100.00(99.77)  prec@5:100.00(100.00)
+Epoch[82]:[060/079] AT_loss:0.0194(0.0269)  prec@1:100.00(99.84)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 82
+[clean]Prec@1: 78.75
+[bad]Prec@1: 8.83
+Epoch[83]:[020/079] AT_loss:0.0176(0.0185)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[83]:[040/079] AT_loss:0.0176(0.0188)  prec@1:100.00(99.96)  prec@5:100.00(100.00)
+Epoch[83]:[060/079] AT_loss:0.0170(0.0185)  prec@1:100.00(99.97)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 83
+[clean]Prec@1: 78.68
+[bad]Prec@1: 9.33
+Epoch[84]:[020/079] AT_loss:0.0167(0.0168)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[84]:[040/079] AT_loss:0.0185(0.0168)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[84]:[060/079] AT_loss:0.0164(0.0167)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 84
+[clean]Prec@1: 76.44
+[bad]Prec@1: 8.06
+Epoch[85]:[020/079] AT_loss:0.0186(0.0406)  prec@1:100.00(99.30)  prec@5:100.00(100.00)
+Epoch[85]:[040/079] AT_loss:0.0195(0.0323)  prec@1:100.00(99.57)  prec@5:100.00(100.00)
+Epoch[85]:[060/079] AT_loss:0.0207(0.0280)  prec@1:100.00(99.71)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 85
+[clean]Prec@1: 78.54
+[bad]Prec@1: 10.09
+Epoch[86]:[020/079] AT_loss:0.0168(0.0185)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[86]:[040/079] AT_loss:0.0171(0.0179)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[86]:[060/079] AT_loss:0.0167(0.0177)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 86
+[clean]Prec@1: 78.64
+[bad]Prec@1: 9.10
+Epoch[87]:[020/079] AT_loss:0.0192(0.0164)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[87]:[040/079] AT_loss:0.0158(0.0162)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[87]:[060/079] AT_loss:0.0154(0.0162)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 87
+[clean]Prec@1: 78.27
+[bad]Prec@1: 10.07
+Epoch[88]:[020/079] AT_loss:0.0208(0.0205)  prec@1:100.00(99.84)  prec@5:100.00(100.00)
+Epoch[88]:[040/079] AT_loss:0.0168(0.0189)  prec@1:100.00(99.92)  prec@5:100.00(100.00)
+Epoch[88]:[060/079] AT_loss:0.0171(0.0183)  prec@1:100.00(99.95)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 88
+[clean]Prec@1: 78.83
+[bad]Prec@1: 10.40
+Epoch[89]:[020/079] AT_loss:0.0173(0.0169)  prec@1:100.00(99.92)  prec@5:100.00(100.00)
+Epoch[89]:[040/079] AT_loss:0.0151(0.0161)  prec@1:100.00(99.96)  prec@5:100.00(100.00)
+Epoch[89]:[060/079] AT_loss:0.0138(0.0159)  prec@1:100.00(99.97)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 89
+[clean]Prec@1: 78.89
+[bad]Prec@1: 9.19
+Epoch[90]:[020/079] AT_loss:0.0145(0.0153)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[90]:[040/079] AT_loss:0.0161(0.0152)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[90]:[060/079] AT_loss:0.0146(0.0150)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 90
+[clean]Prec@1: 78.95
+[bad]Prec@1: 8.90
+Epoch[91]:[020/079] AT_loss:0.0143(0.0176)  prec@1:100.00(99.92)  prec@5:100.00(100.00)
+Epoch[91]:[040/079] AT_loss:0.0158(0.0162)  prec@1:100.00(99.96)  prec@5:100.00(100.00)
+Epoch[91]:[060/079] AT_loss:0.0141(0.0157)  prec@1:100.00(99.97)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 91
+[clean]Prec@1: 78.76
+[bad]Prec@1: 8.94
+Epoch[92]:[020/079] AT_loss:0.0161(0.0142)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[92]:[040/079] AT_loss:0.0137(0.0142)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[92]:[060/079] AT_loss:0.0134(0.0141)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 92
+[clean]Prec@1: 78.83
+[bad]Prec@1: 10.21
+Epoch[93]:[020/079] AT_loss:0.0134(0.0134)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[93]:[040/079] AT_loss:0.0130(0.0135)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[93]:[060/079] AT_loss:0.0131(0.0134)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 93
+[clean]Prec@1: 76.68
+[bad]Prec@1: 9.38
+Epoch[94]:[020/079] AT_loss:0.0271(0.0544)  prec@1:98.44(98.75)  prec@5:100.00(100.00)
+Epoch[94]:[040/079] AT_loss:0.0154(0.0415)  prec@1:100.00(99.26)  prec@5:100.00(100.00)
+Epoch[94]:[060/079] AT_loss:0.0163(0.0340)  prec@1:100.00(99.48)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 94
+[clean]Prec@1: 78.44
+[bad]Prec@1: 9.23
+Epoch[95]:[020/079] AT_loss:0.0183(0.0161)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[95]:[040/079] AT_loss:0.0140(0.0155)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[95]:[060/079] AT_loss:0.0144(0.0154)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 95
+[clean]Prec@1: 74.49
+[bad]Prec@1: 8.49
+Epoch[96]:[020/079] AT_loss:0.0201(0.0811)  prec@1:100.00(98.36)  prec@5:100.00(100.00)
+Epoch[96]:[040/079] AT_loss:0.0207(0.0658)  prec@1:100.00(98.71)  prec@5:100.00(99.96)
+Epoch[96]:[060/079] AT_loss:0.0219(0.0560)  prec@1:100.00(98.88)  prec@5:100.00(99.97)
+testing the models......
+[epoch]: 96
+[clean]Prec@1: 76.55
+[bad]Prec@1: 8.01
+Epoch[97]:[020/079] AT_loss:0.0325(0.0294)  prec@1:100.00(99.69)  prec@5:100.00(100.00)
+Epoch[97]:[040/079] AT_loss:0.0195(0.0274)  prec@1:100.00(99.77)  prec@5:100.00(100.00)
+Epoch[97]:[060/079] AT_loss:0.0204(0.0257)  prec@1:100.00(99.82)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 97
+[clean]Prec@1: 78.48
+[bad]Prec@1: 9.56
+Epoch[98]:[020/079] AT_loss:0.0224(0.0238)  prec@1:100.00(99.84)  prec@5:100.00(100.00)
+Epoch[98]:[040/079] AT_loss:0.0207(0.0218)  prec@1:100.00(99.92)  prec@5:100.00(100.00)
+Epoch[98]:[060/079] AT_loss:0.0184(0.0207)  prec@1:100.00(99.95)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 98
+[clean]Prec@1: 78.86
+[bad]Prec@1: 9.70
+Epoch[99]:[020/079] AT_loss:0.0166(0.0177)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[99]:[040/079] AT_loss:0.0174(0.0172)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[99]:[060/079] AT_loss:0.0157(0.0168)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 99
+[clean]Prec@1: 78.80
+[bad]Prec@1: 8.89
+Epoch[100]:[020/079] AT_loss:0.0152(0.0159)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[100]:[040/079] AT_loss:0.0142(0.0155)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+Epoch[100]:[060/079] AT_loss:0.0143(0.0152)  prec@1:100.00(100.00)  prec@5:100.00(100.00)
+testing the models......
+[epoch]: 100
+[clean]Prec@1: 78.88
+[bad]Prec@1: 8.42
