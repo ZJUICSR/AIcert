@@ -1,6 +1,7 @@
 from parse_args import create_exerpiment_setting
 import utils
 import torch
+import numpy as np
 from metrics import METRICS_FULL_NAME
 
 def collect_args(dataset_name='celeba', algorithm_name='baseline', experiment_name='test'):
@@ -20,7 +21,16 @@ def collect_args(dataset_name='celeba', algorithm_name='baseline', experiment_na
     model, opt = create_exerpiment_setting(opt)
     return model, opt
 
-def model_evaluate(dataset_name, model_name="Resnet50", metrics=['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTPR', 'mAcc', 'mRec', 'mSpec', 'mF1', 'mBA'], test_mode=True):
+def model_overall_fairness(result, metrics=['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTPR', 'mAcc', 'mF1', 'mBA']):
+    # print(result)
+    valid_metrics = ['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTPR', 'mAcc', 'mF1', 'mBA']
+    # valid_metrics_name = [METRICS_FULL_NAME[key] for key in valid_metrics]
+    eval_metrics = [key for key in metrics if ((METRICS_FULL_NAME[key] in result) and (key in valid_metrics))]
+    values = [result[METRICS_FULL_NAME[key]] for key in eval_metrics]
+    overall_group_fairness = 1 - np.mean(values)
+    return overall_group_fairness
+
+def model_evaluate(dataset_name, model_name="Resnet50", metrics=['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTPR', 'mAcc', 'mF1', 'mBA'], test_mode=True):
     
     model, opt = collect_args(dataset_name)
     opt['test_mode'] = test_mode
@@ -37,10 +47,13 @@ def model_evaluate(dataset_name, model_name="Resnet50", metrics=['mPre', 'mFPR',
     for m in metrics:
         value = cal_func(metric_func=metrics_ls[m], **td)
         result[METRICS_FULL_NAME[m]] = value
+        
+    # calculate overall fairness
+    result['Overall fairness'] = model_overall_fairness(result=result)
 
     return result
 
-def model_debias(dataset_name,  model_name="Resnet50", algorithm_name="sampling", metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], test_mode=True):
+def model_debias(dataset_name,  model_name="Resnet50", algorithm_name="sampling", metrics=['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTPR', 'mAcc', 'mF1', 'mBA'], test_mode=True):
     
     model, opt = collect_args(dataset_name, algorithm_name=algorithm_name)
     opt['test_mode'] = test_mode
@@ -57,9 +70,14 @@ def model_debias(dataset_name,  model_name="Resnet50", algorithm_name="sampling"
     for m in metrics:
         value = cal_func(metric_func=metrics_ls[m], **td)
         result[METRICS_FULL_NAME[m]] = value
+        
+    # calculate overall fairness
+    result['Overall fairness'] = model_overall_fairness(result=result)
 
     return result
 
 if __name__ == "__main__":
-    result = model_evaluate("cifar-s")
+    result = model_evaluate("cifar-s", test_mode=True)
+    print(result)
+    result = model_debias("cifar-s", test_mode=True)
     print(result)
