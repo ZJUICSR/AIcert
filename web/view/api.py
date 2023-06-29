@@ -15,6 +15,7 @@ def home():
 @api.route("/detect", methods=["POST"])
 def Detect():
     adv_dataset = request.form.get("adv_dataset")
+    adv_model = request.form.get("adv_model")
     adv_method = request.form.get("adv_method")
     adv_nums = request.form.get("adv_nums")
     # defense_methods = request.form.getlist("defense_methods[]")
@@ -32,11 +33,11 @@ def Detect():
         adv_examples.save(adv_file_path)
     else:
         adv_file_path = None
-    _, no_defense_accuracy = detect(adv_dataset, adv_method, adv_nums, defense_methods[0], adv_file_path)
+    _, no_defense_accuracy = detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods[0], adv_file_path)
     no_defense_accuracy_list = no_defense_accuracy.tolist() if isinstance(no_defense_accuracy, np.ndarray) else no_defense_accuracy
     detect_rate_dict = {}
     for defense_method in defense_methods:
-        detect_rate, _ = detect(adv_dataset, adv_method, adv_nums, defense_method, adv_file_path)
+        detect_rate, _ = detect(adv_dataset, adv_model, adv_method, adv_nums, defense_method, adv_file_path)
         detect_rate_dict[defense_method] = round(detect_rate, 4)
     response_data = {
         "detect_rates": detect_rate_dict,
