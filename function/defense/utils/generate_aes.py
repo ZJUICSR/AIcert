@@ -17,7 +17,8 @@ def save_jepg(adv_examples, output_path, adv_dataset):
     pil_image.save(output_path, "JPEG")
 
 def generate_adv_examples(model, adv_method, adv_dataset, adv_nums, device, normalize=False):
-    clean_loader, num_classes = get_clean_loader(adv_dataset, normalize)
+    batch_size = 128
+    clean_loader, num_classes = get_clean_loader(model, adv_dataset, normalize, batch_size)
     if adv_dataset == 'CIFAR10':
         eps = 0.031
         nb_iter = 20
@@ -74,7 +75,7 @@ def generate_adv_examples(model, adv_method, adv_dataset, adv_nums, device, norm
             adv_examples = torch.cat((adv_examples, adv_data))
             adv_labels = torch.cat((adv_labels, adv_label))
         i += 1
-        if i * 128 > adv_nums:
+        if i * batch_size > adv_nums:
             break
     # adv_examples = adversary.perturb(clean_examples, true_labels)
     adv_examples = adv_examples[:adv_nums]

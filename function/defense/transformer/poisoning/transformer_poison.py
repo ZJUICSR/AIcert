@@ -10,6 +10,7 @@ from keras.models import Sequential, Model
 from keras import layers
 from keras.layers import Dense, Flatten, Conv2D, MaxPooling2D, Dropout, AveragePooling2D, BatchNormalization, MaxPool2D, Input, Activation
 from keras.regularizers import l2
+from keras.applications import VGG16
 from art import config
 from art.utils import load_mnist
 from art.attacks.poisoning.perturbations.image_perturbations import add_pattern_bd, add_single_bd
@@ -202,17 +203,27 @@ class Transformerpoison(object):
         print('Create Keras convolutional neural network - basic architecture from Keras examples:')
         # Source here: https://github.com/keras-team/keras/blob/master/examples/mnist_cnn.py
         if self.adv_dataset == 'CIFAR10':
-            model = ResNet18(input_shape=(32, 32, 3), classes=10, weight_decay=1e-4)
+            if self.model.__class__.__name__ == 'ResNet':
+                model = ResNet18(input_shape=(32, 32, 3), classes=10, weight_decay=1e-4)
+            elif self.model.__class__.__name__ == 'VGG':
+                model = VGG16(input_shape=(32, 32, 3), weights = None, classes=10)
+            else:
+                raise Exception('CIFAR10 can only use ResNet18 and VGG16!')
         elif self.adv_dataset == 'MNIST':
-            model = Sequential()
-            model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=x_train.shape[1:]))
-            model.add(Conv2D(64, (3, 3), activation='relu'))
-            model.add(MaxPooling2D(pool_size=(2, 2)))
-            model.add(Dropout(0.25))
-            model.add(Flatten())
-            model.add(Dense(128, activation='relu'))
-            model.add(Dropout(0.5))
-            model.add(Dense(10, activation='softmax'))
+            if self.model.__class__.__name__ == 'SmallCNN':
+                model = Sequential()
+                model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=x_train.shape[1:]))
+                model.add(Conv2D(64, (3, 3), activation='relu'))
+                model.add(MaxPooling2D(pool_size=(2, 2)))
+                model.add(Dropout(0.25))
+                model.add(Flatten())
+                model.add(Dense(128, activation='relu'))
+                model.add(Dropout(0.5))
+                model.add(Dense(10, activation='softmax'))
+            elif self.model.__class__.__name__ == 'VGG':
+                model = VGG16(input_shape=(28, 28, 1), weights = None, classes=10)
+            else:
+                raise Exception('MNIST can only use SmallCNN and VGG16!')
 
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         classifier = KerasClassifier(model=model, clip_values=(min_, max_))
