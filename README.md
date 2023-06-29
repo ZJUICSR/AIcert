@@ -26,6 +26,10 @@ view：后台与前端的接口，每个python文件为一个蓝图，在flask�
 
 ### GAN模型：
 
-GAN模型文件大于50M，可下载[GAN模型](https://www.aliyundrive.com/s/6JJBn3NUSdR)后，放于model目录。
+GAN模型文件大于50M，可下载[GAN模型](https://www.aliyundrive.com/s/YD6hvPaZZus)后，放于model目录。
+
+### 预训练模型：
+
+预训练模型文件大于50M，可下载[预训练模型](https://www.aliyundrive.com/s/j9Pu84wYvUo)后，放于model目录。
 
 PS： 项目暂时没有配置工程上的如log、redis之类，后面有需要再考虑   
