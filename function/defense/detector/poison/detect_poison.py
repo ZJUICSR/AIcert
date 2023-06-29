@@ -4,6 +4,7 @@ from typing import Union
 import torch
 from torch.nn import Module
 import torchvision.transforms as transforms
+from torchvision.models import vgg16
 import json
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -153,10 +154,23 @@ class Detectpoison(object):
         is_poison_train = is_poison_train[shuffled_indices]
 
         if self.adv_dataset == 'CIFAR10':
-            model = ResNet18()
+            if self.model.__class__.__name__ == 'ResNet':
+                model = ResNet18()
+            elif self.model.__class__.__name__ == 'VGG':
+                model = vgg16()
+                model.classifier[6] = nn.Linear(4096, 10)
+            else:
+                raise Exception('CIFAR10 can only use ResNet18 and VGG16!')
             input_shape = (3, 32, 32)
         elif self.adv_dataset == 'MNIST':
-            model = SmallCNN()
+            if self.model.__class__.__name__ == 'SmallCNN':
+                model = SmallCNN()
+            elif self.model.__class__.__name__ == 'VGG':
+                model = vgg16()
+                model.features[0] = nn.Conv2d(1, 64, kernel_size=3, padding=1)
+                model.classifier[6] = nn.Linear(4096, 10)
+            else:
+                raise Exception('MNIST can only use SmallCNN and VGG16!')
             input_shape = (1, 28, 28)
 
         classifier = PyTorchClassifier(

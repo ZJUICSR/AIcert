@@ -61,9 +61,9 @@ class Twis(object):
     def transform(self, img):
         # Data
         if self.adv_dataset == 'MNIST':
-            mean = torch.Tensor([self.mean]).unsqueeze(1).expand_as(img[0, :, :, 0]).unsqueeze(2).expand_as(
+            mean = torch.Tensor([self.mean[0]]).unsqueeze(1).expand_as(img[0, :, :, 0]).unsqueeze(2).expand_as(
                 img[0]).unsqueeze(0).expand_as(img).cuda()
-            std = torch.Tensor([self.std]).unsqueeze(1).expand_as(img[0, :, :, 0]).unsqueeze(2).expand_as(
+            std = torch.Tensor([self.std[0]]).unsqueeze(1).expand_as(img[0, :, :, 0]).unsqueeze(2).expand_as(
                 img[0]).unsqueeze(0).expand_as(img).cuda()
         elif self.adv_dataset == 'CIFAR10':
             mean = torch.Tensor(self.mean).unsqueeze(1).expand_as(img[0, :, :, 0]).unsqueeze(2).expand_as(
