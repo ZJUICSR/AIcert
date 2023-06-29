@@ -29,7 +29,7 @@ def main():
     model.train()
 
     lr_steps = train_config['epochs'] * len(train_loader)
-    if train_config['lr_type'] == 'cyclic' and dataset = 'CIFAR10':
+    if train_config['lr_type'] == 'cyclic' and dataset == 'CIFAR10':
         scheduler = torch.optim.lr_scheduler.CyclicLR(opt, base_lr=0, max_lr=train_config['lr_max'],
             step_size_up=lr_steps / 2, step_size_down=lr_steps / 2)
     elif train_config['lr_type'] == 'multistep':
