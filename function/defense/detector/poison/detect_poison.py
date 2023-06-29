@@ -1,13 +1,16 @@
-import numpy as np
-from typing import List, Optional
-from typing import Union
+import os
 import torch
-from torch.nn import Module
+import numpy as np
 import torchvision.transforms as transforms
-from torchvision.models import vgg16
 import json
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
+from typing import List, Optional
+from typing import Union
+from torch.nn import Module
+from torchvision.models import vgg16
+from PIL import Image
+
 from sklearn.svm import SVC
 from art.attacks.poisoning.perturbations.image_perturbations import add_pattern_bd, add_single_bd
 from art.estimators.classification import PyTorchClassifier
@@ -23,8 +26,19 @@ from function.defense.models import *
 
 import logging
 logging.getLogger('tensorflow').disabled = True
+
+def save_jepg(adv_examples, output_path, adv_dataset):
+    # 将torch加载的图像转换为PIL图像
+    if adv_dataset == 'MNIST':
+        image = adv_examples.squeeze()
+    elif adv_dataset == 'CIFAR10':
+        image = adv_examples.transpose(1, 2, 0)
+    pil_image = Image.fromarray(image)
+    # 保存为JPEG图像
+    pil_image.save(output_path, "JPEG")
+
 def generate_backdoor(
-    x_clean, y_clean, percent_poison, backdoor_type="pattern", sources=np.arange(10), targets=(np.arange(10) + 1) % 10
+    x_clean, y_clean, percent_poison, backdoor_type="pattern", sources=np.arange(10), targets=(np.arange(10) + 1) % 10, dataset=None
 ):
     """
     Creates a backdoor in MNIST images by adding a pattern or pixel to the image and changing the label to a targeted
@@ -56,7 +70,10 @@ def generate_backdoor(
     x_poison = np.copy(x_clean)
     y_poison = np.copy(y_clean)
     is_poison = np.zeros(np.shape(y_poison))
-
+    x_clean_save = x_clean[:10].copy()
+    x_poison_save = np.copy(x_clean_save)
+    if dataset != None:
+        k = 0
     for i, (src, tgt) in enumerate(zip(sources, targets)):
         n_points_in_tgt = np.size(np.where(y_clean == tgt))
         num_poison = round((percent_poison * n_points_in_tgt) / (1 - percent_poison))
@@ -67,15 +84,36 @@ def generate_backdoor(
         indices_to_be_poisoned = np.random.choice(n_points_in_src, num_poison)
 
         imgs_to_be_poisoned = np.copy(src_imgs[indices_to_be_poisoned])
+        if dataset != None:
+            imgs_to_be_poisoned_save = np.copy(imgs_to_be_poisoned)
         if backdoor_type == "pattern":
             imgs_to_be_poisoned = add_pattern_bd(x=imgs_to_be_poisoned, pixel_value=max_val)
         elif backdoor_type == "pixel":
             imgs_to_be_poisoned = add_single_bd(imgs_to_be_poisoned, pixel_value=max_val)
+        if dataset != None:
+            if k < 10:
+                for j in range(len(imgs_to_be_poisoned)):
+                    x_clean_save[k] = imgs_to_be_poisoned_save[j]
+                    x_poison_save[k] = imgs_to_be_poisoned[j]
+                    k += 1
+                    print(k)
+                    if k == 10:
+                        break
         x_poison = np.append(x_poison, imgs_to_be_poisoned, axis=0)
         y_poison = np.append(y_poison, np.ones(num_poison) * tgt, axis=0)
         is_poison = np.append(is_poison, np.ones(num_poison))
 
     is_poison = is_poison != 0
+    if dataset != None:
+        image_num = min(np.sum(is_poison), 10)
+        for i in range(image_num):
+            output_dir = "/mnt/data2/yxl/AI-platform/output/backdoor/" + str(i)
+            if not os.path.exists(output_dir):
+                # 如果文件夹不存在，则创建文件夹
+                os.makedirs(output_dir)
+            save_jepg(x_poison_save[i], output_dir + '/poisoned.jpeg', dataset)
+            save_jepg(x_clean_save[i], output_dir + '/clean.jpeg', dataset)
+            save_jepg(x_poison_save[i] - x_clean_save[i], output_dir + '/backdoor.jpeg', dataset)
 
     return is_poison, x_poison, y_poison
 
@@ -139,7 +177,7 @@ class Detectpoison(object):
             x_train = np.expand_dims(x_train, axis=3)
 
         print("Poison test data")
-        (is_poison_test, x_poisoned_raw_test, y_poisoned_raw_test) = generate_backdoor(x_raw_test, y_raw_test, perc_poison)
+        (is_poison_test, x_poisoned_raw_test, y_poisoned_raw_test) = generate_backdoor(x_raw_test, y_raw_test, perc_poison, dataset = self.adv_dataset)
         x_test, y_test = preprocess(x_poisoned_raw_test, y_poisoned_raw_test)
         print("Add channel axis")
         if self.adv_dataset == 'MNIST':
@@ -220,22 +258,22 @@ class Detectpoison(object):
         print('detect rate: ', self.detect_rate)
 
 class Activation_defence(Detectpoison):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.train(ActivationDefence)
 
 class Spectral_signature(Detectpoison):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.train(SpectralSignatureDefense)
 
 class Provenance_defense(Detectpoison):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         print('Load and transform {} data'.format(self.adv_dataset))
