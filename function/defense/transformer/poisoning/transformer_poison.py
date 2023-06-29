@@ -1,8 +1,10 @@
+import os
 import numpy as np
 from typing import List, Optional
 from typing import Union
 import torch
 from torch.nn import Module
+from PIL import Image
 import torchvision.transforms as transforms
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -89,6 +91,16 @@ def ResNet18(classes, input_shape, weight_decay=1e-4):
     model = Model(input, x, name='ResNet18')
     return model
 
+def save_jepg(adv_examples, output_path, adv_dataset):
+    # 将torch加载的图像转换为PIL图像
+    if adv_dataset == 'MNIST':
+        image = adv_examples.squeeze()
+    elif adv_dataset == 'CIFAR10':
+        image = adv_examples.transpose(1, 2, 0)
+    pil_image = Image.fromarray(image)
+    # 保存为JPEG图像
+    pil_image.save(output_path, "JPEG")
+
 class Transformerpoison(object):
     def __init__(self, model:Module, 
                 mean:List[float]=[0.485, 0.456, 0.406], 
@@ -147,11 +159,14 @@ class Transformerpoison(object):
                     return insert_image(x, backdoor_path='../utils/dataset/backdoors/alert.png', size=(10,10))
                 else:
                     raise("Unknown backdoor type")
-        def poison_dataset(x_clean, y_clean, percent_poison, poison_func):
+        def poison_dataset(x_clean, y_clean, percent_poison, poison_func, dataset=None):
             x_poison = np.copy(x_clean)
             y_poison = np.copy(y_clean)
             is_poison = np.zeros(np.shape(y_poison))
-            
+            x_clean_save = x_clean[:10].copy()
+            x_poison_save = np.copy(x_clean_save)
+            if dataset != None:
+                k = 0
             # sources=np.arange(10) # 0, 1, 2, 3, ...
             # targets=(np.arange(10) + 1) % 10 # 1, 2, 3, 4, ...
             sources = np.array([0])
@@ -165,13 +180,34 @@ class Transformerpoison(object):
                 indices_to_be_poisoned = np.random.choice(n_points_in_src, num_poison)
 
                 imgs_to_be_poisoned = np.copy(src_imgs[indices_to_be_poisoned])
+                if dataset != None:
+                    imgs_to_be_poisoned_save = np.copy(imgs_to_be_poisoned)
                 backdoor_attack = PoisoningAttackBackdoor(poison_func)
                 imgs_to_be_poisoned, poison_labels = backdoor_attack.poison(imgs_to_be_poisoned, y=np.ones(num_poison) * tgt)
+                if dataset != None:
+                    if k < 10:
+                        for j in range(len(imgs_to_be_poisoned)):
+                            x_clean_save[k] = imgs_to_be_poisoned_save[j]
+                            x_poison_save[k] = imgs_to_be_poisoned[j]
+                            k += 1
+                            print(k)
+                            if k == 10:
+                                break
                 x_poison = np.append(x_poison, imgs_to_be_poisoned, axis=0)
                 y_poison = np.append(y_poison, poison_labels, axis=0)
                 is_poison = np.append(is_poison, np.ones(num_poison))
 
             is_poison = is_poison != 0
+            if dataset != None:
+                image_num = min(np.sum(is_poison), 10)
+                for i in range(image_num):
+                    output_dir = "/mnt/data2/yxl/AI-platform/output/backdoor/" + str(i)
+                    if not os.path.exists(output_dir):
+                        # 如果文件夹不存在，则创建文件夹
+                        os.makedirs(output_dir)
+                    save_jepg(x_poison_save[i], output_dir + '/poisoned.jpeg', dataset)
+                    save_jepg(x_clean_save[i], output_dir + '/clean.jpeg', dataset)
+                    save_jepg(x_poison_save[i] - x_clean_save[i], output_dir + '/backdoor.jpeg', dataset)
 
             return is_poison, x_poison, y_poison
         print('Poison training data:')
@@ -188,7 +224,7 @@ class Transformerpoison(object):
             x_train = np.expand_dims(x_train, axis=3)
 
         print('Poison test data:')
-        (is_poison_test, x_poisoned_raw_test, y_poisoned_raw_test) = poison_dataset(x_raw_test, y_raw_test, percent_poison, add_modification)
+        (is_poison_test, x_poisoned_raw_test, y_poisoned_raw_test) = poison_dataset(x_raw_test, y_raw_test, percent_poison, add_modification, dataset=self.adv_dataset)
         x_test, y_test = preprocess(x_poisoned_raw_test, y_poisoned_raw_test)
         print('Add channel axis:')
         if self.adv_dataset == 'MNIST':
@@ -244,7 +280,7 @@ class Transformerpoison(object):
         image = (poison_x_test_example[0] - x_test_example[3])
         image_uint8 = (image * 255).astype(np.uint8)
         pil_image = Image.fromarray(image_uint8)
-        import os
+
         trigger_path = "/mnt/data2/yxl/AI-platform/output/trigger"
         if not os.path.exists(trigger_path):
             os.makedirs(trigger_path)
@@ -281,15 +317,15 @@ class Transformerpoison(object):
         print('detect rate: ', self.detect_rate)
 
 class Neural_cleanse_l1(Transformerpoison):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.train(NeuralCleanse, 1)
     
 class Neural_cleanse_l2(Transformerpoison):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.train(NeuralCleanse, 2)
