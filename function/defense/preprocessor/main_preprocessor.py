@@ -3,8 +3,8 @@ import torch
 import sys
 sys.path.append('../../..')
 from function.defense.models import *
-from function.defense.trainer.trainer import *
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+from function.defense.preprocessor.preprocessor import *
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 if torch.cuda.is_available():
     print("got GPU")
@@ -25,6 +25,6 @@ elif adv_dataset == 'MNIST':
     checkpoint = torch.load('/mnt/data2/yxl/AI-platform/model/model-mnist-smallCNN/model-nn-epoch61.pt')
 model.load_state_dict(checkpoint)
 model = model.to(device)
-deflection = Cartl(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=100, device=device)#, adv_examples='data/' + adv_dataset + '/adv_' + adv_dataset + '_' + adv_method + '.npy')
+deflection = Defense_gan(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=100, device=device)#, adv_examples='data/' + adv_dataset + '/adv_' + adv_dataset + '_' + adv_method + '.npy')
 deflection.detect()
 deflection.print_res()

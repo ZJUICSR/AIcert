@@ -16,7 +16,7 @@ if adv_dataset == 'CIFAR10':
     mean = [0.4914, 0.4822, 0.4465]
     std = [0.2023, 0.1994, 0.2010]
     # # checkpoint = torch.load('/mnt/data/yxl/AI-platform/trades/model-cifar-wideResNet/model-wideres-epoch91.pt')
-    checkpoint = torch.load('/mnt/data2/yxl/AI-platform/model/model-cifar-wideResNet/model-wideres-epoch85.pt') 
+    checkpoint = torch.load('/mnt/data2/yxl/AI-platform/model/model-cifar-resnet18/model-res-epoch85.pt') 
 elif adv_dataset == 'MNIST':
     model = SmallCNN()
     mean = 0.1307
