@@ -8,7 +8,7 @@ import os
 from flask import Flask
 from jinja2.sandbox import SandboxedEnvironment
 from werkzeug.routing import BaseConverter
-import utils.functional as F
+# import utils.functional as F
 __version__ = "0.1.0"
 
 
@@ -38,32 +38,32 @@ class RegexConverter(BaseConverter):
         self.regex = items[0]
 
 
-def create_app(config="config.develop.Config"):
-    app = XAI_Flask(__name__, static_folder="web/static")
-    app.VERSION = __version__
-    print("-> Running at version={:s}".format(str(app.VERSION)))
-    with app.app_context():
-        app.config.from_object(config)
+# def create_app(config="config.develop.Config"):
+#     app = XAI_Flask(__name__, static_folder="web/static")
+#     app.VERSION = __version__
+#     print("-> Running at version={:s}".format(str(app.VERSION)))
+#     with app.app_context():
+#         app.config.from_object(config)
 
-        # cache & log & redis
-        F.init(app)
+#         # cache & log & redis
+#         F.init(app)
 
-        # init some utils
-        F.init_utils(app)
+#         # init some utils
+#         F.init_utils(app)
 
-        # register controller
-        from web.view.api import api
-        app.register_blueprint(api)
-    return app
+#         # register controller
+#         from web.view.api import api
+#         app.register_blueprint(api)
+#     return app
 
 
-def main_api():
-    if os.environ.get("SecAladdin_STABLE"):
-        conf = "config.stable.Config"
-    else:
-        conf = "config.develop.Config"
-    app = create_app(config=conf)
-    app.run(debug=True, threaded=True, host="127.0.0.1", port=2000) #
+# def main_api():
+#     if os.environ.get("SecAladdin_STABLE"):
+#         conf = "config.stable.Config"
+#     else:
+#         conf = "config.develop.Config"
+#     app = create_app(config=conf)
+#     app.run(debug=True, threaded=True, host="127.0.0.1", port=2000) #
 
 def main_index():
     parser = argparse.ArgumentParser()
