@@ -38,6 +38,18 @@ from function.formal_verify.veritex import Net as reachNet
 from function.formal_verify.veritex.networks.cnn import Method as ReachMethod
 from function.formal_verify.veritex.utils.plot_poly import plot_polytope2d
 ROOT = osp.dirname(osp.abspath(__file__))
+from function.defense.jpeg import Jpeg
+from function.defense.twis import Twis
+from function.defense.region_based import RegionBased
+from function.defense.pixel_deflection import Pixel_Deflection
+from function.defense.feature_squeeze import feature_squeeze
+from function.defense.preprocessor.preprocessor import *
+from function.defense.trainer.trainer import *
+from function.defense.detector.poison.detect_poison import *
+from function.defense.transformer.poisoning.transformer_poison import *
+from function.defense.sage.sage import *
+from function.defense.models import *
+
 def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList):
     """模型公平性提升
     :params tid:主任务ID
@@ -783,154 +795,76 @@ def reach(tid,stid,dataset,pic_path,label,target_label):
     }
     return resp
 
-ROOT = osp.dirname(osp.abspath(__file__))
+def detect(adv_dataset, adv_method, adv_nums, defense_methods, adv_examples=None):
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu") 
+    if torch.cuda.is_available():
+        print("got GPU")
+    if adv_dataset == 'CIFAR10':
+        mean = [0.4914, 0.4822, 0.4465]
+        std = [0.2023, 0.1994, 0.2010]
+        model = ResNet18()
+        checkpoint = torch.load('./model/model-cifar-wideResNet/model-wideres-epoch85.pt')
+        model.load_state_dict(checkpoint)
+        model = model.to(device)
+    elif adv_dataset == 'MNIST':
+        mean = (0.1307,)
+        std = (0.3081,)
+        model = SmallCNN()
+        checkpoint = torch.load('./model/model-mnist-smallCNN/model-nn-epoch61.pt')
+        model.load_state_dict(checkpoint)
+        model = model.to(device).eval()    
 
-"""对抗样本加载计算，绘制解释图接口"""
-# if __name__ == '__main__':
-#     # m = lenet(None,1)
-#     # m.load_state_dict(torch.load("./model/ckpt/mnist_lenet.pt"))
+    if defense_methods == 'JPEG':
+        detector =  Jpeg(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Feature Squeeze':
+        detector =  feature_squeeze(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Twis':
+        detector =  Twis(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Rgioned-based':
+        detector =  RegionBased(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Pixel Deflection':
+        detector =  Pixel_Deflection(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Label Smoothing':
+        detector =  Label_smoothing(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Spatial Smoothing':
+        detector =  Spatial_smoothing(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Gaussian Data Augmentation':
+        detector =  Gaussian_augmentation(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Total Variance Minimization':
+        detector =  Total_var_min(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Pixel Defend':
+        detector =  Pixel_defend(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'InverseGAN':
+        detector =  Inverse_gan(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'DefenseGAN':
+        detector =  Defense_gan(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Madry':
+        detector =  Madry(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'FastAT':
+        detector =  FastAT(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'TRADES':
+        detector =  Trades(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'FreeAT':
+        detector =  FreeAT(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'MART':
+        detector =  Mart(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'CARTL':
+        detector =  Cartl(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Activation':
+        detector =  Activation_defence(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Spectral Signature':
+        detector =  Spectral_signature(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Provenance':
+        detector =  Provenance_defense(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Neural Cleanse L1':
+        detector =  Neural_cleanse_l1(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Neural Cleanse L2':
+        detector =  Neural_cleanse_l2(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Neural Cleanse Linf':
+        detector =  Neural_cleanse_linf(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'SAGE':
+        detector =  Sage(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
 
-#     params = {
-#         "dataset": {"name": "imagenet"},
-#         "model": {"name": "densenet121","ckpt":None},
-#         "out_path": "./output",
-#         "device": torch.device("cuda:1"),
-#         "ex_methods":{"methods":["lrp", "gradcam", "integrated_grad"]},
-#         "adv_methods":{"methods":["FGSM"]},
-#         "root":ROOT
-#     }
-
-#     logging = Logger(filename=osp.join(params["out_path"], "kt1_logs.txt"))
-
-#     root = params["root"]
-#     dataset = params["dataset"]["name"]
-#     nor_data = torch.load(osp.join(root, f"dataset/{dataset}/data/{dataset}_NOR.pt"))
-#     nor_loader = get_loader(nor_data, batchsize=16)
-#     logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
-
-#     model_name = params["model"]["name"]
-#     device = params["device"]
-#     model = params["model"]["ckpt"]
-#     logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
-#     net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
-#     net = net.eval().to(device)
-#     logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
-
-#     adv_loader = {}
-#     adv_methods = params["adv_methods"]["methods"]
-#     for adv_method in adv_methods:
-#         adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=16, logging=logging)
-#     logging.info("[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
-
-#     ex_methods = params["ex_methods"]["methods"]
-#     logging.info("[注意力分布图计算]：选择了{:s}解释算法".format(", ".join(ex_methods)))
-#     ex_images = attribution_maps(net, nor_loader, adv_loader, ex_methods, params, 20, logging)
-
-
-"""模型每层特征图可视化，支持vgg和alexnet"""
-# if __name__ == '__main__':
-#     params = {
-#         "dataset": {"name": "imagenet"},
-#         "model": {"name": "vgg19"},
-#         "out_path": "./output",
-#         "device": torch.device("cuda:6"),
-#         "ex_methods":{"dataset":"ImageNet"},
-#         "root": ROOT
-#     }
-#     logging = Logger(filename=osp.join(params["out_path"], "kt1_logs.txt"))
-
-#     dataset = params["dataset"]["name"]
-
-#     nor_loader = get_loader(osp.join(ROOT,"dataset",dataset,"data"))
-#     logging.info("[数据集获取]：获取正常样本已完成.")
-
-#     adv_loader = {}
-#     adv_dataloader_path = osp.join(ROOT,"imagenet_adv_data")
-#     for data in os.listdir(adv_dataloader_path):
-#         adv_method = data.split("_")[1]
-#         adv_loader[adv_method] = get_loader(osp.join(adv_dataloader_path, data))
-#     logging.info("[获取数据集]：获取对抗样本已完成")
-
-#     # 执行卷积层解释运算
-#     model_name = params["model"]["name"]
-#     logging.info("[特征层可视化]:对{:s}模型逐层提取特征并进行可视化分析".format(model_name))
-#     layer_explain(model_name, nor_loader, adv_loader["BIM"], params)
-
-
-''''五种降维方法'''
-if __name__ == "__main__":
-
-    params = {
-        "dataset": {"name": "cifar10"},
-        "model": {"name": "resnet50","ckpt":None},
-        "out_path": "./output",
-        "device": torch.device("cuda:4"),
-        "ex_methods":{"methods":["lrp", "gradcam", "integrated_grad"]},
-        "adv_methods":{"methods":["PGD"]},
-        "root":ROOT
-    }
-
-    logging = Logger(filename=osp.join(params["out_path"], "kt1_logs.txt"))
-
-    root = params["root"]
-    dataset = params["dataset"]["name"]
-    nor_data = torch.load(osp.join(root, f"dataset/{dataset}/data/{dataset}_NOR.pt"))
-    nor_loader = get_loader(nor_data, batchsize=128)
-    logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
-
-    model_name = params["model"]["name"]
-    device = params["device"]
-    model = params["model"]["ckpt"]
-    logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
-    net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
-    # net = torchvision.models.densenet121(weights=torchvision.models.DenseNet121_Weights.DEFAULT)
-    adv_methods = params["adv_methods"]["methods"]
-    for adv_method in adv_methods:
-        adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=128, logging=logging)
-    logging.info("[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
-
-    save_path = params["out_path"]
-    vis_type_list = ['pca', 'ss', 'tsne', 'svm', 'mean_diff']
-    dim_reduciton_visualize(vis_type_list, nor_loader, adv_loader["PGD"], net, model_name, dataset, device, save_path)
-
-
-'''lime的图像文本接口'''
-# if __name__ == "__main__":
-
-#     params = {
-#         "dataset": {"name": "imagenet"},
-#         "model": {"name": "vgg16","ckpt":None},
-#         "out_path": "./output",
-#         "device": torch.device("cuda:7"),
-#         "ex_methods":{"methods":["lrp", "gradcam", "integrated_grad"]},
-#         "adv_methods":{"methods":["FGSM"]},
-#         "root":ROOT
-#     }
-
-#     logging = Logger(filename=osp.join(params["out_path"], "kt1_logs.txt"))
-
-#     root = params["root"]
-#     dataset = params["dataset"]["name"]
-#     nor_data = torch.load(osp.join(root, f"dataset/{dataset}/data/{dataset}_NOR.pt"))
-#     nor_img_x = nor_data["x"][2]
-#     label = nor_data['y'][2]
-#     img = recreate_image(nor_img_x.squeeze())
-#     logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
-
-#     model_name = params["model"]["name"]
-#     device = params["device"]
-#     model = params["model"]["ckpt"]
-#     logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
-#     net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
-#     # net = torchvision.models.inception_v3(num_classes=10)
-#     net = net.eval().to(device)
-#     logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
-
-#     adv_loader = {}
-#     adv_methods = params["adv_methods"]["methods"]
-#     adv_img_x = sample_untargeted_attack(dataset, adv_methods[0], net, nor_img_x, label, device, root)
-#     logging.info("[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
-
-#     save_path = params["out_path"]
-#     lime_image_ex(img, net, model_name, dataset, device, root, save_path)
-
+    _, _, detect_rate, no_defense_accuracy = detector.detect()
+    return detect_rate, no_defense_accuracy
