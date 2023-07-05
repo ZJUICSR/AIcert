@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 # Local
-from ..utils import y_table, c_table
+from ..utils import y_table, c_table, y_table_mnist, c_table_mnist
 
 
 class y_dequantize(nn.Module):
@@ -23,6 +23,10 @@ class y_dequantize(nn.Module):
         self.factor = factor
 
     def forward(self, image):
+        ###
+        if image.size(2) == 7:
+            self.y_table = y_table_mnist
+        ###
         return image * (self.y_table * self.factor)
 
 
@@ -41,6 +45,10 @@ class c_dequantize(nn.Module):
         self.c_table = c_table
 
     def forward(self, image):
+        ###
+        if image.size(2) == 7:
+            self.c_table = c_table_mnist
+        ###
         return image * (self.c_table * self.factor)
 
 
@@ -62,7 +70,16 @@ class idct_8x8(nn.Module):
         self.tensor = nn.Parameter(torch.from_numpy(tensor).float())
 
     def forward(self, image):
-        
+        ###
+        if image.size(2) == 7:
+            alpha = np.array([1. / np.sqrt(2)] + [1] * 6)
+            self.alpha = nn.Parameter(torch.from_numpy(np.outer(alpha, alpha)).float())
+            tensor = np.zeros((7, 7, 7, 7), dtype=np.float32)
+            for x, y, u, v in itertools.product(range(7), repeat=4):
+                tensor[x, y, u, v] = np.cos((2 * u + 1) * x * np.pi / 14) * np.cos(
+                    (2 * v + 1) * y * np.pi / 14)
+            self.tensor = nn.Parameter(torch.from_numpy(tensor).float())
+        ###
         image = image * self.alpha
         result = 0.25 * torch.tensordot(image, self.tensor, dims=2) + 128
         result.view(image.shape)
@@ -83,6 +100,8 @@ class block_merging(nn.Module):
         
     def forward(self, patches, height, width):
         k = 8
+        if height % 7 == 0: #
+            k = 7 #
         batch_size = patches.shape[0]
         image_reshaped = patches.view(batch_size, height//k, width//k, k, k)
         image_transposed = image_reshaped.permute(0, 1, 3, 2, 4)

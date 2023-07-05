@@ -85,7 +85,8 @@ class Jpeg(object):
         no_defense_accuracy = torch.sum(torch.argmax(adv_predictions, dim = 1) == true_labels) / float(len(adv_imgs))
         self.no_defense_accuracy = no_defense_accuracy.cpu().numpy()
         for i in range(len(adv_imgs)):
-            self.total_num += 1
+            if torch.argmax(self.model(adv_imgs[i:i+1].to(self.device)), dim = 1)[0] != true_labels[i]:
+                self.total_num += 1
             test_img = adv_imgs[i]
             with torch.no_grad():
                 out = self.model(test_img.unsqueeze(0).to(self.device))
@@ -95,6 +96,8 @@ class Jpeg(object):
             if len(test_img.size()) != 4:
                 test_img = test_img.unsqueeze(0)
             test_img = test_img.to(self.device)
+            if self.adv_dataset == 'MNIST': #
+                test_img = test_img[:, :1, :, :] #
             with torch.no_grad():
                 out = self.model(test_img)
                 _, label_fix = torch.max(out, dim=1)
