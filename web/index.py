@@ -1108,6 +1108,7 @@ def Detect():
     defense_methods_str = request.form.get("defense_methods")
     defense_methods = json.loads(defense_methods_str)
     adv_nums = int(adv_nums)
+    format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
     stid = "S"+IOtool.get_task_id(str(format_time))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"].update({stid:{
