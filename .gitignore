@@ -10,6 +10,12 @@ dataset/adv_examples/*
 function/defense/trainer/test/*
 web/static/images/adv_images
 output/images/*
+output/backdoor/*
+model/model-cifar-wideResNet/*
+model/model-mnist-smallCNN/*
+output/trigger/*
+function/side/CMake_Research3/Build/*
+function/side/CMake_Research3/Trs/*
 log.txt
 *.pth
 *.pyc
@@ -180,3 +186,5 @@ dataset
 
 /dev.env
 output/task_info.json
+# 忽略所有子目录中的__pycache__目录
+**/__pycache__/

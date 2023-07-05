@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 # Local
-from ..utils import y_table, c_table
+from ..utils import y_table, c_table, y_table_mnist, c_table_mnist
 
 
 class rgb_to_ycbcr_jpeg(nn.Module):
@@ -26,11 +26,12 @@ class rgb_to_ycbcr_jpeg(nn.Module):
 
     def forward(self, image):
         image = image.permute(0, 2, 3, 1)
+        if image.size(3) == 1:
+            image = image.repeat(1, 1, 1, 3)
         result = torch.tensordot(image, self.matrix, dims=1) + self.shift
     #    result = torch.from_numpy(result)
         result.view(image.shape)
         return result
-
 
 
 class chroma_subsampling(nn.Module):
@@ -70,6 +71,8 @@ class block_splitting(nn.Module):
     def forward(self, image):
         height, width = image.shape[1:3]
         batch_size = image.shape[0]
+        if height == 28: #
+            self.k = 7 #
         image_reshaped = image.view(batch_size, height // self.k, self.k, -1, self.k)
         image_transposed = image_reshaped.permute(0, 1, 3, 2, 4)
         return image_transposed.contiguous().view(batch_size, -1, self.k, self.k)
@@ -95,6 +98,17 @@ class dct_8x8(nn.Module):
         
     def forward(self, image):
         image = image - 128
+        ###
+        if image.size(2) == 7:
+            tensor = np.zeros((7, 7, 7, 7), dtype=np.float32)
+            for x, y, u, v in itertools.product(range(7), repeat=4):
+                tensor[x, y, u, v] = np.cos((2 * x + 1) * u * np.pi / 14) * np.cos(
+                    (2 * y + 1) * v * np.pi / 14)
+            alpha = np.array([1. / np.sqrt(2)] + [1] * 6)
+            #
+            self.tensor =  nn.Parameter(torch.from_numpy(tensor).float())
+            self.scale = nn.Parameter(torch.from_numpy(np.outer(alpha, alpha) * 0.25).float() )
+        ###
         result = self.scale * torch.tensordot(image, self.tensor, dims=2)
         result.view(image.shape)
         return result
@@ -116,6 +130,10 @@ class y_quantize(nn.Module):
         self.y_table = y_table
 
     def forward(self, image):
+        ###
+        if image.size(2) == 7:
+            self.y_table = y_table_mnist
+        ###
         image = image.float() / (self.y_table * self.factor)
         image = self.rounding(image)
         return image
@@ -137,6 +155,10 @@ class c_quantize(nn.Module):
         self.c_table = c_table
 
     def forward(self, image):
+        ###
+        if image.size(2) == 7:
+            self.c_table = c_table_mnist
+        ###
         image = image.float() / (self.c_table * self.factor)
         image = self.rounding(image)
         return image
