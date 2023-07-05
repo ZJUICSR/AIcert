@@ -37,7 +37,7 @@ import matplotlib.pyplot as plt
 from function.formal_verify.veritex import Net as reachNet
 from function.formal_verify.veritex.networks.cnn import Method as ReachMethod
 from function.formal_verify.veritex.utils.plot_poly import plot_polytope2d
-ROOT = osp.dirname(osp.abspath(__file__))
+
 from function.defense.jpeg import Jpeg
 from function.defense.twis import Twis
 from function.defense.region_based import RegionBased
@@ -49,7 +49,10 @@ from function.defense.detector.poison.detect_poison import *
 from function.defense.transformer.poisoning.transformer_poison import *
 from function.defense.sage.sage import *
 from function.defense.models import *
+from torchvision.models import vgg16
+from function.side import *
 
+ROOT = osp.dirname(osp.abspath(__file__))
 def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList):
     """模型公平性提升
     :params tid:主任务ID
@@ -623,8 +626,6 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, device):
         result = lime_image_ex(img, net, model_name, dataset, device, root, save_path)
         
         res[adv_method]=result
-        
-        print(result)
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json")) 
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"] = 2
@@ -704,7 +705,6 @@ def knowledge_consistency(tid, stid, arch,dataset,img_path,layer):
     x_ori = transform(img)
     y = net1(x_ori.unsqueeze(0))
     y = np.argmax(y.cpu().detach().numpy())
-    print(y)
     x = get_feature(x_ori, net1,arch,conv_layer)
     input_size = x.shape
     output_size = x.shape
@@ -756,11 +756,9 @@ def reach(tid,stid,dataset,pic_path,label,target_label):
     img = cv2.imread(pic_path)
     image=transf(img)
     image=torch.unsqueeze(image, 0)
-    print(image.shape)
     label=torch.tensor(int(label))
     target_label=torch.tensor(int(target_label))
     # [image, label, target_label, _] = torch.load("/mnt/data/ai/veritex/examples/CIFAR10/data/images/0.pt")
-    print(image.shape)
 
     attack_block = (1,1)
     epsilon = 0.02
@@ -782,9 +780,6 @@ def reach(tid,stid,dataset,pic_path,label,target_label):
         plot_polytope2d(out_vertices[:, [dim0, dim1]], ax, color='b', alpha=1.0, edgecolor='k', linewidth=0.0,zorder=2)
     ax.plot(sims[:,dim0], sims[:,dim1],'k.',zorder=1)
     ax.autoscale()
-    # ax.set_xlabel(f'Correct class: $y_{dim0}$', fontsize=16)
-    # ax.set_ylabel(f'Adversarial class: $y_{dim1}$', fontsize=16)
-    # plt.title('Reachability analysis of CNNs with input pixels under perturbation. \nBlue area represents the reachable domain. \nBlack dots represent simultations')
     plt.tight_layout()
     plt.show()
     pt_dir=os.path.dirname(pic_path)
@@ -795,7 +790,7 @@ def reach(tid,stid,dataset,pic_path,label,target_label):
     }
     return resp
 
-def detect(adv_dataset, adv_method, adv_nums, defense_methods, adv_examples=None):
+def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_examples=None):
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu") 
     if torch.cuda.is_available():
@@ -803,15 +798,30 @@ def detect(adv_dataset, adv_method, adv_nums, defense_methods, adv_examples=None
     if adv_dataset == 'CIFAR10':
         mean = [0.4914, 0.4822, 0.4465]
         std = [0.2023, 0.1994, 0.2010]
-        model = ResNet18()
-        checkpoint = torch.load('./model/model-cifar-wideResNet/model-wideres-epoch85.pt')
+        if adv_model == 'ResNet18':
+            model = ResNet18()
+            checkpoint = torch.load(osp.join(ROOT,'model/model-cifar-resnet18/model-res-epoch85.pt'))
+        elif adv_model == 'VGG16':
+            model = vgg16()
+            model.classifier[6] = nn.Linear(4096, 10)
+            checkpoint = torch.load(osp.join(ROOT,'model/model-cifar-vgg16/model-vgg16-epoch85.pt'))
+        else:
+            raise Exception('CIFAR10 can only use ResNet18 and VGG16!')
         model.load_state_dict(checkpoint)
         model = model.to(device)
     elif adv_dataset == 'MNIST':
         mean = (0.1307,)
         std = (0.3081,)
-        model = SmallCNN()
-        checkpoint = torch.load('./model/model-mnist-smallCNN/model-nn-epoch61.pt')
+        if adv_model == 'SmallCNN':
+            model = SmallCNN()
+            checkpoint = torch.load(osp.join(ROOT,'model/model-mnist-smallCNN/model-nn-epoch61.pt'))
+        elif adv_model == 'VGG16':
+            model = vgg16()
+            model.features[0] = nn.Conv2d(1, 64, kernel_size=3, padding=1)
+            model.classifier[6] = nn.Linear(4096, 10)
+            checkpoint = torch.load(osp.join(ROOT,'model/model-mnist-vgg16/model-vgg16-epoch32.pt'))
+        else:
+            raise Exception('MNIST can only use SmallCNN and VGG16!')
         model.load_state_dict(checkpoint)
         model = model.to(device).eval()    
 
@@ -868,3 +878,33 @@ def detect(adv_dataset, adv_method, adv_nums, defense_methods, adv_examples=None
 
     _, _, detect_rate, no_defense_accuracy = detector.detect()
     return detect_rate, no_defense_accuracy
+
+
+def run_side_api(trs_file, methods, tid, stid):
+    
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"][stid]["state"]=1
+    taskinfo[tid]["state"]=1
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
+    logging.info("开始执行侧信道分析")
+    res={}
+    for method in methods:
+        logging.info("当前分析文件为{:s}，分析方法为{:s}，分析时间较久，约需30分钟".format(trs_file, method))
+        outpath = osp.join(ROOT,"output", tid,stid + "_" + method+"_out.txt")
+        trs_file_path = osp.join(ROOT,"dataset/Trs/samples",trs_file)
+        random_file = osp.join(ROOT,"dataset/Trs/random","randdata_"+trs_file.split("_")[1].split(".")[0]+".trs")
+        use_time = run_side(trs_file_path, random_file, method, outpath)
+        if method in ["cpa","dpa"]:
+            for line in open(outpath, 'r'):
+                res[method] = [float(s) for s in line.split()]
+        else:
+            # 其他方法结果处理
+            pass 
+        logging.info("分析方法{:s}执行结束，耗时{:s}s".format(method,str(round(use_time,1))))
+    logging.info("侧信道分析执行结束！")
+    IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"][stid]["state"] = 2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_task_success_v2(tid)
