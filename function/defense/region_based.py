@@ -95,7 +95,10 @@ class RegionBased(object):
             if self.adv_dataset == 'CIFAR10':
                 noise = torch.rand((batch_size,3,32,32)).to(self.device)
             elif self.adv_dataset == 'MNIST':
-                noise = torch.rand((batch_size,1,28,28)).to(self.device)
+                if self.model.__class__.__name__ == 'VGG':
+                    noise = torch.rand((batch_size,1,32,32)).to(self.device)
+                else:
+                    noise = torch.rand((batch_size,1,28,28)).to(self.device)
             imgs = img.squeeze().repeat(batch_size,1,1,1)    
             noise = noise*2.0 - 1.0
             noise = noise * self.radius

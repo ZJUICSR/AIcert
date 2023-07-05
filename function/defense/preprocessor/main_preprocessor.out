@@ -7837,7 +7837,7 @@ Traceback (most recent call last):
   File "../../../function/defense/preprocessor/preprocessor.py", line 398, in detect
     return self.detect_base(DefenseGAN)
   File "../../../function/defense/preprocessor/preprocessor.py", line 82, in detect_base
-    gen_tf, enc_tf, z_ph, image_to_enc_ph = load_model(sess, "GAN.model-200000", "/mnt/data2/yxl/AI-platform/utils/resources/models/cifar10") # model tarained with 10 epochs
+    gen_tf, enc_tf, z_ph, image_to_enc_ph = load_model(sess, "GAN.model-200000", "./utils/resources/models/cifar10") # model tarained with 10 epochs
   File "../../../function/defense/preprocessor/preprocessor.py", line 352, in load_model
     generator_tf = graph.get_tensor_by_name("generator/output:0")
   File "/home/ubuntu/.local/lib/python3.7/site-packages/tensorflow/python/framework/ops.py", line 3972, in get_tensor_by_name
