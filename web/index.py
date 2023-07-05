@@ -640,52 +640,6 @@ def get_result():
         print(result)
         return jsonify({"code":1,"msg":"success","result":result,"stop":stopflag})
 
-# ----------------- 课题4 形式化验证 -----------------
-
-@app.route('/FormalVerification', methods=['GET',"POST"])
-def FormalVerification():
-    
-    if (request.method == "GET"):
-        return render_template("former_verification.html")
-    else:
-        # res = {
-        #     "tid":"20230224_1106_d5ab4b1",
-        #     "stid":"S20230224_1106_368e295"
-        # }
-        # return jsonify(res)
-        inputParam = json.loads(request.data)
-        param = {
-            "dataset": inputParam["dataset"],
-            "model": inputParam['model'],
-            "size": int(inputParam["size"]),
-            "up_eps": float(inputParam["up_eps"]),
-            "down_eps": float(inputParam["down_eps"]),
-            "steps": int(inputParam["steps"]),
-            "task_id": inputParam["task_id"],
-        }
-        tid = inputParam["task_id"]
-        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
-        stid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        print("*************************************add stid******************")
-        taskinfo[tid]["function"].update({stid:{
-            "type":"formal_verification",
-            "state":0,
-            "name":["formal_verification"],
-            "dataset":inputParam["dataset"],
-            "model":inputParam['model']
-        }})
-        taskinfo[tid]["dataset"]=inputParam["dataset"]
-        taskinfo[tid]["model"]=inputParam['model']
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        t2 = threading.Thread(target=interface.run_verify, args=(tid, stid, param))
-        t2.setDaemon(True)
-        t2.start()
-        res = {
-            "tid":tid,
-            "stid":stid
-        }
-        return jsonify(res)
 
 # ----------------- 课题1 对抗攻击评估 -----------------
 @app.route('/Attack/AdvAttack', methods=['POST'])
@@ -1134,6 +1088,70 @@ def AttackLime():
         return jsonify(res)
     else:
         abort(403)
+from interface import detect
+from werkzeug.utils import secure_filename
+import numpy as np
+# ----------------- 课题1 防御 -----------------
+@app.route("/defense", methods=["GET", "POST"])
+def home():
+    return render_template("Adv_detect.html")
+
+@app.route("/detect", methods=["POST"])
+def Detect():
+    adv_dataset = request.form.get("adv_dataset")
+    adv_model = request.form.get("adv_model")
+    adv_method = request.form.get("adv_method")
+    adv_nums = request.form.get("adv_nums")
+    # tid=request.form.get("tid")
+    tid="20230625_0948_fd3c890"
+    # defense_methods = request.form.getlist("defense_methods[]")
+    defense_methods_str = request.form.get("defense_methods")
+    defense_methods = json.loads(defense_methods_str)
+    adv_nums = int(adv_nums)
+    stid = "S"+IOtool.get_task_id(str(format_time))
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"].update({stid:{
+        "type":"attack_defense",
+        "state":0,
+        "name":["attack_defense"],
+        "dataset":adv_dataset,
+        "method":defense_methods,
+        "model":adv_method,
+    }})
+    taskinfo[tid]["dataset"] = adv_dataset
+    taskinfo[tid]["model"] = adv_method
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    
+    if 'adv_examples' in request.files:
+        adv_examples = request.files['adv_examples']
+        # 获取文件名
+        file_name = secure_filename(adv_examples.filename)
+        
+        # 生成唯一的文件路径
+        adv_file_path = "./dataset/adv_examples/" + file_name
+        # 将对抗样本文件保存到服务器上的指定位置
+        adv_examples.save(adv_file_path)
+    else:
+        adv_file_path = None
+    
+    detect_rate_dict = {}
+    print("-----------defense_methods:",defense_methods)
+    for defense_method in defense_methods:
+        detect_rate, no_defense_accuracy = detect(adv_dataset, adv_model, adv_method, adv_nums, defense_method, adv_file_path)
+        detect_rate_dict[defense_method] = round(detect_rate, 4)
+    no_defense_accuracy_list = no_defense_accuracy.tolist() if isinstance(no_defense_accuracy, np.ndarray) else no_defense_accuracy
+    response_data = {
+        "detect_rates": detect_rate_dict,
+        "no_defense_accuracy": no_defense_accuracy_list
+    }
+    
+    IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo[tid]["function"][stid]["state"] = 2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_task_success_v2(tid)
+    
+    return json.dumps(response_data)
 # ----------------- 课题2 测试样本自动生成 -----------------
 @app.route('/Concolic/SamGenParamGet', methods=['GET','POST'])
 def Concolic():
@@ -1285,7 +1303,83 @@ def DeepSstParamSet():
     else:
         abort(403)
 
+# ----------------- 课题3 侧信道分析 -----------------
+@app.route('/SideAnalysis', methods=["POST"])
+def SideAnalysis():
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        trs_file = inputParam["trs_file"]
+        methods = inputParam["methods"]
+        tid = inputParam["tid"]
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["function"].update({stid:{
+            "type":"attack_defense",
+            "state":0,
+            "name":["attack_defense"],
+            "dataset":"",
+            "method":methods,
+            "model":"",
+        }})
+        taskinfo[tid]["dataset"] = ""
+        taskinfo[tid]["model"] = ""
+        print("index root:",ROOT)
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        t2 = threading.Thread(target=interface.run_side_api,args=(trs_file, methods, tid, stid))
+        t2.setDaemon(True)
+        t2.start()
+        res = {"code":1,"msg":"success","Taskid":tid,"stid":stid}
+        return jsonify(res)
+    else:
+        abort(403)
        
+# ----------------- 课题4 形式化验证 -----------------
+
+@app.route('/FormalVerification', methods=['GET',"POST"])
+def FormalVerification():
+    
+    if (request.method == "GET"):
+        return render_template("former_verification.html")
+    else:
+        # res = {
+        #     "tid":"20230224_1106_d5ab4b1",
+        #     "stid":"S20230224_1106_368e295"
+        # }
+        # return jsonify(res)
+        inputParam = json.loads(request.data)
+        param = {
+            "dataset": inputParam["dataset"],
+            "model": inputParam['model'],
+            "size": int(inputParam["size"]),
+            "up_eps": float(inputParam["up_eps"]),
+            "down_eps": float(inputParam["down_eps"]),
+            "steps": int(inputParam["steps"]),
+            "task_id": inputParam["task_id"],
+        }
+        tid = inputParam["task_id"]
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        print("*************************************add stid******************")
+        taskinfo[tid]["function"].update({stid:{
+            "type":"formal_verification",
+            "state":0,
+            "name":["formal_verification"],
+            "dataset":inputParam["dataset"],
+            "model":inputParam['model']
+        }})
+        taskinfo[tid]["dataset"]=inputParam["dataset"]
+        taskinfo[tid]["model"]=inputParam['model']
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        t2 = threading.Thread(target=interface.run_verify, args=(tid, stid, param))
+        t2.setDaemon(True)
+        t2.start()
+        res = {
+            "tid":tid,
+            "stid":stid
+        }
+        return jsonify(res)
 
 
 def app_run(args):

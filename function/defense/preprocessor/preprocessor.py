@@ -8,7 +8,8 @@ import tensorflow as tf
 import torch
 import torchvision
 from torch.nn import Module
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader
+from torchvision.models import vgg16
 import torchvision.transforms as transforms
 import torch.nn as nn
 import torch.optim as optim
@@ -70,16 +71,16 @@ class Prepro(object):
         with torch.no_grad():
             predictions = self.model(cln_imgs)
             predictions_adv = self.model(adv_imgs)
-        acc = torch.sum(torch.argmax(predictions, dim = 1) == true_labels) / float(len(adv_imgs))
-        print('acc: ', float(acc.cpu()))
-        rob = torch.sum(torch.argmax(predictions_adv, dim = 1) == true_labels) / float(len(adv_imgs))
-        print('rob: ', float(rob.cpu()))
+        # acc = torch.sum(torch.argmax(predictions, dim = 1) == true_labels) / float(len(adv_imgs))
+        # print('acc: ', float(acc.cpu()))
+        # rob = torch.sum(torch.argmax(predictions_adv, dim = 1) == true_labels) / float(len(adv_imgs))
+        # print('rob: ', float(rob.cpu()))
         if preprocess_method.__name__ == 'InverseGAN' or preprocess_method.__name__ == 'DefenseGAN':
             sess = tf.Session()
             if self.adv_dataset == 'CIFAR10':
-                gen_tf, enc_tf, z_ph, image_to_enc_ph = load_model(sess, "model-dcgan", "/mnt/data2/yxl/AI-platform/model/gan_model/cifar10")
+                gen_tf, enc_tf, z_ph, image_to_enc_ph = load_model(sess, "model-dcgan", "./model/gan_model/cifar10")
             elif self.adv_dataset == 'MNIST':
-                gen_tf, enc_tf, z_ph, image_to_enc_ph = load_model(sess, "model-dcgan", "/mnt/data2/yxl/AI-platform/model/gan_model/mnist")
+                gen_tf, enc_tf, z_ph, image_to_enc_ph = load_model(sess, "model-dcgan", "./model/gan_model/mnist")
             gan = TensorFlowGenerator(input_ph=z_ph, model=gen_tf, sess=sess,)
             inverse_gan = TensorFlowEncoder(input_ph=image_to_enc_ph, model=enc_tf, sess=sess,)
             if preprocess_method.__name__ == 'DefenseGAN':
@@ -109,18 +110,20 @@ class Prepro(object):
         print("Step 1: Load the {} dataset".format(self.adv_dataset))
         kwargs = {'num_workers': 1, 'pin_memory': True} if True else {}
         if self.adv_dataset == 'MNIST':
-            transform_train = transforms.Compose([
-                transforms.RandomCrop(28, padding=4),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-            ])
-            transform_test = transforms.Compose([
-                transforms.ToTensor(),
-            ])
-            trainset = torchvision.datasets.MNIST(root='/mnt/data2/yxl/AI-platform/dataset/', train=True, download=True, transform=transform_train)
-            train_loader = DataLoader(trainset, batch_size=64, shuffle=True, **kwargs)
-            testset = torchvision.datasets.MNIST(root='/mnt/data2/yxl/AI-platform/dataset/', train=False, download=True, transform=transform_test)
-            test_loader = DataLoader(testset, batch_size=64, shuffle=False, **kwargs)
+            if self.model.__class__.__name__ == 'VGG':
+                transform_train = transforms.Compose([
+                    transforms.Resize((32, 32)),
+                    transforms.ToTensor(),
+                ])
+            else:
+                transform_train = transforms.Compose([
+                    transforms.ToTensor(),
+                ])
+            transform_test = transform_train
+            trainset = torchvision.datasets.MNIST(root='./dataset/', train=True, download=True, transform=transform_train)
+            train_loader = DataLoader(trainset, batch_size=128, shuffle=True, **kwargs)
+            testset = torchvision.datasets.MNIST(root='./dataset/', train=False, download=True, transform=transform_test)
+            test_loader = DataLoader(testset, batch_size=128, shuffle=False, **kwargs)
         elif self.adv_dataset == 'CIFAR10':
             transform_train = transforms.Compose([
                 transforms.RandomCrop(32, padding=4),
@@ -130,10 +133,10 @@ class Prepro(object):
             transform_test = transforms.Compose([
                 transforms.ToTensor(),
             ])
-            trainset = torchvision.datasets.CIFAR10(root='/mnt/data2/yxl/AI-platform/dataset/CIFAR10', train=True, download=True, transform=transform_train)
-            train_loader = DataLoader(trainset, batch_size=64, shuffle=True, **kwargs)
-            testset = torchvision.datasets.CIFAR10(root='/mnt/data2/yxl/AI-platform/dataset/CIFAR10', train=False, download=True, transform=transform_test)
-            test_loader = DataLoader(testset, batch_size=64, shuffle=False, **kwargs)
+            trainset = torchvision.datasets.CIFAR10(root='./dataset/CIFAR10', train=True, download=True, transform=transform_train)
+            train_loader = DataLoader(trainset, batch_size=128, shuffle=True, **kwargs)
+            testset = torchvision.datasets.CIFAR10(root='./dataset/CIFAR10', train=False, download=True, transform=transform_test)
+            test_loader = DataLoader(testset, batch_size=128, shuffle=False, **kwargs)
         l = [x for (x, y) in test_loader]
         x_test = torch.cat(l, 0)
         l = [y for (x, y) in test_loader]
@@ -156,9 +159,24 @@ class Prepro(object):
 
         print("Step 2: Create the model")
         if self.adv_dataset == 'CIFAR10':
-            model = ResNet18().to(self.device)
+            if self.model.__class__.__name__ == 'ResNet':
+                model = ResNet18()
+            elif self.model.__class__.__name__ == 'VGG':
+                model = vgg16()
+                model.classifier[6] = nn.Linear(4096, 10)
+            else:
+                raise Exception('CIFAR10 can only use ResNet18 and VGG16!')
+            model = model.to(self.device)
         elif self.adv_dataset == 'MNIST':
-            model = SmallCNN().to(self.device)
+            if self.model.__class__.__name__ == 'SmallCNN':
+                model = SmallCNN()
+            elif self.model.__class__.__name__ == 'VGG':
+                model = vgg16()
+                model.features[0] = nn.Conv2d(1, 64, kernel_size=3, padding=1)
+                model.classifier[6] = nn.Linear(4096, 10)
+            else:
+                raise Exception('MNIST can only use SmallCNN and VGG16!')
+            model = model.to(self.device)
         print("Step 3: Define the optimizer")
         optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=5e-4)
         print("Step 4: Train the {} classifier".format(preprocess_method.__name__))
@@ -211,43 +229,43 @@ class Prepro(object):
         print('detect rate: ', self.detect_rate)
 
 # class Feature_squeezing(Prepro):
-#     def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-#         super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+#     def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+#         super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
 #     def detect(self):
 #         return self.detect_base(FeatureSqueezing)
 
 # class Jpeg_compression(Prepro):
-#     def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-#         super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+#     def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+#         super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
 #     def detect(self):
 #         return self.detect_base(JpegCompression)
 
 class Label_smoothing(Prepro):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.train(LabelSmoothing)
 
 class Spatial_smoothing(Prepro):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.detect_base(SpatialSmoothing)
 
 class Gaussian_augmentation(Prepro):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.train(GaussianAugmentation)
 
 class Total_var_min(Prepro):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.detect_base(TotalVarMin)
@@ -260,6 +278,16 @@ class ModelImageMNIST(nn.Module):
         x = x.view(-1, 28 * 28 * 1)
         logit_output = self.fc(x)
         logit_output = logit_output.view(-1, 28, 28, 1, 256)
+        return logit_output
+    
+class ModelImageMNISTVGG(nn.Module):
+    def __init__(self):
+        super(ModelImageMNISTVGG, self).__init__()
+        self.fc = nn.Linear(32 * 32 * 1, 32 * 32 * 1 * 256)
+    def forward(self, x):
+        x = x.view(-1, 32 * 32 * 1)
+        logit_output = self.fc(x)
+        logit_output = logit_output.view(-1, 32, 32, 1, 256)
         return logit_output
 
 class ModelImageCIFAR10(nn.Module):
@@ -290,8 +318,8 @@ def bpda(model, adv_dataset, examples, labels):
     return adv_examples
 
 class Pixel_defend(Prepro):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         if self.adv_examples is None:
@@ -305,13 +333,19 @@ class Pixel_defend(Prepro):
         if self.adv_dataset == 'CIFAR10':
             model = ModelImageCIFAR10()
         elif self.adv_dataset == 'MNIST':
-            model = ModelImageMNIST()
+            if self.model.__class__.__name__ == 'VGG':
+                model = ModelImageMNISTVGG()
+            else:
+                model = ModelImageMNIST()
         loss_fn = nn.CrossEntropyLoss()
         optimizer = optim.Adam(model.parameters(), lr=0.01)
         if self.adv_dataset == 'CIFAR10':
             input_shape = (3, 32, 32)
         elif self.adv_dataset == 'MNIST':
-            input_shape = (1, 28, 28)
+            if self.model.__class__.__name__ == 'VGG':
+                input_shape = (1, 32, 32)
+            else:
+                input_shape = (1, 28, 28)
         pixel_cnn = PyTorchClassifier(
             model=model, loss=loss_fn, optimizer=optimizer, input_shape=input_shape, nb_classes=10, clip_values=(0, 1)
         )
@@ -333,7 +367,7 @@ class Pixel_defend(Prepro):
                 predictions_ss = self.model(torch.from_numpy(adv_imgs_ss).to(self.device))
             accuracy = torch.sum(torch.argmax(predictions, dim = 1) == true_labels) / float(len(adv_imgs)) #0.9360000491142273 
             robustness = torch.sum(torch.argmax(predictions_adv, dim = 1) == true_labels) / float(len(adv_imgs)) #0.017000000923871994
-            print('accuracy:', float(accuracy.cpu()), 'robustness:', float(robustness.cpu()))
+            # print('accuracy:', float(accuracy.cpu()), 'robustness:', float(robustness.cpu()))
             detect_rate = torch.sum(torch.argmax(predictions_ss, dim = 1) == true_labels) / float(len(adv_imgs)) #0.029000001028180122
             self.detect_rate = float(detect_rate.cpu())
         if self.adv_examples is None:
@@ -386,13 +420,13 @@ class SmoothCrossEntropyLoss(nn.Module):
 
 
 class Inverse_gan(Prepro):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     def detect(self):
         return self.detect_base(InverseGAN)
     
 class Defense_gan(Inverse_gan):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     def detect(self):
         return self.detect_base(DefenseGAN)
