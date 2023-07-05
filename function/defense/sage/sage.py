@@ -222,7 +222,7 @@ class Sage(object):
         Load model
         """
         model = resnet18(10)
-        backdoor_path = "/mnt/data2/yxl/AI-platform/model/robnet-resnet18-cifar10.pth"
+        backdoor_path = "./model/robnet-resnet18-cifar10.pth"
         model_path = os.path.join(backdoor_path)
         print('Loading Model from {}'.format(model_path))
         checkpoint = torch.load(model_path, map_location='cpu')
@@ -236,8 +236,8 @@ class Sage(object):
                                         std=[0.2023, 0.1994, 0.2010],
                                     )])
         testset = datasets.CIFAR10(
-                root='/mnt/data2/yxl/AI-platform/dataset/CIFAR10', train=False, download=True)
-        test_data = torch.load('/mnt/data2/yxl/AI-platform/dataset/CIFAR10/cifar10_poisoned_samples_test.pth')
+                root='./dataset/CIFAR10', train=False, download=True)
+        test_data = torch.load('./dataset/CIFAR10/cifar10_poisoned_samples_test.pth')
         
         test_data_clean = DatasetFull(
             full_dataset=testset, transform=tf_test)
@@ -258,7 +258,7 @@ class Sage(object):
                                         std=[0.2023, 0.1994, 0.2010],
                                     )])
         trainset = datasets.CIFAR10(
-                root='/mnt/data2/yxl/AI-platform/dataset/CIFAR10', train=True, download=True)
+                root='./dataset/CIFAR10', train=True, download=True)
         
         train_data = DatasetPart(ratio = 0.1, full_dataset=trainset, transform=tf_train)
         train_loader = DataLoader(

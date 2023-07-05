@@ -13,12 +13,31 @@ y_table = np.array(
     dtype=np.float32).T
 
 y_table = nn.Parameter(torch.from_numpy(y_table))
+
+###
+y_table_mnist = np.array(
+                [[16, 11, 10, 16, 24, 40, 51],  [12, 12, 14, 19, 26, 58, 60], 
+                [14, 13, 16, 24, 40, 57, 69],   [14, 17, 22, 29, 51, 87, 80],
+                [18, 22, 37, 56, 68, 109, 103],  [24, 35, 55, 64, 81, 104, 113],
+                [49, 64, 78, 87, 103, 121, 120]],
+                dtype=np.float32).T
+
+y_table_mnist = nn.Parameter(torch.from_numpy(y_table_mnist))
+###
 #
 c_table = np.empty((8, 8), dtype=np.float32)
 c_table.fill(99)
 c_table[:4, :4] = np.array([[17, 18, 24, 47], [18, 21, 26, 66],
                             [24, 26, 56, 99], [47, 66, 99, 99]]).T
 c_table = nn.Parameter(torch.from_numpy(c_table))
+
+###
+c_table_mnist = np.empty((7, 7), dtype=np.float32)
+c_table_mnist.fill(99)
+c_table_mnist[:4, :4] = np.array([[17, 18, 24, 47], [18, 21, 26, 66],
+                                        [24, 26, 56, 99], [47, 66, 99, 99]]).T
+c_table_mnist = nn.Parameter(torch.from_numpy(c_table_mnist))
+###
 
 
 def diff_round(x):
