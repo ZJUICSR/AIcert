@@ -5,7 +5,8 @@ import torchvision.transforms as transforms
 import torch.nn as nn
 import torch.optim as optim
 from torch.nn import Module
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader
+from torchvision.models import vgg16
 from typing import List, Optional, Union
 from art.defences.trainer import *
 from function.defense.trainer.trades import * #
@@ -56,12 +57,16 @@ class at(object):
         print("Step 1: Load the {} dataset".format(self.adv_dataset))
         kwargs = {'num_workers': 1, 'pin_memory': True} if True else {}
         if self.adv_dataset == 'MNIST':
-            transform_train = transforms.Compose([
-                transforms.RandomCrop(28, padding=4),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-            ])
-            trainset = torchvision.datasets.MNIST(root='/mnt/data2/yxl/AI-platform/dataset', train=True, download=True, transform=transform_train)
+            if self.model.__class__.__name__ == 'VGG':
+                transform_train = transforms.Compose([
+                    transforms.Resize((32, 32)),
+                    transforms.ToTensor(),
+                ])
+            else:
+                transform_train = transforms.Compose([
+                    transforms.ToTensor(),
+                ])
+            trainset = torchvision.datasets.MNIST(root='./dataset', train=True, download=True, transform=transform_train)
             train_loader = DataLoader(trainset, batch_size=128, shuffle=True, **kwargs)
         elif self.adv_dataset == 'CIFAR10':
             transform_train = transforms.Compose([
@@ -69,7 +74,7 @@ class at(object):
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
             ])
-            trainset = torchvision.datasets.CIFAR10(root='/mnt/data2/yxl/AI-platform/dataset/CIFAR10', train=True, download=True, transform=transform_train)
+            trainset = torchvision.datasets.CIFAR10(root='./dataset/CIFAR10', train=True, download=True, transform=transform_train)
             train_loader = DataLoader(trainset, batch_size=128, shuffle=True, **kwargs)
 
         return train_loader
@@ -86,14 +91,29 @@ class at(object):
         train_loader = self.dataset()
         print("Step 2: Create the model")
         if self.adv_dataset == 'CIFAR10':
-            model = ResNet18().to(self.device)
+            if self.model.__class__.__name__ == 'ResNet':
+                model = ResNet18()
+            elif self.model.__class__.__name__ == 'VGG':
+                model = vgg16()
+                model.classifier[6] = nn.Linear(4096, 10)
+            else:
+                raise Exception('CIFAR10 can only use ResNet18 and VGG16!')
+            model = model.to(self.device)
             train_config = {
                 'epsilon': 0.031,
                 'num_steps': 10,
                 'step_size': 0.007,
             }
         elif self.adv_dataset == 'MNIST':
-            model = SmallCNN().to(self.device)
+            if self.model.__class__.__name__ == 'SmallCNN':
+                model = SmallCNN()
+            elif self.model.__class__.__name__ == 'VGG':
+                model = vgg16()
+                model.features[0] = nn.Conv2d(1, 64, kernel_size=3, padding=1)
+                model.classifier[6] = nn.Linear(4096, 10)
+            else:
+                raise Exception('MNIST can only use SmallCNN and VGG16!')
+            model = model.to(self.device)
             train_config = {
                 'epsilon': 0.3,
                 'num_steps': 40,
@@ -133,22 +153,22 @@ class at(object):
         print('detect rate: ', self.detect_rate)
 
 class Madry(at):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
 
     def detect(self):
         return self.train('Madry')
 
 class Trades(at):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
 
     def detect(self):
         return self.train('TRADES')
 
 class FreeAT(at):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
 
     def detect(self):
         if self.adv_examples is None:
@@ -163,9 +183,24 @@ class FreeAT(at):
 
         print("Step 2: Create the model")
         if self.adv_dataset == 'CIFAR10':
-            model = ResNet18().to(self.device)
+            if self.model.__class__.__name__ == 'ResNet':
+                model = ResNet18()
+            elif self.model.__class__.__name__ == 'VGG':
+                model = vgg16()
+                model.classifier[6] = nn.Linear(4096, 10)
+            else:
+                raise Exception('CIFAR10 can only use ResNet18 and VGG16!')
+            model = model.to(self.device)
         elif self.adv_dataset == 'MNIST':
-            model = SmallCNN().to(self.device)
+            if self.model.__class__.__name__ == 'SmallCNN':
+                model = SmallCNN()
+            elif self.model.__class__.__name__ == 'VGG':
+                model = vgg16()
+                model.features[0] = nn.Conv2d(1, 64, kernel_size=3, padding=1)
+                model.classifier[6] = nn.Linear(4096, 10)
+            else:
+                raise Exception('MNIST can only use SmallCNN and VGG16!')
+            model = model.to(self.device)
 
         print("Step 2a: Define the optimizer")
         optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=1e-4)
@@ -198,15 +233,15 @@ class FreeAT(at):
         return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
 
 class Mart(at):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
 
     def detect(self):
         return self.train('MART')
     
 class FastAT(at):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
 
     def detect(self):
         if self.adv_examples is None:
@@ -219,10 +254,25 @@ class FastAT(at):
         self.no_defense_accuracy = no_defense_accuracy.cpu().numpy()
         train_loader = self.dataset()
         if self.adv_dataset == 'CIFAR10':
-            model = ResNet18().to(self.device)
+            if self.model.__class__.__name__ == 'ResNet':
+                model = ResNet18()
+            elif self.model.__class__.__name__ == 'VGG':
+                model = vgg16()
+                model.classifier[6] = nn.Linear(4096, 10)
+            else:
+                raise Exception('CIFAR10 can only use ResNet18 and VGG16!')
+            model = model.to(self.device)
             train_config = {'epochs': 1, 'alpha': 0.01, 'epsilon': 0.3, 'attack_iters': 40, 'lr_max': 0.0001, 'lr_type': 'flat'}
         elif self.adv_dataset == 'MNIST':
-            model = SmallCNN().to(self.device)
+            if self.model.__class__.__name__ == 'SmallCNN':
+                model = SmallCNN()
+            elif self.model.__class__.__name__ == 'VGG':
+                model = vgg16()
+                model.features[0] = nn.Conv2d(1, 64, kernel_size=3, padding=1)
+                model.classifier[6] = nn.Linear(4096, 10)
+            else:
+                raise Exception('MNIST can only use SmallCNN and VGG16!')
+            model = model.to(self.device)
             train_config = {'epochs': 1, 'alpha': 2, 'epsilon': 8. / 255., 'attack_iters': 7, 'lr_max': 0.2, 'lr_type': 'cyclic'}
 
         model.train()
@@ -277,8 +327,8 @@ class FastAT(at):
         return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
     
 class Cartl(at):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
 
     def generate_adv_examples(self):
         return generate_adv_examples(self.model, self.adv_method, self.adv_dataset, self.adv_nums, self.device, normalize=True)

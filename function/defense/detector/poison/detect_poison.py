@@ -1,12 +1,16 @@
-import numpy as np
-from typing import List, Optional
-from typing import Union
+import os
 import torch
-from torch.nn import Module
+import numpy as np
 import torchvision.transforms as transforms
 import json
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
+from typing import List, Optional
+from typing import Union
+from torch.nn import Module
+from torchvision.models import vgg16
+from PIL import Image
+
 from sklearn.svm import SVC
 from art.attacks.poisoning.perturbations.image_perturbations import add_pattern_bd, add_single_bd
 from art.estimators.classification import PyTorchClassifier
@@ -22,8 +26,19 @@ from function.defense.models import *
 
 import logging
 logging.getLogger('tensorflow').disabled = True
+
+def save_jepg(adv_examples, output_path, adv_dataset):
+    # 将torch加载的图像转换为PIL图像
+    if adv_dataset == 'MNIST':
+        image = adv_examples.squeeze()
+    elif adv_dataset == 'CIFAR10':
+        image = adv_examples.transpose(1, 2, 0)
+    pil_image = Image.fromarray(image)
+    # 保存为JPEG图像
+    pil_image.save(output_path, "JPEG")
+
 def generate_backdoor(
-    x_clean, y_clean, percent_poison, backdoor_type="pattern", sources=np.arange(10), targets=(np.arange(10) + 1) % 10
+    x_clean, y_clean, percent_poison, backdoor_type="pattern", sources=np.arange(10), targets=(np.arange(10) + 1) % 10, dataset=None
 ):
     """
     Creates a backdoor in MNIST images by adding a pattern or pixel to the image and changing the label to a targeted
@@ -55,7 +70,10 @@ def generate_backdoor(
     x_poison = np.copy(x_clean)
     y_poison = np.copy(y_clean)
     is_poison = np.zeros(np.shape(y_poison))
-
+    x_clean_save = x_clean[:10].copy()
+    x_poison_save = np.copy(x_clean_save)
+    if dataset != None:
+        k = 0
     for i, (src, tgt) in enumerate(zip(sources, targets)):
         n_points_in_tgt = np.size(np.where(y_clean == tgt))
         num_poison = round((percent_poison * n_points_in_tgt) / (1 - percent_poison))
@@ -66,15 +84,36 @@ def generate_backdoor(
         indices_to_be_poisoned = np.random.choice(n_points_in_src, num_poison)
 
         imgs_to_be_poisoned = np.copy(src_imgs[indices_to_be_poisoned])
+        if dataset != None:
+            imgs_to_be_poisoned_save = np.copy(imgs_to_be_poisoned)
         if backdoor_type == "pattern":
             imgs_to_be_poisoned = add_pattern_bd(x=imgs_to_be_poisoned, pixel_value=max_val)
         elif backdoor_type == "pixel":
             imgs_to_be_poisoned = add_single_bd(imgs_to_be_poisoned, pixel_value=max_val)
+        if dataset != None:
+            if k < 10:
+                for j in range(len(imgs_to_be_poisoned)):
+                    x_clean_save[k] = imgs_to_be_poisoned_save[j]
+                    x_poison_save[k] = imgs_to_be_poisoned[j]
+                    k += 1
+                    print(k)
+                    if k == 10:
+                        break
         x_poison = np.append(x_poison, imgs_to_be_poisoned, axis=0)
         y_poison = np.append(y_poison, np.ones(num_poison) * tgt, axis=0)
         is_poison = np.append(is_poison, np.ones(num_poison))
 
     is_poison = is_poison != 0
+    if dataset != None:
+        image_num = min(np.sum(is_poison), 10)
+        for i in range(image_num):
+            output_dir = "./output/backdoor/" + str(i)
+            if not os.path.exists(output_dir):
+                # 如果文件夹不存在，则创建文件夹
+                os.makedirs(output_dir)
+            save_jepg(x_poison_save[i], output_dir + '/poisoned.jpeg', dataset)
+            save_jepg(x_clean_save[i], output_dir + '/clean.jpeg', dataset)
+            save_jepg(x_poison_save[i] - x_clean_save[i], output_dir + '/backdoor.jpeg', dataset)
 
     return is_poison, x_poison, y_poison
 
@@ -109,10 +148,10 @@ class Detectpoison(object):
     def train(self, detect_poison:PoisonFilteringDefence):
         print("Read {} dataset (x_raw contains the original images)".format(self.adv_dataset))
         if self.adv_dataset == 'CIFAR10':
-            config.ART_DATA_PATH = '/mnt/data2/yxl/AI-platform/dataset/CIFAR10'
+            config.ART_DATA_PATH = './dataset/CIFAR10'
             load_dataset = load_cifar10
         elif self.adv_dataset == 'MNIST':
-            config.ART_DATA_PATH = '/mnt/data2/yxl/AI-platform/dataset/MNIST'
+            config.ART_DATA_PATH = './dataset/MNIST'
             load_dataset = load_mnist
         (x_raw, y_raw), (x_raw_test, y_raw_test), min_, max_ = load_dataset(raw=True)
         # print(x_raw.shape, x_raw[0])
@@ -138,7 +177,7 @@ class Detectpoison(object):
             x_train = np.expand_dims(x_train, axis=3)
 
         print("Poison test data")
-        (is_poison_test, x_poisoned_raw_test, y_poisoned_raw_test) = generate_backdoor(x_raw_test, y_raw_test, perc_poison)
+        (is_poison_test, x_poisoned_raw_test, y_poisoned_raw_test) = generate_backdoor(x_raw_test, y_raw_test, perc_poison, dataset = self.adv_dataset)
         x_test, y_test = preprocess(x_poisoned_raw_test, y_poisoned_raw_test)
         print("Add channel axis")
         if self.adv_dataset == 'MNIST':
@@ -153,10 +192,23 @@ class Detectpoison(object):
         is_poison_train = is_poison_train[shuffled_indices]
 
         if self.adv_dataset == 'CIFAR10':
-            model = ResNet18()
+            if self.model.__class__.__name__ == 'ResNet':
+                model = ResNet18()
+            elif self.model.__class__.__name__ == 'VGG':
+                model = vgg16()
+                model.classifier[6] = nn.Linear(4096, 10)
+            else:
+                raise Exception('CIFAR10 can only use ResNet18 and VGG16!')
             input_shape = (3, 32, 32)
         elif self.adv_dataset == 'MNIST':
-            model = SmallCNN()
+            if self.model.__class__.__name__ == 'SmallCNN':
+                model = SmallCNN()
+            elif self.model.__class__.__name__ == 'VGG':
+                model = vgg16()
+                model.features[0] = nn.Conv2d(1, 64, kernel_size=3, padding=1)
+                model.classifier[6] = nn.Linear(4096, 10)
+            else:
+                raise Exception('MNIST can only use SmallCNN and VGG16!')
             input_shape = (1, 28, 28)
 
         classifier = PyTorchClassifier(
@@ -206,22 +258,22 @@ class Detectpoison(object):
         print('detect rate: ', self.detect_rate)
 
 class Activation_defence(Detectpoison):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.train(ActivationDefence)
 
 class Spectral_signature(Detectpoison):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.train(SpectralSignatureDefense)
 
 class Provenance_defense(Detectpoison):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         print('Load and transform {} data'.format(self.adv_dataset))
@@ -232,10 +284,10 @@ class Provenance_defense(Detectpoison):
         NB_DEVICES = 10
         kernel = "linear"
         if self.adv_dataset == 'CIFAR10':
-            config.ART_DATA_PATH = '/mnt/data2/yxl/AI-platform/dataset/CIFAR10'
+            config.ART_DATA_PATH = './dataset/CIFAR10'
             load_dataset = load_cifar10()
         elif self.adv_dataset == 'MNIST':
-            config.ART_DATA_PATH = '/mnt/data2/yxl/AI-platform/dataset/MNIST'
+            config.ART_DATA_PATH = './dataset/MNIST'
             load_dataset = load_mnist()
         (x_train, y_train), (x_test, y_test), min_, max_ = load_dataset
         y_train = np.argmax(y_train, axis=1)
