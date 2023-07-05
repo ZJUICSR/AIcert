@@ -17,7 +17,8 @@ def save_jepg(adv_examples, output_path, adv_dataset):
     pil_image.save(output_path, "JPEG")
 
 def generate_adv_examples(model, adv_method, adv_dataset, adv_nums, device, normalize=False):
-    clean_loader, num_classes = get_clean_loader(adv_dataset, normalize)
+    batch_size = 128
+    clean_loader, num_classes = get_clean_loader(model, adv_dataset, normalize, batch_size)
     if adv_dataset == 'CIFAR10':
         eps = 0.031
         nb_iter = 20
@@ -74,24 +75,24 @@ def generate_adv_examples(model, adv_method, adv_dataset, adv_nums, device, norm
             adv_examples = torch.cat((adv_examples, adv_data))
             adv_labels = torch.cat((adv_labels, adv_label))
         i += 1
-        if i * 128 > adv_nums:
+        if i * batch_size > adv_nums:
             break
     # adv_examples = adversary.perturb(clean_examples, true_labels)
     adv_examples = adv_examples[:adv_nums]
     count = 0
     image_num = min(adv_nums, 10)
     for i in range(image_num):
-        output_dir = "/mnt/data2/yxl/AI-platform/output/images/" + str(i)
+        output_dir = "./output/images/" + str(i)
         if not os.path.exists(output_dir):
             # 如果文件夹不存在，则创建文件夹
             os.makedirs(output_dir)
         save_jepg(adv_examples[i], output_dir + '/adv.jpeg', adv_dataset)
         save_jepg(clean_examples[i], output_dir + '/clean.jpeg', adv_dataset)
         save_jepg(adv_examples[i] - clean_examples[i], output_dir + '/noise.jpeg', adv_dataset)
-    # np.save('/mnt/data2/yxl/AI-platform/adv_' + adv_dataset + '_' + adv_method + '.npy', adv_examples.cpu().numpy())
+    # np.save('./adv_' + adv_dataset + '_' + adv_method + '.npy', adv_examples.cpu().numpy())
     # torch.save({
     #     'adv_img': adv_examples,
     #     'cln_img': clean_examples,
     #     'y': true_labels
-    # }, '/mnt/data2/yxl/AI-platform/dataset/adv_' + adv_dataset + '_' + adv_method + '.pt')
+    # }, './dataset/adv_' + adv_dataset + '_' + adv_method + '.pt')
     return adv_examples, clean_examples, true_labels

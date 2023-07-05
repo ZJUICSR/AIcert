@@ -3,7 +3,7 @@ nohup: ignoring input
   "See the documentation of nn.Upsample for details.".format(mode)
 got GPU
 Files already downloaded and verified
-Loading Model from /mnt/data2/yxl/AI-platform/model/robnet-resnet18-cifar10.pth
+Loading Model from ./model/robnet-resnet18-cifar10.pth
 Files already downloaded and verified
 full_train: 10000
 test_size: 10000 drop_size: 0

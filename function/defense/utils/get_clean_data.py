@@ -6,7 +6,7 @@ from torchvision import datasets
 # from .imagenette import ImageNette
 import torchvision.transforms as transforms
 
-def get_clean_loader(dataset, normalize=False):
+def get_clean_loader(model, dataset, normalize=False, batch_size=128):
     if dataset == 'CIFAR10':
         num_classes = 10
         if normalize:
@@ -19,25 +19,25 @@ def get_clean_loader(dataset, normalize=False):
             tf_test = transforms.Compose([
                 transforms.ToTensor(),])
         cleanset = datasets.CIFAR10(
-            root='/mnt/data2/yxl/AI-platform/dataset/CIFAR10', train=False, download=True, transform=tf_test)
+            root='./dataset/CIFAR10', train=False, download=True, transform=tf_test)
         clean_loader = DataLoader(dataset=cleanset,
-                                   batch_size=128,
+                                   batch_size=batch_size,
                                    shuffle=False,
                                    )
     elif dataset == 'MNIST':
         num_classes = 10
+        transforms_list = []
+        if model.__class__.__name__ == 'VGG':
+            transforms_list.append(transforms.Resize((32, 32)))
+        transforms_list.append(transforms.ToTensor())
         if normalize:
-            tf_test = transforms.Compose([
-                    transforms.ToTensor(),
-                    transforms.Normalize((0.1307, ), (0.3081, ))])
-        else:
-            tf_test = transforms.Compose([
-                    transforms.ToTensor(),])
+            transforms_list.append(transforms.Normalize((0.1307, ), (0.3081, )))
+        tf_test = transforms.Compose(transforms_list)
         cleanset = datasets.MNIST(
-            root = '/mnt/data2/yxl/AI-platform/dataset', train=False, download=True, transform=tf_test
+            root = './dataset', train=False, download=True, transform=tf_test
         )
         clean_loader = DataLoader(dataset=cleanset,
-                                   batch_size=128,
+                                   batch_size=batch_size,
                                    shuffle=False,
                                    )
     

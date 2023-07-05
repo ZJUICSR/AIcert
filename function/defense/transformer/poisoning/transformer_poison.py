@@ -1,8 +1,10 @@
+import os
 import numpy as np
 from typing import List, Optional
 from typing import Union
 import torch
 from torch.nn import Module
+from PIL import Image
 import torchvision.transforms as transforms
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -10,6 +12,8 @@ from keras.models import Sequential, Model
 from keras import layers
 from keras.layers import Dense, Flatten, Conv2D, MaxPooling2D, Dropout, AveragePooling2D, BatchNormalization, MaxPool2D, Input, Activation
 from keras.regularizers import l2
+# from keras.applications import VGG16
+from tensorflow.keras.applications import VGG16
 from art import config
 from art.utils import load_mnist
 from art.attacks.poisoning.perturbations.image_perturbations import add_pattern_bd, add_single_bd
@@ -88,6 +92,16 @@ def ResNet18(classes, input_shape, weight_decay=1e-4):
     model = Model(input, x, name='ResNet18')
     return model
 
+def save_jepg(adv_examples, output_path, adv_dataset):
+    # 将torch加载的图像转换为PIL图像
+    if adv_dataset == 'MNIST':
+        image = adv_examples.squeeze()
+    elif adv_dataset == 'CIFAR10':
+        image = adv_examples.transpose(1, 2, 0)
+    pil_image = Image.fromarray(image)
+    # 保存为JPEG图像
+    pil_image.save(output_path, "JPEG")
+
 class Transformerpoison(object):
     def __init__(self, model:Module, 
                 mean:List[float]=[0.485, 0.456, 0.406], 
@@ -119,10 +133,10 @@ class Transformerpoison(object):
     def train(self, detect_poison:Transformer, norm):
         print('Read {} dataset (x_raw contains the original images):'.format(self.adv_dataset))
         if self.adv_dataset == 'CIFAR10':
-            config.ART_DATA_PATH = '/mnt/data2/yxl/AI-platform/dataset/CIFAR10'
+            config.ART_DATA_PATH = './dataset/CIFAR10'
             load_dataset = load_cifar10
         elif self.adv_dataset == 'MNIST':
-            config.ART_DATA_PATH = '/mnt/data2/yxl/AI-platform/dataset/MNIST'
+            config.ART_DATA_PATH = './dataset/MNIST'
             load_dataset = load_mnist
         (x_raw, y_raw), (x_raw_test, y_raw_test), min_, max_ = load_dataset(raw=True)
 
@@ -146,11 +160,14 @@ class Transformerpoison(object):
                     return insert_image(x, backdoor_path='../utils/dataset/backdoors/alert.png', size=(10,10))
                 else:
                     raise("Unknown backdoor type")
-        def poison_dataset(x_clean, y_clean, percent_poison, poison_func):
+        def poison_dataset(x_clean, y_clean, percent_poison, poison_func, dataset=None):
             x_poison = np.copy(x_clean)
             y_poison = np.copy(y_clean)
             is_poison = np.zeros(np.shape(y_poison))
-            
+            x_clean_save = x_clean[:10].copy()
+            x_poison_save = np.copy(x_clean_save)
+            if dataset != None:
+                k = 0
             # sources=np.arange(10) # 0, 1, 2, 3, ...
             # targets=(np.arange(10) + 1) % 10 # 1, 2, 3, 4, ...
             sources = np.array([0])
@@ -164,13 +181,34 @@ class Transformerpoison(object):
                 indices_to_be_poisoned = np.random.choice(n_points_in_src, num_poison)
 
                 imgs_to_be_poisoned = np.copy(src_imgs[indices_to_be_poisoned])
+                if dataset != None:
+                    imgs_to_be_poisoned_save = np.copy(imgs_to_be_poisoned)
                 backdoor_attack = PoisoningAttackBackdoor(poison_func)
                 imgs_to_be_poisoned, poison_labels = backdoor_attack.poison(imgs_to_be_poisoned, y=np.ones(num_poison) * tgt)
+                if dataset != None:
+                    if k < 10:
+                        for j in range(len(imgs_to_be_poisoned)):
+                            x_clean_save[k] = imgs_to_be_poisoned_save[j]
+                            x_poison_save[k] = imgs_to_be_poisoned[j]
+                            k += 1
+                            print(k)
+                            if k == 10:
+                                break
                 x_poison = np.append(x_poison, imgs_to_be_poisoned, axis=0)
                 y_poison = np.append(y_poison, poison_labels, axis=0)
                 is_poison = np.append(is_poison, np.ones(num_poison))
 
             is_poison = is_poison != 0
+            if dataset != None:
+                image_num = min(np.sum(is_poison), 10)
+                for i in range(image_num):
+                    output_dir = "./output/backdoor/" + str(i)
+                    if not os.path.exists(output_dir):
+                        # 如果文件夹不存在，则创建文件夹
+                        os.makedirs(output_dir)
+                    save_jepg(x_poison_save[i], output_dir + '/poisoned.jpeg', dataset)
+                    save_jepg(x_clean_save[i], output_dir + '/clean.jpeg', dataset)
+                    save_jepg(x_poison_save[i] - x_clean_save[i], output_dir + '/backdoor.jpeg', dataset)
 
             return is_poison, x_poison, y_poison
         print('Poison training data:')
@@ -187,7 +225,7 @@ class Transformerpoison(object):
             x_train = np.expand_dims(x_train, axis=3)
 
         print('Poison test data:')
-        (is_poison_test, x_poisoned_raw_test, y_poisoned_raw_test) = poison_dataset(x_raw_test, y_raw_test, percent_poison, add_modification)
+        (is_poison_test, x_poisoned_raw_test, y_poisoned_raw_test) = poison_dataset(x_raw_test, y_raw_test, percent_poison, add_modification, dataset=self.adv_dataset)
         x_test, y_test = preprocess(x_poisoned_raw_test, y_poisoned_raw_test)
         print('Add channel axis:')
         if self.adv_dataset == 'MNIST':
@@ -202,17 +240,27 @@ class Transformerpoison(object):
         print('Create Keras convolutional neural network - basic architecture from Keras examples:')
         # Source here: https://github.com/keras-team/keras/blob/master/examples/mnist_cnn.py
         if self.adv_dataset == 'CIFAR10':
-            model = ResNet18(input_shape=(32, 32, 3), classes=10, weight_decay=1e-4)
+            if self.model.__class__.__name__ == 'ResNet':
+                model = ResNet18(input_shape=(32, 32, 3), classes=10, weight_decay=1e-4)
+            elif self.model.__class__.__name__ == 'VGG':
+                model = VGG16(input_shape=(32, 32, 3), weights = None, classes=10)
+            else:
+                raise Exception('CIFAR10 can only use ResNet18 and VGG16!')
         elif self.adv_dataset == 'MNIST':
-            model = Sequential()
-            model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=x_train.shape[1:]))
-            model.add(Conv2D(64, (3, 3), activation='relu'))
-            model.add(MaxPooling2D(pool_size=(2, 2)))
-            model.add(Dropout(0.25))
-            model.add(Flatten())
-            model.add(Dense(128, activation='relu'))
-            model.add(Dropout(0.5))
-            model.add(Dense(10, activation='softmax'))
+            if self.model.__class__.__name__ == 'SmallCNN':
+                model = Sequential()
+                model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=x_train.shape[1:]))
+                model.add(Conv2D(64, (3, 3), activation='relu'))
+                model.add(MaxPooling2D(pool_size=(2, 2)))
+                model.add(Dropout(0.25))
+                model.add(Flatten())
+                model.add(Dense(128, activation='relu'))
+                model.add(Dropout(0.5))
+                model.add(Dense(10, activation='softmax'))
+            elif self.model.__class__.__name__ == 'VGG':
+                model = VGG16(input_shape=(28, 28, 1), weights = None, classes=10)
+            else:
+                raise Exception('MNIST can only use SmallCNN and VGG16!')
 
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         classifier = KerasClassifier(model=model, clip_values=(min_, max_))
@@ -233,8 +281,8 @@ class Transformerpoison(object):
         image = (poison_x_test_example[0] - x_test_example[3])
         image_uint8 = (image * 255).astype(np.uint8)
         pil_image = Image.fromarray(image_uint8)
-        import os
-        trigger_path = "/mnt/data2/yxl/AI-platform/output/trigger"
+
+        trigger_path = "./output/trigger"
         if not os.path.exists(trigger_path):
             os.makedirs(trigger_path)
         pil_image.save(trigger_path + '/trigger.jpeg', "JPEG")
@@ -270,15 +318,15 @@ class Transformerpoison(object):
         print('detect rate: ', self.detect_rate)
 
 class Neural_cleanse_l1(Transformerpoison):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.train(NeuralCleanse, 1)
     
 class Neural_cleanse_l2(Transformerpoison):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.train(NeuralCleanse, 2)

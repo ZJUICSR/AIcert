@@ -13,14 +13,14 @@ from function.defense.models import SmallCNN
 def main():
     train_config = {'epochs': 1, 'alpha': 0.01, 'epsilon': 0.3, 'attack_iters': 40, 'lr_max': 0.0001, 'lr_type': 'flat'}
     train_config = {'epochs': 1, 'alpha': 0.01, 'epsilon': 8. / 255., 'attack_iters': 7, 'lr_max': 0.2, 'lr_type': 'flat'}
-    mnist_train = datasets.MNIST("/mnt/data2/yxl/AI-platform/dataset", train=True, download=True, transform=transforms.ToTensor())
+    mnist_train = datasets.MNIST("./dataset", train=True, download=True, transform=transforms.ToTensor())
     train_loader = DataLoader(mnist_train, batch_size=100, shuffle=True)
     transform_train = transforms.Compose([
                 transforms.RandomCrop(32, padding=4),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
             ])
-    trainset = torchvision.datasets.CIFAR10(root='/mnt/data2/yxl/AI-platform/dataset/CIFAR10', train=True, download=True, transform=transform_train)
+    trainset = torchvision.datasets.CIFAR10(root='./dataset/CIFAR10', train=True, download=True, transform=transform_train)
     kwargs = {'num_workers': 1, 'pin_memory': True} if True else {}
     train_loader = DataLoader(trainset, batch_size=64, shuffle=True, **kwargs)
     
@@ -29,7 +29,7 @@ def main():
     model.train()
 
     lr_steps = train_config['epochs'] * len(train_loader)
-    if train_config['lr_type'] == 'cyclic' and dataset = 'CIFAR10':
+    if train_config['lr_type'] == 'cyclic' and dataset == 'CIFAR10':
         scheduler = torch.optim.lr_scheduler.CyclicLR(opt, base_lr=0, max_lr=train_config['lr_max'],
             step_size_up=lr_steps / 2, step_size_down=lr_steps / 2)
     elif train_config['lr_type'] == 'multistep':
