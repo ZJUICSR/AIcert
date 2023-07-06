@@ -16,7 +16,8 @@ void dpa(char* inFile, char* outFile)
 
     Parameters param;
     param.setSampleFile(inFile);
-    param.setRandFile("./dataset/Trs/random/randdata_9.trs");
+    // param.setRandFile("./dataset/Trs/random/randdata_9.trs");
+    param.setRandFile(inFile);
     param.setOutFile(outFile);
     param.setAttackIndex(0);
     param.setPointNumStart(108);
