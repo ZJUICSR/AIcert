@@ -19,10 +19,9 @@ ROOT = osp.dirname(osp.abspath(__file__))
 
 # print("end print")
 
-def run_side(trs_file, random_file, method, path):
+def run_side(trs_file, method, path):
     ll = ctypes.cdll.LoadLibrary
     lib = ll(osp.join(ROOT,'CMake_Research3/libresreach3.so'))
-    print("init outpath:",path)
     if method == "cpa":
         lib.cpa_.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
         try:
