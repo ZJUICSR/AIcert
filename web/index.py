@@ -1104,12 +1104,14 @@ def Detect():
     adv_nums = request.form.get("adv_nums")
     # tid=request.form.get("tid")
     tid="20230625_0948_fd3c890"
-    # defense_methods = request.form.getlist("defense_methods[]")
-    defense_methods_str = request.form.get("defense_methods")
-    defense_methods = json.loads(defense_methods_str)
-    adv_nums = int(adv_nums)
     format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
     stid = "S"+IOtool.get_task_id(str(format_time))
+    # defense_methods = request.form.getlist("defense_methods[]")
+    defense_methods_str = request.form.get("defense_methods")
+    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
+    defense_methods = json.loads(defense_methods_str)
+    adv_nums = int(adv_nums)
+    
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"].update({stid:{
         "type":"attack_defense",
@@ -1138,15 +1140,17 @@ def Detect():
     detect_rate_dict = {}
     print("-----------defense_methods:",defense_methods)
     for defense_method in defense_methods:
-        detect_rate, no_defense_accuracy = detect(adv_dataset, adv_model, adv_method, adv_nums, defense_method, adv_file_path)
+        logging.info("开始执行防御任务{:s}".format(defense_method))
+        detect_rate, no_defense_accuracy = detect(adv_dataset, adv_model, adv_method, adv_nums, defense_method, adv_file_path,logging)
         detect_rate_dict[defense_method] = round(detect_rate, 4)
+        logging.info("{:s}防御算法执行结束，对抗鲁棒性为：{:.3f}".format(defense_method,round(detect_rate, 4)))
     no_defense_accuracy_list = no_defense_accuracy.tolist() if isinstance(no_defense_accuracy, np.ndarray) else no_defense_accuracy
     response_data = {
         "detect_rates": detect_rate_dict,
         "no_defense_accuracy": no_defense_accuracy_list
     }
     
-    IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    IOtool.write_json(response_data, osp.join(ROOT,"output", tid, stid+"_result.json")) 
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"] = 2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
