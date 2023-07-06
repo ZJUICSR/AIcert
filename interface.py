@@ -790,11 +790,12 @@ def reach(tid,stid,dataset,pic_path,label,target_label):
     }
     return resp
 
-def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_examples=None):
+def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_examples=None, logging=None):
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu") 
     if torch.cuda.is_available():
         print("got GPU")
+    logging.info("加载模型{:s}".format(adv_model))
     if adv_dataset == 'CIFAR10':
         mean = [0.4914, 0.4822, 0.4465]
         std = [0.2023, 0.1994, 0.2010]
@@ -824,7 +825,7 @@ def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_ex
             raise Exception('MNIST can only use SmallCNN and VGG16!')
         model.load_state_dict(checkpoint)
         model = model.to(device).eval()    
-
+    logging.info("{:s}模型加载结束".format(adv_model))
     if defense_methods == 'JPEG':
         detector =  Jpeg(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Feature Squeeze':
@@ -890,11 +891,10 @@ def run_side_api(trs_file, methods, tid, stid):
     logging.info("开始执行侧信道分析")
     res={}
     for method in methods:
-        logging.info("当前分析文件为{:s}，分析方法为{:s}，分析时间较久，约需30分钟".format(trs_file, method))
+        logging.info("当前分析文件为{:s}，分析方法为{:s}，分析时间较久，约需50分钟".format(trs_file, method))
         outpath = osp.join(ROOT,"output", tid,stid + "_" + method+"_out.txt")
         trs_file_path = osp.join(ROOT,"dataset/Trs/samples",trs_file)
-        random_file = osp.join(ROOT,"dataset/Trs/random","randdata_"+trs_file.split("_")[1].split(".")[0]+".trs")
-        use_time = run_side(trs_file_path, random_file, method, outpath)
+        use_time = run_side(trs_file_path, method, outpath)
         if method in ["cpa","dpa"]:
             for line in open(outpath, 'r'):
                 res[method] = [float(s) for s in line.split()]
