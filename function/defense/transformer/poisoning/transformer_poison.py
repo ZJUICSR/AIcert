@@ -22,8 +22,8 @@ from art.estimators.classification import KerasClassifier
 from art.utils import load_mnist, preprocess, load_cifar10
 from art.attacks.poisoning import PoisoningAttackBackdoor
 from art.attacks.poisoning.perturbations import add_pattern_bd, add_single_bd, insert_image
-from art.defences.transformer.poisoning.neural_cleanse import NeuralCleanse
 from art.defences.transformer.transformer import Transformer
+from function.defense.transformer.poisoning.neural_cleanse import NeuralCleanse
 
 def conv2d_bn(x, filters, kernel_size, weight_decay=.0, strides=(1, 1)):
     layer = Conv2D(filters=filters,
@@ -143,7 +143,7 @@ class Transformerpoison(object):
 
         print('Random Selection:')
         n_train = np.shape(x_raw)[0]
-        num_selection = 10000 # 5000
+        num_selection = 5000
         random_selection_indices = np.random.choice(n_train, num_selection)
         x_raw = x_raw[random_selection_indices]
         y_raw = y_raw[random_selection_indices]
@@ -239,6 +239,9 @@ class Transformerpoison(object):
         np.random.shuffle(shuffled_indices)
         x_train = x_train[shuffled_indices]
         y_train = y_train[shuffled_indices]
+        if self.adv_dataset == 'MNIST':
+            x_train = np.pad(x_train, ((0, 0), (2, 2), (2, 2), (0, 0)))
+            x_test = np.pad(x_test, ((0, 0), (2, 2), (2, 2), (0, 0)))
         print('Create Keras convolutional neural network - basic architecture from Keras examples:')
         if self.adv_dataset == 'CIFAR10':
             if self.model.__class__.__name__ == 'ResNet':
@@ -259,7 +262,7 @@ class Transformerpoison(object):
                 model.add(Dropout(0.5))
                 model.add(Dense(10, activation='softmax'))
             elif self.model.__class__.__name__ == 'VGG':
-                model = VGG16(input_shape=(28, 28, 1), weights = None, classes=10)
+                model = VGG16(input_shape=(32, 32, 1), weights = None, classes=10)
             else:
                 raise Exception('MNIST can only use SmallCNN and VGG16!')
 
