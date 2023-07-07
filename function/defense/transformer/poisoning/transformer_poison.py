@@ -8,6 +8,8 @@ from PIL import Image
 import torchvision.transforms as transforms
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
+import tensorflow as tf
+tf.compat.v1.disable_eager_execution()
 from keras.models import Sequential, Model
 from keras import layers
 from keras.layers import Dense, Flatten, Conv2D, MaxPooling2D, Dropout, AveragePooling2D, BatchNormalization, MaxPool2D, Input, Activation
@@ -97,7 +99,7 @@ def save_jepg(adv_examples, output_path, adv_dataset):
     if adv_dataset == 'MNIST':
         image = adv_examples.squeeze()
     elif adv_dataset == 'CIFAR10':
-        image = adv_examples.transpose(1, 2, 0)
+        image = adv_examples
     pil_image = Image.fromarray(image)
     # 保存为JPEG图像
     pil_image.save(output_path, "JPEG")
