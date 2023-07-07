@@ -6,3 +6,6 @@ __pycache__/
 
 # 忽略所有子目录中的__pycache__目录
 **/__pycache__/
+
+# 忽略jpeg格式的图片
+*.jpeg
