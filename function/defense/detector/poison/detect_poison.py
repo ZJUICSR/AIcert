@@ -32,7 +32,7 @@ def save_jepg(adv_examples, output_path, adv_dataset):
     if adv_dataset == 'MNIST':
         image = adv_examples.squeeze()
     elif adv_dataset == 'CIFAR10':
-        image = adv_examples.transpose(1, 2, 0)
+        image = adv_examples
     pil_image = Image.fromarray(image)
     # 保存为JPEG图像
     pil_image.save(output_path, "JPEG")
@@ -232,7 +232,7 @@ class Detectpoison(object):
         defence = detect_poison(classifier, x_test, y_test)
 
         print("End-to-end method")
-        defence.detect_poison(nb_clusters=3, nb_dims=9, reduce="PCA") #nb_dims=10
+        defence.detect_poison(nb_clusters=2, nb_dims=6, reduce="PCA")
 
         print("Evaluate method when ground truth is known")
         is_clean = is_poison_test == 0
