@@ -5,6 +5,7 @@ from typing import Union
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import torch
 import torchvision
 from torch.nn import Module
@@ -19,7 +20,7 @@ from art.defences.trainer import *
 from art.estimators.classification import PyTorchClassifier
 from art.estimators.encoding.tensorflow import TensorFlowEncoder
 from art.estimators.generation.tensorflow import TensorFlowGenerator
-from art.defences.preprocessor.inverse_gan import InverseGAN, DefenseGAN
+from function.defense.preprocessor.inverse_gan import InverseGAN, DefenseGAN
 from function.defense.models import *
 from function.defense.utils.generate_aes import generate_adv_examples
 
@@ -385,7 +386,7 @@ def load_model(sess, model_name, model_path):
 
     generator_tf = graph.get_tensor_by_name("generator/output:0")
     image_to_encode_ph = graph.get_tensor_by_name("image_to_encode_input:0")
-    encoder_tf = graph.get_tensor_by_name("encoder_1/fully_connected/Relu:0")
+    encoder_tf = graph.get_tensor_by_name("encoder_1/dense_1/Relu:0")
     z_ph = graph.get_tensor_by_name("z_input:0")
 
     return generator_tf, encoder_tf, z_ph, image_to_encode_ph

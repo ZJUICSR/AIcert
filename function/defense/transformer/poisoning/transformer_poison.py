@@ -8,13 +8,13 @@ from PIL import Image
 import torchvision.transforms as transforms
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
-import tensorflow as tf
-tf.compat.v1.disable_eager_execution()
+import tensorflow.compat.v1 as tf
+tf.disable_eager_execution()
 from keras.models import Sequential, Model
 from keras import layers
 from keras.layers import Dense, Flatten, Conv2D, MaxPooling2D, Dropout, AveragePooling2D, BatchNormalization, MaxPool2D, Input, Activation
 from keras.regularizers import l2
-from keras.applications import VGG16
+from keras.applications.vgg16 import VGG16
 from art import config
 from art.utils import load_mnist
 from art.attacks.poisoning.perturbations.image_perturbations import add_pattern_bd, add_single_bd
