@@ -210,9 +210,9 @@ class FreeAT(at):
         epochs = int(math.ceil(args_epochs / n_repeats))
         criterion = nn.CrossEntropyLoss().cuda()
         if self.adv_dataset == 'CIFAR10':
-            global_noise_data = torch.zeros([64, 3, 32, 32]).cuda()
+            global_noise_data = torch.zeros([train_loader.batch_size, 3, 32, 32]).cuda()
         elif self.adv_dataset == 'MNIST':
-            global_noise_data = torch.zeros([64, 1, 28, 28]).cuda()
+            global_noise_data = torch.zeros([train_loader.batch_size, 1, 28, 28]).cuda()
         for epoch in range(0, epochs):
             freeat_adjust_learning_rate(0.1, optimizer, epoch, n_repeats)
             freeat_train(train_loader, model, criterion, optimizer, epoch, global_noise_data)
