@@ -24,12 +24,8 @@ templates：存储所有的前端html页面
 view：后台与前端的接口，每个python文件为一个蓝图，在flask生成时需要进行注册。api.py里面是之前我写的几个用到的，可以参考。  
 为了方便，前端传参的js我暂时也写在了html文件里（最底部），采用ajax的传参框架，可以参考。
 
-### GAN模型：
-
-GAN模型文件大于50M，可下载[GAN模型](https://www.aliyundrive.com/s/YD6hvPaZZus)后，放于model目录。
-
 ### 预训练模型：
 
-预训练模型文件大于50M，可下载[预训练模型](https://www.aliyundrive.com/s/j9Pu84wYvUo)后，放于model目录。
+预训练模型文件大于50M，可下载[预训练模型](https://drive.google.com/drive/folders/11t2aPUNrr-I8f2zL_GtAVqRCDcs2NgG7?usp=sharing)后，放于model目录。
 
 PS： 项目暂时没有配置工程上的如log、redis之类，后面有需要再考虑   
