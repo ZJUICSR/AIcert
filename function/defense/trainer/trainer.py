@@ -354,8 +354,8 @@ class Cartl(at):
 
         with torch.no_grad():
             model.eval()
-            predictions = model(cln_imgs)
-            predictions_adv = model(adv_imgs)
+            predictions = model(cln_imgs.repeat(1, 3, 1, 1))
+            predictions_adv = model(adv_imgs.repeat(1, 3, 1, 1))
         acc = torch.sum(torch.argmax(predictions, dim = 1) == true_labels) / float(len(adv_imgs))
         print('acc: ', float(acc.cpu()))
         detect_rate = torch.sum(torch.argmax(predictions_adv, dim = 1) == true_labels) / float(len(adv_imgs))
