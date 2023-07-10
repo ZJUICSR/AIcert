@@ -8,6 +8,7 @@ sys.path.append('../../..') #
 from ....src import settings
 from ..logging_utils import logger
 from .dataset_utils import SubsetDataset, GTSRB
+import time
 
 DATA_DIR = "./dataset"
 
@@ -162,7 +163,7 @@ def get_mnist_train_dataloader(batch_size=settings.batch_size, num_workers=setti
         mean, std = get_mean_and_std("mnist")
         compose_list.append(transforms.Normalize(mean, std))
     transform = transforms.Compose(compose_list)
-
+    time.sleep(1)
     train_data = torchvision.datasets.MNIST(root=os.path.join(DATA_DIR, "MNIST"), train=True,
                                             download=True, transform=transform)
     train_loader = DataLoader(train_data, shuffle=shuffle, num_workers=num_workers, batch_size=batch_size)
