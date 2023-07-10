@@ -9,11 +9,8 @@ dataset/MNIST/*
 dataset/adv_examples/*
 function/defense/trainer/test/*
 web/static/images/adv_images
-output/images/*
-output/backdoor/*
 model/model-cifar-wideResNet/*
 model/model-mnist-smallCNN/*
-output/trigger/*
 function/side/CMake_Research3/Build/*
 function/side/CMake_Research3/Trs/*
 log.txt
@@ -22,18 +19,18 @@ log.txt
 *.*.pyc
 **/__pycache__
 __pycache__
-model/ckpt/CIFAR10_vgg11.pt
+model/ckpt/*
 dataset/auto_LiRPA_dataset
-
-function/attack/adv0211/datasets/cifar-10-batches-py.tar.gz
 dataset/data/CIFAR10/cifar-10-python.tar.gz
 function/DeepLogic/adv_train/model-resnet18-fashionminist/Standard-fashionminist-model-resnet18-epoch300.pt
 function/concolic/Utils/Models/cifar10_vgg16.pth
 function/env_test/valid_extract.pkl
 output/*
 model/robnet-resnet18-cifar10.pth
-
-
+function/defense/trainer/cartl/checkpoint/*
+function/defense/trainer/cartl/runs/*
+function/defense/trainer/cartl/trained_models/*
+function/defense/trainer/cartl/logs/*
 
 
 
@@ -188,3 +185,6 @@ dataset
 output/task_info.json
 # 忽略所有子目录中的__pycache__目录
 **/__pycache__/
+
+# 忽略jpeg格式的图片
+*.jpeg
