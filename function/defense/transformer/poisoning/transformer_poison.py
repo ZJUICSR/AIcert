@@ -192,7 +192,7 @@ class Transformerpoison(object):
                             x_clean_save[k] = imgs_to_be_poisoned_save[j]
                             x_poison_save[k] = imgs_to_be_poisoned[j]
                             k += 1
-                            print(k)
+                            # print(k)
                             if k == 10:
                                 break
                 x_poison = np.append(x_poison, imgs_to_be_poisoned, axis=0)

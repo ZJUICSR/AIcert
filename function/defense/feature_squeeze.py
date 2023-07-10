@@ -4,7 +4,6 @@ from scipy import ndimage
 import torch
 import torch.nn.functional as F
 from torch.nn import Module
-from torch.utils.data import DataLoader, TensorDataset
 import torchvision.transforms as transforms
 from function.defense.utils.generate_aes import generate_adv_examples
 from function.defense.utils import UnNorm
@@ -36,7 +35,6 @@ class feature_squeeze(object):
         self.adv_nums = adv_nums
         self.device = device
         self.un_norm = UnNorm(mean, std)
-        self.thre_score = self.init_scores()
         self.total_num = 0
         self.detect_num = 0
         self.detect_rate = 0
@@ -54,27 +52,20 @@ class feature_squeeze(object):
 
 
     # 假设传入的是两张没有norm的[0-1]内的图片
-    def depth_reduction(self, img_adv, cln_img, depth):
+    def depth_reduction(self, img_adv, depth):
         coef = (2 ** depth) - 1
         img1 = img_adv.clone().unsqueeze(0)
-        cln_img = cln_img.clone().unsqueeze(0)
         img2 = (coef * img_adv) / 255.0
         img2 = img2.unsqueeze(0)
         img1 = self.norm(img1)
         img2 = self.norm(img2)
-        cln_img = self.norm(cln_img)
         if len(img1.size()) != 4:
-            img1, img2, cln_img = img1.unsqueeze(0), img2.unsqueeze(0), cln_img.unsqueeze(0)
+            img1, img2 = img1.unsqueeze(0), img2.unsqueeze(0)
         score = 0
 
         with torch.no_grad():
             out1 = self.model(img1.to(self.device))
             out2 = self.model(img2.to(self.device))
-            out_cln = self.model(cln_img.to(self.device))
-            _, label1 = torch.max(out_cln, dim=1)
-            _, label2 = torch.max(out2, dim=1)
-            if label1 == label2:
-                self.detect_num += 1
             out1 = F.softmax(out1, dim=1)
             out2 = F.softmax(out2, dim=1)
             score = torch.norm(out1-out2, p=1).item()
@@ -113,13 +104,13 @@ class feature_squeeze(object):
 
         return score
 
-    def init_scores(self):
+    def fs_detect(self, adv_img):
         if self.denoiser_name == 'depth_reduction':
             if self.adv_dataset == 'MNIST':
                 if self.denoiser_para == 1:
-                    bd_thres = 0.000102
+                    bd_thres = 1.6354
                 elif self.denoiser_para == 2:
-                    bd_thres = 0.0001005
+                    bd_thres = 1.7225
                 else:
                     raise Exception('Wrong choice!')
             elif self.adv_dataset == 'CIFAR10':
@@ -135,35 +126,10 @@ class feature_squeeze(object):
                     bd_thres = 0.09372
                 else:
                     raise Exception('Wrong choice!')
-            elif self.adv_dataset == 'CIFAR100':
-                if self.denoiser_para == 1:
-                    bd_thres = 1.9997
-                elif self.denoiser_para == 2:
-                    bd_thres = 1.9967
-                elif self.denoiser_para == 3:
-                    bd_thres = 1.7822
-                elif self.denoiser_para == 4:
-                    bd_thres = 0.7930
-                elif self.denoiser_para == 5:
-                    bd_thres = 0.3301
-                else:
-                    raise Exception('Wrong choice!')
-            elif self.adv_dataset == 'Imagenet':
-                if self.denoiser_para == 1:
-                    bd_thres = 1.9942
-                elif self.denoiser_para == 2:
-                    bd_thres = 1.9512
-                elif self.denoiser_para == 3:
-                    bd_thres = 1.4417
-                elif self.denoiser_para == 4:
-                    bd_thres = 0.7996
-                elif self.denoiser_para == 5:
-                    bd_thres = 0.3528
-                else:
-                    raise Exception('Wrong choice!')
             else:
                 raise Exception('Wrong choice!')
-            return bd_thres
+            scores = self.depth_reduction(adv_img, self.denoiser_para)
+            return bd_thres, scores
         elif self.denoiser_name == 'median_smoothing':
             if self.adv_dataset == 'MNIST':
                 if self.denoiser_para == 2:
@@ -179,31 +145,7 @@ class feature_squeeze(object):
                     mf_thres = 0.0704
                 else:
                     raise Exception('Wrong choice!')
-            elif self.adv_dataset == 'CIFAR100':
-                if self.denoiser_para == 2:
-                    mf_thres = 1.1296
-                elif self.denoiser_para == 3:
-                    mf_thres = 1.9431
-                else:
-                    raise Exception('Wrong choice!')
-            elif self.adv_dataset == 'Imagenet':
-                if self.denoiser_para == 2:
-                    mf_thres = 1.1472
-                elif self.denoiser_para == 3:
-                    mf_thres = 1.6615
-                else:
-                    raise Exception('Wrong choice!')
-            return mf_thres
-        else:
-            raise Exception('Input right detect method')
-        return
-
-    def fs_detect(self, adv_img, cln_img):
-        if self.denoiser_name == 'depth_reduction':
-            scores = self.depth_reduction(adv_img, cln_img, self.denoiser_para)
-            return scores
-        elif self.denoiser_name == 'median_smoothing':
-            return self.median_smoothing(adv_img, self.denoiser_para)
+            return mf_thres, self.median_smoothing(adv_img, self.denoiser_para)
         else:
             raise Exception('Input right detect method')
 
@@ -219,13 +161,10 @@ class feature_squeeze(object):
         for i in range(len(adv_imgs)):
             self.total_num += 1
             test_img = adv_imgs[i]
-            cln_img = cln_imgs[i]
-            detect_score = self.fs_detect(self.un_norm(test_img).squeeze(), self.un_norm(cln_img).squeeze())
-            '''
-            if detect_score >= self.thre_score:
+            thre_score, detect_score = self.fs_detect(self.un_norm(test_img).squeeze())
+            if detect_score >= thre_score:
                 self.detect_num += 1
-                print(self.detect_num)
-            '''
+                # print(self.detect_num)
         self.detect_rate = self.detect_num/float(self.total_num)
         if self.adv_examples is None:
             attack_method = 'from user'
