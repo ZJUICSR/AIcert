@@ -9,6 +9,8 @@ from .src.cli.utils import get_model, get_test_dataset, get_train_dataset
 def fdm(model, num_classes, dataset, random_init, epsilon, step_size, num_steps, k, lambda_):
     """Cooperative Adversarially-Robust TransferLearning"""
     save_name = f"cartl_{model}_{dataset}_{k}_{lambda_}"
+    if not os.path.exists(settings.log_dir):
+            os.makedirs(settings.log_dir)
     logger.change_log_file(f"{settings.log_dir / save_name}.log")
     params = {
         "random_init": random_init,
