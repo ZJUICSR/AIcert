@@ -167,6 +167,8 @@ class BaseTrainer:
         self._save_model(save_path)
 
     def _save_model(self, save_path: str):
+        if not os.path.exists(os.path.dirname(save_path)):
+            os.makedirs(os.path.dirname(save_path))
         torch.save(self.model.state_dict(), save_path)
 
     def _adjust_lr(self, ep):
@@ -188,7 +190,9 @@ class BaseTrainer:
     def _save_checkpoint(self, current_epoch, best_acc):
         model_weights = self.model.state_dict()
         optimizer = self.optimizer.state_dict()
-
+        print("_checkpoint_path:",os.path.dirname(self._checkpoint_path))
+        if not os.path.exists(os.path.dirname(self._checkpoint_path)):
+            os.makedirs(os.path.dirname(self._checkpoint_path))
         torch.save({
             "model_weights": model_weights,
             "optimizer": optimizer,
