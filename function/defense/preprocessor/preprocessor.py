@@ -4,7 +4,7 @@ from typing import List, Optional
 from typing import Union
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import torch
 import torchvision
 from torch.nn import Module
