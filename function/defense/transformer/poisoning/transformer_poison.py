@@ -144,7 +144,7 @@ class Transformerpoison(object):
 
         print('Random Selection:')
         n_train = np.shape(x_raw)[0]
-        num_selection = 5000
+        num_selection = 10000 # 5000
         random_selection_indices = np.random.choice(n_train, num_selection)
         x_raw = x_raw[random_selection_indices]
         y_raw = y_raw[random_selection_indices]
@@ -206,20 +206,21 @@ class Transformerpoison(object):
                 for i in range(image_num):
                     output_dir = "./output/backdoor/" + str(i)
                     if not os.path.exists(output_dir):
-                        # 如果文件夹不存在，则创建文件夹
                         os.makedirs(output_dir)
                     save_jepg(x_poison_save[i], output_dir + '/poisoned.jpeg', dataset)
                     save_jepg(x_clean_save[i], output_dir + '/clean.jpeg', dataset)
                     save_jepg(x_poison_save[i] - x_clean_save[i], output_dir + '/backdoor.jpeg', dataset)
+                    if i == 0:
+                        save_jepg(x_poison_save[i] - x_clean_save[i], './output/trigger/trigger.jpeg', dataset)
 
             return is_poison, x_poison, y_poison
         print('Poison training data:')
         percent_poison = .33
 
-        # n_train = np.shape(x_raw_test)[0]
-        # random_selection_indices = np.random.choice(n_train, self.adv_nums)
-        # x_raw_test = x_raw_test[random_selection_indices]
-        # y_raw_test = np.array(y_raw_test)[random_selection_indices]
+        n_train = np.shape(x_raw_test)[0]
+        random_selection_indices = np.random.choice(n_train, 2000)
+        x_raw_test = x_raw_test[random_selection_indices]
+        y_raw_test = np.array(y_raw_test)[random_selection_indices]
         (is_poison_train, x_poisoned_raw, y_poisoned_raw) = poison_dataset(x_raw, y_raw, percent_poison, add_modification)
         x_train, y_train = preprocess(x_poisoned_raw, y_poisoned_raw)
         print('Add channel axis:')
@@ -233,14 +234,13 @@ class Transformerpoison(object):
         if self.adv_dataset == 'MNIST':
             x_test = np.expand_dims(x_test, axis=3)
 
-        # print('Shuffle training data:')
-        # n_train = np.shape(y_train)[0]
-        # shuffled_indices = np.arange(n_train)
-        # np.random.shuffle(shuffled_indices)
-        # x_train = x_train[shuffled_indices]
-        # y_train = y_train[shuffled_indices]
+        print('Shuffle training data:')
+        n_train = np.shape(y_train)[0]
+        shuffled_indices = np.arange(n_train)
+        np.random.shuffle(shuffled_indices)
+        x_train = x_train[shuffled_indices]
+        y_train = y_train[shuffled_indices]
         print('Create Keras convolutional neural network - basic architecture from Keras examples:')
-        # Source here: https://github.com/keras-team/keras/blob/master/examples/mnist_cnn.py
         if self.adv_dataset == 'CIFAR10':
             if self.model.__class__.__name__ == 'ResNet':
                 model = ResNet18(input_shape=(32, 32, 3), classes=10, weight_decay=1e-4)
@@ -266,28 +266,11 @@ class Transformerpoison(object):
 
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         classifier = KerasClassifier(model=model, clip_values=(min_, max_))
-        classifier.fit(x_train, y_train, nb_epochs=1, batch_size=128)
+        classifier.fit(x_train, y_train, nb_epochs=3, batch_size=128)
         clean_x_test = x_test[is_poison_test == 0]
         clean_y_test = y_test[is_poison_test == 0]
         poison_x_test = x_test[is_poison_test]
         poison_y_test = y_test[is_poison_test]
-
-        x_raw_test_example = x_raw_test[:4]
-        y_raw_test_example = y_raw_test[:4]
-        print(y_raw_test[:20])
-        percent_poison_example = 0.5
-        (is_poison_test_example, x_poisoned_raw_test_example, y_poisoned_raw_test_example) = poison_dataset(x_raw_test_example, y_raw_test_example, percent_poison_example, add_modification)
-        x_test_example, y_test_example = preprocess(x_poisoned_raw_test_example, y_poisoned_raw_test_example)
-        from PIL import Image
-        poison_x_test_example = x_test_example[is_poison_test_example]
-        image = (poison_x_test_example[0] - x_test_example[3])
-        image_uint8 = (image * 255).astype(np.uint8)
-        pil_image = Image.fromarray(image_uint8)
-
-        trigger_path = "./output/trigger"
-        if not os.path.exists(trigger_path):
-            os.makedirs(trigger_path)
-        pil_image.save(trigger_path + '/trigger.jpeg', "JPEG")
 
         with torch.no_grad():
             adv_predictions = classifier.predict(poison_x_test)
@@ -301,14 +284,14 @@ class Transformerpoison(object):
         image = trigger_predict
         image_uint8 = (image * 255).astype(np.uint8)
         pil_image = Image.fromarray(image_uint8)
-        pil_image.save(trigger_path + '/trigger_predict.jpeg', "JPEG")
+        pil_image.save('./output/trigger/trigger_predict.jpeg', "JPEG")
 
         defence_cleanse.mitigate(clean_x_test, clean_y_test, mitigation_types=["filtering"])
         poison_pred = defence_cleanse.predict(poison_x_test)
         num_filtered = np.sum(np.all(poison_pred == np.zeros(10), axis=1))
         num_poison = len(poison_pred)
         effectiveness = float(num_filtered) / num_poison
-
+        print(effectiveness)
         self.detect_rate = effectiveness
         if self.adv_examples is None:
             attack_method = 'from user'
@@ -334,8 +317,8 @@ class Neural_cleanse_l2(Transformerpoison):
         return self.train(NeuralCleanse, 2)
 
 class Neural_cleanse_linf(Transformerpoison):
-    def __init__(self, model, mean, std, adv_method, adv_dataset, adv_nums, device):
-        super().__init__(model = model, mean = mean, std = std, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
         
     def detect(self):
         return self.train(NeuralCleanse, np.inf)
