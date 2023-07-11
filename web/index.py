@@ -800,16 +800,21 @@ def model_reach():
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
         img_dir=os.path.join(os.getcwd(),"web/static/imgs/tmp_imgs")
+        pic_path=os.path.join(img_dir,tid,stid+'.png')
         try:
             os.mkdir(os.path.join(img_dir,tid))
         except:
             pass
-        # pic_path=os.path.join(img_dir,tid,stid+'.pt')
-        pic_path=os.path.join(img_dir,tid,pic+'.png')
-        print("********************image.png*************",pic_path)
-        # with open(pic_path, 'wb') as f:
-        #     f.write(base64.b64decode(pic.replace('data:image/png;base64,','')))
-        #     f.close()
+        if "image/jpeg;" in pic:
+            
+            with open( pic_path, 'wb') as f:
+                f.write(base64.b64decode(pic.replace('data:image/jpeg;base64,','')))
+                f.close()
+        else:
+            
+            with open( pic_path, 'wb') as f:
+                f.write(base64.b64decode(pic.replace('data:image/png;base64,','')))
+                f.close()
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         taskinfo[tid]["function"].update({stid:{
             "type":"attack_dim_reduciton",
@@ -846,10 +851,21 @@ def model_consistency():
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
         img_dir=os.path.join(os.getcwd(),"web/static/imgs/tmp_imgs")
+        pic_path=os.path.join(img_dir,tid,stid+'.png')
         try:
             os.mkdir(os.path.join(img_dir,tid))
         except:
             pass
+        if "image/jpeg;" in pic:
+            
+            with open( pic_path, 'wb') as f:
+                f.write(base64.b64decode(pic.replace('data:image/jpeg;base64,','')))
+                f.close()
+        else:
+            
+            with open( pic_path, 'wb') as f:
+                f.write(base64.b64decode(pic.replace('data:image/png;base64,','')))
+                f.close()
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         taskinfo[tid]["function"].update({stid:{
             "type":"attack_dim_reduciton",
@@ -898,17 +914,18 @@ def auto_verify_img():
         dataset=inputParam['dataset']
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         img_dir=os.path.join(os.getcwd(),"web/static/imgs/tmp_imgs")
+        pic_path=os.path.join(img_dir,tid,stid+'.png')
         try:
             os.mkdir(os.path.join(img_dir,tid))
         except:
             pass
         if "image/jpeg;" in pic:
-            pic_path=os.path.join(img_dir,tid,stid+'.png')
+            
             with open( pic_path, 'wb') as f:
                 f.write(base64.b64decode(pic.replace('data:image/jpeg;base64,','')))
                 f.close()
         else:
-            pic_path=os.path.join(img_dir,tid,stid+'.png')
+            
             with open( pic_path, 'wb') as f:
                 f.write(base64.b64decode(pic.replace('data:image/png;base64,','')))
                 f.close()
@@ -1098,18 +1115,27 @@ def home():
 
 @app.route("/detect", methods=["POST"])
 def Detect():
-    adv_dataset = request.form.get("adv_dataset")
-    adv_model = request.form.get("adv_model")
-    adv_method = request.form.get("adv_method")
-    adv_nums = request.form.get("adv_nums")
-    # tid=request.form.get("tid")
-    tid="20230625_0948_fd3c890"
+    try:
+        adv_dataset = request.form.get("adv_dataset")
+        adv_model = request.form.get("adv_model")
+        adv_method = request.form.get("adv_method")
+        adv_nums = request.form.get("adv_nums")
+        defense_methods_str = request.form.get("defense_methods")
+        defense_methods = json.loads(defense_methods_str)
+        # tid=request.form.get("tid")
+        tid="20230625_0948_fd3c890"
+    except:
+        inputParam = json.loads(request.data)
+        adv_dataset = inputParam["adv_dataset"]
+        adv_model = inputParam["adv_model"]
+        adv_method = inputParam["adv_method"]
+        adv_nums = inputParam["adv_nums"]
+        defense_methods = inputParam["defense_methods"]
+        tid = inputParam["tid"]
     format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
     stid = "S"+IOtool.get_task_id(str(format_time))
-    # defense_methods = request.form.getlist("defense_methods[]")
-    defense_methods_str = request.form.get("defense_methods")
     logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
-    defense_methods = json.loads(defense_methods_str)
+    
     adv_nums = int(adv_nums)
     
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
