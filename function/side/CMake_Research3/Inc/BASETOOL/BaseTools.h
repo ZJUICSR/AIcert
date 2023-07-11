@@ -48,5 +48,6 @@ public:
 
 	static void generateFileName(char* name,int buflen,char* fixedName,int index,char* postfix);
 	static int hToD(char* str);
+	static int charToNumD(char* str);
 };
 

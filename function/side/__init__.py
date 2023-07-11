@@ -20,6 +20,8 @@ ROOT = osp.dirname(osp.abspath(__file__))
 # print("end print")
 
 def run_side(trs_file, method, path):
+    print("trs_file:",trs_file)
+    print("path",path)
     ll = ctypes.cdll.LoadLibrary
     lib = ll(osp.join(ROOT,'CMake_Research3/libresreach3.so'))
     if method == "cpa":
@@ -41,6 +43,18 @@ def run_side(trs_file, method, path):
         except:
             starttime = time.perf_counter()
         lib.dpa_(trs_file.encode('utf-8'),path.encode('utf-8'))
+        try:
+            endtime = time.clock()
+        except:
+            endtime = time.perf_counter()
+            
+    elif method == "hpa":
+        lib.hpa_.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+        try:
+            starttime = time.clock()
+        except:
+            starttime = time.perf_counter()
+        lib.hpa_(trs_file.encode('utf-8'),path.encode('utf-8'))
         try:
             endtime = time.clock()
         except:
