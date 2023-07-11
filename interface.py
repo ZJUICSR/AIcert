@@ -876,7 +876,29 @@ def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_ex
         detector =  Neural_cleanse_linf(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'SAGE':
         detector =  Sage(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == "STRIP":
+        # 模型准备
+            # model = BadNet(1, 10)
+            # model.load_state_dict(torch.load('argp/third_party/defenses/backdoor/data/badnet-mnist.pth'))
+            # model.eval()
+            # 数据准备
+            train_set = torchvision.datasets.MNIST(root="./dataset", train=True,download=False)
+            test_set = torchvision.datasets.MNIST(root="./dataset", train=False, download=False)
+            result["STRIP"]=""
+            # train_data = PoisonedDataset(train_set, 0, portion=0.1, mode="train", dataname="mnist")
+            # test_data_ori = PoisonedDataset(test_set, 0, portion=0, mode="test", dataname="mnist")
+            # test_data_tri = PoisonedDataset(test_set, 0, portion=1, mode="test", dataname="mnist")
 
+            # train_data_loader = DataLoader(dataset=train_data, batch_size=16, shuffle=True)
+            # test_data_ori_loader = DataLoader(dataset=test_data_ori, batch_size=16, shuffle=True)
+            # test_data_tri_loader = DataLoader(dataset=test_data_tri, batch_size=16, shuffle=True)
+            # # RUN
+            # storage = Storage(method='badnets', model=model, train_loader=train_data_loader,
+            #                   test_loader=test_data_ori_loader, poison_batch=list(test_data_tri_loader)[0][0][:10])
+            # bd = backdoor.WrapperBackdoorDefense(args=args, method=method, params=params)
+            # res_strip = bd(model=model, train_loader=train_data_loader, test_loader=test_data_ori_loader, atk_storage=storage)
+            # result["STRIP"] = res_strip
+            return result["STRIP"]
     _, _, detect_rate, no_defense_accuracy = detector.detect()
     return detect_rate, no_defense_accuracy
 
