@@ -8,8 +8,8 @@
 //定义train/test两个函数
 
 
-int8_t* cifar10_nn_run_cpa(Parameters*);
-
+int8_t* cifar10_nn_run_cpa_dpa(Parameters*);
+int8_t* cifar10_nn_run_hpa(Parameters*);
 
 
 #endif
