@@ -210,9 +210,9 @@ class FreeAT(at):
         epochs = int(math.ceil(args_epochs / n_repeats))
         criterion = nn.CrossEntropyLoss().cuda()
         if self.adv_dataset == 'CIFAR10':
-            global_noise_data = torch.zeros([64, 3, 32, 32]).cuda()
+            global_noise_data = torch.zeros([train_loader.batch_size, 3, 32, 32]).cuda()
         elif self.adv_dataset == 'MNIST':
-            global_noise_data = torch.zeros([64, 1, 28, 28]).cuda()
+            global_noise_data = torch.zeros([train_loader.batch_size, 1, 28, 28]).cuda()
         for epoch in range(0, epochs):
             freeat_adjust_learning_rate(0.1, optimizer, epoch, n_repeats)
             freeat_train(train_loader, model, criterion, optimizer, epoch, global_noise_data)
@@ -350,12 +350,14 @@ class Cartl(at):
         elif self.adv_dataset == 'MNIST':
             target_dataset = 'mnist'
             target_num_classes = 10
+            adv_imgs = adv_imgs .repeat(1, 3,1,1)
+            cln_imgs = cln_imgs.repeat(1, 3,1,1)
         model = cartl(source_dataset, source_num_classes, target_dataset, target_num_classes)
 
         with torch.no_grad():
             model.eval()
-            predictions = model(cln_imgs.repeat(1, 3, 1, 1))
-            predictions_adv = model(adv_imgs.repeat(1, 3, 1, 1))
+            predictions = model(cln_imgs)
+            predictions_adv = model(adv_imgs)
         acc = torch.sum(torch.argmax(predictions, dim = 1) == true_labels) / float(len(adv_imgs))
         print('acc: ', float(acc.cpu()))
         detect_rate = torch.sum(torch.argmax(predictions_adv, dim = 1) == true_labels) / float(len(adv_imgs))

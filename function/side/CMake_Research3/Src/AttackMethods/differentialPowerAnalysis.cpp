@@ -28,7 +28,7 @@ void differentialPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*)){
 	float* sample[param->getPointNum()] = {nullptr};
     for(int i=0;i< param->getPointNum() ;i++){
         sample[i]=(float*)malloc(param->getTraceNum()*sizeof(float));
-        std::memset(sample[i], 0, param->getTraceNum() * sizeof(float));
+        std::memset(sample[i], 0.0, param->getTraceNum() * sizeof(float));
     }
 
     Trace traceR(param->getRandFile());
@@ -42,7 +42,7 @@ void differentialPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*)){
         hw[i]=(uint8_t*)malloc(param->getTraceNum() * sizeof(uint8_t));
         std::memset(hw[i], 0, param->getTraceNum() * sizeof(uint8_t));
         trsData_result[i].samples=(float*)malloc(param->getPointNum() * sizeof(float));
-        std::memset(trsData_result[i].samples, 0, param->getPointNum() * sizeof(float));
+        std::memset(trsData_result[i].samples, 0.0, param->getPointNum() * sizeof(float));
     }
 
     float result_max[param->getGuessSize()]={0.0};
@@ -77,7 +77,7 @@ void differentialPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*)){
             #if 1
 
             (*f)(param);
-            hw[j][i] = BaseTools::hanmingWeight(param->getMid());
+            hw[j][i] = param->getMidHW();
             // printf("%d ", hw[j][i]);
 
             #endif
@@ -222,7 +222,7 @@ void differentialPowerAnalysis_correlation_distinguish_index(Parameters* param, 
 	float* sample[param->getPointNum()] = {nullptr};
     for(int i=0;i< param->getPointNum() ;i++){
         sample[i]=(float*)malloc(tem_trace_num*sizeof(float));
-        std::memset(sample[i], 0, tem_trace_num * sizeof(float));
+        std::memset(sample[i], 0.0, tem_trace_num * sizeof(float));
     }
 
     Trace traceR(param->getRandFile());
@@ -236,7 +236,7 @@ void differentialPowerAnalysis_correlation_distinguish_index(Parameters* param, 
         hw[i]=(uint8_t*)malloc(tem_trace_num * sizeof(uint8_t));
         std::memset(hw[i], 0, tem_trace_num * sizeof(uint8_t));
         trsData_result[i].samples=(float*)malloc(param->getPointNum() * sizeof(float));
-        std::memset(trsData_result[i].samples, 0, param->getPointNum() * sizeof(float));
+        std::memset(trsData_result[i].samples, 0.0, param->getPointNum() * sizeof(float));
     }
 
     float result_max[param->getGuessSize()]={0.0};
@@ -271,7 +271,7 @@ void differentialPowerAnalysis_correlation_distinguish_index(Parameters* param, 
             #if 1
 
             (*f)(param);
-            hw[j][i] = BaseTools::hanmingWeight(param->getMid());
+            hw[j][i] = param->getMidHW();
             // printf("%d ", hw[j][i]);
 
             #endif
@@ -296,7 +296,8 @@ void differentialPowerAnalysis_correlation_distinguish_index(Parameters* param, 
         for (int j = 0; j < param->getPointNum(); j++){
             
             //问题出现在这行，检查内存是否溢出？
-            trsData_result[i].samples[j] = (float)abs(BaseTools::corr(hw[i], sample[j], tem_trace_num));
+            // trsData_result[i].samples[j] = (float)abs(BaseTools::corr(hw[i], sample[j], tem_trace_num));
+            trsData_result[i].samples[j] = (float)abs(BaseTools::diff(hw[i], sample[j], tem_trace_num, 27));
             // printf("2\n");
             
             // printf("%f,",trsData_result[i].samples[startPoint_r+j]);
@@ -314,7 +315,7 @@ void differentialPowerAnalysis_correlation_distinguish_index(Parameters* param, 
         
     }
     
-    #if 1    
+    #if 1 //output in result**
 
 
     for(int i=0;i<param->getGuessSize();i++){
@@ -427,7 +428,7 @@ void differentialPowerAnalysis_correlation_distinguish(Parameters* param, int8_t
     }
 
     for(int i =0;i<param->getGuessSize();i++){
-        for(int j =0; j<param->getTraceNum()/gap; j++){
+        for(int j =0; j<(param->getTraceNum()-bias)/gap+1; j++){
             *outfile<<result[i][j]<<" ";
         }
         *outfile<<"\n";

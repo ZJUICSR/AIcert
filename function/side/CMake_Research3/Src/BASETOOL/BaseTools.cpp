@@ -411,3 +411,52 @@ int BaseTools::hToD(char* str){
 
 	return re;
 }
+
+int BaseTools::charToNumD(char* str){
+
+	int re = 0;
+	int num[1024]={0};
+	int numLen = 0;
+	// int i = 0;
+	while(str[numLen] != '\0'){
+		if(str[numLen]=='0'){
+			num[numLen] = 0;
+		}else if(str[numLen]=='1'){
+			num[numLen] = 1;
+		}else if(str[numLen]=='2'){
+			num[numLen] = 2;
+		}else if(str[numLen]=='3'){
+			num[numLen] = 3;
+		}else if(str[numLen]=='4'){
+			num[numLen] = 4;
+		}else if(str[numLen]=='5'){
+			num[numLen] = 5;
+		}else if(str[numLen]=='6'){
+			num[numLen] = 6;
+		}else if(str[numLen]=='7'){
+			num[numLen] = 7;
+		}else if(str[numLen]=='8'){
+			num[numLen] = 8;
+		}else if(str[numLen]=='9'){
+			num[numLen] = 9;
+		}
+    // i++;
+		numLen ++;
+	}
+
+  
+  	int w=1;
+	for(int i =numLen;i>= 0;i--){
+		
+		if(i == numLen){
+		re += num[i];
+		}else{
+			re += num[i] * w;
+		w*=10;
+		}
+    
+	}
+
+	return re;
+
+}

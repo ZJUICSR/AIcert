@@ -6,17 +6,15 @@
 #include "../../Inc/TRACE/Trace.h"
 #include "../../Inc/BASETOOL/BaseTools.h"
 #include "../../Inc/CNNModel/cnn.h"
-// #include "../../Inc/CNNModel/arm_nnexamples_cifar10_parameter.h"
-// #include "../../Inc/CNNModel/arm_nnexamples_cifar10_weights.h"
 
-
-
-void correlationPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*)){
+void horizontalPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*)){
 
     //fmap初始化
     q7_t fmap[param->getFmapNum()]={0};
     fmapInitial(param, fmap);
 
+    //horMid初始化
+    param->InitialHorMid();
 
     //wt初始化
     q7_t wt[param->getGuessSize()];
@@ -27,8 +25,8 @@ void correlationPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*)){
     //一次读量初始化
 	float* sample[param->getPointNum()] = {nullptr};
     for(int i=0;i< param->getPointNum() ;i++){
-        sample[i]=(float*)malloc(param->getTraceNum()*sizeof(float));
-        std::memset(sample[i], 0.0, param->getTraceNum() * sizeof(float));
+        sample[i]=(float*)malloc(param->getTraceNum()*param->getMidvaluePerTrace()*sizeof(float));
+        std::memset(sample[i], 0.0, param->getTraceNum()*param->getMidvaluePerTrace()*sizeof(float));
     }
 
     Trace traceR(param->getRandFile());
@@ -37,10 +35,10 @@ void correlationPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*)){
 	TrsData trsDataS;
 
     TrsData* trsData_result=(TrsData*)malloc(param->getGuessSize() * sizeof(TrsData));
-    uint8_t* hw[param->getGuessSize()] = {nullptr};
+    // uint8_t* hw[param->getGuessSize()] = {nullptr};
     for(int i=0;i<param->getGuessSize();i++){
-        hw[i]=(uint8_t*)malloc(param->getTraceNum() * sizeof(uint8_t));
-        std::memset(hw[i], 0, param->getTraceNum() * sizeof(uint8_t));
+        // hw[i]=(uint8_t*)malloc(param->getTraceNum() * param->getMidvaluePerTrace() * sizeof(uint8_t));
+        // std::memset(hw[i], 0, param->getTraceNum() * param->getMidvaluePerTrace() * sizeof(uint8_t));
         trsData_result[i].samples=(float*)malloc(param->getPointNum() * sizeof(float));
         std::memset(trsData_result[i].samples, 0.0, param->getPointNum() * sizeof(float));
     }
@@ -51,49 +49,46 @@ void correlationPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*)){
     //attackindex -->> i j k m n l
     int attackIndex = param->getAttackIndex();
     param->setForI(attackIndex/75);//
-    param->setForJ(2);
-    param->setForK(2);
+    // param->setForJ(2);
+    // param->setForK(2);
     param->setForM(attackIndex%75/15);//
     param->setForN(attackIndex%75%15/3);//
     param->setForL(attackIndex%3);//
 
+    
 
-    for(int i=0; i < param->getTraceNum(); i++){
 
+    for(param->setHorMidX(0); param->getHorMidX() < param->getGuessSize(); param->setHorMidX(param->getHorMidX() + 1)){
+        fmap[param->getAttackIndex()] = wt[param->getHorMidX()];
         
-
-        //读一条
-        traceS.readIndexTrace(&trsDataS,i);
-        traceR.readIndexTrace(&trsDataR,i); 
-
-        param->setImageDataPoint(trsDataR.data);//param读imagedata参数
-        //像素初始化
-        for(int j=0;j < param->getGuessSize();j++){ 
-            
-            
-            fmap[param->getAttackIndex()] = wt[j];
-            // param->setFmapPoint(fmap);//param读fmap参数
-            
-            #if 1
-
+        for(int i = 0 ; i < param->getTraceNum(); i++){
+            traceR.readIndexTrace(&trsDataR,i*param->getMidvaluePerTrace()); 
+            param->setImageDataPoint(trsDataR.data);
             (*f)(param);
-            hw[j][i] = param->getMidHW();
-            // printf("%d ", hw[j][i]);
-
-            #endif
-
+            // hw[param->getHorMidX()][param->getHorMidY()] = BaseTools::hanmingWeight(param->getHorMidValue(param->getHorMidX(), param->getHorMidY()));
         }
+        param->setHorMidHWY(0);
+    }
 
-        // printf("%d ", i);
-        // printf("\n");
-        
+    
+    // printf("done1\n");
+
+
+    // printf
+
+    for(int i=0; i < param->getTraceNum() * param->getMidvaluePerTrace(); i++){
+
+        // printf("%d\n", i);
+        traceS.readIndexTrace(&trsDataS,i);
+
         for(int j=0; j < param->getPointNum() ; j++){
+            // printf("%d ", param->getPointNum());
             sample[j][i]=trsDataS.samples[j+param->getPointNumStart()];
         }  
         
     }
 
-    
+    // printf("done2\n");
 
 
 
@@ -102,7 +97,7 @@ void correlationPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*)){
         for (int j = 0; j < param->getPointNum(); j++){
             
             //问题出现在这行，检查内存是否溢出？
-            trsData_result[i].samples[j] = (float)abs(BaseTools::corr(hw[i], sample[j], param->getTraceNum()));
+            trsData_result[i].samples[j] = (float)abs(BaseTools::corr(param->getHorMidHWXPointer(i), sample[j], param->getTraceNum() * param->getMidvaluePerTrace()));
             // printf("2\n");
             
             // printf("%f,",trsData_result[i].samples[startPoint_r+j]);
@@ -173,7 +168,7 @@ void correlationPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*)){
     
     
     for(int i=0;i < param->getGuessSize(); i++){
-        free(hw[i]);
+        // free(hw[i]);
         free(trsData_result[i].samples);
     }
     free(trsData_result);
@@ -190,25 +185,28 @@ void correlationPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*)){
     free(trsDataR.data);
     free(trsDataR.TSData);
 
+    param->freeHorMidHW();
+
     outfile->close();
     free(outfile);
     
 
     return;
 
-    
-    
-} 
+}
 
 
 
 
-void correlationPowerAnalysis_correlation_distinguish_index(Parameters* param, int8_t* (*f)(Parameters*), float** result, int index, int tem_trace_num){
 
+
+void horizontalPowerAnalysis_correlation_distinguish_index(Parameters* param, int8_t* (*f)(Parameters*), float** result, int index, int tem_trace_num){
     //fmap初始化
     q7_t fmap[param->getFmapNum()]={0};
     fmapInitial(param, fmap);
 
+    //horMid初始化
+    param->InitialHorMid();
 
     //wt初始化
     q7_t wt[param->getGuessSize()];
@@ -219,8 +217,8 @@ void correlationPowerAnalysis_correlation_distinguish_index(Parameters* param, i
     //一次读量初始化
 	float* sample[param->getPointNum()] = {nullptr};
     for(int i=0;i< param->getPointNum() ;i++){
-        sample[i]=(float*)malloc(tem_trace_num*sizeof(float));
-        std::memset(sample[i], 0.0, tem_trace_num * sizeof(float));
+        sample[i]=(float*)malloc(tem_trace_num*param->getMidvaluePerTrace()*sizeof(float));
+        std::memset(sample[i], 0.0, tem_trace_num*param->getMidvaluePerTrace()*sizeof(float));
     }
 
     Trace traceR(param->getRandFile());
@@ -229,10 +227,10 @@ void correlationPowerAnalysis_correlation_distinguish_index(Parameters* param, i
 	TrsData trsDataS;
 
     TrsData* trsData_result=(TrsData*)malloc(param->getGuessSize() * sizeof(TrsData));
-    uint8_t* hw[param->getGuessSize()] = {nullptr};
+    // uint8_t* hw[param->getGuessSize()] = {nullptr};
     for(int i=0;i<param->getGuessSize();i++){
-        hw[i]=(uint8_t*)malloc(tem_trace_num * sizeof(uint8_t));
-        std::memset(hw[i], 0, tem_trace_num * sizeof(uint8_t));
+        // hw[i]=(uint8_t*)malloc(tem_trace_num * param->getMidvaluePerTrace() * sizeof(uint8_t));
+        // std::memset(hw[i], 0, tem_trace_num * param->getMidvaluePerTrace() * sizeof(uint8_t));
         trsData_result[i].samples=(float*)malloc(param->getPointNum() * sizeof(float));
         std::memset(trsData_result[i].samples, 0.0, param->getPointNum() * sizeof(float));
     }
@@ -243,49 +241,46 @@ void correlationPowerAnalysis_correlation_distinguish_index(Parameters* param, i
     //attackindex -->> i j k m n l
     int attackIndex = param->getAttackIndex();
     param->setForI(attackIndex/75);//
-    param->setForJ(2);
-    param->setForK(2);
+    // param->setForJ(2);
+    // param->setForK(2);
     param->setForM(attackIndex%75/15);//
     param->setForN(attackIndex%75%15/3);//
     param->setForL(attackIndex%3);//
 
+    
 
-    for(int i=0; i < tem_trace_num; i++){
 
+    for(param->setHorMidX(0); param->getHorMidX() < param->getGuessSize(); param->setHorMidX(param->getHorMidX() + 1)){
+        fmap[param->getAttackIndex()] = wt[param->getHorMidX()];
         
-
-        //读一条
-        traceS.readIndexTrace(&trsDataS,i);
-        traceR.readIndexTrace(&trsDataR,i); 
-
-        param->setImageDataPoint(trsDataR.data);//param读imagedata参数
-        //像素初始化
-        for(int j=0;j < param->getGuessSize();j++){ 
-            
-            
-            fmap[param->getAttackIndex()] = wt[j];
-            // param->setFmapPoint(fmap);//param读fmap参数
-            
-            #if 1
-
+        for(int i = 0 ; i < tem_trace_num; i++){
+            traceR.readIndexTrace(&trsDataR,i*param->getMidvaluePerTrace()); 
+            param->setImageDataPoint(trsDataR.data);
             (*f)(param);
-            hw[j][i] = param->getMidHW();
-            // printf("%d ", hw[j][i]);
-
-            #endif
-
+            // hw[param->getHorMidX()][param->getHorMidY()] = BaseTools::hanmingWeight(param->getHorMidValue(param->getHorMidX(), param->getHorMidY()));
         }
+        param->setHorMidHWY(0);
+    }
 
-        // printf("%d ", i);
-        // printf("\n");
-        
+    
+    // printf("done1\n");
+
+
+    // printf
+
+    for(int i=0; i < tem_trace_num * param->getMidvaluePerTrace(); i++){
+
+        // printf("%d\n", i);
+        traceS.readIndexTrace(&trsDataS,i);
+
         for(int j=0; j < param->getPointNum() ; j++){
+            // printf("%d ", param->getPointNum());
             sample[j][i]=trsDataS.samples[j+param->getPointNumStart()];
         }  
         
     }
 
-    
+    // printf("done2\n");
 
 
 
@@ -294,7 +289,7 @@ void correlationPowerAnalysis_correlation_distinguish_index(Parameters* param, i
         for (int j = 0; j < param->getPointNum(); j++){
             
             //问题出现在这行，检查内存是否溢出？
-            trsData_result[i].samples[j] = (float)abs(BaseTools::corr(hw[i], sample[j], tem_trace_num));
+            trsData_result[i].samples[j] = (float)abs(BaseTools::corr(param->getHorMidHWXPointer(i), sample[j], tem_trace_num * param->getMidvaluePerTrace()));
             // printf("2\n");
             
             // printf("%f,",trsData_result[i].samples[startPoint_r+j]);
@@ -311,26 +306,16 @@ void correlationPowerAnalysis_correlation_distinguish_index(Parameters* param, i
 
         
     }
-    
-    #if 1    
 
-
+    #if 1 //output in result**
     for(int i=0;i<param->getGuessSize();i++){
         result[i][index]=result_max[i];
         // printf("%f ",result_max[i]); 
         // printf("%f,",result_max[i]); 
     }
-
-
-
     #endif
-
-
-
-
         
     
-
     #if 0//存储trs----START------------------------------------------------
     ofstream* outfile=new ofstream();   
     outfile->open(param->getOutFile(), ios::out | ios::binary | ios::trunc);
@@ -354,9 +339,14 @@ void correlationPowerAnalysis_correlation_distinguish_index(Parameters* param, i
     
     #endif//存储trs-----END-------------------------------------------------
     
+    #if 0
+    for(int i=0;i<GUESS_SIZE;i++){
+    trsData2->samples[i]=result_max[i];
+    // printf("%f ",result_max[i]); 
+    printf("%f,",result_max[i]); 
+    }
 
-
-    
+    #endif
 
     #if 0
     BaseTools::bubbleSort(result_max,wt,param->getGuessSize());
@@ -376,7 +366,7 @@ void correlationPowerAnalysis_correlation_distinguish_index(Parameters* param, i
     
     
     for(int i=0;i < param->getGuessSize(); i++){
-        free(hw[i]);
+        // free(hw[i]);
         free(trsData_result[i].samples);
     }
     free(trsData_result);
@@ -393,23 +383,22 @@ void correlationPowerAnalysis_correlation_distinguish_index(Parameters* param, i
     free(trsDataR.data);
     free(trsDataR.TSData);
 
+    param->freeHorMidHW();
 
     // outfile->close();
     // free(outfile);
     
 
     return;
-
-    
-    
 }
 
-void correlationPowerAnalysis_correlation_distinguish(Parameters* param, int8_t* (*f)(Parameters*)){
+
+void horizontalPowerAnalysis_correlation_distinguish(Parameters* param, int8_t* (*f)(Parameters*)){
     ofstream* outfile=new ofstream();   
     outfile->open(param->getOutFile(), ios::out | ios::binary | ios::trunc);
 
-    int bias=50;
-    int gap=50;
+    int bias=1;
+    int gap=1;
 
     float** result=(float**)malloc(param->getGuessSize()*sizeof(float*));
     for(int i =0 ;i<param->getGuessSize();i++){
@@ -421,7 +410,7 @@ void correlationPowerAnalysis_correlation_distinguish(Parameters* param, int8_t*
         
         // param->setTraceNum(index*gap+bias);
         // printf("%d %d\n", index,index*gap+bias);
-        correlationPowerAnalysis_correlation_distinguish_index(param, f, result, index, index*gap+bias);
+        horizontalPowerAnalysis_correlation_distinguish_index(param, f, result, index, index*gap+bias);
     }
 
     for(int i =0;i<param->getGuessSize();i++){
@@ -439,4 +428,9 @@ void correlationPowerAnalysis_correlation_distinguish(Parameters* param, int8_t*
     free(outfile);
 
 }
+
+
+
+
+
 
