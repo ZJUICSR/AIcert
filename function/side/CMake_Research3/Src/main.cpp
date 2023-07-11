@@ -26,7 +26,7 @@ int main(int argc, char const *argv[])
 
   start=clock();
 
-  differentialPowerAnalysis_correlation_distinguish(&param, cifar10_nn_run_cpa);
+  differentialPowerAnalysis_correlation_distinguish(&param, cifar10_nn_run_cpa_dpa);
   // differentialPowerAnalysis(&param, cifar10_nn_run_cpa);
   // correlationPowerAnalysis(&param, cifar10_nn_run_cpa);
   // correlationPowerAnalysis_correlation_distinguish(&param, cifar10_nn_run_cpa);

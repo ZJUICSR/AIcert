@@ -4,9 +4,9 @@
 #include  "../Inc/side_channel_attack_methods.h"
 #include "../Inc/CNNModel/cifar10_NN_example.h"
 
-void cpa(char* inFile, char* outFile){
 
-    printf("start:\n");
+
+void hpa(char* inFile, char* outFile){
 
     #if 1
 
@@ -15,7 +15,8 @@ void cpa(char* inFile, char* outFile){
 
     int num[SIZE] = {0};
     selectParenthesesNum(inFile, num);
-        
+
+    printf("start:\n");
     Parameters param;
     param.setSampleFile(inFile);
     param.setRandFile(inFile);//"./CMake_Research3/Trs/random/cpa/randdata_cpa_-9.trs"
@@ -23,10 +24,11 @@ void cpa(char* inFile, char* outFile){
     param.setAttackIndex(num[0]);
     param.setPointNumStart(num[1]);
     param.setPointNumEnd(num[2]);
-    param.setTraceNum(5000);
+    param.setTraceNum(9);
+    param.setMidvaluePerTrace(784);
 
     start=clock();
-    correlationPowerAnalysis_correlation_distinguish(&param, cifar10_nn_run_cpa_dpa);
+    horizontalPowerAnalysis_correlation_distinguish(&param, cifar10_nn_run_hpa);
     end=clock();
 
     printf("time:%d\n", end-start);
@@ -37,6 +39,6 @@ void cpa(char* inFile, char* outFile){
 
 }
 
-void cpa_(char* inFile, char* outFile){
-    cpa(inFile, outFile);
+void hpa_(char* inFile, char* outFile){
+    hpa(inFile, outFile);
 }
