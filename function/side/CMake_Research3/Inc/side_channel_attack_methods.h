@@ -1,9 +1,11 @@
 #ifndef _SIDE_CHANNEL_ATTACKS_METHODS_H_
 #define _SIDE_CHANNEL_ATTACKS_METHODS_H_
+#include<stdio.h>
 #include<stdint.h>
 #include<stdlib.h>
 #include <cstring>
 #include "../Inc/CNNModel/arm_nnexamples_cifar10_weights.h"
+#include "../Inc/BASETOOL/BaseTools.h"
 
 
 #define MIN_VALUE 1e-12
@@ -13,6 +15,14 @@
 #define HOR_TRS 9
 
 #define SIZE 1024
+
+inline void prints(char* str){
+    int i = 0;
+    while(str[i] != '\0'){
+        printf("%c", str[i]);
+        i++;
+    }
+}
 
 typedef struct{
 
@@ -36,6 +46,8 @@ typedef struct{
     int fmap_num;
     int point_num;
 
+    int midvalue_per_trace;
+
 }InParameters;
 
 typedef struct{
@@ -46,7 +58,11 @@ typedef struct{
     int forM;
     int forN;
     int forL;
-    int mid;
+    uint8_t midHW;
+    uint8_t** horMidHW;
+    int horMidHWX;
+    int horMidHWY;
+
 }MidParameters;
 
 class Parameters{
@@ -75,20 +91,40 @@ class Parameters{
         strcpy(in->samplesFile, fileName);
     };
 
+    char* getSampleFile(){
+        return in->samplesFile;
+    };
+
     void setRandFile(char* fileName){
         strcpy(in->randFile, fileName);
+    };
+
+    char* getRandFile(){
+        return in->randFile;
     };
 
     void setOutFile(char* fileName){
         strcpy(in->outFile, fileName);
     };
 
+    char* getOutFile(){
+        return in->outFile;
+    };
+
     void setTraceNum(int i){
         in->trace_num = i;
     };
 
+    int getTraceNum(){
+        return in->trace_num;
+    };
+
     void setAttackIndex(int i){
         in->attackindex = i;
+    };
+
+    int getAttackIndex(){
+        return in->attackindex;
     };
 
     void setPointNumStart(int i){
@@ -96,17 +132,17 @@ class Parameters{
         in->point_num = in->point_num_end - in->point_num_start + 1;
     };
 
+    int getPointNumStart(){
+        return in->point_num_start;
+    };
+
     void setPointNumEnd(int i){
         in->point_num_end = i;
         in->point_num = in->point_num_end - in->point_num_start + 1;
     };
 
-    int getTraceNum(){
-        return in->trace_num;
-    };
-
-    int getAttackIndex(){
-        return in->attackindex;
+    int getPointNumEnd(){
+        return in->point_num_end;
     };
 
     int getFmapNum(){
@@ -121,25 +157,62 @@ class Parameters{
         return in->point_num;
     }
 
-    char* getSampleFile(){
-        return in->samplesFile;
-    };
+    void setHorMidHW(int indexX, int indexY, uint8_t value){
+        mid->horMidHW[indexX][indexY] = value;
+    }
 
-    char* getRandFile(){
-        return in->randFile;
-    };
+    uint8_t getHorMidHW(int indexX, int indexY){
+        return mid->horMidHW[indexX][indexY];
+    }
 
-    char* getOutFile(){
-        return in->outFile;
-    };
+    uint8_t* getHorMidHWXPointer(int i){
+        return mid->horMidHW[i];
+    }
 
-    int getPointNumStart(){
-        return in->point_num_start;
-    };
+    void setHorMidX(int i){
+        mid->horMidHWX = i;
+    }
 
-    int getPointNumEnd(){
-        return in->point_num_end;
-    };
+    int getHorMidX(){
+        return mid->horMidHWX;
+    }
+
+    void setHorMidHWY(int i){
+        mid->horMidHWY = i;
+    }
+
+    int getHorMidHWY(){
+        return mid->horMidHWY;
+    }
+
+    void setMidvaluePerTrace(int i){ //调用必须在setTraceNum()后
+        in->midvalue_per_trace = i;
+       
+    }
+    
+    int getMidvaluePerTrace(){ //调用必须在setTraceNum()后
+        return in->midvalue_per_trace;
+    }
+
+    void InitialHorMid(){
+        mid->horMidHW = (uint8_t**)malloc(in->guess_size*sizeof(uint8_t*));
+        for(int i =0 ;i < in->guess_size; i++){
+                mid->horMidHW[i] = (uint8_t*)malloc(in->trace_num*in->midvalue_per_trace*sizeof(uint8_t));
+                memset(mid->horMidHW[i], 0 ,in->trace_num*in->midvalue_per_trace*sizeof(uint8_t));
+        }
+    }
+    
+    void freeHorMidHW(){
+
+        if(mid->horMidHW != NULL){
+            for(int i =0 ; i < in->guess_size; i++){
+                if(mid->horMidHW[i] != NULL)
+                    free(mid->horMidHW[i]);
+            }
+            free(mid->horMidHW);
+        }
+        
+    }
 
     //****END*********************************************************************
 
@@ -173,69 +246,57 @@ class Parameters{
     //***********************************************************************
     void setForI(int i){
         mid->forI = i;
-
     };
 
     int getForI(){
         return mid->forI;
-
     };
 
     void setForJ(int i){
         mid->forJ = i;
-
     };
 
     int getForJ(){
         return mid->forJ;
-
     };
 
     void setForK(int i){
         mid->forK = i;
-
     };
 
     int getForK(){
         return mid->forK;
-
     };
 
     void setForM(int i){
         mid->forM = i;
-
     };
 
     int getForM(){
         return mid->forM;
-
     };
 
     void setForN(int i){
         mid->forN = i;
-
     };
 
     int getForN(){
         return mid->forN;
-
     };
 
     void setForL(int i){
         mid->forL = i;
-
     };
 
     int getForL(){
         return mid->forL;
-
     };
 
-    void setMid(int i){
+    void setMidHW(uint8_t i){
         in->mid = i;
     };
     
-    int getMid(){
+    uint8_t getMidHW(){
         return in->mid;
     };
 
@@ -264,6 +325,8 @@ class Parameters{
         in->fmap_num = 2400;
         in->point_num = in->point_num_end - in->point_num_start + 1;
 
+        in->midvalue_per_trace = 0;
+
     };
 
     void emptyFunctionParameters(){
@@ -280,22 +343,85 @@ class Parameters{
         mid->forM = 0;
         mid->forN = 0;
         mid->forL = 0;
-        mid->mid = 0;
+        mid->midHW = 0;
+        mid->horMidHWX = 0;
+        mid->horMidHWY = 0;
+        mid->horMidHW = NULL;
     };
     //********END*********************************************************
 
 
     ~Parameters(){
-        // free(in);
-        // free(fParam);
-        // free(mid);
-        
         if(in != NULL) free(in);
         if(fParam != NULL) free(fParam);
+        // freeHorMidHW();
         if(mid != NULL) free(mid);
     };
 
 };
+
+inline void selectParentheses(char* str, char* disStr){
+    int strlen = 0;
+    int flag = -1;
+    int disStrlen = 0;
+    while(str[strlen] != '\0'){
+       
+        if(str[strlen] == '('){
+            flag = 0;
+        }else if(str[strlen] == ')'){
+            flag = 1;
+        }
+
+        if(flag == -1){
+            strlen++;
+            continue;
+        }else if(flag == 1){
+            disStr[disStrlen-1] = '\0';
+            break;
+        }else if(flag == 0){
+            disStr[disStrlen] = str[strlen+1];
+            disStrlen++;
+        }
+
+        strlen++;
+        
+    }
+}
+
+inline void selectParenthesesNum(char* str, int* num){//printf("done1\n");
+    char disStr[SIZE] = "\0";
+    selectParentheses(str, disStr);
+
+    #if 1
+    prints(disStr);
+    
+
+    #endif
+
+    char tem[SIZE]="\0";
+    int temlen = 0;
+    int disStrlen = 0;
+    int numlen = 0;
+    while(disStr[disStrlen]!='\0'){
+
+        if(disStr[disStrlen]!='-'){
+            tem[temlen]=disStr[disStrlen];
+            temlen++;
+        }else{
+            printf("\n");
+            prints(tem);
+            num[numlen]=BaseTools::charToNumD(tem);
+            numlen++;
+            strcpy(tem, "\0");
+            temlen = 0;
+            
+        }
+
+        disStrlen++;
+    }
+    tem[temlen]=disStr[disStrlen];
+    num[numlen]=BaseTools::charToNumD(tem);
+}
 
 inline void fmapInitial(Parameters* param, int8_t* fm){
 
@@ -316,6 +442,10 @@ void correlationPowerAnalysis_correlation_distinguish(Parameters* param, int8_t*
 //DPA
 void differentialPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*));
 void differentialPowerAnalysis_correlation_distinguish(Parameters* param, int8_t* (*f)(Parameters*));
+
+//HPA
+void horizontalPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*));
+void horizontalPowerAnalysis_correlation_distinguish(Parameters* param, int8_t* (*f)(Parameters*));
 
 #endif
 

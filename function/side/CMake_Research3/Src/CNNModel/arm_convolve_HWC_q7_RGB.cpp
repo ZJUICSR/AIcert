@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "../../Inc/CNNModel/cnn.h"
 #include "../../Inc/side_channel_attack_methods.h"
+#include "../../Inc/BASETOOL/BaseTools.h"
 
 
 arm_status
@@ -58,7 +59,7 @@ arm_convolve_HWC_q7_RGB_mid_cpa_dpa(const q7_t * Im_in,//输入
                                    * wt[i * ch_im_in * dim_kernel * dim_kernel + (m * dim_kernel +n) * ch_im_in + l];
 
                                 if(i==param->getForI() && j==param->getForJ() && k==param->getForK() && m==param->getForM() && n==param->getForN() && l==param->getForL()){
-                                    param->setMid(conv_out);
+                                    param->setMidHW(BaseTools::hanmingWeight(conv_out));
                                     // printf("%d ", conv_out);
                                     return (ARM_MATH_SUCCESS);
                                 }
@@ -72,6 +73,86 @@ arm_convolve_HWC_q7_RGB_mid_cpa_dpa(const q7_t * Im_in,//输入
                
             }
         }
+    }
+   
+
+                      /* ARM_MATH_DSP */
+
+    /* Return to application */
+    return (ARM_MATH_SUCCESS);
+}
+
+arm_status
+arm_convolve_HWC_q7_RGB_mid_hpa(const q7_t * Im_in,//输入
+                        const uint16_t dim_im_in,//输入数据宽度
+                        const uint16_t ch_im_in,//输入数据通道
+                        const q7_t * wt,//权重
+                        const uint16_t ch_im_out,//输出数据通道
+                        const uint16_t dim_kernel,//权重宽度
+                        const uint16_t padding,
+                        const uint16_t stride,
+                        const q7_t * bias,
+                        const uint16_t bias_shift,
+                        const uint16_t out_shift,
+                        q7_t * Im_out, const uint16_t dim_im_out, q15_t * bufferA, q7_t * bufferB, Parameters* param)//输出数据，输出数据宽度，数据缓冲
+{
+
+    int counts=0; 
+
+    /* Run the following code as reference implementation for Cortex-M0 and Cortex-M3 */
+
+    uint16_t  i, j, k, l, m, n;
+    int       conv_out;
+    signed char in_row, in_col;
+
+    
+
+    // check if number of input channels is 3
+    if (ch_im_in != 3)
+    {
+        return ARM_MATH_SIZE_MISMATCH;
+    }
+
+    for (i = param->getForI(); i < ch_im_out; i++)//通道32  
+    {
+        // count++;
+        for (j = 0; j < dim_im_out; j++)//行32
+        {
+            for (k = 0; k < dim_im_out; k++)//列32
+            {
+                conv_out = (bias[i] << bias_shift) + NN_ROUND(out_shift);//bias[i]
+                for (m = 0; m < dim_kernel; m++)//key行5
+                {
+                    for (n = 0; n < dim_kernel; n++)//key列5
+                    {
+                        /* if-for implementation */
+                        in_row = stride * j + m - padding;
+                        in_col = stride * k + n - padding;
+                        if (in_row >= 0 && in_col >= 0 && in_row < dim_im_in && in_col < dim_im_in)
+                        {
+                            for (l = 0; l < ch_im_in; l++)//key通道3
+                            {
+                                
+                                conv_out +=Im_in[(in_row * dim_im_in + in_col) * ch_im_in +l] 
+                                   * wt[i * ch_im_in * dim_kernel * dim_kernel + (m * dim_kernel +n) * ch_im_in + l];
+
+                                if( i==param->getForI() && m==param->getForM() && n==param->getForN() && l==param->getForL()){
+                                    if(j >= 2 && j < 30 && k >= 2 && k < 30){
+                                        param->setHorMidHW(param->getHorMidX(), param->getHorMidHWY(), BaseTools::hanmingWeight(conv_out));
+                                        param->setHorMidHWY(param->getHorMidHWY()+1);
+                                    }
+                                }
+                                
+                            }
+                        }
+                    }
+                }
+                
+                Im_out[i + (j * dim_im_out + k) * ch_im_out] = (q7_t) __SSAT((conv_out >> out_shift), 8);
+               
+            }
+        }
+        return (ARM_MATH_SUCCESS);
     }
    
 
@@ -153,6 +234,8 @@ arm_convolve_HWC_q7_RGB(const q7_t * Im_in,//输入
     /* Return to application */
     return (ARM_MATH_SUCCESS);
 }
+
+
 
 
 #if 0
