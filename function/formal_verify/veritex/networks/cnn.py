@@ -985,7 +985,7 @@ class Method:
         if self.label != y.argmax(axis=-1):
             print(self.label,y.argmax(axis=-1))
             print('This shouldn\' happen!')
-            sys.exit()
+            self.label = y.argmax(axis=-1)
 
         if self.attack_target == None:
             label_temp = self.label
