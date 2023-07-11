@@ -36,6 +36,7 @@ import matplotlib.pyplot as plt
 from function.formal_verify.veritex import Net as reachNet
 from function.formal_verify.veritex.networks.cnn import Method as ReachMethod
 from function.formal_verify.veritex.utils.plot_poly import plot_polytope2d
+import numpy as np
 ROOT = osp.dirname(osp.abspath(__file__))
 def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList):
     """模型公平性提升
@@ -726,7 +727,8 @@ def knowledge_consistency(tid, stid, arch,dataset,img_path,layer):
     plt.imshow(delta[t], cmap='jet', norm=None, vmin=delta.min(), vmax=delta.max())
     plt.savefig(os.path.join(pic_dir,stid+f'_delta_{t}.png'),bbox_inches='tight')
     plt.close()
-    return torch.norm(delta, p=2).numpy().tolist(),len(target)
+    print(1-max(min(torch.norm(delta, p=2).numpy().tolist(),350)-150,0)/350)
+    return 1-max(min(torch.norm(delta, p=2).numpy().tolist(),350)-150,0)/350,len(target)
 def reach(tid,stid,dataset,pic_path,label,target_label):
     base=os.path.join(os.getcwd(),"model","ckpt")
     base_path=os.path.join(base,'reach_checkpoints')
@@ -770,6 +772,9 @@ def reach(tid,stid,dataset,pic_path,label,target_label):
     # ax.set_ylabel(f'Adversarial class: $y_{dim1}$', fontsize=16)
     # plt.title('Reachability analysis of CNNs with input pixels under perturbation. \nBlue area represents the reachable domain. \nBlack dots represent simultations')
     plt.tight_layout()
+    x_min, x_max = plt.xlim()
+    y = np.linspace(x_min, x_max, 100)
+    plt.plot(y, y, color='r', label='y=x')
     plt.show()
     pt_dir=os.path.dirname(pic_path)
     plt.savefig(os.path.join(pt_dir,stid+'.png'))
