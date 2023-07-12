@@ -20,7 +20,7 @@ from PIL import Image
 from model.model_net.lenet import Lenet
 from model.model_net.resnet import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
 from function.attack import run_adversarial, run_backdoor
-import cv2 
+import cv2
 from function.fairness import run_dataset_debias, run_model_debias
 from function import concolic, env_test, deepsst, dataclean
 from function.ex_methods.module.func import get_loader, Logger, recreate_image
@@ -48,6 +48,7 @@ from function.defense.trainer.trainer import *
 from function.defense.detector.poison.detect_poison import *
 from function.defense.transformer.poisoning.transformer_poison import *
 from function.defense.sage.sage import *
+from function.defense.strip import *
 from function.defense.models import *
 from torchvision.models import vgg16
 from function.side import *
@@ -69,7 +70,7 @@ def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics,
     taskinfo[tid]["function"][stid]["state"]=2
     taskinfo[tid]["state"]=2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-    
+
 
 def run_data_debias_api(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList):
     """数据集公平性提升
@@ -111,7 +112,7 @@ def get_data_loader(data_path, data_name, params, transform =None):
     else:
         dataloader = ArgpLoader(data_root=data_path, dataset=data_name, **params)
         train_loader, test_loader = dataloader.get_loader()
-        
+
         params = dataloader.__config__(dataset=data_name)
         return test_loader,train_loader,params
 
@@ -223,8 +224,8 @@ def run_verify(tid, AAtid, param):
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-    
-    
+
+
 def run_concolic(tid, AAtid, dataname, modelname, norm, times):
     """测试样本自动生成
     :params tid:主任务ID
@@ -235,13 +236,13 @@ def run_concolic(tid, AAtid, dataname, modelname, norm, times):
     """
     logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = concolic.run_concolic(dataname.lower(), modelname.lower(), norm.lower(), int(times), osp.join(ROOT,"output", tid, AAtid), logging)  
-    res["stop"]=1 
+    res = concolic.run_concolic(dataname.lower(), modelname.lower(), norm.lower(), int(times), osp.join(ROOT,"output", tid, AAtid), logging)
+    res["stop"]=1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-    
+
 def run_dataclean(tid, AAtid, dataname):
     """异常数据检测
     :params tid:主任务ID
@@ -250,7 +251,7 @@ def run_dataclean(tid, AAtid, dataname):
     :output res:需保存到子任务json中的返回结果/路径
     """
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = dataclean.run_dataclean(dataname)   
+    res = dataclean.run_dataclean(dataname)
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
@@ -266,11 +267,11 @@ def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
     :output res:需保存到子任务json中的返回结果/路径
     """
     logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
-    
+
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     res = env_test.run_env_frame(matchmethod,frameworkname,frameversion, osp.join(ROOT,"output", tid, AAtid), logging)
     # res = concolic.run_concolic(dataname, modelname, norm)  
-    res["detection_result"]=IOtool.load_json(res["env_test"]["detection_result"]) 
+    res["detection_result"]=IOtool.load_json(res["env_test"]["detection_result"])
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
@@ -279,7 +280,7 @@ def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
 
 def run_coverage(tid,AAtid,dataset,modelname):
     pass
-  
+
 def run_deepsst(tid,AAtid,dataset,modelname,pertube,m_dir):
     """敏感神经元测试准则
     :params tid:主任务ID
@@ -292,7 +293,7 @@ def run_deepsst(tid,AAtid,dataset,modelname,pertube,m_dir):
     """
     logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = deepsst.run_deepsst(dataset.lower(), modelname, float(pertube.strip("%"))/100, m_dir, osp.join(ROOT,"output", tid, AAtid), logging)  
+    res = deepsst.run_deepsst(dataset.lower(), modelname, float(pertube.strip("%"))/100, m_dir, osp.join(ROOT,"output", tid, AAtid), logging)
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
@@ -345,8 +346,8 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
     taskinfo[tid]["function"][stid]["state"] = 2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
     IOtool.change_task_success_v2(tid)
-    
-    
+
+
 def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
     """后门攻击评估
     :params tid:主任务ID
@@ -443,13 +444,13 @@ def run_dim_reduct(tid, stid, datasetparam, modelparam, vis_methods, adv_methods
     for adv_method in adv_methods:
         temp = dim_reduciton_visualize(vis_methods, nor_loader, adv_loader[adv_method], net, model_name, dataset, device, save_path)
         res[adv_method] = temp
-    
-    IOtool.write_json(res,osp.join(ROOT,"output", tid, stid+"_result.json")) 
+
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, stid+"_result.json"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"] = 2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
     IOtool.change_task_success_v2(tid)
-    
+
 def run_attrbution_analysis(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device):
     """对抗攻击归因解释
     :params tid:主任务ID
@@ -501,10 +502,10 @@ def run_attrbution_analysis(tid, stid, datasetparam, modelparam, ex_methods, adv
     save_path = osp.join(ROOT,"output", tid, stid)
     if not osp.exists(save_path):
         os.mkdir(save_path)
-    
+
     logging.info("[注意力分布图计算]：选择了{:s}解释算法".format(", ".join(ex_methods)))
     ex_images = attribution_maps(net, nor_loader, adv_loader, ex_methods, params, 20, logging)
-    IOtool.write_json(ex_images,osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    IOtool.write_json(ex_images,osp.join(ROOT,"output", tid, stid+"_result.json"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"] = 2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
@@ -541,7 +542,7 @@ def run_layer_explain(tid, stid, datasetparam, modelparam, ex_methods, adv_metho
     nor_data = torch.load(osp.join(root, f"dataset/data/{dataset}_NOR.pt"))
     nor_loader = get_loader(nor_data, batchsize=16)
     logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
-    
+
     model_name = modelparam["name"]
     if modelparam["ckpt"] != "None":
         model = torch.load(modelparam["ckpt"])
@@ -552,19 +553,19 @@ def run_layer_explain(tid, stid, datasetparam, modelparam, ex_methods, adv_metho
     net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
     net = net.eval().to(device)
     logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
-    
+
     adv_loader = {}
     res = {}
     for adv_method in adv_methods:
         logging.info("[数据集获取]：获取{:s}对抗样本".format(adv_method))
         adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=16, logging=logging)
-        
+
         logging.info("[特征层可视化]:对{:s}模型逐层提取特征并进行可视化分析".format(model_name))
         result = layer_explain(model_name, nor_loader, adv_loader[adv_method], params)
         res[adv_method]=result
-        
+
         print(result)
-    IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"] = 2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
@@ -603,7 +604,7 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, device):
     label = nor_data['y'][2]
     img = recreate_image(nor_img_x.squeeze())
     logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
-    
+
     model_name = modelparam["name"]
     if modelparam["ckpt"] != "None":
         model = torch.load(modelparam["ckpt"])
@@ -614,7 +615,7 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, device):
     net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
     net = net.eval().to(device)
     logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
-    
+
     adv_loader = {}
     res = {}
     for adv_method in adv_methods:
@@ -624,9 +625,9 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, device):
 
         save_path = params["out_path"]
         result = lime_image_ex(img, net, model_name, dataset, device, root, save_path)
-        
+
         res[adv_method]=result
-    IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"] = 2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
@@ -655,7 +656,7 @@ def verify_img(tid, stid, net, dataset, eps, pic_path):
         categories.append(f'f_{i}')
     resp={'boundary1':b1,'boundary2':b2,'categories':categories,'predicted':predicted,
           'score_IBP':score_IBP,'score_CROWN':score_CROWN}
-    IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"] = 2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
@@ -690,10 +691,10 @@ def knowledge_consistency(tid, stid, arch,dataset,img_path,layer):
         return None
     if dataset=='mnist':
         transform=transforms.Compose([transforms.Resize((224,224)),transforms.Grayscale(num_output_channels=3),
-            transforms.ToTensor(), 
+            transforms.ToTensor(),
             transforms.Normalize((0.1307,), (0.3081,))])
     elif dataset=='cifar10':
-        transform=transforms.Compose([transforms.Resize((224,224)),transforms.ToTensor(), 
+        transform=transforms.Compose([transforms.Resize((224,224)),transforms.ToTensor(),
                                   transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])])
     net1 = models.__dict__[arch](num_classes=10)
     load_checkpoint(model_path1, net1)
@@ -747,7 +748,7 @@ def reach(tid,stid,dataset,pic_path,label,target_label):
     base=os.path.join(os.getcwd(),"model","ckpt")
     base_path=os.path.join(base,'reach_checkpoints')
     model = reachNet()
-    if dataset=='CIFAR10':  
+    if dataset=='CIFAR10':
         model.load_state_dict(torch.load(os.path.join(base_path,'cifar_torch_net.pth'), map_location=torch.device('cpu')))
     else:
         model.load_state_dict(torch.load(os.path.join(base_path,'mnist_torch_net.pth'), map_location=torch.device('cpu')))
@@ -786,13 +787,13 @@ def reach(tid,stid,dataset,pic_path,label,target_label):
     plt.savefig(os.path.join(pt_dir,stid+'.png'))
     plt.close()
     resp={
-        
+
     }
     return resp
 
 def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_examples=None, logging=None):
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu") 
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     if torch.cuda.is_available():
         print("got GPU")
     logging.info("加载模型{:s}".format(adv_model))
@@ -824,87 +825,67 @@ def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_ex
         else:
             raise Exception('MNIST can only use SmallCNN and VGG16!')
         model.load_state_dict(checkpoint)
-        model = model.to(device).eval()    
+        model = model.to(device).eval()
     logging.info("{:s}模型加载结束".format(adv_model))
     if defense_methods == 'JPEG':
-        detector =  Jpeg(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Jpeg(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Feature Squeeze':
-        detector =  feature_squeeze(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = feature_squeeze(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Twis':
-        detector =  Twis(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Twis(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Rgioned-based':
-        detector =  RegionBased(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = RegionBased(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Pixel Deflection':
-        detector =  Pixel_Deflection(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Pixel_Deflection(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Label Smoothing':
-        detector =  Label_smoothing(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Label_smoothing(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Spatial Smoothing':
-        detector =  Spatial_smoothing(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Spatial_smoothing(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Gaussian Data Augmentation':
-        detector =  Gaussian_augmentation(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Gaussian_augmentation(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Total Variance Minimization':
-        detector =  Total_var_min(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Total_var_min(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Pixel Defend':
-        detector =  Pixel_defend(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Pixel_defend(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'InverseGAN':
-        detector =  Inverse_gan(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Inverse_gan(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'DefenseGAN':
-        detector =  Defense_gan(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Defense_gan(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Madry':
-        detector =  Madry(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Madry(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'FastAT':
-        detector =  FastAT(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = FastAT(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'TRADES':
-        detector =  Trades(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Trades(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'FreeAT':
-        detector =  FreeAT(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = FreeAT(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'MART':
-        detector =  Mart(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Mart(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'CARTL':
-        detector =  Cartl(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Cartl(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Activation':
-        detector =  Activation_defence(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Activation_defence(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Spectral Signature':
-        detector =  Spectral_signature(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Spectral_signature(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Provenance':
-        detector =  Provenance_defense(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Provenance_defense(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Neural Cleanse L1':
-        detector =  Neural_cleanse_l1(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Neural_cleanse_l1(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Neural Cleanse L2':
-        detector =  Neural_cleanse_l2(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Neural_cleanse_l2(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Neural Cleanse Linf':
-        detector =  Neural_cleanse_linf(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Neural_cleanse_linf(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'SAGE':
-        detector =  Sage(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        detector = Sage(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == "STRIP":
-        # 模型准备
-            # model = BadNet(1, 10)
-            # model.load_state_dict(torch.load('argp/third_party/defenses/backdoor/data/badnet-mnist.pth'))
-            # model.eval()
-            # 数据准备
-            train_set = torchvision.datasets.MNIST(root="./dataset", train=True,download=False)
-            test_set = torchvision.datasets.MNIST(root="./dataset", train=False, download=False)
-            result["STRIP"]=""
-            # train_data = PoisonedDataset(train_set, 0, portion=0.1, mode="train", dataname="mnist")
-            # test_data_ori = PoisonedDataset(test_set, 0, portion=0, mode="test", dataname="mnist")
-            # test_data_tri = PoisonedDataset(test_set, 0, portion=1, mode="test", dataname="mnist")
+        detector = Strip(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
 
-            # train_data_loader = DataLoader(dataset=train_data, batch_size=16, shuffle=True)
-            # test_data_ori_loader = DataLoader(dataset=test_data_ori, batch_size=16, shuffle=True)
-            # test_data_tri_loader = DataLoader(dataset=test_data_tri, batch_size=16, shuffle=True)
-            # # RUN
-            # storage = Storage(method='badnets', model=model, train_loader=train_data_loader,
-            #                   test_loader=test_data_ori_loader, poison_batch=list(test_data_tri_loader)[0][0][:10])
-            # bd = backdoor.WrapperBackdoorDefense(args=args, method=method, params=params)
-            # res_strip = bd(model=model, train_loader=train_data_loader, test_loader=test_data_ori_loader, atk_storage=storage)
-            # result["STRIP"] = res_strip
-            return result["STRIP"]
     _, _, detect_rate, no_defense_accuracy = detector.detect()
     return detect_rate, no_defense_accuracy
 
 
 def run_side_api(trs_file, methods, tid, stid):
-    
+
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"]=1
     taskinfo[tid]["state"]=1
@@ -922,10 +903,10 @@ def run_side_api(trs_file, methods, tid, stid):
                 res[method] = [float(s) for s in line.split()]
         else:
             # 其他方法结果处理
-            pass 
+            pass
         logging.info("分析方法{:s}执行结束，耗时{:s}s".format(method,str(round(use_time,1))))
     logging.info("侧信道分析执行结束！")
-    IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"] = 2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
