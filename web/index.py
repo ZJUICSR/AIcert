@@ -829,19 +829,19 @@ def model_reach():
         taskinfo[tid]["model"] = 'CNN'
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
         
-        resp=interface.reach(tid,stid,dataset,pic_path,label,target)
+        resp=interface.reach(tid,stid,dataset.upper(),pic_path,label,target)
         resp['input']=f'static/imgs/tmp_imgs/{tid}/{stid}.png'
         IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         taskinfo[tid]["function"][stid]["state"] = 2
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
         IOtool.change_task_success_v2(tid)
+        print("**************end**********")
         return resp
     return render_template('reach.html')
 @app.route('/knowledge_consistency',methods=["GET","POST"])
 def model_consistency():
     if request.method=='POST':
-        print("***********************knowledge_consistency*********\n")
         inputParam = json.loads(request.data)
         tid = inputParam["tid"]
         net=inputParam['net']
@@ -857,7 +857,6 @@ def model_consistency():
         except:
             pass
         if "image/jpeg;" in pic:
-            
             with open( pic_path, 'wb') as f:
                 f.write(base64.b64decode(pic.replace('data:image/jpeg;base64,','')))
                 f.close()
@@ -877,13 +876,7 @@ def model_consistency():
         taskinfo[tid]["dataset"] = dataset
         taskinfo[tid]["model"] = net
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        
-        img_path=os.path.join(img_dir,tid,stid+'.png')
-        with open(img_path, 'wb') as f:
-            f.write(base64.b64decode(pic.replace('data:image/png;base64,','')))
-            f.close()
-        
-        l2,layers=interface.knowledge_consistency(tid, stid, net,dataset,img_path,layer)
+        l2,layers=interface.knowledge_consistency(tid, stid, net,dataset,pic_path,layer)
         resp={'l2':l2,'input':f'static/imgs/tmp_imgs/{tid}/{stid}.png',
                 'output':f'static/imgs/tmp_imgs/{tid}/{stid}_output_{layer}.png',
                 'target':f'static/imgs/tmp_imgs/{tid}/{stid}_target_{layer}.png',
@@ -895,7 +888,9 @@ def model_consistency():
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
         IOtool.change_task_success_v2(tid)
         return json.dumps(resp,ensure_ascii=False)
+    
     return render_template('knowledge_consistency.html')
+
 @app.route('/auto_verify_img',methods=["GET","POST"])
 def auto_verify_img():
     if request.method=='POST':
@@ -945,9 +940,7 @@ def auto_verify_img():
         print("net:",net)
         print("dataset:",dataset)
         print("eps:",eps)
-        print("pic_path:",pic_path)
-        print("pic:",pic)
-        resp=interface.verify_img(tid, stid, net, dataset, eps, pic_path)
+        resp=interface.verify_img(tid, stid, net, dataset.upper(), eps, pic_path)
         IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         taskinfo[tid]["function"][stid]["state"] = 2
