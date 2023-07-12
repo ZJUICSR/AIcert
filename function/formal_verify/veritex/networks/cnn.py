@@ -14,7 +14,7 @@ import torch.nn as nn
 import torch.multiprocessing
 from torch.autograd import Variable
 import veritex.sets.cubelattice as cl
-import logging
+from function.ex_methods.module.func import Logger
 import pickle
 import time
 import sys
@@ -98,7 +98,7 @@ class Network:
         Returns:
             sequential_layers (sequential): Sequential model
         """
-
+        print(f"in forward_layer_sequential {len(net.sequential)}")
         net_layers = []
         for i in range(len(net.sequential)):
             type_name = type(net.sequential[i]).__name__
@@ -110,7 +110,10 @@ class Network:
         if self.is_cuda:
             sequential_layers = nn.Sequential(*net_layers).eval().cuda()
         else:
+            print("forward_layer_sequential no cuda")
             sequential_layers = nn.Sequential(*net_layers).eval()
+        
+        print("sequential_layers.parameters():",sequential_layers.parameters())
 
         for param in sequential_layers.parameters():
             param.requires_grad = False
@@ -157,10 +160,13 @@ class Network:
         """
 
         layer_fls = [input_image_fl]
+        print("***regular****")
+        print(self.layer_num)
         for self._layer in range(self.layer_num):
             self.reach_single_layer(layer_fls)
 
         layer_fls_out = [[afl.vertices, afl.vertices_init] for afl in layer_fls]
+        print("***regular end****")
         return layer_fls_out
 
 
@@ -269,11 +275,12 @@ class Network:
         Parameters:
             all_fls (list): Input reachable sets and after computation it stores all output reachable sets
         """
+        print("in reach_single_layer")
         if type(self.sequential[self._layer]).__name__ == 'DataParallel':
             type_name = type(self.sequential[self._layer].module).__name__
         else:
             type_name = type(self.sequential[self._layer]).__name__
-
+        print(type_name)
         if type_name == 'BatchNorm2d':
             self.norm2d_layer(all_fls)
 
@@ -343,6 +350,7 @@ class Network:
         elif type_name == 'Linear':
             for im_fl in all_fls:
                 self.linear_layer(im_fl)
+        print("reach_single_layer end")
 
 
     def norm2d_layer(self, all_fls):
@@ -373,7 +381,9 @@ class Network:
             all_fls (list): Input reachable sets and after computation it stores all output reachable sets
 
         """
+        print("in conv2d_layer")
         if self.is_cuda:
+            print("cuda")
             ap = self.layer_attack_poss[self._layer]
             ap_next = self.layer_attack_poss[self._layer+1]
             rp = self.layer_process_range[self._layer]
@@ -391,20 +401,27 @@ class Network:
                 ap3 = ap_next - rp[0]
                 im_fl.vertices = cp.deepcopy(im_output[:, :, ap3[0][0]:ap3[1][0] + 1, ap3[0][1]:ap3[1][1] + 1])
         else:
+            print("no cuda")
             ap = self.layer_attack_poss[self._layer]
             ap_next = self.layer_attack_poss[self._layer + 1]
             rp = self.layer_process_range[self._layer]
+            print(f"all_fls:{len(all_fls)}")
+            i = 0
             for im_fl in all_fls:
                 im_input = cp.deepcopy(self._image_frame).repeat(im_fl.vertices.shape[0], axis=0)
                 ap2 = ap - rp[0]
+                print("im_fl.vertices")
                 im_input[:, :, ap2[0][0]:ap2[1][0] + 1, ap2[0][1]:ap2[1][1] + 1] = im_fl.vertices
 
                 im_input0 = torch.from_numpy(im_input)
+                print("sequential")
                 im_output0 = self.sequential[self._layer](im_input0)
                 im_output = im_output0.numpy()
-
+                print("ap_next")
                 ap3 = ap_next - rp[0]
                 im_fl.vertices = cp.deepcopy(im_output[:, :, ap3[0][0]:ap3[1][0] + 1, ap3[0][1]:ap3[1][1] + 1])
+                print(f"i:{i}")
+                i = i+1
 
 
     def get_valid_neurons1(self, afl, neurons):
@@ -812,6 +829,7 @@ class Method:
                  attack_block=(1,1),
                  epsilon=0.001,
                  relaxation=1,
+                 logging=None,
                  target=None,
                  mean=np.array([0,0,0]),
                  std=np.array([1,1,1]),
@@ -833,7 +851,7 @@ class Method:
             std (np.ndarray): Std for normalization of the input image
             is_cuda (bool): Enable cuda
         """
-
+        
         self.model = model
         self.image_orig = cp.deepcopy(image)
         self.image = image
@@ -856,6 +874,10 @@ class Method:
         self.relaxation = relaxation
         if self.attack_target == self.label:
             sys.exit('Label should not be the attack target')
+        if logging==None:
+            self.logging = Logger(filename=osp.join(self.savepath, "log.txt"))
+        else:
+            self.logging = logging
 
 
     def reach(self):
@@ -866,31 +888,36 @@ class Method:
             all_fls (list): Output reachable sets
         """
         t0 = time.time()
+        
+        self.logging.info(f'Network process')
         net = Network(self.model, self.image, self.label, self.attack_poss,
                            self.layer_gradients, relaxation=self.relaxation, is_cuda=self.is_cuda)
 
         self.attack_range = self.attack_range_3channel()
         # Partition input set into subsets
+        self.logging.info(f'Partition input set into subsets')
         all_input_fls = cl.partition_input(self.attack_range, pnum=4, poss=self.attack_poss)
         pool = torch.multiprocessing.Pool(self.num_core)  # multiprocessing
-
+        self.logging.info(f'multiprocessing')
         outputSets = []
+        print("outputSets") 
         outputSets.extend(pool.imap(net.regular_reach, all_input_fls))
         pool.close()
         self.elapsed_time = time.time() - t0
+        print("pool close") 
         all_fls = [item for sublist in outputSets for item in sublist]
-
-        logging.info(f'Running time: {self.elapsed_time}')
-        logging.info(f'Number of Output Sets: {len(all_fls)}')
+        self.logging.info(f'Running time: {self.elapsed_time}')
+        self.logging.info(f'Number of Output Sets: {len(all_fls)}')
         filename = f'image_label_{self.label.numpy()}_epsilon' \
                    f'_{self.epsilon}_relaxation_{self.relaxation}'
+        print(self.savepath+'/'+filename+'.pkl') 
         with open(self.savepath+'/'+filename+'.pkl', 'wb') as f:
             pickle.dump({'Output reachable sets':all_fls,
                          'Image label':self.label.numpy(),
                          'Running time':self.elapsed_time,
                          'Attack pixels':self.attack_poss,
                          'Relaxtion factor':self.relaxation}, f)
-
+        print("end")
         return all_fls
 
 

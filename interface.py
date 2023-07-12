@@ -743,16 +743,23 @@ def knowledge_consistency(tid, stid, arch,dataset,img_path,layer):
     plt.savefig(os.path.join(pic_dir,stid+f'_delta_{t}.png'),bbox_inches='tight')
     plt.close()
     return torch.norm(delta, p=2).numpy().tolist(),len(target)
+
 def reach(tid,stid,dataset,pic_path,label,target_label):
+    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
+    logging.info(f"The reachability task starts ，dateset: {dataset}")
     base=os.path.join(os.getcwd(),"model","ckpt")
     base_path=os.path.join(base,'reach_checkpoints')
     model = reachNet()
     if dataset=='CIFAR10':  
+        logging.info(f"Start to load CNN-3layer")
         model.load_state_dict(torch.load(os.path.join(base_path,'cifar_torch_net.pth'), map_location=torch.device('cpu')))
     else:
+        logging.info(f"Start to load CNN-3layer")
         model.load_state_dict(torch.load(os.path.join(base_path,'mnist_torch_net.pth'), map_location=torch.device('cpu')))
+    logging.info(f"End of model loading")
     model.eval()
     transf = transforms.ToTensor()
+    logging.info(f"Start to load the uploaded image")
     img = cv2.imread(pic_path)
     image=transf(img)
     image=torch.unsqueeze(image, 0)
@@ -763,31 +770,34 @@ def reach(tid,stid,dataset,pic_path,label,target_label):
     attack_block = (1,1)
     epsilon = 0.02
     relaxation = 0.01
+    logging.info(f"reachability verification")
     reach_model = ReachMethod(model, image, label, 'logs',
                          attack_block=attack_block,
                          epsilon=epsilon,
-                         relaxation=relaxation)
+                         relaxation=relaxation,
+                         logging=logging)
     output_sets = reach_model.reach()
-
+    # sims = reach_model.simulate(num=100) 
+    # num 越小越快
     sims = reach_model.simulate(num=100)
 
     # Plot output reachable sets and simulations
     dim0, dim1 = label.numpy(), target_label.numpy()
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    logging.info(f"Output data process, reachable area drawing")
     for item in output_sets:
         out_vertices = item[0]
         plot_polytope2d(out_vertices[:, [dim0, dim1]], ax, color='b', alpha=1.0, edgecolor='k', linewidth=0.0,zorder=2)
     ax.plot(sims[:,dim0], sims[:,dim1],'k.',zorder=1)
     ax.autoscale()
     plt.tight_layout()
-    plt.show()
+    # plt.show()
     pt_dir=os.path.dirname(pic_path)
     plt.savefig(os.path.join(pt_dir,stid+'.png'))
     plt.close()
-    resp={
-        
-    }
+    logging.info(f"The reachable areas is drawn. The reachability verification is complete")
+    resp={"path":os.path.join(pt_dir,stid+'.png')}
     return resp
 
 def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_examples=None, logging=None):
@@ -917,9 +927,10 @@ def run_side_api(trs_file, methods, tid, stid):
         outpath = osp.join(ROOT,"output", tid,stid + "_" + method+"_out.txt")
         trs_file_path = osp.join(ROOT,"dataset/Trs/samples",trs_file)
         use_time = run_side(trs_file_path, method, outpath)
-        if method in ["cpa","dpa"]:
+        res[method] = []
+        if method in ["cpa","dpa","hpa"]:
             for line in open(outpath, 'r'):
-                res[method] = [float(s) for s in line.split()]
+                res[method].append([float(s) for s in line.split()])
         else:
             # 其他方法结果处理
             pass 
