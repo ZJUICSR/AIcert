@@ -102,7 +102,7 @@ void differentialPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*)){
         for (int j = 0; j < param->getPointNum(); j++){
             
             //问题出现在这行，检查内存是否溢出？
-            trsData_result[i].samples[j] = (float)abs(BaseTools::diff(hw[i], sample[j], param->getTraceNum(),27));
+            trsData_result[i].samples[j] = (float)abs(BaseTools::diff(hw[i], sample[j], param->getTraceNum(),25));
             // printf("2\n");
             
             // printf("%f,",trsData_result[i].samples[startPoint_r+j]);
@@ -297,7 +297,7 @@ void differentialPowerAnalysis_correlation_distinguish_index(Parameters* param, 
             
             //问题出现在这行，检查内存是否溢出？
             // trsData_result[i].samples[j] = (float)abs(BaseTools::corr(hw[i], sample[j], tem_trace_num));
-            trsData_result[i].samples[j] = (float)abs(BaseTools::diff(hw[i], sample[j], tem_trace_num, 27));
+            trsData_result[i].samples[j] = (float)abs(BaseTools::diff(hw[i], sample[j], tem_trace_num, 25));
             // printf("2\n");
             
             // printf("%f,",trsData_result[i].samples[startPoint_r+j]);
