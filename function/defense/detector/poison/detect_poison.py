@@ -96,7 +96,7 @@ def generate_backdoor(
                     x_clean_save[k] = imgs_to_be_poisoned_save[j]
                     x_poison_save[k] = imgs_to_be_poisoned[j]
                     k += 1
-                    print(k)
+                    # print(k)
                     if k == 10:
                         break
         x_poison = np.append(x_poison, imgs_to_be_poisoned, axis=0)
@@ -162,7 +162,7 @@ class Detectpoison(object):
         y_raw = y_raw[random_selection_indices]
 
         n_train = np.shape(x_raw_test)[0]
-        num_selection = self.adv_nums
+        num_selection = max(self.adv_nums, 100)
         random_selection_indices = np.random.choice(n_train, num_selection)
         x_raw_test = x_raw_test[random_selection_indices]
         y_raw_test = np.array(y_raw_test)[random_selection_indices]
@@ -235,7 +235,10 @@ class Detectpoison(object):
         defence = detect_poison(classifier, x_test, y_test)
 
         print("End-to-end method")
-        defence.detect_poison(nb_clusters=2, nb_dims=6, reduce="PCA")
+        nb_dims = 6
+        if detect_poison.__name__ == 'ActivationDefence':
+            nb_dims = 5
+        defence.detect_poison(nb_clusters=2, nb_dims=nb_dims, reduce="PCA")
 
         print("Evaluate method when ground truth is known")
         is_clean = is_poison_test == 0
@@ -347,7 +350,7 @@ class Provenance_defense(Detectpoison):
             eps=1.0,
             x_val=valid_data,
             y_val=valid_labels,
-            verbose=False,
+            max_iter=200,
         )
 
         poisoned_data, _ = svm_attack.poison(all_poison_init, y=poison_labels)
@@ -371,12 +374,11 @@ class Provenance_defense(Detectpoison):
         no_defense_accuracy = np.sum(np.argmax(adv_predictions, axis=1) == np.argmax(y_test, axis=1)) / len(y_test)
         self.no_defense_accuracy = no_defense_accuracy
 
-        defence_no_trust = ProvenanceDefense(classifier, all_data, all_labels, all_p, eps=0.1)
+        defence = ProvenanceDefense(classifier, all_data, all_labels, all_p, eps=0.1, x_val=trusted_data, y_val=trusted_labels)
         
         # End-to-end method:
         # print("------------------- Results using size metric -------------------")
         # print(defence.get_params())
-        defence = defence_no_trust
         defence.detect_poison()
 
         # Evaluate method when ground truth is known:
