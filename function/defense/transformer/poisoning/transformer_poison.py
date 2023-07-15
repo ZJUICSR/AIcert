@@ -143,6 +143,9 @@ class Transformerpoison(object):
             save_name = 'linf'
         else:
             save_name = 'l' + str(norm)
+        save_dir = '/mnt/data2/yxl/AI-platform/output/trigger/' + save_name + '/'
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
         num_selection = 5000
         x_raw = x_raw[:num_selection]
         y_raw = y_raw[:num_selection]
@@ -209,7 +212,7 @@ class Transformerpoison(object):
                     save_jepg(x_clean_save[i], output_dir + '/clean.jpeg', dataset)
                     save_jepg(x_poison_save[i] - x_clean_save[i], output_dir + '/backdoor.jpeg', dataset)
                     if i == 0:
-                        save_jepg(x_poison_save[i] - x_clean_save[i], '/mnt/data2/yxl/AI-platform/output/trigger/' + save_name + '/trigger.jpeg', dataset)
+                        save_jepg(x_poison_save[i] - x_clean_save[i], save_dir + 'trigger.jpeg', dataset)
 
             return is_poison, x_poison, y_poison
         percent_poison = .33
@@ -302,7 +305,7 @@ class Transformerpoison(object):
         image = trigger_predict
         image_uint8 = (image * 255).astype(np.uint8)
         pil_image = Image.fromarray(image_uint8)
-        pil_image.save('/mnt/data2/yxl/AI-platform/output/trigger/' + save_name + '/trigger_predict.jpeg', "JPEG")
+        pil_image.save(save_dir + 'trigger_predict.jpeg', "JPEG")
 
         defence_cleanse.mitigate(clean_x_test, clean_y_test, mitigation_types=["filtering"])
         poison_pred = defence_cleanse.predict(poison_x_test)
