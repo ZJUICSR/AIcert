@@ -146,14 +146,14 @@ def validate(test_loader, model, criterion):
     for i, (input, target) in enumerate(test_loader):
         crop_size = len(input[0][0])
         break
-    if crop_size == 32:
+    if crop_size == 32 and len(input[0]) == 3:
         args_mean = [0.485, 0.456, 0.406]
         args_std = [0.229, 0.224, 0.225]
         mean = torch.Tensor(np.array(args_mean)[:, np.newaxis, np.newaxis])
         mean = mean.expand(3,crop_size, crop_size).cuda()
         std = torch.Tensor(np.array(args_std)[:, np.newaxis, np.newaxis])
         std = std.expand(3, crop_size, crop_size).cuda()
-    elif crop_size == 28:
+    else:
         args_mean = [0.1307]
         args_std = [0.3081]
         mean = torch.Tensor(np.array(args_mean)[:, np.newaxis, np.newaxis])
@@ -218,14 +218,14 @@ def freeat_train(train_loader, model, criterion, optimizer, epoch, global_noise_
     for i, (input, target) in enumerate(train_loader):
         crop_size = len(input[0][0])
         break
-    if crop_size == 32:
+    if crop_size == 32 and len(input[0]) == 3:
         args_mean = [0.485, 0.456, 0.406]
         args_std = [0.229, 0.224, 0.225]
         mean = torch.Tensor(np.array(args_mean)[:, np.newaxis, np.newaxis])
         mean = mean.expand(3,crop_size, crop_size).cuda()
         std = torch.Tensor(np.array(args_std)[:, np.newaxis, np.newaxis])
         std = std.expand(3, crop_size, crop_size).cuda()
-    elif crop_size == 28:
+    else:
         args_mean = [0.1307]
         args_std = [0.3081]
         mean = torch.Tensor(np.array(args_mean)[:, np.newaxis, np.newaxis])
