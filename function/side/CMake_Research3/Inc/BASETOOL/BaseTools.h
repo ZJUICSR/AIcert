@@ -34,6 +34,8 @@ public:
 	static double correlate(float* src1, float* src2, int len);
 	static double corr(uint8_t* hw_arrays, float* power, int len);
 	static double diff(uint8_t* hw_arrays, float* power, int len, int thresholdL);
+	static double ttest(float* sample1, float* sample2, int len1, int len2);
+	static double x2test(uint8_t* hw_arrays, float* power, int len);
 	//bool descendingOrder(const MaxCorrStrcut a, const MaxCorrStrcut b);//����
 	//bool ascendingOrder(const MaxCorrStrcut a, const MaxCorrStrcut b);//����
 	void corrSort(MaxCorrStrcut* maxCorr, COMPARE_MODE sortMode, int size);
