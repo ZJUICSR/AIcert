@@ -88,10 +88,17 @@ class Prepro(object):
                 inverse_gan = None
             preproc = InverseGAN(sess=sess, gan=gan, inverse_gan=inverse_gan)
             adv_imgs = np.transpose(adv_imgs.cpu().numpy(), (0, 2, 3, 1)).astype(np.float32)
+            if self.model.__class__.__name__ == 'VGG' and self.adv_dataset == 'MNIST':
+                adv_imgs = adv_imgs[:, 2:-2, 2:-2, :]
             adv_imgs_ss, _ = preproc(adv_imgs, maxiter=1) #20
+            if self.model.__class__.__name__ == 'VGG' and self.adv_dataset == 'MNIST':
+                adv_imgs_ss = np.pad(adv_imgs_ss, ((0, 0), (2, 2), (2, 2), (0, 0)))
             adv_imgs_ss = np.transpose(adv_imgs_ss, (0, 3, 1, 2)).astype(np.float32)
         else:
-            preprocess = preprocess_method(clip_values=(0,1))
+            if preprocess_method.__name__ == 'SpatialSmoothing':
+                preprocess = preprocess_method(clip_values=(0,1), window_size=6)
+            else:
+                preprocess = preprocess_method(clip_values=(0,1))
             adv_imgs_ss, _ = preprocess(adv_imgs.cpu().numpy())
         with torch.no_grad():
             predictions_ss = self.model(torch.from_numpy(adv_imgs_ss).to(self.device))

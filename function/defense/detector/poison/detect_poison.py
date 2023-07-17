@@ -219,6 +219,9 @@ class Detectpoison(object):
             nb_classes=10, 
             clip_values=(min_, max_)
         )
+        if self.model.__class__.__name__ == 'VGG' and self.adv_dataset == 'MNIST':
+            x_train = np.pad(x_train, ((0, 0), (2, 2), (2, 2), (0, 0)))
+            x_test = np.pad(x_test, ((0, 0), (2, 2), (2, 2), (0, 0)))
         x_train = np.transpose(x_train, (0, 3, 1, 2)).astype(np.float32)
         x_test = np.transpose(x_test, (0, 3, 1, 2)).astype(np.float32)
         classifier.fit(x_train, y_train, nb_epochs=4, batch_size=128) #nb_epochs=30
