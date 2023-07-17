@@ -59,4 +59,26 @@ def run_side(trs_file, method, path):
             endtime = time.clock()
         except:
             endtime = time.perf_counter()
+    elif method == "ttest":
+        lib.ttest_.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+        try:
+            starttime = time.clock()
+        except:
+            starttime = time.perf_counter()
+        lib.ttest_(trs_file.encode('utf-8'),path.encode('utf-8'))
+        try:
+            endtime = time.clock()
+        except:
+            endtime = time.perf_counter()
+    elif method == "X2test":
+        lib.X2test_.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+        try:
+            starttime = time.clock()
+        except:
+            starttime = time.perf_counter()
+        lib.X2test_(trs_file.encode('utf-8'),path.encode('utf-8'))
+        try:
+            endtime = time.clock()
+        except:
+            endtime = time.perf_counter()
     return endtime-starttime
