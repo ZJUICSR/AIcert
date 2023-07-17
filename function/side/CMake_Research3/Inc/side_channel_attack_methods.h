@@ -48,6 +48,8 @@ typedef struct{
 
     int midvalue_per_trace;
 
+    int wt_for_whiteBoxTest;
+
 }InParameters;
 
 typedef struct{
@@ -212,6 +214,14 @@ class Parameters{
             free(mid->horMidHW);
         }
         
+    }
+
+    void setWtForWhiteBoxTest(int i){
+        in->wt_for_whiteBoxTest = i;
+    }
+
+    int getWtForWhiteBoxTest(){
+        return in->wt_for_whiteBoxTest;
     }
 
     //****END*********************************************************************
@@ -392,7 +402,7 @@ inline void selectParenthesesNum(char* str, int* num){//printf("done1\n");
     char disStr[SIZE] = "\0";
     selectParentheses(str, disStr);
 
-    #if 1
+    #if 0
     prints(disStr);
     
 
@@ -404,12 +414,12 @@ inline void selectParenthesesNum(char* str, int* num){//printf("done1\n");
     int numlen = 0;
     while(disStr[disStrlen]!='\0'){
 
-        if(disStr[disStrlen]!='-'){
+        if(disStr[disStrlen]!='.'){
             tem[temlen]=disStr[disStrlen];
             temlen++;
         }else{
-            printf("\n");
-            prints(tem);
+            // printf("\n");
+            // prints(tem);
             num[numlen]=BaseTools::charToNumD(tem);
             numlen++;
             strcpy(tem, "\0");
@@ -446,6 +456,10 @@ void differentialPowerAnalysis_correlation_distinguish(Parameters* param, int8_t
 //HPA
 void horizontalPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*));
 void horizontalPowerAnalysis_correlation_distinguish(Parameters* param, int8_t* (*f)(Parameters*));
+
+//TTEST
+void ttest_non_specific(Parameters* param, int8_t* (*f)(Parameters*));
+void X2_test(Parameters* param, int8_t* (*f)(Parameters*));
 
 #endif
 

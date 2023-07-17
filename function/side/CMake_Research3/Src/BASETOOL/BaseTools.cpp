@@ -279,6 +279,24 @@ double BaseTools::diff(uint8_t* hw_arrays, float* power, int len, int thresholdL
 }
 
 
+
+double BaseTools::ttest(float* sample1, float* sample2, int len1, int len2){
+	double result = 0.0;
+
+	result = (aver(sample1, len1)-aver(sample2, len2)) / pow((1/(float)len1 + 1/(float)len2), 0.5) / pow(((float)(len1-1)*var(sample1, len1)*var(sample1, len1) + (float)(len2-1)*var(sample2, len2)*var(sample2, len2)) / (float)(len1+len2-2), 0.5);
+
+	return result;
+}
+
+double BaseTools::x2test(uint8_t* hw_arrays, float* power, int len){
+	double result = 0.0;
+	for(int i = 0; i< len;i++){
+		result+=(power[i]- (float)hw_arrays[i])*(power[i]- (float)hw_arrays[i])/(float)hw_arrays[i];
+	}
+	return result;
+}
+
+
 double BaseTools::aver(float* array,int len){
 	double sum=0.0;
 	for(int i=0;i<len;i++){
@@ -417,9 +435,12 @@ int BaseTools::charToNumD(char* str){
 	int re = 0;
 	int num[1024]={0};
 	int numLen = 0;
+	int isPostive = 1;
 	// int i = 0;
 	while(str[numLen] != '\0'){
-		if(str[numLen]=='0'){
+		if(str[numLen]=='-'){
+			isPostive = 0;
+		}else if(str[numLen]=='0'){
 			num[numLen] = 0;
 		}else if(str[numLen]=='1'){
 			num[numLen] = 1;
@@ -447,7 +468,7 @@ int BaseTools::charToNumD(char* str){
   
   	int w=1;
 	for(int i =numLen;i>= 0;i--){
-		
+
 		if(i == numLen){
 		re += num[i];
 		}else{
@@ -457,6 +478,11 @@ int BaseTools::charToNumD(char* str){
     
 	}
 
-	return re;
+	if(isPostive){
+		return re;
+	}else{
+		return -re;
+	}
+	
 
 }
