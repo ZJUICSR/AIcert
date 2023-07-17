@@ -132,7 +132,6 @@ class Transformerpoison(object):
         self.no_defense_accuracy = 0
 
     def train(self, detect_poison:Transformer, norm):
-        print('Read {} dataset (x_raw contains the original images):'.format(self.adv_dataset))
         if self.adv_dataset == 'CIFAR10':
             config.ART_DATA_PATH = './dataset/CIFAR10'
             load_dataset = load_cifar10
@@ -141,12 +140,9 @@ class Transformerpoison(object):
             load_dataset = load_mnist
         (x_raw, y_raw), (x_raw_test, y_raw_test), min_, max_ = load_dataset(raw=True)
 
-        print('Random Selection:')
-        n_train = np.shape(x_raw)[0]
         num_selection = 5000
-        random_selection_indices = np.random.choice(n_train, num_selection)
-        x_raw = x_raw[random_selection_indices]
-        y_raw = y_raw[random_selection_indices]
+        x_raw = x_raw[:num_selection]
+        y_raw = y_raw[:num_selection]
         if self.adv_dataset == 'MNIST':
             BACKDOOR_TYPE = "pattern" # one of ['pattern', 'pixel', 'image']
         elif self.adv_dataset == 'CIFAR10':
@@ -192,7 +188,7 @@ class Transformerpoison(object):
                             x_clean_save[k] = imgs_to_be_poisoned_save[j]
                             x_poison_save[k] = imgs_to_be_poisoned[j]
                             k += 1
-                            print(k)
+                            # print(k)
                             if k == 10:
                                 break
                 x_poison = np.append(x_poison, imgs_to_be_poisoned, axis=0)
@@ -213,44 +209,45 @@ class Transformerpoison(object):
                         save_jepg(x_poison_save[i] - x_clean_save[i], './output/trigger/trigger.jpeg', dataset)
 
             return is_poison, x_poison, y_poison
-        print('Poison training data:')
         percent_poison = .33
 
-        n_train = np.shape(x_raw_test)[0]
-        random_selection_indices = np.random.choice(n_train, 2000)
-        x_raw_test = x_raw_test[random_selection_indices]
-        y_raw_test = np.array(y_raw_test)[random_selection_indices]
+        num_selection = 1000
+        if self.adv_dataset == 'CIFAR10' and self.model.__class__.__name__ == 'ResNet':
+            num_selection = 3000
+        x_raw_test = x_raw_test[:num_selection]
+        y_raw_test = np.array(y_raw_test)[:num_selection]
         (is_poison_train, x_poisoned_raw, y_poisoned_raw) = poison_dataset(x_raw, y_raw, percent_poison, add_modification)
         x_train, y_train = preprocess(x_poisoned_raw, y_poisoned_raw)
-        print('Add channel axis:')
-        if self.adv_dataset == 'MNIST':
-            x_train = np.expand_dims(x_train, axis=3)
 
-        print('Poison test data:')
         (is_poison_test, x_poisoned_raw_test, y_poisoned_raw_test) = poison_dataset(x_raw_test, y_raw_test, percent_poison, add_modification, dataset=self.adv_dataset)
         x_test, y_test = preprocess(x_poisoned_raw_test, y_poisoned_raw_test)
-        print('Add channel axis:')
-        if self.adv_dataset == 'MNIST':
-            x_test = np.expand_dims(x_test, axis=3)
 
-        print('Shuffle training data:')
-        n_train = np.shape(y_train)[0]
-        shuffled_indices = np.arange(n_train)
-        np.random.shuffle(shuffled_indices)
-        x_train = x_train[shuffled_indices]
-        y_train = y_train[shuffled_indices]
-        if self.adv_dataset == 'MNIST':
-            x_train = np.pad(x_train, ((0, 0), (2, 2), (2, 2), (0, 0)))
-            x_test = np.pad(x_test, ((0, 0), (2, 2), (2, 2), (0, 0)))
-        print('Create Keras convolutional neural network - basic architecture from Keras examples:')
+        nb_epochs = 10
+        thr = 1e-3
         if self.adv_dataset == 'CIFAR10':
             if self.model.__class__.__name__ == 'ResNet':
                 model = ResNet18(input_shape=(32, 32, 3), classes=10, weight_decay=1e-4)
             elif self.model.__class__.__name__ == 'VGG':
-                model = VGG16(input_shape=(32, 32, 3), weights = None, classes=10)
+                base_model = VGG16(weights='imagenet', include_top=False, input_shape=(32, 32, 3))
+                # 添加自定义层
+                x = base_model.output
+                x = Flatten()(x)
+                x = Dense(4096, activation='relu')(x)
+                x = Dropout(0.5)(x)
+                x = Dense(4096, activation='relu')(x)
+                x = Dropout(0.5)(x)
+                predictions = Dense(10, activation='softmax')(x)
+                # 创建新模型
+                model = Model(inputs=base_model.input, outputs=predictions)
+                # 冻结预训练层
+                for layer in base_model.layers:
+                    layer.trainable = False
+                thr = 0.2
             else:
                 raise Exception('CIFAR10 can only use ResNet18 and VGG16!')
         elif self.adv_dataset == 'MNIST':
+            x_train = np.expand_dims(x_train, axis=3)
+            x_test = np.expand_dims(x_test, axis=3)
             if self.model.__class__.__name__ == 'SmallCNN':
                 model = Sequential()
                 model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=x_train.shape[1:]))
@@ -261,14 +258,32 @@ class Transformerpoison(object):
                 model.add(Dense(128, activation='relu'))
                 model.add(Dropout(0.5))
                 model.add(Dense(10, activation='softmax'))
+                nb_epochs = 3
             elif self.model.__class__.__name__ == 'VGG':
-                model = VGG16(input_shape=(32, 32, 1), weights = None, classes=10)
+                base_model = VGG16(weights='imagenet', include_top=False, input_shape=(32, 32, 3))
+                # 添加自定义层
+                x = base_model.output
+                x = Flatten()(x)
+                x = Dense(4096, activation='relu')(x)
+                x = Dropout(0.5)(x)
+                x = Dense(4096, activation='relu')(x)
+                x = Dropout(0.5)(x)
+                predictions = Dense(10, activation='softmax')(x)
+                # 创建新模型
+                model = Model(inputs=base_model.input, outputs=predictions)
+                # 冻结预训练层
+                for layer in base_model.layers:
+                    layer.trainable = False
+                x_train = np.pad(x_train, ((0, 0), (2, 2), (2, 2), (0, 0)))
+                x_test = np.pad(x_test, ((0, 0), (2, 2), (2, 2), (0, 0)))
+                x_train = np.repeat(x_train, 3, axis=-1)
+                x_test = np.repeat(x_test, 3, axis=-1)
             else:
                 raise Exception('MNIST can only use SmallCNN and VGG16!')
 
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         classifier = KerasClassifier(model=model, clip_values=(min_, max_))
-        classifier.fit(x_train, y_train, nb_epochs=3, batch_size=128)
+        classifier.fit(x_train, y_train, nb_epochs=nb_epochs, batch_size=128)
         clean_x_test = x_test[is_poison_test == 0]
         clean_y_test = y_test[is_poison_test == 0]
         poison_x_test = x_test[is_poison_test]
@@ -290,7 +305,7 @@ class Transformerpoison(object):
 
         defence_cleanse.mitigate(clean_x_test, clean_y_test, mitigation_types=["filtering"])
         poison_pred = defence_cleanse.predict(poison_x_test)
-        num_filtered = np.sum(np.all(poison_pred == np.zeros(10), axis=1))
+        num_filtered = np.sum(np.all(poison_pred <= np.ones(10) * (1 - thr), axis=1))
         num_poison = len(poison_pred)
         effectiveness = float(num_filtered) / num_poison
         print(effectiveness)
