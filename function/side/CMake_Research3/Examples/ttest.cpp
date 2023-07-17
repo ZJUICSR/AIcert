@@ -5,8 +5,9 @@
 #include "../Inc/CNNModel/cifar10_NN_example.h"
 
 
+void ttest(char* inFile, char* outFile){
 
-void hpa(char* inFile, char* outFile){
+    printf("start:\n");
 
     #if 1
 
@@ -15,21 +16,19 @@ void hpa(char* inFile, char* outFile){
 
     int num[SIZE] = {0};
     selectParenthesesNum(inFile, num);
-    printf("%d %d %d\n", num[0], num[1], num[2]);
-
-    printf("start:\n");
+        
     Parameters param;
     param.setSampleFile(inFile);
     param.setRandFile(inFile);//"./CMake_Research3/Trs/random/cpa/randdata_cpa_-9.trs"
     param.setOutFile(outFile);
     param.setAttackIndex(num[0]);
-    param.setPointNumStart(num[1]);
-    param.setPointNumEnd(num[2]);
-    param.setTraceNum(9);
-    param.setMidvaluePerTrace(784);
+    param.setPointNumStart(1);
+    param.setPointNumEnd(123);
+    param.setTraceNum(5000);
+    param.setWtForWhiteBoxTest(num[3]);
 
     start=clock();
-    horizontalPowerAnalysis_correlation_distinguish(&param, cifar10_nn_run_hpa);
+    ttest_non_specific(&param, cifar10_nn_run_cpa_dpa);
     end=clock();
 
     printf("time:%d\n", end-start);
@@ -40,6 +39,6 @@ void hpa(char* inFile, char* outFile){
 
 }
 
-void hpa_(char* inFile, char* outFile){
-    hpa(inFile, outFile);
+void ttest_(char* inFile, char* outFile){
+    ttest(inFile, outFile);
 }
