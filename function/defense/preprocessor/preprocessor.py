@@ -70,7 +70,7 @@ class Prepro(object):
         no_defense_accuracy = torch.sum(torch.argmax(adv_predictions, dim = 1) == true_labels) / float(len(adv_imgs))
         self.no_defense_accuracy = no_defense_accuracy.cpu().numpy()
         with torch.no_grad():
-            predictions = self.model(cln_imgs)
+            # predictions = self.model(cln_imgs)
             predictions_adv = self.model(adv_imgs)
         # acc = torch.sum(torch.argmax(predictions, dim = 1) == true_labels) / float(len(adv_imgs))
         # print('acc: ', float(acc.cpu()))
@@ -90,7 +90,7 @@ class Prepro(object):
             adv_imgs = np.transpose(adv_imgs.cpu().numpy(), (0, 2, 3, 1)).astype(np.float32)
             if self.model.__class__.__name__ == 'VGG' and self.adv_dataset == 'MNIST':
                 adv_imgs = adv_imgs[:, 2:-2, 2:-2, :]
-            adv_imgs_ss, _ = preproc(adv_imgs, maxiter=1) #20
+            _, adv_imgs_ss = preproc(adv_imgs, maxiter=10) #20
             if self.model.__class__.__name__ == 'VGG' and self.adv_dataset == 'MNIST':
                 adv_imgs_ss = np.pad(adv_imgs_ss, ((0, 0), (2, 2), (2, 2), (0, 0)))
             adv_imgs_ss = np.transpose(adv_imgs_ss, (0, 3, 1, 2)).astype(np.float32)
@@ -103,7 +103,7 @@ class Prepro(object):
         with torch.no_grad():
             predictions_ss = self.model(torch.from_numpy(adv_imgs_ss).to(self.device))
         if preprocess_method.__name__ == 'InverseGAN' or preprocess_method.__name__ == 'DefenseGAN':
-            detect_rate = torch.sum(torch.argmax(predictions_adv, dim = 1) == true_labels) / float(len(adv_imgs))
+            detect_rate = torch.sum(torch.argmax(predictions_ss, dim = 1) == true_labels) / float(len(adv_imgs))
         else:
             detect_rate = torch.sum(torch.argmax(predictions_adv, dim = 1) != torch.argmax(predictions_ss, dim = 1)) / float(len(adv_imgs))
         self.detect_rate = float(detect_rate.cpu())
@@ -339,25 +339,22 @@ class Pixel_defend(Prepro):
         no_defense_accuracy = torch.sum(torch.argmax(adv_predictions, dim = 1) == true_labels) / float(len(adv_imgs))
         self.no_defense_accuracy = no_defense_accuracy.cpu().numpy() 
         if self.adv_dataset == 'CIFAR10':
+            input_shape = (3, 32, 32)
             model = ModelImageCIFAR10()
         elif self.adv_dataset == 'MNIST':
             if self.model.__class__.__name__ == 'VGG':
+                input_shape = (1, 32, 32)
                 model = ModelImageMNISTVGG()
             else:
+                input_shape = (1, 28, 28)
                 model = ModelImageMNIST()
         loss_fn = nn.CrossEntropyLoss()
         optimizer = optim.Adam(model.parameters(), lr=0.01)
-        if self.adv_dataset == 'CIFAR10':
-            input_shape = (3, 32, 32)
-        elif self.adv_dataset == 'MNIST':
-            if self.model.__class__.__name__ == 'VGG':
-                input_shape = (1, 32, 32)
-            else:
-                input_shape = (1, 28, 28)
+
         pixel_cnn = PyTorchClassifier(
             model=model, loss=loss_fn, optimizer=optimizer, input_shape=input_shape, nb_classes=10, clip_values=(0, 1)
         )
-        preprocess = PixelDefend(eps=32, pixel_cnn=pixel_cnn)
+        preprocess = PixelDefend(eps=64, pixel_cnn=pixel_cnn)
         if self.adv_method == 'BPDA':
             defend_examples, _ = preprocess(cln_imgs.cpu().numpy()) #pixdefend处理
             defend_examples = torch.from_numpy(defend_examples).to(self.device) #转成tensor
@@ -370,11 +367,11 @@ class Pixel_defend(Prepro):
         else:
             adv_imgs_ss, _ = preprocess(adv_imgs.cpu().numpy()) #
             with torch.no_grad():
-                predictions = self.model(cln_imgs)
-                predictions_adv = self.model(adv_imgs)
+                # predictions = self.model(cln_imgs)
+                # predictions_adv = self.model(adv_imgs)
                 predictions_ss = self.model(torch.from_numpy(adv_imgs_ss).to(self.device))
-            accuracy = torch.sum(torch.argmax(predictions, dim = 1) == true_labels) / float(len(adv_imgs)) #0.9360000491142273 
-            robustness = torch.sum(torch.argmax(predictions_adv, dim = 1) == true_labels) / float(len(adv_imgs)) #0.017000000923871994
+            # accuracy = torch.sum(torch.argmax(predictions, dim = 1) == true_labels) / float(len(adv_imgs)) #0.9360000491142273 
+            # robustness = torch.sum(torch.argmax(predictions_adv, dim = 1) == true_labels) / float(len(adv_imgs)) #0.017000000923871994
             # print('accuracy:', float(accuracy.cpu()), 'robustness:', float(robustness.cpu()))
             detect_rate = torch.sum(torch.argmax(predictions_ss, dim = 1) == true_labels) / float(len(adv_imgs)) #0.029000001028180122
             self.detect_rate = float(detect_rate.cpu())
