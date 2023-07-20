@@ -236,4 +236,4 @@ class Strip(object):
         else:
             attack_method = self.adv_method
 
-        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy.item()
