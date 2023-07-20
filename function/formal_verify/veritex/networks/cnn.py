@@ -98,7 +98,6 @@ class Network:
         Returns:
             sequential_layers (sequential): Sequential model
         """
-        print(f"in forward_layer_sequential {len(net.sequential)}")
         net_layers = []
         for i in range(len(net.sequential)):
             type_name = type(net.sequential[i]).__name__
@@ -110,11 +109,8 @@ class Network:
         if self.is_cuda:
             sequential_layers = nn.Sequential(*net_layers).eval().cuda()
         else:
-            print("forward_layer_sequential no cuda")
             sequential_layers = nn.Sequential(*net_layers).eval()
         
-        print("sequential_layers.parameters():",sequential_layers.parameters())
-
         for param in sequential_layers.parameters():
             param.requires_grad = False
 
@@ -415,6 +411,8 @@ class Network:
 
                 im_input0 = torch.from_numpy(im_input)
                 print("sequential")
+                print(f"self._layer{self._layer}")
+                print(f"im_input0:{im_input0}")
                 im_output0 = self.sequential[self._layer](im_input0)
                 im_output = im_output0.numpy()
                 print("ap_next")

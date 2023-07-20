@@ -1,5 +1,6 @@
 if [ -d Build ]; then
-    rm -rf Build/*
+    rm -rf Build
+    mkdir Build
 else
     mkdir Build
 fi
