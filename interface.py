@@ -905,7 +905,8 @@ def run_side_api(trs_file, methods, tid, stid):
     res={}
     for method in methods:
         logging.info("当前分析文件为{:s}，分析方法为{:s}，分析时间较久，约需50分钟".format(trs_file, method))
-        outpath = osp.join(ROOT,"output", tid,stid + "_" + method+"_out.txt")
+        number = trs_file.split(".trs")[0].split("_")[-1]
+        outpath = osp.join(ROOT,"output", tid,stid + "_" + method+"_"+number+"_out.txt")
         trs_file_path = osp.join(ROOT,"dataset/Trs/samples",trs_file)
         use_time = run_side(trs_file_path, method, outpath)
         res[method] = []

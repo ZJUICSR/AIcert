@@ -1123,8 +1123,13 @@ def Detect():
         adv_model = inputParam["adv_model"]
         adv_method = inputParam["adv_method"]
         adv_nums = inputParam["adv_nums"]
-        defense_methods = inputParam["defense_methods"]
+        defense_methods = json.loads(inputParam["defense_methods"])
         tid = inputParam["tid"]
+    print("adv_dataset:",adv_dataset)
+    print("adv_model:",adv_model)
+    print("adv_method:",adv_method)
+    print("adv_nums:",adv_nums)
+    print("defense_methods:",defense_methods)
     format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
     stid = "S"+IOtool.get_task_id(str(format_time))
     logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
@@ -1141,7 +1146,7 @@ def Detect():
         "model":adv_method,
     }})
     taskinfo[tid]["dataset"] = adv_dataset
-    taskinfo[tid]["model"] = adv_method
+    taskinfo[tid]["model"] = adv_model
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
     
     if 'adv_examples' in request.files:
@@ -1157,6 +1162,10 @@ def Detect():
         adv_file_path = None
     
     detect_rate_dict = {}
+    if "CARTL" in defense_methods:
+        # 调换顺序，将CARTL放在最后执行
+        defense_methods.remove("CARTL")
+        defense_methods.append("CARTL")
     print("-----------defense_methods:",defense_methods)
     for defense_method in defense_methods:
         logging.info("开始执行防御任务{:s}".format(defense_method))
@@ -1168,7 +1177,7 @@ def Detect():
         "detect_rates": detect_rate_dict,
         "no_defense_accuracy": no_defense_accuracy_list
     }
-    
+    print(response_data)
     IOtool.write_json(response_data, osp.join(ROOT,"output", tid, stid+"_result.json")) 
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"] = 2
@@ -1342,11 +1351,11 @@ def SideAnalysis():
             "type":"attack_defense",
             "state":0,
             "name":["attack_defense"],
-            "dataset":"",
+            "dataset":trs_file,
             "method":methods,
             "model":"",
         }})
-        taskinfo[tid]["dataset"] = ""
+        taskinfo[tid]["dataset"] = trs_file
         taskinfo[tid]["model"] = ""
         print("index root:",ROOT)
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
