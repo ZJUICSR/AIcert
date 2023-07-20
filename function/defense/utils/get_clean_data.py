@@ -6,15 +6,15 @@ from torchvision import datasets
 # from .imagenette import ImageNette
 import torchvision.transforms as transforms
 
-def get_clean_loader(model, dataset, normalize=False, batch_size=128):
+def get_clean_loader(model, dataset, normalize=True, batch_size=128):
     if dataset == 'CIFAR10':
         num_classes = 10
         if normalize:
             tf_test = transforms.Compose([
                     transforms.ToTensor(),
                     transforms.Normalize(
-                    mean=[0.49139765, 0.48215759, 0.44653141], #[0.4914, 0.4822, 0.4465]
-                    std=[0.24703199, 0.24348481, 0.26158789],)]) #[0.2023, 0.1994, 0.2010]
+                    mean=[0.4914, 0.4822, 0.4465], #[0.49139765, 0.48215759, 0.44653141]
+                    std=[0.2023, 0.1994, 0.2010],)]) #[0.24703199, 0.24348481, 0.26158789]
         else: 
             tf_test = transforms.Compose([
                 transforms.ToTensor(),])
