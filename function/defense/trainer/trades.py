@@ -89,7 +89,7 @@ def trades_train(model, device, train_loader, optimizer, epoch, train_config):
                            step_size=train_config['step_size'],
                            epsilon=train_config['epsilon'],
                            perturb_steps=train_config['num_steps'],
-                           beta=6.0)
+                           beta=train_config['beta'])
         loss.backward()
         optimizer.step()
 
@@ -99,14 +99,14 @@ def trades_train(model, device, train_loader, optimizer, epoch, train_config):
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                        100. * batch_idx / len(train_loader), loss.item()))
 
-def adjust_learning_rate(optimizer, epoch):
+def adjust_learning_rate(optimizer, epoch, lr_init):
     """decrease the learning rate"""
-    lr = 0.1
+    lr = lr_init
     if epoch >= 75:
-        lr = 0.1 * 0.1
+        lr = lr_init * 0.1
     if epoch >= 90:
-        lr = 0.1 * 0.01
+        lr = lr_init * 0.01
     if epoch >= 100:
-        lr = 0.1 * 0.001
+        lr = lr_init * 0.001
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
