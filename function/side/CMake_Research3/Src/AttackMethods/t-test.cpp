@@ -91,7 +91,7 @@ void ttest_non_specific(Parameters* param, int8_t* (*f)(Parameters*)){
     ofstream* outfile=new ofstream();   
     outfile->open(param->getOutFile(), ios::out | ios::binary | ios::trunc);
 
-    #if 1 //save as trs
+    #if 0 //save as trs
     TrsHead trsHead_result;
     trsHead_result.NT = 1;
     trsHead_result.NS = param->getPointNum();
@@ -108,7 +108,7 @@ void ttest_non_specific(Parameters* param, int8_t* (*f)(Parameters*)){
 
     #endif
 
-    #if 0 //save as txt
+    #if 1 //save as txt
     for(int i = 0; i < param->getPointNum(); i++){
         *outfile<<trsData_result.samples[i]<<" ";
     }
