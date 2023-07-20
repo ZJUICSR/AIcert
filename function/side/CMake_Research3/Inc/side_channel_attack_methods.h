@@ -459,7 +459,7 @@ void horizontalPowerAnalysis_correlation_distinguish(Parameters* param, int8_t* 
 
 //TTEST
 void ttest_non_specific(Parameters* param, int8_t* (*f)(Parameters*));
-void X2_test(Parameters* param, int8_t* (*f)(Parameters*));
+void x2_test(Parameters* param, int8_t* (*f)(Parameters*));
 
 #endif
 
