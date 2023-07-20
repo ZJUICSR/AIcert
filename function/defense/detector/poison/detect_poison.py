@@ -155,17 +155,13 @@ class Detectpoison(object):
             load_dataset = load_mnist
         (x_raw, y_raw), (x_raw_test, y_raw_test), min_, max_ = load_dataset(raw=True)
         # print(x_raw.shape, x_raw[0])
-        n_train = np.shape(x_raw)[0]
         num_selection = 5000
-        random_selection_indices = np.random.choice(n_train, num_selection)
-        x_raw = x_raw[random_selection_indices]
-        y_raw = y_raw[random_selection_indices]
+        x_raw = x_raw[:num_selection]
+        y_raw = y_raw[:num_selection]
 
-        n_train = np.shape(x_raw_test)[0]
-        num_selection = max(self.adv_nums, 100)
-        random_selection_indices = np.random.choice(n_train, num_selection)
-        x_raw_test = x_raw_test[random_selection_indices]
-        y_raw_test = np.array(y_raw_test)[random_selection_indices]
+        num_selection = max(self.adv_nums, 200)
+        x_raw_test = x_raw_test[:num_selection]
+        y_raw_test = np.array(y_raw_test)[:num_selection]
 
         print("Poison training data")
         perc_poison = 0.33
@@ -183,13 +179,13 @@ class Detectpoison(object):
         if self.adv_dataset == 'MNIST':
             x_test = np.expand_dims(x_test, axis=3)
 
-        print("Shuffle training data so poison is not together")
-        n_train = np.shape(y_train)[0]
-        shuffled_indices = np.arange(n_train)
-        np.random.shuffle(shuffled_indices)
-        x_train = x_train[shuffled_indices]
-        y_train = y_train[shuffled_indices]
-        is_poison_train = is_poison_train[shuffled_indices]
+        # print("Shuffle training data so poison is not together")
+        # n_train = np.shape(y_train)[0]
+        # shuffled_indices = np.arange(n_train)
+        # np.random.shuffle(shuffled_indices)
+        # x_train = x_train[shuffled_indices]
+        # y_train = y_train[shuffled_indices]
+        # is_poison_train = is_poison_train[shuffled_indices]
 
         if self.adv_dataset == 'CIFAR10':
             if self.model.__class__.__name__ == 'ResNet':
