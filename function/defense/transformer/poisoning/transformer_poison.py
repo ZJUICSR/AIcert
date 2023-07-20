@@ -139,7 +139,13 @@ class Transformerpoison(object):
             config.ART_DATA_PATH = './dataset/MNIST'
             load_dataset = load_mnist
         (x_raw, y_raw), (x_raw_test, y_raw_test), min_, max_ = load_dataset(raw=True)
-
+        if norm == np.inf:
+            save_name = 'linf'
+        else:
+            save_name = 'l' + str(norm)
+        save_dir = './output/trigger/' + save_name + '/'
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
         num_selection = 5000
         x_raw = x_raw[:num_selection]
         y_raw = y_raw[:num_selection]
@@ -206,14 +212,12 @@ class Transformerpoison(object):
                     save_jepg(x_clean_save[i], output_dir + '/clean.jpeg', dataset)
                     save_jepg(x_poison_save[i] - x_clean_save[i], output_dir + '/backdoor.jpeg', dataset)
                     if i == 0:
-                        save_jepg(x_poison_save[i] - x_clean_save[i], './output/trigger/trigger.jpeg', dataset)
+                        save_jepg(x_poison_save[i] - x_clean_save[i], save_dir + 'trigger.jpeg', dataset)
 
             return is_poison, x_poison, y_poison
         percent_poison = .33
 
         num_selection = 1000
-        if self.adv_dataset == 'CIFAR10' and self.model.__class__.__name__ == 'ResNet':
-            num_selection = 3000
         x_raw_test = x_raw_test[:num_selection]
         y_raw_test = np.array(y_raw_test)[:num_selection]
         (is_poison_train, x_poisoned_raw, y_poisoned_raw) = poison_dataset(x_raw, y_raw, percent_poison, add_modification)
@@ -296,12 +300,12 @@ class Transformerpoison(object):
         cleanse = detect_poison(classifier)
         defence_cleanse = cleanse(classifier, steps=10, learning_rate=0.1, norm=norm)
 
-        pattern, mask = defence_cleanse.generate_backdoor(poison_x_test, poison_y_test, np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 0]))
+        pattern, mask = defence_cleanse.generate_backdoor(x_test, y_test, np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 0]))
         trigger_predict = np.squeeze(mask * pattern)
         image = trigger_predict
         image_uint8 = (image * 255).astype(np.uint8)
         pil_image = Image.fromarray(image_uint8)
-        pil_image.save('./output/trigger/trigger_predict.jpeg', "JPEG")
+        pil_image.save(save_dir + 'trigger_predict.jpeg', "JPEG")
 
         defence_cleanse.mitigate(clean_x_test, clean_y_test, mitigation_types=["filtering"])
         poison_pred = defence_cleanse.predict(poison_x_test)
