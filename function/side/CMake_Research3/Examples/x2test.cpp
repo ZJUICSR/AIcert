@@ -5,7 +5,7 @@
 #include "../Inc/CNNModel/cifar10_NN_example.h"
 
 
-void X2test(char* inFile, char* outFile){
+void x2test(char* inFile, char* outFile){
 
     printf("start:\n");
 
@@ -28,7 +28,7 @@ void X2test(char* inFile, char* outFile){
     param.setWtForWhiteBoxTest(num[3]);
 
     start=clock();
-    X2_test(&param, cifar10_nn_run_cpa_dpa);
+    x2_test(&param, cifar10_nn_run_cpa_dpa);
     end=clock();
 
     printf("time:%d\n", end-start);
@@ -39,6 +39,6 @@ void X2test(char* inFile, char* outFile){
 
 }
 
-void X2test_(char* inFile, char* outFile){
-    X2test(inFile, outFile);
+void x2test_(char* inFile, char* outFile){
+    x2test(inFile, outFile);
 }

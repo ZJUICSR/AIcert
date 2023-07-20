@@ -7,7 +7,7 @@ extern "C"{
     void spa_(char* inFile, char* outFile);
     void hpa_(char* inFile, char* outFile);
     void ttest_(char* inFile, char* outFile);
-    void X2test_(char* inFile, char* outFile);
+    void x2test_(char* inFile, char* outFile);
 }
 
 
