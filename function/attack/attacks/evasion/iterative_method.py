@@ -5,7 +5,6 @@ import numpy as np
 from function.attack.attacks.evasion.projected_gradient_descent.projected_gradient_descent import ProjectedGradientDescent
 if TYPE_CHECKING:
     from function.attack.attacks.utils import CLASSIFIER_LOSS_GRADIENTS_TYPE
-# logger = logging.getLogger(__name__)
 
 # 基于FGSM的基本迭代方法，与PGD的主要区别在于其没有随机开始，即num_random_init默认为0
 class BasicIterativeMethod(ProjectedGradientDescent):
