@@ -10,25 +10,11 @@ from function.attack.attacks.utils import (
     get_labels_np_array,
     check_and_transform_label_format,
 )
-# from Attack.summary_writer import SummaryWriter
 
 if TYPE_CHECKING:
     from function.attack.attacks.utils import CLASSIFIER_LOSS_GRADIENTS_TYPE
 
-# logger = logging.getLogger(__name__)
-
 class FastGradientMethod(EvasionAttack):
-    
-    # attack_params = EvasionAttack.attack_params + [
-    #     "norm",
-    #     "eps",
-    #     "eps_step",
-    #     "targeted",
-    #     "num_random_init",
-    #     "batch_size",
-    #     "minimal",
-    #     "summary_writer",
-    # ]
 
     attack_params = EvasionAttack.attack_params + [
         "norm",
@@ -44,12 +30,8 @@ class FastGradientMethod(EvasionAttack):
         estimator: "CLASSIFIER_LOSS_GRADIENTS_TYPE",
         norm: Union[int, float, str] = np.inf,
         eps: Union[int, float, np.ndarray] = 8/255,
-        # eps_step: Union[int, float, np.ndarray] = 0.03,
         targeted: bool = False,
-        # num_random_init: int = 0,
         batch_size: int = 128,
-        # minimal: bool = False,
-        # summary_writer: Union[str, bool, SummaryWriter] = False,
     ) -> None:
         # super().__init__(estimator=estimator, summary_writer=summary_writer)
         super().__init__(estimator=estimator)
