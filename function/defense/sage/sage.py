@@ -213,11 +213,6 @@ class Sage(object):
         return data['adv_img'], data['cln_img'], data['y']
 
     def detect(self):
-        # if self.adv_examples is None:
-        #     adv_imgs, cln_imgs, true_labels = self.generate_adv_examples()
-        # else:
-        #     adv_imgs, cln_imgs, true_labels = self.load_adv_examples() 
-
         """
         Load model
         """
