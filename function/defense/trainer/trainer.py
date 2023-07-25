@@ -61,10 +61,12 @@ class at(object):
                 transform_train = transforms.Compose([
                     transforms.Resize((32, 32)),
                     transforms.ToTensor(),
+                    transforms.Normalize((0.1307, ), (0.3081, ))
                 ])
             else:
                 transform_train = transforms.Compose([
                     transforms.ToTensor(),
+                    transforms.Normalize((0.1307, ), (0.3081, ))
                 ])
             trainset = torchvision.datasets.MNIST(root='./dataset', train=True, download=True, transform=transform_train)
             train_loader = DataLoader(trainset, batch_size=128, shuffle=True, **kwargs)
@@ -73,6 +75,8 @@ class at(object):
                 transforms.RandomCrop(32, padding=4),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
+                transforms.Normalize(mean=[0.4914, 0.4822, 0.4465],
+                                     std=[0.2023, 0.1994, 0.2010],)
             ])
             trainset = torchvision.datasets.CIFAR10(root='./dataset/CIFAR10', train=True, download=True, transform=transform_train)
             train_loader = DataLoader(trainset, batch_size=128, shuffle=True, **kwargs)
@@ -88,12 +92,16 @@ class at(object):
             adv_predictions = self.model(adv_imgs)
         no_defense_accuracy = torch.sum(torch.argmax(adv_predictions, dim = 1) == true_labels) / float(len(adv_imgs))
         self.no_defense_accuracy = no_defense_accuracy.cpu().numpy()
+        print('no defense accuracy: {:.4f}'.format(self.no_defense_accuracy))
         train_loader = self.dataset()
         print("Step 2: Create the model")
         if self.adv_dataset == 'CIFAR10':
+            weight_decay = 2e-4
             if self.model.__class__.__name__ == 'ResNet':
+                lr = 0.1
                 model = ResNet18()
             elif self.model.__class__.__name__ == 'VGG':
+                lr = 0.01
                 model = vgg16()
                 model.classifier[6] = nn.Linear(4096, 10)
             else:
@@ -103,8 +111,11 @@ class at(object):
                 'epsilon': 0.031,
                 'num_steps': 10,
                 'step_size': 0.007,
+                'beta': 6.0,
             }
         elif self.adv_dataset == 'MNIST':
+            lr = 0.01
+            weight_decay = 0
             if self.model.__class__.__name__ == 'SmallCNN':
                 model = SmallCNN()
             elif self.model.__class__.__name__ == 'VGG':
@@ -118,10 +129,11 @@ class at(object):
                 'epsilon': 0.3,
                 'num_steps': 40,
                 'step_size': 0.01,
+                'beta': 1.0,
             }
 
         print("Step 2a: Define the optimizer")
-        optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=5e-4)
+        optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay)
         print("Step 4: Train the {} classifier".format(at_method))
         train_method = None
         if at_method == 'TRADES':
@@ -131,15 +143,15 @@ class at(object):
         elif at_method == 'MART':
             train_method = mart_train
         for epoch in range(1, 2):
-            adjust_learning_rate(optimizer, epoch)
+            adjust_learning_rate(optimizer, epoch, lr)
             train_method(model, self.device, train_loader, optimizer, epoch, train_config)
 
         with torch.no_grad():
             model.eval()
-            predictions = model(cln_imgs)
+            # predictions = model(cln_imgs)
             predictions_adv = model(adv_imgs)
-        acc = torch.sum(torch.argmax(predictions, dim = 1) == true_labels) / float(len(adv_imgs))
-        print('acc: ', float(acc.cpu()))
+        # acc = torch.sum(torch.argmax(predictions, dim = 1) == true_labels) / float(len(adv_imgs))
+        # print('acc: ', float(acc.cpu()))
         detect_rate = torch.sum(torch.argmax(predictions_adv, dim = 1) == true_labels) / float(len(adv_imgs))
         self.detect_rate = float(detect_rate.cpu())
         if self.adv_examples is None:
@@ -257,6 +269,12 @@ class FastAT(at):
         self.no_defense_accuracy = no_defense_accuracy.cpu().numpy()
         train_loader = self.dataset()
         if self.adv_dataset == 'CIFAR10':
+            cifar10_mean = (0.4914, 0.4822, 0.4465)
+            cifar10_std = (0.2471, 0.2435, 0.2616)
+            mu = torch.tensor(cifar10_mean).view(3,1,1).cuda()
+            std = torch.tensor(cifar10_std).view(3,1,1).cuda()
+            upper_limit = ((1 - mu)/ std)
+            lower_limit = ((0 - mu)/ std)
             if self.model.__class__.__name__ == 'ResNet':
                 model = ResNet18()
             elif self.model.__class__.__name__ == 'VGG':
@@ -265,7 +283,50 @@ class FastAT(at):
             else:
                 raise Exception('CIFAR10 can only use ResNet18 and VGG16!')
             model = model.to(self.device)
-            train_config = {'epochs': 1, 'alpha': 0.01, 'epsilon': 0.3, 'attack_iters': 40, 'lr_max': 0.0001, 'lr_type': 'flat'}
+            model.train()
+            train_config = {'epochs': 1, 'alpha': 2 / 255. / std, 'epsilon': 8 / 255. / std, \
+                            'attack_iters': 7, 'lr_max': 0.2, 'lr_min': 0., 'weight_decay': 5e-4}
+            opt = torch.optim.SGD(model.parameters(), lr=train_config['lr_max'], momentum=0.9, weight_decay=train_config['weight_decay'])
+            amp_args = dict(opt_level='O2', loss_scale='1.0', verbosity=False)
+            amp_args['master_weights'] = None
+            import apex.amp as amp
+            model, opt = amp.initialize(model, opt, **amp_args)
+            criterion = nn.CrossEntropyLoss()
+            lr_steps = train_config['epochs'] * len(train_loader)
+            scheduler = torch.optim.lr_scheduler.CyclicLR(opt, base_lr=train_config['lr_min'], max_lr=train_config['lr_max'],
+            step_size_up=lr_steps / 2, step_size_down=lr_steps / 2)
+            epsilon = train_config['epsilon']
+            alpha = train_config['alpha']
+            def clamp(X, lower_limit, upper_limit):
+                return torch.max(torch.min(X, upper_limit), lower_limit)
+            for epoch in range(train_config['epochs']):
+                print('epoch', epoch)
+                for i, (X, y) in enumerate(train_loader):
+                    if i % 100 == 0:
+                        print(i)
+                    X, y = X.cuda(), y.cuda()
+                    delta = torch.zeros_like(X).cuda()
+                    for i in range(len(epsilon)):
+                        delta[:, i, :, :].uniform_(-epsilon[i][0][0].item(), epsilon[i][0][0].item())
+                    delta.data = clamp(delta, lower_limit - X, upper_limit - X)
+                    delta.requires_grad = True
+                    for _ in range(train_config['attack_iters']):
+                        output = model(X + delta)
+                        loss = criterion(output, y)
+                        with amp.scale_loss(loss, opt) as scaled_loss:
+                            scaled_loss.backward()
+                        grad = delta.grad.detach()
+                        delta.data = clamp(delta + alpha * torch.sign(grad), -epsilon, epsilon)
+                        delta.data = clamp(delta, lower_limit - X, upper_limit - X)
+                        delta.grad.zero_()
+                    delta = delta.detach()
+                    output = model(X + delta)
+                    loss = criterion(output, y)
+                    opt.zero_grad()
+                    with amp.scale_loss(loss, opt) as scaled_loss:
+                        scaled_loss.backward()
+                    opt.step()
+                    scheduler.step()
         elif self.adv_dataset == 'MNIST':
             if self.model.__class__.__name__ == 'SmallCNN':
                 model = SmallCNN()
@@ -276,50 +337,43 @@ class FastAT(at):
             else:
                 raise Exception('MNIST can only use SmallCNN and VGG16!')
             model = model.to(self.device)
-            train_config = {'epochs': 1, 'alpha': 2, 'epsilon': 8. / 255., 'attack_iters': 7, 'lr_max': 0.2, 'lr_type': 'cyclic'}
+            model.train()
+            train_config = {'epochs': 1, 'alpha': 0.375, 'epsilon': 0.3, 'attack_iters': 40, \
+                            'lr_max': 5e-3, 'lr_type': 'cyclic'}
+            opt = torch.optim.Adam(model.parameters(), lr=train_config['lr_max'])
+            lr_schedule = lambda t: np.interp([t], [0, train_config['epochs'] * 2//5, train_config['epochs']], \
+                                              [0, train_config['lr_max'], 0])[0]
+            criterion = nn.CrossEntropyLoss()
+            epsilon = train_config['epsilon']
+            alpha = train_config['alpha']
+            for epoch in range(train_config['epochs']):
+                print(epoch)
+                for i, (X, y) in enumerate(train_loader):
+                    print(i)
+                    X, y = X.cuda(), y.cuda()
+                    lr = lr_schedule(epoch + (i+1)/len(train_loader))
+                    opt.param_groups[0].update(lr=lr)
 
-        model.train()
-
-        if train_config['lr_type'] == 'cyclic': 
-            lr_schedule = lambda t: np.interp([t], [0, train_config['epochs'] * 2//5, train_config['epochs']], [0, train_config['lr_max'], 0])[0]
-        elif train_config['lr_type'] == 'flat': 
-            lr_schedule = lambda t: train_config['lr_max']
-        else:
-            raise ValueError('Unknown lr_type')
-        opt = torch.optim.SGD(model.parameters(), lr=train_config['lr_max'], momentum=0.9, weight_decay=5e-4)
-
-        criterion = nn.CrossEntropyLoss()
-        for epoch in range(train_config['epochs']):
-            print(epoch)
-            for i, (X, y) in enumerate(train_loader):
-                print(i)
-                X, y = X.cuda(), y.cuda()
-                lr = lr_schedule(epoch + (i+1)/len(train_loader))
-                opt.param_groups[0].update(lr=lr)
-                delta = torch.zeros_like(X).uniform_(-train_config['epsilon'], train_config['epsilon'])
-                delta.data = torch.max(torch.min(1-X, delta.data), 0-X)
-                for _ in range(train_config['attack_iters']):
+                    delta = torch.zeros_like(X).uniform_(-epsilon, epsilon).cuda()
                     delta.requires_grad = True
                     output = model(X + delta)
+                    loss = F.cross_entropy(output, y)
+                    loss.backward()
+                    grad = delta.grad.detach()
+                    delta.data = torch.clamp(delta + alpha * torch.sign(grad), -epsilon, epsilon)
+                    delta.data = torch.max(torch.min(1-X, delta.data), 0-X)
+                    delta = delta.detach()
+                    output = model(torch.clamp(X + delta, 0, 1))
                     loss = criterion(output, y)
                     opt.zero_grad()
                     loss.backward()
-                    grad = delta.grad.detach()
-                    I = output.max(1)[1] == y
-                    delta.data[I] = torch.clamp(delta + train_config['alpha'] * torch.sign(grad), -train_config['epsilon'], train_config['epsilon'])[I]
-                    delta.data[I] = torch.max(torch.min(1-X, delta.data), 0-X)[I]
-                delta = delta.detach()
-                output = model(torch.clamp(X + delta, 0, 1))
-                loss = criterion(output, y)
-                opt.zero_grad()
-                loss.backward()
-                opt.step()
+                    opt.step()
         with torch.no_grad():
             model.eval()
-            predictions = model(cln_imgs)
+            # predictions = model(cln_imgs)
             predictions_adv = model(adv_imgs)
-        acc = torch.sum(torch.argmax(predictions, dim = 1) == true_labels) / float(len(adv_imgs))
-        print('acc: ', float(acc.cpu()))
+        # acc = torch.sum(torch.argmax(predictions, dim = 1) == true_labels) / float(len(adv_imgs))
+        # print('acc: ', float(acc.cpu()))
         detect_rate = torch.sum(torch.argmax(predictions_adv, dim = 1) == true_labels) / float(len(adv_imgs))
         self.detect_rate = float(detect_rate.cpu())
         if self.adv_examples is None:
