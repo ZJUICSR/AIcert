@@ -707,7 +707,7 @@ def BackdoorAttack():
         inputParam["device"] = "cuda:0"
         dataname = inputParam["Dataset"]
         model = inputParam["Model"]
-        adv_method = inputParam["Method"]
+        adv_method = json.loads(inputParam["Method"])
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
