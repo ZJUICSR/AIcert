@@ -37,7 +37,6 @@ from function.attack.attacks.config import MY_NUMPY_DTYPE
 from function.attack.estimators.classification.classifier import ClassifierMixin
 from function.attack.estimators.estimator import BaseEstimator, LossGradientsMixin
 from function.attack.attacks.utils import compute_success, get_labels_np_array, check_and_transform_label_format, compute_success_array
-from Attack.summary_writer import SummaryWriter
 
 if TYPE_CHECKING:
     from function.attack.attacks.utils import CLASSIFIER_LOSS_GRADIENTS_TYPE, OBJECT_DETECTOR_TYPE
@@ -64,7 +63,6 @@ class ProjectedGradientDescentCommon():
         num_random_init: int = 0,
         batch_size: int = 32,
         random_eps: bool = False,
-        summary_writer: Union[str, bool, SummaryWriter] = False,
         verbose: bool = True,
     ) -> None:
         """
