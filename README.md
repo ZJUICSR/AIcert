@@ -56,3 +56,4 @@ view：后台与前端的接口，每个python文件为一个蓝图，在flask�
 预训练模型文件大于50M，可下载[预训练模型](https://drive.google.com/drive/folders/11t2aPUNrr-I8f2zL_GtAVqRCDcs2NgG7?usp=sharing)后，放于model目录。
 
 PS： 项目暂时没有配置工程上的如log、redis之类，后面有需要再考虑   
+
