@@ -12,16 +12,6 @@ from function.attack.attacks.utils import compute_success, get_labels_np_array, 
 from scipy.stats import truncnorm
 from tqdm.auto import tqdm
 from function.attack.estimators.classification.classifier import ClassifierMixin
-# from function.attack.attacks.evasion.projected_gradient_descent.projected_gradient_descent_numpy import (
-#     ProjectedGradientDescentNumpy,
-# )
-# from function.attack.attacks.evasion.projected_gradient_descent.projected_gradient_descent_pytorch import (
-#     ProjectedGradientDescentPyTorch,
-# )
-# from function.attack.attacks.evasion.projected_gradient_descent.projected_gradient_descent_tensorflow_v2 import (
-#     ProjectedGradientDescentTensorFlowV2,
-# )
-from Attack.summary_writer import SummaryWriter
 
 if TYPE_CHECKING:
     from function.attack.attacks.utils import CLASSIFIER_LOSS_GRADIENTS_TYPE, OBJECT_DETECTOR_TYPE
@@ -46,7 +36,6 @@ class ProjectedGradientDescentCommon():
         num_random_init: int = 0,
         batch_size: int = 32,
         random_eps: bool = False,
-        summary_writer: Union[str, bool, SummaryWriter] = False,
         verbose: bool = True,
     ) -> None:
         """
@@ -234,7 +223,6 @@ class ProjectedGradientDescentPyTorch(ProjectedGradientDescentCommon):
         num_random_init: int = 0,
         batch_size: int = 32,
         random_eps: bool = False,
-        summary_writer: Union[str, bool, SummaryWriter] = False,
         verbose: bool = True,
     ):
         """
@@ -267,9 +255,6 @@ class ProjectedGradientDescentPyTorch(ProjectedGradientDescentCommon):
                 "The framework-specific implementation only supports framework-specific preprocessing."
             )
 
-        if summary_writer and num_random_init > 1:
-            raise ValueError("TensorBoard is not yet supported for more than 1 random restart (num_random_init>1).")
-
         super().__init__(
             estimator=estimator,
             norm=norm,
@@ -282,7 +267,6 @@ class ProjectedGradientDescentPyTorch(ProjectedGradientDescentCommon):
             batch_size=batch_size,
             random_eps=random_eps,
             verbose=verbose,
-            summary_writer=summary_writer,
         )
 
         self._batch_id = 0

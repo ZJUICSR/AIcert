@@ -21,7 +21,6 @@ from function.attack.estimators.classification.classifier import ClassifierMixin
 # from function.attack.attacks.evasion.projected_gradient_descent.projected_gradient_descent_tensorflow_v2 import (
 #     ProjectedGradientDescentTensorFlowV2,
 # )
-# from Attack.summary_writer import SummaryWriter
 
 if TYPE_CHECKING:
     from function.attack.attacks.utils import CLASSIFIER_LOSS_GRADIENTS_TYPE, OBJECT_DETECTOR_TYPE
@@ -651,9 +650,6 @@ class ProjectedGradientDescent(EvasionAttack):
         "num_random_init",
         "batch_size",
         "max_iter",
-        # "random_eps",
-        # "summary_writer",
-        # "verbose",
     ]
     _estimator_requirements = (BaseEstimator, LossGradientsMixin)
     def __init__(
