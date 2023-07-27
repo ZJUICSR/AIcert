@@ -3,3 +3,4 @@
 # from function.attack import ReconstructionAttack
 from function.attack.attacks.evasion import *
 from function.attack.attacks.poisoning import *
+from function.attack.attacks.torchattack import *
