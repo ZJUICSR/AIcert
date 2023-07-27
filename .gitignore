@@ -1,5 +1,3 @@
-function/side/CMake_Research3-bak/
-*/__pycache__
 output/*
 web/static/imgs/tmp_imgs/*
 datasets/**
@@ -17,8 +15,6 @@ log.txt
 *.pth
 *.pyc
 *.*.pyc
-**/__pycache__
-__pycache__
 model/ckpt/*
 dataset/auto_LiRPA_dataset
 dataset/data/CIFAR10/cifar-10-python.tar.gz
@@ -188,3 +184,5 @@ output/task_info.json
 
 # 忽略jpeg格式的图片
 *.jpeg
+
+function/side/CMake_Research3-bak/*
