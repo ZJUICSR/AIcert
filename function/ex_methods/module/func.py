@@ -65,7 +65,7 @@ def save_image(im, path):
         im = format_np_output(im)
         im = Image.fromarray(im)
     im.save(path)
-    return path.split("/")[-5] + "/" + path.split("/")[-4] + "/" + path.split("/")[-3] + "/" + path.split("/")[-2] + "/" + path.split("/")[-1]
+    return path.split("/")[-3] + "/" + path.split("/")[-2] + "/" + path.split("/")[-1]
 
 def save_gradient_images(gradient, file_name):
     """
@@ -268,7 +268,7 @@ def save_ex_img(root, img, img_name):
     if not os.path.exists(root+'/adv_explain/'):
         os.makedirs(root+'/adv_explain/')
     img.save(path)
-    return path.split("/")[-3] + "/" + path.split("/")[-2] + "/" + path.split("/")[-1]
+    return path.split("/")[-2] + "/" + path.split("/")[-1]
 
 '''将tensor存储的样本逆转换成image格式的list'''
 def loader2imagelist(dataloader, dataset, size):
@@ -289,10 +289,22 @@ def loader2imagelist(dataloader, dataset, size):
             raise ValueError("not supported data set!")
     return image_list
 
+def get_batchsize(model_name, dataset):
+    model = model_name.lower()
+    dataset = dataset.lower()
+    if dataset == "imagenet":
+        if model in ['vgg11','vgg13','vgg16','vgg19','resnet18','resnet34']:
+            return 16 
+        elif model in ['resnet50','densenet121']:
+            return 8
+        else: 
+            return 4
+    else:
+        return 32
 
-def target_layer(model,dataset):
+def target_layer(model_name, dataset):
     target_layer_ = None
-    model = model.lower()
+    model = model_name.lower()
     dataset = dataset.lower()
     if dataset == "imagenet":
         if model == 'vgg11':
@@ -352,6 +364,38 @@ def target_layer(model,dataset):
             raise NotImplementedError("selected model is not supported!")
     return target_layer_
 
+def get_conv_layer(model_name):
+    cnn_layers = None
+    model = model_name.lower()
+    if model == 'vgg11':
+        cnn_layers = ['1','4','7','9','12','14','17','19']
+    elif model == 'vgg13':
+        cnn_layers = ['1','3','6','8','11','13','16','18','21','23']
+    elif model == 'vgg16':
+        cnn_layers = ['1','3','6','8','11','13','15','18','20','22','25','27','29']
+    elif model == 'vgg19':
+        cnn_layers = ["1", "3", "6", "8", "11", "13", "15", "17", "20", "22", "24", "26", "29", "31", "33", "35"]
+    elif model == 'resnet18':
+        cnn_layers = ['4','5','6','7','8','9','10','11']
+    elif model == 'resnet34':
+        cnn_layers = [str(layer) for layer in range(4,19,2)]
+    elif model == 'resnet50':
+        cnn_layers = [str(layer) for layer in range(4,19,2)]
+    elif model == 'resnet101':
+        cnn_layers = [str(layer) for layer in range(4,36,3)]
+    elif model == 'resnet152':
+        cnn_layers = [str(layer) for layer in range(4,53,5)]
+    elif model == 'densenet121':
+        cnn_layers = [str(layer) for layer in range(4,64,6)]
+    elif model == 'densenet161':
+        cnn_layers = [str(layer) for layer in range(4,84,8)]
+    elif model == 'densenet169':
+        cnn_layers = [str(layer) for layer in range(4,88,8)]
+    elif model == 'densenet201':
+        cnn_layers = [str(layer) for layer in range(4,104,10)]
+    else:
+        raise NotImplementedError("selected model is not supported!")
+    return cnn_layers
 
 def lrp_visualize(R_lrp, gamma=0.9):
     heatmaps_lrp = []
