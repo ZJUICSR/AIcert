@@ -349,6 +349,8 @@ def run_visualize_importance(dataset, model_type, model_path, n_imp, clus, out_p
         model = torchvision.models.vgg11(num_classes=10)
     elif model_type == "vgg13":
         model = torchvision.models.vgg13(num_classes=10)
+    elif model_type == "vgg16":
+        model = torchvision.models.vgg16(num_classes=10)
     elif model_type == "vgg19":
         model = torchvision.models.vgg19(num_classes=10)
     elif model_type == "resnet18":

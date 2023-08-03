@@ -22,7 +22,7 @@ from model.model_net.resnet import ResNet18, ResNet34, ResNet50, ResNet101, ResN
 from function.attack import run_adversarial, run_backdoor
  
 from function.fairness import run_dataset_debias, run_model_debias
-from function import concolic, env_test, coverage, deepsst, dataclean
+from function import concolic, env_test, coverage, deepsst, deep_logic, dataclean, framework_test
 from function.ex_methods.module.func import get_loader, Logger, recreate_image
 from function.ex_methods.module.generate_adv import get_adv_loader, sample_untargeted_attack
 from function.ex_methods.module.load_model import load_model
@@ -295,7 +295,7 @@ def run_coverage_layer(tid,AAtid,dataset,model, k, N):
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
 
 def run_coverage_importance(tid,AAtid,dataset,model, n_imp, clus):
-    """神经层测试准则
+    """重要神经元覆盖测试准则
     :params tid:主任务ID
     :params AAtid:子任务id
     :params dataset: 数据集名称
@@ -325,7 +325,41 @@ def run_deepsst(tid,AAtid,dataset,modelname,pertube,m_dir):
     """
     logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = deepsst.run_deepsst(dataset.lower(), modelname, float(pertube.strip("%"))/100, m_dir, osp.join(ROOT,"output", tid, AAtid), logging)  
+    res = deepsst.run_deepsst(dataset.lower(), modelname, float(pertube), m_dir, osp.join(ROOT,"output", tid, AAtid), logging)  
+    res["stop"] = 1
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+    taskinfo[tid]["function"][AAtid]["state"]=2
+    taskinfo[tid]["state"]=2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+
+def run_deeplogic(tid,AAtid,dataset,modelname):
+    """逻辑神经元测试准则
+    :params tid:主任务ID
+    :params AAtid:子任务id
+    :params dataset: 数据集名称
+    :params modelname: 模型名称
+    :output res:需保存到子任务json中的返回结果/路径
+    """
+    logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    res = deep_logic.run_deeplogic(dataset.lower(), modelname.lower(), osp.join(ROOT,"output", tid, AAtid), logging)  
+    res["stop"] = 1
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+    taskinfo[tid]["function"][AAtid]["state"]=2
+    taskinfo[tid]["state"]=2
+    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+
+def run_frameworktest(tid,AAtid,modelname,framework):
+    """开发框架安全结构度量
+    :params tid:主任务ID
+    :params AAtid:子任务id
+    :params framework: 开发框架名称
+    :params modelname: 模型名称
+    :output res:需保存到子任务json中的返回结果/路径
+    """
+    logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
+    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    res = framework_test.run_framework_test_exec(modelname.lower(), framework, osp.join(ROOT,"output", tid, AAtid), logging)  
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
