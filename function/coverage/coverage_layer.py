@@ -391,7 +391,7 @@ def run_visualize(
         if now_conv > best_conv + 0.05 or i %50==0:
             best_conv = now_conv
             saves.append((i, now_conv))
-            g = DrawNet_overlap(result, format='png', type_net=model_type, outputdir=outputdir, imagename=str(i),
+            g = DrawNet_overlap(result, format='svg', type_net=model_type, outputdir=outputdir, imagename=str(i),
                             number_per_dot=number_per_dot)
 
         NC.update_coverage_step(x)
@@ -520,7 +520,7 @@ def run_visualize_layer(
         if now_conv > best_conv + 0.05:
             best_conv = now_conv
             saves.append((i, now_conv))
-            g = DrawNet_overlap(result, format='pdf', type_net=model_type, outputdir=outputdir, imagename=str(i),
+            g = DrawNet_overlap(result, format='svg', type_net=model_type, outputdir=outputdir, imagename=str(i),
                             number_per_dot=number_per_dot)
 
         NC.update_coverage_step(x)
@@ -532,8 +532,8 @@ def run_visualize_layer(
             json_data['coverage_test_yz'] = {}
         json_data['coverage_test_yz']['coverage_layer'] = []
         for idx, conv in saves:
-            json_data['coverage_test_yz']['coverage_layer'].append([conv, f'{outputdir}/{idx}.pdf']) 
-    
+            # json_data['coverage_test_yz']['coverage_layer'].append([conv, f'{outputdir}/{idx}.pdf']) 
+            json_data['coverage_test_yz']['coverage_layer'].append({"coverage":conv, "imgUrl":f'{outputdir}/{idx}.svg'}) 
         # with open(result_file, 'r') as file_obj:
         #     json_data = json.load(file_obj)
         # with open(result_file, 'w') as file_obj:
