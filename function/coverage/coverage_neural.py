@@ -258,6 +258,24 @@ def afterprocess(net, num_list=[10, 6, 12, 12, 10], net_type='lenet'):
                     if len(value[i * step:]) > 0:
                         result[key].append(sum(value[i * step:]))
                         number_per_dot[key].append(len(value[i * step:]))
+    else:
+        for num_idx, (key, value) in enumerate(net.items()):
+            if num_idx > 20:
+                break
+            result[key] = []
+            num = num_list[num_idx]
+            step = int(ceil(len(value) / num))
+            number_per_dot[key] = []
+            for i in range(num):
+                if i * step + step < len(value):
+                    result[key].append(sum(value[i * step:i * step + step]))
+                    number_per_dot[key].append(len(value[i * step:i * step + step]))
+                else:
+                    if len(value[i * step:]) > 0:
+                        result[key].append(sum(value[i * step:]))
+                        number_per_dot[key].append(len(value[i * step:]))
+            
+                        
 
     return result, number_per_dot
 
@@ -440,7 +458,7 @@ def run_visualize_neural(
         if now_conv > best_conv + 0.05:
             best_conv = now_conv
             saves.append((i, now_conv))
-            g = DrawNet_overlap(result, format='pdf', type_net=model_type, outputdir=outputdir, imagename=str(i),
+            g = DrawNet_overlap(result, format='svg', type_net=model_type, outputdir=outputdir, imagename=str(i),
                             number_per_dot=number_per_dot)
             # print('conv:', now_conv)
             # break
@@ -454,8 +472,8 @@ def run_visualize_neural(
             json_data['coverage_test_yz'] = {}
         json_data['coverage_test_yz']['coverage_neural'] = []
         for idx, conv in saves:
-            json_data['coverage_test_yz']['coverage_neural'].append([conv, f'{outputdir}/{idx}.pdf']) 
-
+            # json_data['coverage_test_yz']['coverage_neural'].append([conv, f'{outputdir}/{idx}.svg']) 
+            json_data['coverage_test_yz']['coverage_neural'].append({"coverage":conv, "imgUrl":f'{outputdir}/{idx}.svg'}) 
         if i == number_of_image:
             break
         
