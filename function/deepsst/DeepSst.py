@@ -77,7 +77,7 @@ def load_data(dataset, path, device):
 
 def load_model_from_path(path, modelname,device):
     
-    if modelname == 'LeNet':
+    if modelname == 'LeNet5':
         net = Lenet5()
         
         
@@ -159,7 +159,7 @@ def fuzz(net_unhook, dataset, trainloader, conv1mpp, conv1mnn, pertube, save_pat
         ni_s,nj_s = np.where(mnn>=np.sort(mnn.reshape(-1))[int(np.round(mnn.size*(1-pertube)))])
         pidxs = np.concatenate((pi_s.reshape(-1,1),pj_s.reshape(-1,1)),axis=1)
         nidxs = np.concatenate((ni_s.reshape(-1,1),nj_s.reshape(-1,1)),axis=1)
-        for k in range(50000): 
+        for k in range(50000):  #50000
             (x,y)=iter(trainloader).next()
             x=x.to(device)
             noisesp = torch.randn(int(np.round(mpp.size*pertube)))*0.3081+0.1307

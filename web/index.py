@@ -602,7 +602,7 @@ def get_result():
         # 使用postman获取参数
         try:
             inputdata = json.loads(request.data)
-            print(inputdata)
+            # print(inputdata)
             tid = inputdata["Taskid"]
             stidlist = inputdata["sid"]
         except:
@@ -610,7 +610,7 @@ def get_result():
         # 从web上传下来的参数
         if request.args.get("Taskid") != None:
             tid = request.args.get("Taskid")
-        print("tid",tid)
+        # print("tid",tid)
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         if stidlist== []:
             stidlist = taskinfo[tid]["function"].keys()
@@ -618,7 +618,7 @@ def get_result():
         
         if request.args.get("stid") != None:
             stidlist = request.args.get("stid")
-        print(stidlist)
+        # print(stidlist)
         result = {}
         for stid in stidlist:
             attack_type = taskinfo[tid]["function"][stid]["type"]
@@ -636,7 +636,7 @@ def get_result():
                 stopflag = 0
             elif  result[temp]["stop"] != 1:
                 stopflag = 0
-        print(result)
+        # print(result)
         return jsonify({"code":1,"msg":"success","result":result,"stop":stopflag})
 
 # ----------------- 课题4 形式化验证 -----------------
@@ -1073,10 +1073,11 @@ def DataClean():
     if (request.method == "GET"):
         return render_template("")
     elif (request.method == "POST"):
-        dataset = request.form.get("dataset")
-        upload_flag = request.form.get("upload_flag")
-        upload_path = "" #上传路径，单独接口获取路径（待定）
-        tid = request.form.get("tid")
+        inputdata = json.loads(request.data)
+        dataset = inputdata["dataset"]
+        upload_flag = inputdata["upload_flag"]
+        upload_path = inputdata["upload_path"]
+        tid = inputdata["tid"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
@@ -1106,11 +1107,12 @@ def CoverageNeuralParamSet():
     if (request.method == "GET"):
         return render_template("")
     elif (request.method == "POST"):
-        dataset = request.form.get("dataset")
-        model = request.form.get("model")
-        k = request.form.get("k")
-        N = request.form.get("N")
-        tid = request.form.get("tid")
+        inputdata = json.loads(request.data)
+        dataset = inputdata["dataset"]
+        model = inputdata["model"]
+        k = inputdata["k"]
+        N = inputdata["N"]
+        tid = inputdata["tid"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
@@ -1139,11 +1141,12 @@ def CoverageLayerParamSet():
     if (request.method == "GET"):
         return render_template("")
     elif (request.method == "POST"):
-        dataset = request.form.get("dataset")
-        model = request.form.get("model")
-        k = request.form.get("k")
-        N = request.form.get("N")
-        tid = request.form.get("tid")
+        inputdata = json.loads(request.data)
+        dataset = inputdata["dataset"]
+        model = inputdata["model"]
+        k = inputdata["k"]
+        N = inputdata["N"]
+        tid = inputdata["tid"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
@@ -1172,18 +1175,20 @@ def CoverageImportanceParamSet():
     if (request.method == "GET"):
         return render_template("")
     elif (request.method == "POST"):
-        dataset = request.form.get("dataset")
-        model = request.form.get("model")
-        n_imp = request.form.get("n_imp")
-        clus = request.form.get("clus")
-        tid = request.form.get("tid")
+        inputdata = json.loads(request.data)
+        dataset = inputdata["dataset"]
+        model = inputdata["model"]
+        n_imp = inputdata["n_imp"]
+        clus = inputdata["clus"]
+        tid = inputdata["tid"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        # AAtid = "S20230704_1557_6aa2239"
         AAtid = "S"+IOtool.get_task_id(str(format_time))
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         taskinfo[tid]["function"].update({AAtid:{
-            "type":"CoverageLayer",
+            "type":"CoverageImportance",
             "state":0,
-            "name":["CoverageLayer"],
+            "name":["CoverageImportance"],
             "dataset": dataset,
             "model": model,
             "number_of_importance": n_imp,
@@ -1205,11 +1210,17 @@ def DeepSstParamSet():
     if (request.method == "GET"):
         return render_template("")
     elif (request.method == "POST"):
-        dataset = request.form.get("dataset")
-        modelname = request.form.get("modelname")
-        pertube = request.form.get("pertube")
-        m_dir = request.form.get("m_dir")
-        tid = request.form.get("tid")
+        inputdata = json.loads(request.data)
+        dataset = inputdata["dataset"]
+        modelname = inputdata["model"]
+        pertube = inputdata["pertube"]
+        m_dir = inputdata["m_dir"]
+        tid = inputdata["tid"]
+        # dataset = request.form.get("dataset")
+        # modelname = request.form.get("model")
+        # pertube = request.form.get("pertube")
+        # m_dir = request.form.get("m_dir")
+        # tid = request.form.get("tid")
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
@@ -1233,7 +1244,67 @@ def DeepSstParamSet():
     else:
         abort(403)
 
-       
+@app.route('/UnitTest/DeepLogicParamSet', methods=['GET','POST']) # 逻辑神经元测试准则
+def DeepLogicParamSet():
+    if (request.method == "GET"):
+        return render_template("")
+    elif (request.method == "POST"):
+        dataset = request.form.get("dataset")
+        modelname = request.form.get("model")
+        tid = request.form.get("tid")
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        AAtid = "S"+IOtool.get_task_id(str(format_time))
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["function"].update({AAtid:{
+            "type":"DeepSst",
+            "state":0,
+            "name":["DeepSst"],
+            "dataset": dataset,
+            "model": modelname,
+        }})
+        taskinfo[tid]["dataset"]=dataset
+        taskinfo[tid]["model"]=modelname
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        t2 = threading.Thread(target=interface.run_deeplogic,args=(tid, AAtid, dataset, modelname))
+        t2.setDaemon(True)
+        t2.start()
+        res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
+        return jsonify(res)
+    else:
+        abort(403)       
+
+# ----------------- 课题2 开发框架安全结构度量 -------------------
+@app.route('/FWTest/FrameworkTestParamSet', methods=['GET','POST']) 
+def FrameworkTestParamSet():
+    if (request.method == "GET"):
+        return render_template("")
+    elif (request.method == "POST"):
+        inputdata = json.loads(request.data)
+        framework = inputdata["framework"]
+        model = inputdata["model"]
+        tid = inputdata["tid"]
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        AAtid = "S"+IOtool.get_task_id(str(format_time))
+        # AAtid = "S20230731_1708_42109a0"
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["function"].update({AAtid:{
+            "type":"FrameworkTest",
+            "state":0,
+            "name":["FrameworkTest"],
+            "dataset": "",
+            "model": model,
+            "framework": framework,
+        }})
+        taskinfo[tid]["dataset"]=""
+        taskinfo[tid]["model"]=model
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        t2 = threading.Thread(target=interface.run_frameworktest,args=(tid, AAtid, model, framework))
+        t2.setDaemon(True)
+        t2.start()
+        res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
+        return jsonify(res)
+    else:
+        abort(403)
 
 
 def app_run(args):
