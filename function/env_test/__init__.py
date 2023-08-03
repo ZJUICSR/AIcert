@@ -97,7 +97,7 @@ def run_env_frame(method, frame, version, path, logging=None):
     if logging == None:
         logging = Logger(filename=osp.join(path, os.path.split(path)[1] +"_log.txt"))
     out_path = path
-    cve_path = ROOT[:-17]+"/model/valid_extract.pkl"
+    cve_path = ROOT[:-17]+"/model/ckpt/valid_extract.pkl"
     json_path = os.path.join(out_path, "env_results.json")
     save_dir= os.path.join(out_path, "env_test_result")
     logging.info("Analyzing Evironment.....")

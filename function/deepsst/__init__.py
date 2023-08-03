@@ -21,7 +21,7 @@ def run_deepsst(dataset, modelname, pertube, m_dir, out_path, logging=None):
     """
     logging.info("Start running......")
     if m_dir=="":
-        m_dir = CURR.rsplit('/',2)[0]+"/dataset/data/npy"
+        m_dir = CURR.rsplit('/',2)[0]+"/dataset/data/ckpt"
     path = CURR.rsplit('/',2)[0]+'/model/ckpt/mnist_lenet5.pth'
     res = DeepSst(dataset=dataset, modelname=modelname, pertube=pertube, m_dir=m_dir, path=path, save_path=out_path, logging=logging)
     logging.info("Finishing......")
