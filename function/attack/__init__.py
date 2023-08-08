@@ -62,14 +62,15 @@ def run_adversarial(model, modelpath, dataname, method, attackparam, device):
         "VMIFGSM":"VMIFGSM",
         "VNIFGSM":"VNIFGSM"
     }
-    if "L1" in method :
-        attackparam["norm"] = 1
-    elif "L2" in method :
-        attackparam["norm"] = 2
-    elif "Linf" in method:
-        attackparam["norm"] = "inf"
-    res = a.generate(methoddict[method], **attackparam)
-    return a.print_res()
+    if method not in ["FABL1","FABL2","PGDRSL2"]:
+        if "L1" in method :
+            attackparam["norm"] = 1
+        elif "L2" in method :
+            attackparam["norm"] = 2
+        elif "Linf" in method :
+            attackparam["norm"] = "inf"
+    res, piclist = a.generate(methoddict[method], **attackparam)
+    return a.print_res(),piclist
 
 def run_backdoor(model, modelpath, dataname, method, pp_poison, save_num, test_sample_num, target, trigger, device, nb_classes=10, method_param=None):
     datasetpath="./datasets/"
@@ -101,12 +102,15 @@ def run_backdoor(model, modelpath, dataname, method, pp_poison, save_num, test_s
     #           target=target, trigger=trigger, **method_param)
     b.poision(method=methoddict[method], **method_param)
     res["accuracy"], res["accuracyonb"], res["attack_success_rate"] = b.train()
+    res["accuracy"] = round(res["accuracy"],1)
+    res["accuracyonb"] = round(res["accuracyonb"],1)
+    res["attack_success_rate"] = round(res["attack_success_rate"],1)
     for i in range(10):
-        temp_pp_poison = 0.001 + 0.01 * i
+        temp_pp_poison = 0.001 + 0.1 * i
         # b.poision(method=methoddict[method], pp_poison=temp_pp_poison, test_sample_num=test_sample_num, target=target, trigger=trigger, **method_param)
         b.poision(method=methoddict[method], **method_param)
         accuracy, accuracyonb, attack_success_rate = b.train()
-        res["asr"].append(attack_success_rate)
+        res["asr"].append(round(attack_success_rate*100,1))
         res["pp_poison"].append(temp_pp_poison)
     return res
 
