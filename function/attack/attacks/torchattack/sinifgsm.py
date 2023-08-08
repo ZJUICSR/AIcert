@@ -1,9 +1,11 @@
 import torch
 import torch.nn as nn
 import numpy as np
+from typing import Optional
+from function.attack.attacks.attack import EvasionAttack
 
 
-class SINIFGSM():
+class SINIFGSM(EvasionAttack):
     r"""
     SI-NI-FGSM in the paper 'NESTEROV ACCELERATED GRADIENT AND SCALEINVARIANCE FOR ADVERSARIAL ATTACKS'
     [https://arxiv.org/abs/1908.06281], Published as a conference paper at ICLR 2020
@@ -12,7 +14,7 @@ class SINIFGSM():
     Distance Measure : Linf
 
     Arguments:
-        model (nn.Module): model to attack.
+        classifier 
         eps (float): maximum perturbation. (Default: 8/255)
         alpha (float): step size. (Default: 2/255)
         steps (int): number of iterations. (Default: 10)
@@ -20,69 +22,72 @@ class SINIFGSM():
         m (int): number of scale copies. (Default: 5)
 
     Shape:
-        - images: :math:`(N, C, H, W)` where `N = number of batches`, `C = number of channels`,        `H = height` and `W = width`. It must have a range [0, 1].
-        - labels: :math:`(N)` where each value :math:`y_i` is :math:`0 \leq y_i \leq` `number of labels`.
+        - x: :math:`(N, C, H, W)` where `N = number of batches`, `C = number of channels`,        `H = height` and `W = width`. It must have a range [0, 1].
+        - y: :math:`(N)` where each value :math:`y_i` is :math:`0 \leq y_i \leq` `number of labels`.
         - output: :math:`(N, C, H, W)`.
 
     Examples::
-        >>> attack = torchattacks.SINIFGSM(model, eps=8/255, alpha=2/255, steps=10, decay=1.0, m=5)
-        >>> adv_images = attack(images, labels)
+        >>> attack = SINIFGSM(classifier, eps=8/255, alpha=2/255, steps=10, decay=1.0, m=5)
+        >>> adv_images = attack.generate(x, y)
 
     """
 
-    def __init__(self, model, eps=8/255, alpha=2/255, steps=10, decay=1.0, m=5):
+    def __init__(self, classifier, eps=8/255, alpha=2/255, steps=10, decay=1.0, m=5):
    
         self.eps = eps
         self.steps = steps
         self.decay = decay
         self.alpha = alpha
         self.m = m
-        self.model = model
-        self.device = next(model.parameters()).device
+        self.classifier = classifier
+        self.device = classifier.device
 
-    def generate(self, x : np.ndarray, y : np.ndarray):
+    def generate(self, x : np.ndarray, y : Optional[np.ndarray] = None):
         r"""
         Overridden.
         """
-        images = torch.from_numpy(x)
-        labels = torch.from_numpy(y)
+        if y is None:
+            y = self.classifier.predict(x)
 
-        images = images.clone().detach().to(self.device)
-        labels = labels.clone().detach().to(self.device)
+        if len(y.shape) == 2:
+            y = self.classifier.reduce_labels(y)
 
+        y = torch.from_numpy(y).to(self.device)
+        x = torch.from_numpy(x).to(self.device)
+        
         # if self.targeted:
-        #     target_labels = self.get_target_label(images, labels)
+        #     target_labels = self.get_target_label(x, y)
 
-        momentum = torch.zeros_like(images).detach().to(self.device)
+        momentum = torch.zeros_like(x).detach().to(self.device)
 
-        loss = nn.CrossEntropyLoss()
-
-        adv_images = images.clone().detach()
+        adv_x = x.clone().detach()
 
         for _ in range(self.steps):
-            adv_images.requires_grad = True
-            nes_image = adv_images + self.decay*self.alpha*momentum
+            adv_x.requires_grad = True
+            nes_x = adv_x + self.decay*self.alpha*momentum
             # Calculate sum the gradients over the scale copies of the input image
-            adv_grad = torch.zeros_like(images).detach().to(self.device)
+            adv_grad = torch.zeros_like(x).detach().to(self.device)
+
             for i in torch.arange(self.m):
-                nes_images = nes_image / torch.pow(2, i)
-                outputs = self.model(nes_images)
+                nes_x = nes_x / torch.pow(2, i)
+                outputs = self.classifier._model(nes_x)
                 # Calculate loss
                 # if self.targeted:
                 #     cost = -loss(outputs, target_labels)
                 # else:
-                cost = loss(outputs, labels.long())
-                adv_grad += torch.autograd.grad(cost, adv_images,
-                                                retain_graph=False, create_graph=False)[0]
+                cost = self.classifier._loss(outputs[-1], y)
+                adv_grad += torch.autograd.grad(cost, adv_x,
+                                                retain_graph=True, create_graph=False)[0]
             adv_grad = adv_grad / self.m
 
             # Update adversarial images
             grad = self.decay*momentum + adv_grad / \
                 torch.mean(torch.abs(adv_grad), dim=(1, 2, 3), keepdim=True)
             momentum = grad
-            adv_images = adv_images.detach() + self.alpha*grad.sign()
-            delta = torch.clamp(adv_images - images,
+            adv_x = adv_x.detach() + self.alpha*grad.sign()
+            delta = torch.clamp(adv_x - x,
                                 min=-self.eps, max=self.eps)
-            adv_images = torch.clamp(images + delta, min=0, max=1).detach()
+            adv_x = torch.clamp(x + delta, min=0, max=1).detach()
 
-        return adv_images
+        adv_x = adv_x.cpu().numpy()
+        return adv_x
