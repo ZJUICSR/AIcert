@@ -2,6 +2,8 @@ import torch
 import torch.nn.functional as F
 import numpy as np 
 import copy
+from typing import Optional
+from function.attack.attacks.attack import EvasionAttack
 
 
 class Noise():
@@ -17,7 +19,7 @@ class Noise():
         return noise
 
 
-class PGDRSL2():
+class PGDRSL2(EvasionAttack):
     r"""
     PGD for randmized smoothing in the paper 'Provably Robust Deep Learning via Adversarially Trained Smoothed Classifiers'
     [https://arxiv.org/abs/1906.04584]
@@ -26,7 +28,7 @@ class PGDRSL2():
     Distance Measure : L2
 
     Arguments:
-        model (nn.Module): model to attack.
+        classifier 
         eps (float): maximum perturbation. (Default: 1.0)
         alpha (float): step size. (Default: 0.2)
         steps (int): number of steps. (Default: 10)
@@ -37,17 +39,17 @@ class PGDRSL2():
         random_start (bool): using random initialization of delta. (Default: True)
 
     Shape:
-        - images: :math:`(N, C, H, W)` where `N = number of batches`, `C = number of channels`,        `H = height` and `W = width`. It must have a range [0, 1].
-        - labels: :math:`(N)` where each value :math:`y_i` is :math:`0 \leq y_i \leq` `number of labels`.
+        - x: :math:`(N, C, H, W)` where `N = number of batches`, `C = number of channels`,        `H = height` and `W = width`. It must have a range [0, 1].
+        - y: :math:`(N)` where each value :math:`y_i` is :math:`0 \leq y_i \leq` `number of labels`.
         - output: :math:`(N, C, H, W)`.
 
     Examples::
-        >>> attack = torchattacks.PGDRSL2(model, eps=1.0, alpha=0.2, steps=10, noise_type="guassian", noise_sd=0.5, noise_batch_size=5, batch_max=2048)
-        >>> adv_images = attack(images, labels)
+        >>> attack = torchattacks.PGDRSL2(classifier, eps=1.0, alpha=0.2, steps=10, noise_type="guassian", noise_sd=0.5, noise_batch_size=5, batch_max=2048)
+        >>> adv_x = attack(x, y)
 
     """
 
-    def __init__(self, model, eps=1.0, alpha=0.2, steps=10, noise_type="guassian", noise_sd=0.5, noise_batch_size=5, batch_max=2048, eps_for_division=1e-10):
+    def __init__(self, classifier, eps=1.0, alpha=0.2, steps=10, noise_type="guassian", noise_sd=0.5, noise_batch_size=5, batch_max=2048, eps_for_division=1e-10):
 
         self.eps = eps
         self.alpha = alpha
@@ -56,50 +58,53 @@ class PGDRSL2():
         self.noise_batch_size = noise_batch_size
         self.eps_for_division = eps_for_division
         self.batch_max = batch_max
-        self.model = model
-        self.device = next(model.parameters()).device
+        self.classifier = classifier
+        self.device = classifier.device
 
-    def generate(self, x : np.ndarray, y : np.ndarray):
+    def generate(self, x : np.ndarray, y : Optional[np.ndarray] = None):
         r"""
         Overridden.
         """
-        inputs = torch.from_numpy(x)
-        labels = torch.from_numpy(y)
+        if y is None:
+            y = self.classifier.predict(x)
 
-        if inputs.shape[0]*self.noise_batch_size > self.batch_max:
-            img_list = []
+        if len(y.shape) == 2:
+            y = self.classifier.reduce_labels(y)
+
+        y = torch.from_numpy(y).to(self.device)
+        x = torch.from_numpy(x).to(self.device)
+
+        if x.shape[0]*self.noise_batch_size > self.batch_max:
+            x_list = []
             split_num = int(self.batch_max/self.noise_batch_size)
-            inputs_split = torch.split(inputs,
-                                       split_size_or_sections=split_num)
-            labels_split = torch.split(labels,
-                                       split_size_or_sections=split_num)
-            for img_sub, lab_sub in zip(inputs_split, labels_split):
-                img_adv = self._generate(img_sub, lab_sub)
-                img_list.append(img_adv)
-            return torch.vstack(img_list)
+            x_split = torch.split(x, split_size_or_sections=split_num)
+            y_split = torch.split(x, split_size_or_sections=split_num)
+            for x_sub, y_sub in zip(x_split, y_split):
+                x_adv = self._generate(x_sub, y_sub)
+                x_list.append(x_adv)
+            return torch.vstack(x_list)
         else:
-            return self._generate(inputs, labels)
+            return self._generate(x, y)
 
-    def _generate(self, images, labels):
+    def _generate(self, x, y):
         r"""
         Overridden.
         """
-
-        images = images.clone().detach().to(self.device)
-        labels = labels.clone().detach().to(self.device)
+        x = x.clone().detach().to(self.device)
+        y = y.clone().detach().to(self.device)
         # expend the inputs over noise_batch_size
-        shape = torch.Size([images.shape[0], self.noise_batch_size]) + images.shape[1:]  # nopep8
-        inputs_exp = images.unsqueeze(1).expand(shape)
+        shape = torch.Size([x.shape[0], self.noise_batch_size]) + x.shape[1:]  # nopep8
+        inputs_exp = x.unsqueeze(1).expand(shape)
         inputs_exp = inputs_exp.reshape(torch.Size([-1]) + inputs_exp.shape[2:])  # nopep8
 
-        data_batch_size = labels.shape[0]
+        data_batch_size = y.shape[0]
         delta = torch.zeros(
-            (len(labels), *inputs_exp.shape[1:]), requires_grad=True, device=self.device)
+            (len(y), *inputs_exp.shape[1:]), requires_grad=True, device=self.device)
         delta_last = torch.zeros(
-            (len(labels), *inputs_exp.shape[1:]), requires_grad=False, device=self.device)
+            (len(y), *inputs_exp.shape[1:]), requires_grad=False, device=self.device)
 
         # if self.targeted:
-        #     target_labels = self.get_target_label(images, labels)
+        #     target_labels = self.get_target_label(x, y)
 
         for _ in range(self.steps):
             delta.requires_grad = True
@@ -112,14 +117,14 @@ class PGDRSL2():
             noise_added = noise_added.view(img_adv.shape)
 
             adv_noise = img_adv + noise_added
-            logits = self.model(adv_noise)
+            logits = self.classifier._model(adv_noise)[-1]
 
             softmax = F.softmax(logits, dim=1)
             # average the probabilities across noise
             average_softmax = softmax.reshape(
                 -1, self.noise_batch_size, logits.shape[-1]).mean(1, keepdim=True).squeeze(1)
             logsoftmax = torch.log(average_softmax.clamp(min=1e-20))
-            ce_loss = F.nll_loss(logsoftmax, labels.long()) 
+            ce_loss = F.nll_loss(logsoftmax, y) 
 
             grad = torch.autograd.grad(
                 ce_loss, delta, retain_graph=False, create_graph=False)[0]
@@ -135,6 +140,7 @@ class PGDRSL2():
             delta = delta * factor.view(-1, 1, 1, 1)
             delta_last.data = copy.deepcopy(delta.data)
 
-        adv_images = torch.clamp(images + delta, min=0, max=1).detach()
+        adv_x = torch.clamp(x + delta, min=0, max=1).detach()
         
-        return adv_images
+        adv_x = adv_x.cpu().numpy()
+        return adv_x

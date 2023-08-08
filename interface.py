@@ -320,6 +320,7 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
     device = torch.device(inputParam['device'])
     if (not osp.exists(modelpath)):
             logging.info("[模型获取]:服务器上模型不存在")
+            result={}
             result["stop"] = 1
             IOtool.write_json(result,osp.join(ROOT,"output", tid, stid+"_result.json"))
             taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
@@ -336,8 +337,7 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
         attackparam["save_path"] = osp.join(ROOT,"output", tid, stid)
         if "norm" in attackparam.keys() and attackparam["norm"]=="np.inf":
             attackparam["norm"]=np.inf
-        print(attackparam)
-        resultlist[method] = run_adversarial(model, modelpath, dataname, method, attackparam, device)
+        resultlist[method] ,resultlist[method]["pic"]= run_adversarial(model, modelpath, dataname, method, attackparam, device)
         logging.info("[执行对抗攻击中]:{:s}对抗攻击结束，攻击成功率为{}%".format(method,resultlist[method]["asr"]))
     logging.info("[执行对抗攻击]:对抗攻击执行完成，数据保存中")
     resultlist["stop"] = 1
@@ -366,6 +366,7 @@ def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
     modelpath = osp.join("./model/ckpt",dataname.upper() + "_" + model.lower()+".pth")
     if (not osp.exists(modelpath)):
             logging.info("[模型获取]:服务器上模型不存在")
+            result={}
             result["stop"] = 1
             IOtool.write_json(result,osp.join(ROOT,"output", tid, stid+"_result.json"))
             taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
@@ -384,7 +385,7 @@ def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
             os.makedirs(save_path)
         inputParam[method]["save_path"] = save_path
         res[method]= run_backdoor(model, modelpath, dataname, method, pp_poison=inputParam[method]["pp_poison"], save_num=inputParam[method]["save_num"], test_sample_num=inputParam[method]["test_sample_num"], target=inputParam[method]["target"],trigger=inputParam[method]["trigger"], device=inputParam["device"], nb_classes=10, method_param=inputParam[method])
-        logging.info("[执行后门攻击]:{:s}后门攻击运行结束，投毒率为{}时，攻击成功率为{}%".format(method, inputParam[method]["pp_poison"], res[method]["attack_success_rate"]))
+        logging.info("[执行后门攻击]:{:s}后门攻击运行结束，投毒率为{}时，攻击成功率为{}%".format(method, inputParam[method]["pp_poison"], res[method]["attack_success_rate"]*100))
     res["stop"] = 1
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
