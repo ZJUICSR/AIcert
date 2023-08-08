@@ -1,6 +1,8 @@
 import torch
 from torch.nn.modules.loss import _Loss
 import numpy as np
+from typing import Optional
+from function.attack.attacks.attack import EvasionAttack
 
 
 class MarginalLoss(_Loss):
@@ -27,7 +29,7 @@ class MarginalLoss(_Loss):
         return loss
 
 
-class SPSA():
+class SPSA(EvasionAttack):
     r"""
     SPSA in the paper 'Adversarial Risk and the Dangers of Evaluating Against Weak Attacks'
     [https://arxiv.org/abs/1802.05666]
@@ -35,7 +37,7 @@ class SPSA():
     Distance Measure : Linf
 
     Arguments:
-        model (nn.Module): model to attack.
+        classifier 
         eps (float): maximum perturbation. (Default: 8/255)
         delta (float): scaling parameter of SPSA.
         lr (float): the learning rate of the `Adam` optimizer.
@@ -44,17 +46,17 @@ class SPSA():
         max_batch_size (int): maximum batch size to be evaluated at once.
 
     Shape:
-        - images: :math:`(N, C, H, W)` where `N = number of batches`, `C = number of channels`,        `H = height` and `W = width`. It must have a range [0, 1].
-        - labels: :math:`(N)` where each value :math:`y_i` is :math:`0 \leq y_i \leq` `number of labels`.
+        - x: :math:`(N, C, H, W)` where `N = number of batches`, `C = number of channels`,        `H = height` and `W = width`. It must have a range [0, 1].
+        - y: :math:`(N)` where each value :math:`y_i` is :math:`0 \leq y_i \leq` `number of labels`.
         - output: :math:`(N, C, H, W)`.
 
     Examples::
-        >>> attack = torchattacks.SPSA(model, eps=0.3)
-        >>> adv_images = attack(images, labels)
+        >>> attack = SPSA(classifier, eps=0.3)
+        >>> adv_images = attack.generate(x, y)
 
     """
 
-    def __init__(self, model, eps=0.3, delta=0.01, lr=0.01, nb_iter=1, nb_sample=128, max_batch_size=64):
+    def __init__(self, classifier, eps=0.3, delta=0.01, lr=0.01, nb_iter=1, nb_sample=128, max_batch_size=64):
   
         self.eps = eps
         self.delta = delta
@@ -63,22 +65,25 @@ class SPSA():
         self.nb_sample = nb_sample
         self.max_batch_size = max_batch_size
         self.loss_fn = MarginalLoss(reduction="none")
-        self.model = model
-        self.device = next(model.parameters()).device
+        self.classifier = classifier
+        self.device = classifier.device
 
-    def generate(self, x : np.ndarray, y : np.ndarray):
+    def generate(self, x : np.ndarray, y : Optional[np.ndarray] = None):
         r"""
         Overridden.
         """
-        images = torch.from_numpy(x)
-        labels = torch.from_numpy(y)
+        if y is None:
+            y = self.classifier.predict(x)
 
+        if len(y.shape) == 2:
+            y = self.classifier.reduce_labels(y)
 
-        images = images.clone().detach().to(self.device)
-        labels = labels.clone().detach().to(self.device)
+        images = torch.from_numpy(x).to(self.device)
+        labels = torch.from_numpy(y).to(self.device)
 
         adv_images = self.spsa_perturb(images, labels)
 
+        adv_images = adv_images.cpu().numpy()
         return adv_images
 
     def loss(self, *args):
@@ -125,7 +130,7 @@ class SPSA():
         labels = torch.unsqueeze(labels, 0)
 
         def f(xvar, yvar):
-            return self.loss(self.model(xvar), yvar)
+            return self.loss(self.classifier._model(xvar)[-1], yvar)
 
         images = images.expand(max_batch_size, *images.shape[1:]).contiguous()
         labels = labels.expand(max_batch_size, *labels.shape[1:]).contiguous()
