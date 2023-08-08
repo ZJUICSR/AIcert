@@ -17,6 +17,9 @@ from function.attack.attacks.attack import EvasionAttack
 
 
 class FAB(EvasionAttack):
+    attack_params = EvasionAttack.attack_params + [
+        "eps"
+    ]
     r"""
     Fast Adaptive Boundary Attack in the paper 'Minimally distorted Adversarial Examples with a Fast Adaptive Boundary Attack'
     [https://arxiv.org/abs/1907.02044]
@@ -75,9 +78,10 @@ class FAB(EvasionAttack):
 
         if y is None:
             y = self.classifier.predict(x)
-            
-        x = torch.from_numpy(x).to(self.device)
+        if len(y.shape) == 2:
+            y = self.classifier.reduce_labels(y)
 
+        x = torch.from_numpy(x).to(self.device)
         y = torch.from_numpy(y).to(self.device)
 
         adv_x = self.perturb(x, y)
@@ -388,9 +392,6 @@ class FAB(EvasionAttack):
     def perturb(self, x, y):
         adv = x.clone()
         with torch.no_grad():
-            if len(y.shape) == 2:
-                y = self.classifier.reduce_labels(y)
-            
             outputs = self.classifier._model(x)[-1]
             acc = self.classifier.reduce_labels(outputs) == y
 
@@ -412,7 +413,6 @@ class FAB(EvasionAttack):
                         outputs = self.classifier._model(adv_curr)[-1]
                         acc_curr = self.classifier.reduce_labels(outputs) == y_to_fool
                     
-                        
                         res = (x_to_fool - adv_curr).abs().view(x_to_fool.shape[0], -1).max(1)[0]  # nopep8
                         
                         acc_curr = torch.max(acc_curr, res > self.eps)

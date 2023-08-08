@@ -74,7 +74,6 @@ class DIFGSM(EvasionAttack):
         """
         if y is None:
             y = self.classifier.predict(x)
-        
         if len(y.shape) == 2:
             y = self.classifier.reduce_labels(y)
 

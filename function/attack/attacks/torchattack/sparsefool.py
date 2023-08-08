@@ -1,9 +1,11 @@
 import numpy as np
 import torch
 import torch.nn as nn
+from typing import Optional
+from function.attack.attacks.attack import EvasionAttack
 
 
-class SparseFool():
+class SparseFool(EvasionAttack):
     r"""
     Attack in the paper 'SparseFool: a few pixels make a big difference'
     [https://arxiv.org/abs/1811.02248]
@@ -13,40 +15,43 @@ class SparseFool():
     Distance Measure : L0
 
     Arguments:
-        model (nn.Module): model to attack.
+        classifier 
         steps (int): number of steps. (Default: 10)
         lam (float): parameter for scaling DeepFool noise. (Default: 3)
         overshoot (float): parameter for enhancing the noise. (Default: 0.02)
 
     Shape:
-        - images: :math:`(N, C, H, W)` where `N = number of batches`, `C = number of channels`,        `H = height` and `W = width`. It must have a range [0, 1].
-        - labels: :math:`(N)` where each value :math:`y_i` is :math:`0 \leq y_i \leq` `number of labels`.
+        - x: :math:`(N, C, H, W)` where `N = number of batches`, `C = number of channels`,        `H = height` and `W = width`. It must have a range [0, 1].
+        - y: :math:`(N)` where each value :math:`y_i` is :math:`0 \leq y_i \leq` `number of labels`.
         - output: :math:`(N, C, H, W)`.
 
     Examples::
-        >>> attack = torchattacks.SparseFool(model, steps=10, lam=3, overshoot=0.02)
-        >>> adv_images = attack(images, labels)
+        >>> attack = SparseFool(classifier, steps=10, lam=3, overshoot=0.02)
+        >>> adv_images = attack.generate(x, y)
 
     """
     
-    def __init__(self, model, steps=10, lam=1, overshoot=0.02):
+    def __init__(self, classifier, steps=10, lam=1, overshoot=0.02):
 
         self.steps = steps
         self.lam = lam
         self.overshoot = overshoot
-        self.deepfool = DeepFool(model)
-        self.model = model
-        self.device = next(model.parameters()).device
+        self.deepfool = DeepFool(classifier)
+        self.classifier = classifier
+        self.device = classifier.device
 
-    def generate(self, x : np.ndarray, y : np.ndarray):
+    def generate(self, x : np.ndarray, y : Optional[np.ndarray] = None):
         r"""
         Overridden.
         """
-        images = torch.from_numpy(x)
-        labels = torch.from_numpy(y)
+        if y is None:
+            y = self.classifier.predict(x)
 
-        images = images.clone().detach().to(self.device)
-        labels = labels.clone().detach().to(self.device)
+        if len(y.shape) == 2:
+            y = self.classifier.reduce_labels(y)
+
+        images = torch.from_numpy(x).to(self.device)
+        labels = torch.from_numpy(y).to(self.device)
 
         batch_size = len(images)
         correct = torch.tensor([True]*batch_size)
@@ -63,8 +68,8 @@ class SparseFool():
                 label = labels[idx:idx+1]
                 adv_image = adv_images[idx]
 
-                fs = self.model(adv_image)[0]
-                _, pre = torch.max(fs, dim=0)
+                fs = self.classifier._model(adv_image)[-1]
+                _, pre = torch.max(fs, dim=1)
                 if pre != label:
                     correct[idx] = False
                     continue
@@ -73,9 +78,11 @@ class SparseFool():
                 adv_image = image + self.lam*(adv_image - image)
 
                 adv_image.requires_grad = True
-                fs = self.model(adv_image)[0]
+                fs = self.classifier._model(adv_image)[-1]
+                if len(fs.shape) == 2:
+                    fs = fs.squeeze(dim=0)
                 _, pre = torch.max(fs, dim=0)
-
+             
                 if pre == label:
                     pre = target_label
 
@@ -92,6 +99,7 @@ class SparseFool():
 
         adv_images = torch.cat(adv_images).detach()
 
+        adv_images = adv_images.cpu().numpy()
         return adv_images
     
 
@@ -138,7 +146,7 @@ class DeepFool():
     [https://arxiv.org/abs/1511.04599]
     Distance Measure : L2
     Arguments:
-        model (nn.Module): model to attack.
+        classifier 
         steps (int): number of steps. (Default: 50)
         overshoot (float): parameter for enhancing the noise. (Default: 0.02)
     Shape:
@@ -146,15 +154,15 @@ class DeepFool():
         - labels: :math:`(N)` where each value :math:`y_i` is :math:`0 \leq y_i \leq` `number of labels`.
         - output: :math:`(N, C, H, W)`.
     Examples::
-        >>> attack = torchattacks.DeepFool(model, steps=50, overshoot=0.02)
-        >>> adv_images = attack(images, labels)
+        >>> attack = DeepFool(classifier, steps=50, overshoot=0.02)
+        >>> adv_images = attack.generate(images, labels)
     """
-    def __init__(self, model, steps=50, overshoot=0.02):
+    def __init__(self, classifier, steps=50, overshoot=0.02):
 
         self.steps = steps
         self.overshoot = overshoot
-        self.model = model
-        self.device = next(model.parameters()).device
+        self.classifier = classifier
+        self.device = classifier.device
 
     def forward(self, images, labels):
         r"""
@@ -195,11 +203,14 @@ class DeepFool():
 
     def _forward_indiv(self, image, label):
         image.requires_grad = True
-        fs = self.model(image)[0]
+        fs = self.classifier._model(image)[-1]
+        if len(fs.shape) == 2:
+            fs = fs.squeeze(dim=0)
         _, pre = torch.max(fs, dim=0)
+       
         if pre != label:
             return (True, pre, image)
-
+    
         ws = self._construct_jacobian(fs, image)
         image = image.detach()
 
