@@ -1,13 +1,14 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 import numpy as np
+from typing import Optional
 from scipy import stats as st
+from function.attack.attacks.attack import EvasionAttack
 
 
 
-class TIFGSM():
+class TIFGSM(EvasionAttack):
     r"""
     TIFGSM in the paper 'Evading Defenses to Transferable Adversarial Examples by Translation-Invariant Attacks'
     [https://arxiv.org/abs/1904.02884]
@@ -15,7 +16,7 @@ class TIFGSM():
     Distance Measure : Linf
 
     Arguments:
-        model (nn.Module): model to attack.
+        classifier 
         eps (float): maximum perturbation. (Default: 8/255)
         alpha (float): step size. (Default: 2/255)
         steps (int): number of iterations. (Default: 10)
@@ -28,19 +29,18 @@ class TIFGSM():
         random_start (bool): using random initialization of delta. (Default: False)
 
     Shape:
-        - images: :math:`(N, C, H, W)` where `N = number of batches`, `C = number of channels`, `H = height` and `W = width`. It must have a range [0, 1].
-        - labels: :math:`(N)` where each value :math:`y_i` is :math:`0 \leq y_i \leq` `number of labels`.
+        - x: :math:`(N, C, H, W)` where `N = number of batches`, `C = number of channels`, `H = height` and `W = width`. It must have a range [0, 1].
+        - y: :math:`(N)` where each value :math:`y_i` is :math:`0 \leq y_i \leq` `number of labels`.
         - output: :math:`(N, C, H, W)`.
 
     Examples::
-        >>> attack = torchattacks.TIFGSM(model, eps=8/255, alpha=2/255, steps=10, decay=1.0, resize_rate=0.9, diversity_prob=0.7, random_start=False)
-        >>> adv_images = attack(images, labels)
+        >>> attack = TIFGSM(classifier, eps=8/255, alpha=2/255, steps=10, decay=1.0, resize_rate=0.9, diversity_prob=0.7, random_start=False)
+        >>> adv_images = attack.generate(x, y)
 
     """
 
-    def __init__(self, model, eps=8/255, alpha=2/255, steps=10, decay=0.0, kernel_name='gaussian',
+    def __init__(self, classifier, eps=8/255, alpha=2/255, steps=10, decay=0.0, kernel_name='gaussian',
                  len_kernel=15, nsig=3, resize_rate=0.9, diversity_prob=0.5, random_start=False):
-       
         self.eps = eps
         self.steps = steps
         self.decay = decay
@@ -52,23 +52,24 @@ class TIFGSM():
         self.len_kernel = len_kernel
         self.nsig = nsig
         self.stacked_kernel = torch.from_numpy(self.kernel_generation())
-        self.model = model
-        self.device = next(model.parameters()).device
+        self.classifier = classifier
+        self.device = classifier.device
 
-    def generate(self, x : np.ndarray, y : np.ndarray):
+    def generate(self, x : np.ndarray, y : Optional[np.ndarray] = None):
         r"""
         Overridden.
         """
-        images = torch.from_numpy(x)
-        labels = torch.from_numpy(y)
+        if y is None:
+            y = self.classifier.predict(x)
+        if len(y.shape) == 2:
+            y = self.classifier.reduce_labels(y)
 
-        images = images.clone().detach().to(self.device)
-        labels = labels.clone().detach().to(self.device)
+        images = torch.from_numpy(x).to(self.device)
+        labels = torch.from_numpy(y).to(self.device)
 
         # if self.targeted:
         #     target_labels = self.get_target_label(images, labels)
 
-        loss = nn.CrossEntropyLoss()
         momentum = torch.zeros_like(images).detach().to(self.device)
         stacked_kernel = self.stacked_kernel.to(self.device)
 
@@ -82,13 +83,13 @@ class TIFGSM():
 
         for _ in range(self.steps):
             adv_images.requires_grad = True
-            outputs = self.model(self.input_diversity(adv_images))
+            outputs = self.classifier._model(self.input_diversity(adv_images))
 
             # Calculate loss
             # if self.targeted:
             #     cost = -loss(outputs, target_labels)
             # else:
-            cost = loss(outputs, labels.long())
+            cost = self.classifier._loss(outputs[-1], labels)
 
             # Update adversarial images
             grad = torch.autograd.grad(cost, adv_images,
@@ -106,6 +107,7 @@ class TIFGSM():
                                 min=-self.eps, max=self.eps)
             adv_images = torch.clamp(images + delta, min=0, max=1).detach()
 
+        adv_images = adv_images.cpu().numpy()
         return adv_images
 
     def kernel_generation(self):
