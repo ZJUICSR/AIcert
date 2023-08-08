@@ -2,9 +2,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+from typing import Optional
+from function.attack.attacks.attack import EvasionAttack
 
 
-class Jitter():
+class Jitter(EvasionAttack):
     r"""
     Jitter in the paper 'Exploring Misclassifications of Robust Neural Networks to Enhance Adversarial Attacks'
     [https://arxiv.org/abs/2105.10304]
@@ -19,18 +21,18 @@ class Jitter():
         random_start (bool): using random initialization of delta. (Default: True)
 
     Shape:
-        - images: :math:`(N, C, H, W)` where `N = number of batches`, `C = number of channels`,        `H = height` and `W = width`. It must have a range [0, 1].
-        - labels: :math:`(N)` where each value :math:`y_i` is :math:`0 \leq y_i \leq` `number of labels`.
+        - x: :math:`(N, C, H, W)` where `N = number of batches`, `C = number of channels`,        `H = height` and `W = width`. It must have a range [0, 1].
+        - y: :math:`(N)` where each value :math:`y_i` is :math:`0 \leq y_i \leq` `number of labels`.
         - output: :math:`(N, C, H, W)`.
 
     Examples::
-        >>> attack = torchattacks.Jitter(model, eps=8/255, alpha=2/255, steps=10,
+        >>> attack = Jitter(model, eps=8/255, alpha=2/255, steps=10,
                  scale=10, std=0.1, random_start=True)
-        >>> adv_images = attack(images, labels)
+        >>> adv_images = attack.generate(x, y)
 
     """
 
-    def __init__(self, model, eps=8/255, alpha=2/255, steps=10,
+    def __init__(self, classifier, eps=8/255, alpha=2/255, steps=10,
                  scale=10, std=0.1, random_start=True):
   
         self.eps = eps
@@ -39,38 +41,42 @@ class Jitter():
         self.random_start = random_start
         self.scale = scale
         self.std = std
-        self.model = model
-        self.device = next(model.parameters()).device
+        self.classifier = classifier
+        self.device = classifier.device
 
-    def generate(self, x : np.ndarray, y : np.ndarray):
+    def generate(self, x : np.ndarray, y : Optional[np.ndarray] = None):
         r"""
         Overridden.
         """
-        images = torch.from_numpy(x)
-        labels = torch.from_numpy(y)
+        if y is None:
+            y = self.classifier.predict(x)
+            
+        if len(y.shape) == 2:
+            y = self.classifier.reduce_labels(y)
 
-        images = images.clone().detach().to(self.device)
-        labels = labels.clone().detach().to(self.device)
+        y = torch.from_numpy(y).to(self.device)
 
-        # if self.targeted:
-        #     target_labels = self.get_target_label(images, labels)
+        x = torch.from_numpy(x).to(self.device)
 
         loss = nn.MSELoss(reduction='none')
 
-        adv_images = images.clone().detach()
+        adv_x = x.clone().detach()
 
         if self.random_start:
             # Starting at a uniformly random point
-            adv_images = adv_images + \
-                torch.empty_like(adv_images).uniform_(-self.eps, self.eps)
-            adv_images = torch.clamp(adv_images, min=0, max=1).detach()
+            adv_x = adv_x + \
+                torch.empty_like(adv_x).uniform_(-self.eps, self.eps)
+            adv_x = torch.clamp(adv_x, min=0, max=1).detach()
 
         for _ in range(self.steps):
-            adv_images.requires_grad = True
-            logits = self.model(adv_images)
+            adv_x.requires_grad = True
 
+            logits = self.classifier._model(adv_x)[-1]
+            
             _, pre = torch.max(logits, dim=1)
-            wrong = (pre != labels)
+            # outputs = self.classifier._model(adv_x)[-1]
+            # pre = self.classifier.reduce_labels(outputs)
+            wrong = (pre != y)
 
             norm_z = torch.norm(logits, p=float('inf'), dim=1, keepdim=True)
             hat_z = nn.Softmax(dim=1)(self.scale*logits/norm_z)
@@ -84,21 +90,22 @@ class Jitter():
             #         target_labels, num_classes=logits.shape[-1]).float()
             #     cost = -loss(hat_z, target_Y).mean(dim=1)
             # else:
-            Y = F.one_hot(labels.long(), num_classes=logits.shape[-1]).float()
+            Y = F.one_hot(y, num_classes=logits.shape[-1]).float()
             cost = loss(hat_z, Y).mean(dim=1)
 
-            norm_r = torch.norm((adv_images - images), p=float('inf'), dim=[1, 2, 3])  # nopep8
+            norm_r = torch.norm((adv_x - x), p=float('inf'), dim=[1, 2, 3])  # nopep8
             nonzero_r = (norm_r != 0)
             cost[wrong*nonzero_r] /= norm_r[wrong*nonzero_r]
 
             cost = cost.mean()
 
             # Update adversarial images
-            grad = torch.autograd.grad(cost, adv_images,
+            grad = torch.autograd.grad(cost, adv_x,
                                        retain_graph=False, create_graph=False)[0]
 
-            adv_images = adv_images.detach() + self.alpha*grad.sign()
-            delta = torch.clamp(adv_images-images, min=-self.eps, max=self.eps)  # nopep8
-            adv_images = torch.clamp(images + delta, min=0, max=1).detach()
+            adv_x = adv_x.detach() + self.alpha*grad.sign()
+            delta = torch.clamp(adv_x-x, min=-self.eps, max=self.eps)  # nopep8
+            adv_x = torch.clamp(x + delta, min=0, max=1).detach()
 
-        return adv_images
+        adv_x = adv_x.cpu().numpy()
+        return adv_x

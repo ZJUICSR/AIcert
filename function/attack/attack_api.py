@@ -6,7 +6,7 @@ import numpy as np
 from .attacks.evasion import FastGradientMethod, ProjectedGradientDescent, BasicIterativeMethod, DeepFool, SaliencyMapMethod, UniversalPerturbation, AutoAttack, GDUAP, CarliniWagner
 from .attacks.evasion import PixelAttack, SimBA, ZooAttack, SquareAttack
 from .attacks.evasion import BoundaryAttack, HopSkipJump, GeoDA, Fastdrop
-from .attacks.torchattack import DIFGSM, FAB
+from .attacks.torchattack import *
 # 后门攻击接口
 from .attacks.poisoning import PoisoningAttackBackdoor, PoisoningAttackCleanLabelBackdoor, FeatureCollisionAttack, PoisoningAttackAdversarialEmbedding
 # 工具函数
@@ -36,6 +36,7 @@ class EvasionAttacker():
         self.device = device
         self.nb_classes = nb_classes
         self.datanormalize = datanormalize
+        self.norm_param = ""
         if dataset == "cifar10":
             self.loaddataset = load_cifar10
         elif dataset == "mnist":
@@ -45,7 +46,7 @@ class EvasionAttacker():
         if sample_num > 0:
             self.input_shape, (self.x_select, self.y_select), _, _, self.min_pixel_value, self.max_pixel_value = self.loaddataset(self.datasetpath, sample_num, normalize=self.datanormalize)
 
-    def generate(self, method: str="FastGradientMethod", save_num: int = 0, **kwargs) -> None:
+    def generate(self, method: str="FastGradientMethod", save_num: int = 1, **kwargs) -> None:
         # 模型加载
         self.model = self.modelnet.to(self.device)
         checkpoint = torch.load(self.modelpath)
@@ -85,6 +86,8 @@ class EvasionAttacker():
                     error = "{} is not the parameter of {}".format(key, method)
                     raise ValueError(error)
             else:
+                if key == "norm":
+                    self.norm_param = str(value)
                 setattr(self.attack, key, value)
         for key in self.attack.attack_params:
             try:
@@ -113,20 +116,21 @@ class EvasionAttacker():
         self.psra= compute_predict_accuracy(adv_predictions, real_lables)
         # 计算真正的攻击成功率，将本来分类错误的样本排除在外
         self.coverrate, self.asr  = compute_attack_success(real_lables, clean_predictions, adv_predictions)
-        self.save_examples(save_num, real_lables, cln_examples, clean_predictions, adv_examples, adv_predictions, kwargs["save_path"])
-        return adv_examples
+        piclist = self.save_examples(save_num, real_lables, cln_examples, clean_predictions, adv_examples, adv_predictions, kwargs["save_path"])
+        return adv_examples, piclist
     
     def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, clean_prediction: np.ndarray, adv_example: np.ndarray, adv_prediction: np.ndarray, path:str="./results/"):
         
-        path = os.path.join(path, self.method)
+        path = os.path.join(path, self.method+self.norm_param)
+        print("************path:",path)
         try:
-            os.makedirs(os.path.join(path,self.method))
+            os.makedirs(path)
         except Exception as e:
-            shutil.rmtree(os.path.join(path,self.method))
-            os.makedirs(os.path.join(path,self.method))
-
+            shutil.rmtree(path)
+            os.makedirs(path)
+        piclist = []
         if save_num <= 0:
-            return
+            return piclist
         else:
             l = np.argmax(label,1)
             s = np.argmax(clean_prediction,1)
@@ -143,16 +147,20 @@ class EvasionAttacker():
                     tmpc = clean_example[random_index[i]].transpose(1,2,0)
                     tmpa = adv_example[random_index[i]].transpose(1,2,0)
                 clean = Image.fromarray(np.uint8(255*tmpc))
-                clean.save(os.path.join(path, "index{}_clean_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]])))
+                cleanname = os.path.join(path, "index{}_clean_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]]))
+                clean.save(cleanname)
                 adv = Image.fromarray(np.uint8(255*tmpa))
-                adv.save(os.path.join(path, "index{}_adv_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]])))
+                advname = os.path.join(path, "index{}_adv_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]]))
+                adv.save(advname)
                 per = np.uint8(255*tmpc) - np.uint8(255*tmpa)
                 per = per + np.abs(np.min(per))
                 per = Image.fromarray(np.uint8(255*per))
-                per.save(os.path.join(path, "index{}_per_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]])))
+                pername = os.path.join(path, "index{}_per_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]])) 
+                per.save(pername)
+                piclist = [cleanname,advname,pername]
                 if i >= save_num - 1:
                     break
-
+        return piclist
     def print_res(self) -> None:
         print("Before {} attack, the accuracy on benign test examples: {}%".format(self.method, self.psrb* 100))
         print("After {} attack, the accuracy on adversarial test examples: {}%".format(self.method, self.psra*100))
@@ -172,6 +180,7 @@ class BackdoorAttacker():
         self.device = device
         self.nb_classes = nb_classes
         self.datanormalize = datanormalize
+        self.norm_param = ""
         if dataset == "cifar10":
             self.loaddataset = load_cifar10
         elif dataset == "mnist":
@@ -221,7 +230,7 @@ class BackdoorAttacker():
         return self.accuracy, self.accuracyonbm, self.attack_success_rate
 
     def save_model(self, path:str="./output/cache/", desc:str="backdoor_model", epoch:int=0):
-        path = os.path.join(path, self.method, "backdoor_model")
+        path = os.path.join(path, self.method)
         if not os.path.exists(path):
             try:
                 os.makedirs(path)
@@ -234,7 +243,7 @@ class BackdoorAttacker():
         torch.save(self.classifier.model.state_dict(), path)
 
     def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, poisoned_example: np.ndarray, path:str="./results/"):
-        path = os.path.join(path, self.method)
+        path = os.path.join(path, self.method+self.norm_param)
         try:
             os.makedirs(path)
         except Exception as e:
@@ -342,6 +351,8 @@ class BackdoorAttacker():
                 error = "{} is not the parameter of {}".format(key, self.method)
                 raise ValueError(error)
             else:
+                if key == "norm":
+                    self.norm_param = str(value)
                 setattr(self.attack, key, value)
         for key in self.attack.attack_params:
             try:
