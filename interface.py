@@ -381,7 +381,7 @@ def run_modelmeasure(tid,AAtid,dataset, modelname, naturemethod, natureargs, adv
     """
     logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = modelmeasure.run_modelmeasure(dataset.upper(), modelname.lower(), naturemethod.lower(), natureargs, advmethod.lower(), advargs, measuremethod, osp.join(ROOT,"output", tid, AAtid), logging)  
+    res = modelmeasure.run_modelmeasure(dataset.upper(), modelname.lower(), naturemethod, float(natureargs), advmethod.lower(), float(advargs), measuremethod, osp.join(ROOT,"output", tid, AAtid), logging)  
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
