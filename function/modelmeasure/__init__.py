@@ -26,7 +26,7 @@ def run_modelmeasure(dataset, model, nature, nature_arg, adversarial, adversaria
         "out_path": out_path
     }
     logging.info("模型安全度量开始......")
-    res = run(params)
+    res = run(params, logging)
     logging.info("模型安全度量结束......")
     return res
 

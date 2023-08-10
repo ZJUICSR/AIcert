@@ -593,8 +593,9 @@ def generalization_metric(model,device,dataloader,mapping=None,BATCH_SIZE=128):
 
 
 
-def run(params):
+def run(params, logging=None):
     BATCH_SIZE = 32
+    logging.info("模型加载中......")
     VGG16 = torchvision.models.vgg16(pretrained=True)
     resnet18 = models.resnet18(pretrained=True)
     resnet50 = models.wide_resnet50_2(pretrained=True)
@@ -607,7 +608,9 @@ def run(params):
         'alexnet':alexnet,
         'inception':inception
     }
+    
     model = model_dict[params["model"]]
+    logging.info("模型加载完成......")
     transform = transforms.Compose([
                     transforms.RandomResizedCrop(224),
                     transforms.ToTensor()
@@ -624,11 +627,17 @@ def run(params):
 
     for i in params["measuremthod"]:
         if i == "safety":
+            logging.info("模型安全性度量中......")
             output_dict["safety"] = safety_metric(params["adversarial"],model,params["device"],test_loader,params["adversarial_arg"])
+            logging.info("模型安全性度量完成......")
         elif i == "robustness":
+            logging.info("模型鲁棒性度量中......")
             output_dict["robustness"] = robustness_metric(params["nature"],model,params["device"],test_loader,params["nature_arg"])
+            logging.info("模型鲁棒性度量完成......")
         elif i == "generalization":
+            logging.info("模型泛化性度量中......")
             output_dict["generalization"] = generalization_metric(model,params["device"],generalize_loader)
+            logging.info("模型泛化性度量完成......")
     output_dict["result"] = str(osp.join(params["out_path"],'sample.png'))
 
     return output_dict
