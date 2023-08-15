@@ -49,7 +49,7 @@ def explain_lime_image(img, net, device, dataset):
 
 
 def lime_image_ex(img, model, model_name, dataset, device, root, save_path):
-    class_list = get_class_list(dataset, root)
+    
     if dataset == "mnist":
         img = img.convert("L")
     x = load_image(device, img, dataset)

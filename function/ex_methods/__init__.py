@@ -252,6 +252,7 @@ def layer_explain(model, model_name, nor_loader, adv_loader, dataset, save_path,
             t_list = []
             for nor_layer, adv_layer in zip(nor_imgs,adv_imgs):    
                 kendall_value, _ = kendalltau(np.array(nor_layer,dtype="float64"),np.array(adv_layer,dtype="float64"))
+                kendall_value = round(kendall_value, 4)
                 t_list.append(kendall_value)
             all_result["value"][adv_method].update({
                 f"img_{index}": t_list
@@ -275,6 +276,7 @@ def get_kendalltau(nor_dict, adv_dict, save_path):
             for nor_ex_img, adv_ex_img in zip(nor_ex, adv_ex):
                 value, _ = kendalltau(np.array(nor_ex_img, dtype="float"), np.array(
                     adv_ex_img, dtype="float"))
+                value = round(value,4)
                 tmp.append(value)
             values[f"{method}"] = tmp
         result[f"{adv_method}"] = values

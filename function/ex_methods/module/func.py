@@ -164,7 +164,7 @@ def get_target_num(dataset):
         return 10
 
 '''将正则化后的图片（tensor）做逆变换成图片'''
-def recreate_image(im_as_var):
+def recreate_image(im_as_var, dataset="imagenet"):
     """
         Recreates images from a torch variable, sort of reverse preprocessing
     Args:
@@ -172,25 +172,24 @@ def recreate_image(im_as_var):
     returns:
         recreated_im (numpy arr): Recreated image in array
     """
-    # reverse_mean = []
-    # reverse_std = []
-    # if dataset == "cifar10":
-    #     reverse_mean = [-0.43768206, -0.44376972, -0.47280434]
-    #     reverse_std = [1 / 0.19803014, 1 / 0.20101564, 1 / 0.19703615]
-    # elif dataset == "mnist":
-    #     reverse_mean = [(-0.1307)]
-    #     reverse_std = [(1 / 0.3081)]
-    # elif dataset == "imagenet":
-    #     reverse_mean = [-0.485, -0.456, -0.406]
-    #     reverse_std = [1 / 0.229, 1 / 0.224, 1 / 0.225]
+    reverse_mean = []
+    reverse_std = []
+    if dataset == "cifar10":
+        reverse_mean = [-0.485, -0.456, -0.406]
+        reverse_std = [1 / 0.229, 1 / 0.224, 1 / 0.225]
+    elif dataset == "mnist":
+        reverse_mean = [(-0.1307)]
+        reverse_std = [(1 / 0.3081)]
+    elif dataset == "imagenet":
+        reverse_mean = [-0.485, -0.456, -0.406]
+        reverse_std = [1 / 0.229, 1 / 0.224, 1 / 0.225]
     recreated_im = copy.copy(im_as_var.data.cpu().numpy())
-    # for c in range(3):
-    #     recreated_im[c] /= reverse_std[c]
-    #     recreated_im[c] -= reverse_mean[c]
-    # recreated_im[recreated_im > 1] = 1
-    # recreated_im[recreated_im < 0] = 0
+    for c in range(3):
+        recreated_im[c] /= reverse_std[c]
+        recreated_im[c] -= reverse_mean[c]
+    recreated_im[recreated_im > 1] = 1
+    recreated_im[recreated_im < 0] = 0
     recreated_im = np.round(recreated_im * 255)
-
     recreated_im = np.uint8(recreated_im).transpose(1, 2, 0)
     return recreated_im
 
@@ -423,7 +422,7 @@ def grad_visualize(R_grad, image):
 
 import logging
 from logging import handlers
-
+from logging.handlers import RotatingFileHandler
 class Logger:
     level_relations = {
         'debug':logging.DEBUG,
@@ -432,31 +431,44 @@ class Logger:
         'error':logging.ERROR,
         'crit':logging.CRITICAL
     }
-    def __init__(self,filename,
-                 level='info',
-                 when='D',
-                 backCount=3,
-                 fmt='%(asctime)s [%(levelname)s] %(message)s'
-                 #fmt='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s'
-                 ):
-        self.logger = logging.getLogger(filename)
-        format_str = logging.Formatter(fmt)#设置日志格式
-        self.logger.setLevel(self.level_relations.get(level))#设置日志级别
-        sh = logging.StreamHandler()#往屏幕上输出
-        sh.setFormatter(format_str) #设置屏幕上显示的格式
-        th = handlers.TimedRotatingFileHandler(filename=filename, when=when, backupCount=backCount, encoding='utf-8')
-        #实例化TimedRotatingFileHandler
-        #interval是时间间隔，backupCount是备份文件的个数，如果超过这个个数，就会自动删除，when是间隔的时间单位，单位有以下几种：
-        # S 秒
-        # M 分
-        # H 小时、
-        # D 天、
-        # W 每星期（interval==0时代表星期一）
-        # midnight 每天凌晨
-        th.setFormatter(format_str)#设置文件里写入的格式
-        self.logger.addHandler(sh) #把对象加到logger里
-        self.logger.addHandler(th)
+    def __init__(self):
+        self.__loggers = {}
+    
+    def add_logger(self, stid,
+        filename,
+        level='info',
+        when='D',
+        backCount=3,
+        # fmt='%(asctime)s [%(levelname)s] %(filename)-12s %(funcName)-24s Line: %(lineno)-6s Msg: %(message)s'
+        fmt='%(asctime)s [%(levelname)s]  Msg: %(message)s'):
+        if stid not in self.__loggers.keys():
+            logger = logging.getLogger(stid)
+            format_str = logging.Formatter(fmt)#设置日志格式
+            sh = logging.StreamHandler()#往屏幕上输出
+            sh.setFormatter(format_str) #设置屏幕上显示的格式
+            th = handlers.TimedRotatingFileHandler(filename=filename, when=when, backupCount=backCount, encoding='utf-8')
+            th.setFormatter(format_str)#设置文件里写入的格式
+            logger.setLevel(self.level_relations.get(level))#设置日志级别
+            logger.addHandler(sh)
+            logger.addHandler(th)
+            self.__loggers.update({stid:logger})
+        else:
+            logger = self.__loggers[stid]
+        return logger
+    
+    def get_sub_logger(self, stid):
+        if stid not in self.__loggers.keys():
+            return -1
+        return self.__loggers[stid]
+    
+    def del_logger(self, stid):
+        del self.__loggers[stid]
+        return 1
+        
 
-    def info(self, msg):
-        return self.logger.info(msg)
+    def info(self, stid, msg):
+        return self.__loggers[stid].info(msg)
+        # return self.logger.info(msg)
+
+
 
