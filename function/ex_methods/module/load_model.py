@@ -5,6 +5,7 @@ from .model_Lenet import lenet
 from .train_model import Train
 
 import torch
+import torchvision.models as models
 import os.path as osp
 
 def load_model(model_name, dataset, device, root, reference_model, logging, pretrained=True, attribution=True):
@@ -87,4 +88,22 @@ def load_model(model_name, dataset, device, root, reference_model, logging, pret
             logging.info("加载到缓存区中的{:s}数据集上训练的{:s}模型".format(dataset, model_name))
             model.load_state_dict(torch.load(path))
 
+    return model
+
+def load_torch_model(model_name):
+    model = None
+    if model_name == "vgg16":
+        model = models.vgg16(pretrained=True)
+    elif model_name == "resnet50":
+        model = models.resnet50(pretrained=True)
+    elif model_name == "densenet121":
+        model = models.densenet121(pretrained=True)
+    elif model_name == "mobilenet":
+        model = models.mobilenet_v2(pretrained=True)
+    elif model_name == "alexnet":
+        model = models.alexnet(pretrained=True)
+    elif model_name == "inception":
+        model = models.inception_v3(pretrained=True)
+    elif model_name == "efficientnet":
+        model = models.efficientnet_b0(pretrained=True)
     return model

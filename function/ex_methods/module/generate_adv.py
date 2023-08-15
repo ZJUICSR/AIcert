@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 from torch.utils.data import TensorDataset
 import torchattacks as attacks
-from function.ex_methods.module.func import get_loader, get_normalize_para
+from function.ex_methods.module.func import get_loader, get_normalize_para, recreate_image
 import os.path as osp
 import os
 import json
@@ -55,15 +55,14 @@ def get_accuracy(dataloader,model,device,mean,std):
         num += num_correct
     return num/len(dataloader.dataset)
 
-def sample_untargeted_attack(dataset, method, model, img, label, device, root):
+def sample_untargeted_attack(dataset, method, model, img_x, label, device, root):
     with open(osp.join(root, "function/ex_methods/cache/adv_params.json")) as fp:
         def_params = json.load(fp)
     attack = get_attack(dataset, method, model, def_params)
-    mean, std = get_normalize_para(dataset)
-    attack.set_normalization_used(mean=mean, std=std)
-    img = img.to(device)
+    img_x = img_x.to(device)
     label = label.to(device)
-    adv_img = attack(img, label)
+    adv_img_x = attack(img_x, label)
+    adv_img = recreate_image(adv_img_x, dataset)
     return adv_img
 
 def targeted_attack(dataset, method, model, data_loader, targeted_label, device, params, mean, std):

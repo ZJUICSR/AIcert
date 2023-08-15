@@ -8,9 +8,9 @@ import tqdm
 def adjust_learning_rate(optimizer, epoch, lr_):
     """decrease the learning rate"""
     lr = lr_
-    if epoch >= 60:
+    if epoch >= 50:
         lr = lr * 0.1
-    if epoch >= 100:
+    if epoch >= 75:
         lr = lr * 0.01
 
     for param_group in optimizer.param_groups:
@@ -34,7 +34,7 @@ def Train(model_name, model, dataset, device):
         transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms.RandomHorizontalFlip(),transforms.ToTensor(),transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])])
         train_dataset = CIFAR10('./dataset/data/CIFAR10', train=True, transform=transform, download=True)
         test_dataset = CIFAR10('./dataset/data/CIFAR10', train=False, transform=transform, download=False)
-        num_epoches = 150
+        num_epoches = 80
 
     #datalodar用于加载训练数据
     train_loader = DataLoader(train_dataset, batch_size=train_batchsize, shuffle=True,num_workers=2)
