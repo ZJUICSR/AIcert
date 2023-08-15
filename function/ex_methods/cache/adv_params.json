@@ -35,8 +35,7 @@
         "EOTPGD": {
             "eps": 0.3,
             "alpha": 0.00784313725490196,
-            "steps": 40,
-            "sampling": 10
+            "steps": 40
         },
         "MultiAttack": {
             "attacks": []
@@ -180,8 +179,7 @@
         "EOTPGD": {
             "eps": 0.03137254901960784,
             "alpha": 0.00784313725490196,
-            "steps": 40,
-            "sampling": 10
+            "steps": 40
         },
         "MultiAttack": {
             "attacks": []
@@ -326,8 +324,7 @@
         "EOTPGD": {
             "eps": 0.2,
             "alpha": 0.00784313725490196,
-            "steps": 40,
-            "sampling": 10
+            "steps": 40
         },
         "MultiAttack": {
             "attacks": []

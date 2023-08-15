@@ -8,6 +8,7 @@ import sklearn.metrics
 from sklearn.datasets import fetch_20newsgroups
 newsgroups_train = fetch_20newsgroups(subset='train')
 newsgroups_test = fetch_20newsgroups(subset='test')
+
 # making class names shorter
 class_names = [x.split('.')[-1] if 'misc' not in x else '.'.join(x.split('.')[-2:]) for x in newsgroups_train.target_names]
 class_names[3] = 'pc.hardware'
