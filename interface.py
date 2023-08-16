@@ -23,9 +23,9 @@ from function.attack import run_adversarial, run_backdoor
 import cv2
 from function.fairness import run_dataset_debias, run_model_debias
 from function import concolic, env_test, deepsst, dataclean
-from function.ex_methods.module.func import get_loader, Logger, recreate_image
+from function.ex_methods.module.func import get_loader, Logger, recreate_image, get_batchsize
 from function.ex_methods.module.generate_adv import get_adv_loader, sample_untargeted_attack
-from function.ex_methods.module.load_model import load_model
+from function.ex_methods.module.load_model import load_model as load_model_ex
 from function.ex_methods import attribution_maps, layer_explain, dim_reduciton_visualize
 from function.ex_methods.module.model_Lenet import lenet
 from function.ex_methods.lime import lime_image_ex
@@ -37,7 +37,6 @@ import matplotlib.pyplot as plt
 from function.formal_verify.veritex import Net as reachNet
 from function.formal_verify.veritex.networks.cnn import Method as ReachMethod
 from function.formal_verify.veritex.utils.plot_poly import plot_polytope2d
-
 from function.defense.jpeg import Jpeg
 from function.defense.twis import Twis
 from function.defense.region_based import RegionBased
@@ -57,36 +56,37 @@ ROOT = osp.dirname(osp.abspath(__file__))
 def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList):
     """模型公平性提升
     :params tid:主任务ID
-    :params AAtid:子任务id
+    :params stid:子任务id
     :params dataname:数据集名称
     :params modelname:模型名称
     :params algorithmname:优化算法名称
     """
-    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    logging = IOtool.get_logger(stid)
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
     res = run_model_debias(dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList, logging=logging)
     res["stop"] = 1
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
-    taskinfo[tid]["function"][stid]["state"]=2
-    taskinfo[tid]["state"]=2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    
+    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_task_success_v2(tid=tid)
 
 
 def run_data_debias_api(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList):
     """数据集公平性提升
     :params tid:主任务ID
-    :params AAtid:子任务id
+    :params stid:子任务id
     :params dataname:数据集名称
     :params datamethod:优化算法名称
     """
-    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    logging = IOtool.get_logger(stid)
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
     res = run_dataset_debias(dataname, datamethod, senAttrList, tarAttrList, staAttrList, logging=logging)
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, stid+"_result.json"))
-    taskinfo[tid]["function"][stid]["state"]=2
-    taskinfo[tid]["state"]=2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_task_success_v2(tid=tid)
 
 def get_badnets_dataloader(dataloader):
     '''
@@ -181,8 +181,9 @@ def get_model_loader(dataset, modelparam, logging, train_loader=None, test_loade
     return model, trainer, summary
 
 def run_verify(tid, AAtid, param):
-    logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    logging = IOtool.get_logger(AAtid)
+    IOtool.change_subtask_state(tid, AAtid, 1)
+    IOtool.change_task_state(tid, 1)
     N = param['size']
     device = 'cpu'
     verify = vision_verify
@@ -221,9 +222,8 @@ def run_verify(tid, AAtid, param):
     result = verify(input_param)
     result["stop"] = 1
     IOtool.write_json(result,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
-    taskinfo[tid]["function"][AAtid]["state"]=2
-    taskinfo[tid]["state"]=2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_subtask_state(tid, AAtid, 2)
+    IOtool.change_task_success_v2(tid=tid)
 
 
 def run_concolic(tid, AAtid, dataname, modelname, norm, times):
@@ -234,14 +234,14 @@ def run_concolic(tid, AAtid, dataname, modelname, norm, times):
     :params modelname:模型名称
     :params norm:范数约束
     """
-    logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    logging = IOtool.get_logger(AAtid)
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
     res = concolic.run_concolic(dataname.lower(), modelname.lower(), norm.lower(), int(times), osp.join(ROOT,"output", tid, AAtid), logging)
     res["stop"]=1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
-    taskinfo[tid]["function"][AAtid]["state"]=2
-    taskinfo[tid]["state"]=2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_task_success_v2(tid=tid)
 
 def run_dataclean(tid, AAtid, dataname):
     """异常数据检测
@@ -250,12 +250,12 @@ def run_dataclean(tid, AAtid, dataname):
     :params dataname:数据集名称
     :output res:需保存到子任务json中的返回结果/路径
     """
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
     res = dataclean.run_dataclean(dataname)
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
-    taskinfo[tid]["function"][AAtid]["state"]=2
-    taskinfo[tid]["state"]=2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_task_success_v2(tid=tid)
 
 def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
     """系统环境分析
@@ -266,17 +266,17 @@ def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
     :params frameversion:框架版本
     :output res:需保存到子任务json中的返回结果/路径
     """
-    logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
-
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    logging = IOtool.get_logger(AAtid)
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
+    
     res = env_test.run_env_frame(matchmethod,frameworkname,frameversion, osp.join(ROOT,"output", tid, AAtid), logging)
     # res = concolic.run_concolic(dataname, modelname, norm)  
     res["detection_result"]=IOtool.load_json(res["env_test"]["detection_result"])
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
-    taskinfo[tid]["function"][AAtid]["state"]=2
-    taskinfo[tid]["state"]=2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_task_success_v2(tid=tid)
 
 def run_coverage(tid,AAtid,dataset,modelname):
     pass
@@ -291,14 +291,14 @@ def run_deepsst(tid,AAtid,dataset,modelname,pertube,m_dir):
     :params m_dir: 敏感度值文件位置
     :output res:需保存到子任务json中的返回结果/路径
     """
-    logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    logging = IOtool.get_logger(AAtid)
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
     res = deepsst.run_deepsst(dataset.lower(), modelname, float(pertube.strip("%"))/100, m_dir, osp.join(ROOT,"output", tid, AAtid), logging)
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
-    taskinfo[tid]["function"][AAtid]["state"]=2
-    taskinfo[tid]["state"]=2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_task_success_v2(tid=tid)
 
 
 def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
@@ -310,12 +310,11 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
     :params methods:list，对抗攻击方法
     :params inputParam:输入参数
     """
-    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
+    logging = IOtool.get_logger(stid)
     # 开始执行标记任务状态
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"]=1
-    taskinfo[tid]["state"]=1
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
+    inputParam['device'] = IOtool.get_device()
     modelpath = osp.join("./model/ckpt",dataname.upper() + "_" + model.lower()+".pth")
     device = torch.device(inputParam['device'])
     if (not osp.exists(modelpath)):
@@ -323,9 +322,7 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
             result={}
             result["stop"] = 1
             IOtool.write_json(result,osp.join(ROOT,"output", tid, stid+"_result.json"))
-            taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-            taskinfo[tid]["function"][stid]["state"] = 3
-            IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+            IOtool.change_subtask_state(tid, stid, 3)
             IOtool.change_task_success_v2(tid)
             return 0
     if not osp.exists(osp.join(ROOT,"output", tid, stid)):
@@ -342,11 +339,8 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
     logging.info("[执行对抗攻击]:对抗攻击执行完成，数据保存中")
     resultlist["stop"] = 1
     IOtool.write_json(resultlist,osp.join(ROOT,"output", tid, stid+"_result.json"))
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"] = 2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
-
 
 def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
     """后门攻击评估
@@ -358,20 +352,17 @@ def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
     :params inputParam:输入参数
     """
     # 开始执行标记任务状态
-    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"]=1
-    taskinfo[tid]["state"]=1
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    logging = IOtool.get_logger(stid)
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
+    inputParam['device'] = IOtool.get_device()
     modelpath = osp.join("./model/ckpt",dataname.upper() + "_" + model.lower()+".pth")
     if (not osp.exists(modelpath)):
             logging.info("[模型获取]:服务器上模型不存在")
             result={}
             result["stop"] = 1
             IOtool.write_json(result,osp.join(ROOT,"output", tid, stid+"_result.json"))
-            taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-            taskinfo[tid]["function"][stid]["state"] = 3
-            IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+            IOtool.change_subtask_state(tid, stid, 3)
             IOtool.change_task_success_v2(tid)
             return 0
     res = {}
@@ -388,12 +379,11 @@ def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
         logging.info("[执行后门攻击]:{:s}后门攻击运行结束，投毒率为{}时，攻击成功率为{}%".format(method, inputParam[method]["pp_poison"], res[method]["attack_success_rate"]*100))
     res["stop"] = 1
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"] = 2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    
+    IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
 
-def run_dim_reduct(tid, stid, datasetparam, modelparam, vis_methods, adv_methods, device):
+def run_dim_reduct(tid, stid, datasetparam, modelparam, vis_methods, adv_methods):
     """降维可视化
     :params tid:主任务ID
     :params stid:子任务id
@@ -403,10 +393,11 @@ def run_dim_reduct(tid, stid, datasetparam, modelparam, vis_methods, adv_methods
     :params adv_methods:list，对抗攻击方法
     :params device:GPU
     """
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"]=1
-    taskinfo[tid]["state"]=1
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    logging = IOtool.get_logger(stid)
+    device = IOtool.get_device()
     params = {
         "dataset": datasetparam,
         "model": modelparam,
@@ -415,29 +406,25 @@ def run_dim_reduct(tid, stid, datasetparam, modelparam, vis_methods, adv_methods
         "adv_methods":{"methods":adv_methods},
         "root":ROOT
     }
-    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
-
     root = ROOT
     dataset = datasetparam["name"]
-    nor_data = torch.load(osp.join(root, f"dataset/data/{dataset}_NOR.pt"))
-    nor_loader = get_loader(nor_data, batchsize=16)
-    logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
-
     model_name = modelparam["name"]
-    if modelparam["ckpt"] != "None":
-        model = torch.load(modelparam["ckpt"])
-    else:
-        modelparam["ckpt"] = None
-        model = modelparam["ckpt"]
-    logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
-    net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
+
+    batchsize = get_batchsize(model_name,dataset)
+    nor_data = torch.load(osp.join(root, f"dataset/data/{dataset}_NOR.pt"))
+    nor_loader = get_loader(nor_data, batchsize=batchsize)
+    logging.info( "[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
+
+    model = modelparam["ckpt"]
+    logging.info( "[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
+    net = load_model_ex(model_name, dataset, device, root, reference_model=model, logging=logging)
     net = net.eval().to(device)
-    logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
+    logging.info( "[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
 
     adv_loader = {}
     for adv_method in adv_methods:
-        adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=16, logging=logging)
-    logging.info("[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
+        adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=batchsize, logging=logging)
+    logging.info( "[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
 
     save_path = osp.join(ROOT,"output", tid, stid)
     if not osp.exists(save_path):
@@ -446,14 +433,14 @@ def run_dim_reduct(tid, stid, datasetparam, modelparam, vis_methods, adv_methods
     for adv_method in adv_methods:
         temp = dim_reduciton_visualize(vis_methods, nor_loader, adv_loader[adv_method], net, model_name, dataset, device, save_path)
         res[adv_method] = temp
-
-    IOtool.write_json(res,osp.join(ROOT,"output", tid, stid+"_result.json"))
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"] = 2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        logging.info( "[数据分布降维解释]：{:s}对抗样本数据分布降维解释已完成".format(adv_method))
+    res["stop"] = 1
+    IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    print("interfase modify sub task state:",tid, stid)
+    IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
-
-def run_attrbution_analysis(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device):
+    
+def run_attrbution_analysis(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, use_layer_explain):
     """对抗攻击归因解释
     :params tid:主任务ID
     :params stid:子任务id
@@ -462,11 +449,13 @@ def run_attrbution_analysis(tid, stid, datasetparam, modelparam, ex_methods, adv
     :params ex_methods:list，攻击解释方法
     :params adv_methods:list，对抗攻击方法
     :params device:GPU
+    :params use_layer_explain: bool, 是否使用层间解释分析方法
     """
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"]=1
-    taskinfo[tid]["state"]=1
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    device = IOtool.get_device()
+    logging = IOtool.get_logger(stid)
     params = {
         "dataset": datasetparam,
         "model": modelparam,
@@ -477,101 +466,51 @@ def run_attrbution_analysis(tid, stid, datasetparam, modelparam, ex_methods, adv
         "root":ROOT,
         "stid":stid
     }
-    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
 
     root = ROOT
+    result = {}
+    img_num = 20
     dataset = datasetparam["name"]
+    model_name = modelparam["name"]
+
+    batchsize = get_batchsize(model_name, dataset)
     nor_data = torch.load(osp.join(root, f"dataset/data/{dataset}_NOR.pt"))
-    nor_loader = get_loader(nor_data, batchsize=16)
+    nor_loader = get_loader(nor_data, batchsize=batchsize)
     logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
 
-    model_name = modelparam["name"]
-    if modelparam["ckpt"] != "None":
-        model = torch.load(modelparam["ckpt"])
-    else:
-        modelparam["ckpt"] = None
-        model = modelparam["ckpt"]
-    logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
-    net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
+    # ckpt参数 直接存储模型object，不存储模型路径；可以直接带入load_model_ex函数中，该函数会自动根据输入作相应处理
+    model = modelparam["ckpt"]
+    logging.info( "[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
+    net = load_model_ex(model_name, dataset, device, root, reference_model=model, logging=logging)
     net = net.eval().to(device)
-    logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
+    logging.info( "[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
 
     adv_loader = {}
     for adv_method in adv_methods:
-        adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=16, logging=logging)
-    logging.info("[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
+        adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=batchsize, logging=logging)
+    logging.info( "[数据集获取]：获取{:s}对抗样本已完成".format(dataset))
 
     save_path = osp.join(ROOT,"output", tid, stid)
     if not osp.exists(save_path):
         os.mkdir(save_path)
+    
+    logging.info( "[注意力分布图计算]：选择了{:s}解释算法".format(", ".join(ex_methods)))
+    ex_images = attribution_maps(net, nor_loader, adv_loader, ex_methods, params, img_num, logging)
+    result.update({"adv_ex":ex_images})
 
-    logging.info("[注意力分布图计算]：选择了{:s}解释算法".format(", ".join(ex_methods)))
-    ex_images = attribution_maps(net, nor_loader, adv_loader, ex_methods, params, 20, logging)
-    IOtool.write_json(ex_images,osp.join(ROOT,"output", tid, stid+"_result.json"))
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"] = 2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-    IOtool.change_task_success_v2(tid)
-
-
-def run_layer_explain(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device):
-    """模型内部解释
-    :params tid:主任务ID
-    :params stid:子任务id
-    :params datasetparam:数据集参数
-    :params modelparam:模型参数
-    :params adv_methods:list，对抗攻击方法
-    :params device:GPU
-    """
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"]=1
-    taskinfo[tid]["state"]=1
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-    params = {
-        "dataset": datasetparam,
-        "model": modelparam,
-        "out_path": osp.join(ROOT,"output", tid),
-        "device": torch.device(device),
-        "adv_methods":{"methods":adv_methods},
-        "ex_methods":ex_methods,
-        "root":ROOT,
-        "stid":stid
-    }
-    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
-
-    root = ROOT
-    dataset = datasetparam["name"]
-    nor_data = torch.load(osp.join(root, f"dataset/data/{dataset}_NOR.pt"))
-    nor_loader = get_loader(nor_data, batchsize=16)
-    logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
-
-    model_name = modelparam["name"]
-    if modelparam["ckpt"] != "None":
-        model = torch.load(modelparam["ckpt"])
+    if use_layer_explain == True:
+        logging.info( "[已选择执行模型层间解释]：正在执行...")
+        layer_ex = layer_explain(net, model_name, nor_loader, adv_loader, dataset, params["out_path"], device, img_num, logging)
+        result.update({"layer_ex": layer_ex})
+        logging.info( "[已选择执行模型层间解释]：层间解释执行完成")
     else:
-        modelparam["ckpt"] = None
-        model = modelparam["ckpt"]
-    logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
-    net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
-    net = net.eval().to(device)
-    logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
-
-    adv_loader = {}
-    res = {}
-    for adv_method in adv_methods:
-        logging.info("[数据集获取]：获取{:s}对抗样本".format(adv_method))
-        adv_loader[adv_method] = get_adv_loader(net, nor_loader, adv_method, params, batchsize=16, logging=logging)
-
-        logging.info("[特征层可视化]:对{:s}模型逐层提取特征并进行可视化分析".format(model_name))
-        result = layer_explain(model_name, nor_loader, adv_loader[adv_method], params)
-        res[adv_method]=result
-
-        print(result)
-    IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"] = 2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        logging.info( "[未选择执行模型层间解释]：将不执行模型层间解释分析方法")
+    result["stop"] = 1
+    IOtool.write_json(result, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    print("interfase modify sub task state:",tid, stid)
+    IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
+  
 
 def run_lime(tid, stid, datasetparam, modelparam, adv_methods, device):
     """多模态解释
@@ -582,10 +521,8 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, device):
     :params adv_methods:list，对抗攻击方法
     :params device:GPU
     """
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"]=1
-    taskinfo[tid]["state"]=1
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
     params = {
         "dataset": datasetparam,
         "model": modelparam,
@@ -596,7 +533,7 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, device):
         "root":ROOT,
         "stid":stid
     }
-    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
+    logging = IOtool.get_logger(stid)
 
     root = ROOT
     dataset = datasetparam["name"]
@@ -606,7 +543,7 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, device):
     label = nor_data['y'][2]
     img = recreate_image(nor_img_x.squeeze())
     logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
-
+    
     model_name = modelparam["name"]
     if modelparam["ckpt"] != "None":
         model = torch.load(modelparam["ckpt"])
@@ -614,10 +551,10 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, device):
         modelparam["ckpt"] = None
         model = modelparam["ckpt"]
     logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
-    net = load_model(model_name, dataset, device, root, reference_model=model, logging=logging)
+    net = load_model_ex(model_name, dataset, device, root, reference_model=model, logging=logging)
     net = net.eval().to(device)
     logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
-
+    
     adv_loader = {}
     res = {}
     for adv_method in adv_methods:
@@ -629,13 +566,14 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, device):
         result = lime_image_ex(img, net, model_name, dataset, device, root, save_path)
 
         res[adv_method]=result
+    res["stop"] = 1
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"] = 2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
 
 def verify_img(tid, stid, net, dataset, eps, pic_path):
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
     b1=[]
     b2=[]
     model=''
@@ -658,14 +596,15 @@ def verify_img(tid, stid, net, dataset, eps, pic_path):
         categories.append(f'f_{i}')
     resp={'boundary1':b1,'boundary2':b2,'categories':categories,'predicted':predicted,
           'score_IBP':score_IBP,'score_CROWN':score_CROWN}
+    
     IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json"))
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"] = 2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
     return resp
 
 def knowledge_consistency(tid, stid, arch,dataset,img_path,layer):
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
     base=os.path.join(os.getcwd(),"model","ckpt")
     base_path=os.path.join(base,'knowledge_consistency_checkpoints')
     if arch=='vgg16_bn' and dataset=='mnist':
@@ -745,10 +684,23 @@ def knowledge_consistency(tid, stid, arch,dataset,img_path,layer):
     plt.imshow(delta[t], cmap='jet', norm=None, vmin=delta.min(), vmax=delta.max())
     plt.savefig(os.path.join(pic_dir,stid+f'_delta_{t}.png'),bbox_inches='tight')
     plt.close()
-    return torch.norm(delta, p=2).numpy().tolist(),len(target)
+    l2 = torch.norm(delta, p=2).numpy().tolist()
+    layers = len(target)
+    resp={'l2':l2,'input':f'static/imgs/tmp_imgs/{tid}/{stid}.png',
+                'output':f'static/imgs/tmp_imgs/{tid}/{stid}_output_{layer}.png',
+                'target':f'static/imgs/tmp_imgs/{tid}/{stid}_target_{layer}.png',
+                'delta':f'static/imgs/tmp_imgs/{tid}/{stid}_delta_{layer}.png',
+            }
+    resp["stop"] = 1
+    IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_task_success_v2(tid)
+    return resp,
 
 def reach(tid,stid,dataset,pic_path,label,target_label):
-    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
+    logging = IOtool.get_logger(stid)
     logging.info(f"The reachability task starts ，dateset: {dataset}")
     base=os.path.join(os.getcwd(),"model","ckpt")
     base_path=os.path.join(base,'reach_checkpoints')
@@ -801,7 +753,38 @@ def reach(tid,stid,dataset,pic_path,label,target_label):
     plt.close()
     logging.info(f"The reachable areas is drawn. The reachability verification is complete")
     resp={"path":os.path.join(pt_dir,stid+'.png')}
+    resp['input']=f'static/imgs/tmp_imgs/{tid}/{stid}.png'
+    resp["stop"] = 1
+    IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_task_success_v2(tid)
     return resp
+
+def run_detect(tid, stid, defense_methods, adv_dataset, adv_model, adv_method, adv_nums, adv_file_path):
+    logging = IOtool.get_logger(stid)
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
+    detect_rate_dict = {}
+    if "CARTL" in defense_methods:
+        # 调换顺序，将CARTL放在最后执行
+        defense_methods.remove("CARTL")
+        defense_methods.append("CARTL")
+    print("-----------defense_methods:",defense_methods)
+    for defense_method in defense_methods:
+        logging.info("开始执行防御任务{:s}".format(defense_method))
+        detect_rate, no_defense_accuracy = detect(adv_dataset, adv_model, adv_method, adv_nums, defense_method, adv_file_path,logging)
+        detect_rate_dict[defense_method] = round(detect_rate, 4)
+        logging.info("{:s}防御算法执行结束，对抗鲁棒性为：{:.3f}".format(defense_method,round(detect_rate, 4)))
+    no_defense_accuracy_list = no_defense_accuracy.tolist() if isinstance(no_defense_accuracy, np.ndarray) else no_defense_accuracy
+    response_data = {
+        "detect_rates": detect_rate_dict,
+        "no_defense_accuracy": no_defense_accuracy_list
+    }
+    response_data["stop"] = 1
+    IOtool.write_json(response_data, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_task_success_v2(tid)
+    return response_data
 
 def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_examples=None, logging=None):
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -893,16 +876,15 @@ def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_ex
         detector = Strip(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
 
     _, _, detect_rate, no_defense_accuracy = detector.detect()
+    
+    
     return detect_rate, no_defense_accuracy
 
 
 def run_side_api(trs_file, methods, tid, stid):
-
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"]=1
-    taskinfo[tid]["state"]=1
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
+    logging = IOtool.get_logger(stid)
     logging.info("开始执行侧信道分析")
     res={}
     for method in methods:
@@ -920,8 +902,7 @@ def run_side_api(trs_file, methods, tid, stid):
             pass
         logging.info("分析方法{:s}执行结束，耗时{:s}s".format(method,str(round(use_time,1))))
     logging.info("侧信道分析执行结束！")
+    res["stop"] = 1
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"] = 2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
