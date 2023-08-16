@@ -177,6 +177,7 @@ model
 # dataset data
 dataset
 
+<<<<<<< HEAD
 /dev.env
 output/task_info.json
 # 忽略所有子目录中的__pycache__目录
@@ -186,3 +187,6 @@ output/task_info.json
 *.jpeg
 
 function/side/CMake_Research3-bak/*
+=======
+/dev.env
+>>>>>>> 44e5eacc3b06d5b327a7e59a490107de34a78ca0
