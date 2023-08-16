@@ -12,13 +12,19 @@ from flask import current_app as abort
 from multiprocessing import Process
 from gol import Taskparam
 from function.fairness import run_model_evaluate
-from function.ex_methods.module.func import Logger
 from flask_cors import *
 import threading
 import hashlib,base64
 ROOT = os.getcwd()
+from concurrent.futures import ThreadPoolExecutor
+
+
+poollist = []
+#  {tid:{stid:feature}}
+task_list = {}
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
+
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(ROOT, 'static'), 'favicon.ico')
@@ -79,6 +85,21 @@ def ModelFairness():
         return render_template("ModelFairness.html")
     else:
         abort(403)
+
+@app.route('/ex/uploadModel', methods=['POST'])
+def ExUploadModel():
+    fileinfo = request.files.get("ex_upload_model")
+    filepath = "model/ckpt/ex_upload_model.pt"
+    if osp.exists(filepath):
+        os.remove(filepath)
+    fileinfo.save(filepath)
+    res={
+        "code":10000,
+        "msg":"success"
+    }
+    return jsonify(res)
+    # 
+    
 # ---------------模板：数据集公平性评估---------
 @app.route('/DataFairnessEvaluate', methods=['POST'])
 def DataFairnessEvaluate():
@@ -95,10 +116,9 @@ def DataFairnessEvaluate():
         # 生成子任务ID
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
-        # 获取任务列表
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    
         # 添加任务信息到taskinfo
-        taskinfo[tid]["function"].update({stid:{
+        value = {
             # 任务类型,注意任务类型不能重复，用于结果返回的key值索引
             "type":"date_evaluate",
             # 任务状态：0 未执行；1 正在执行；2 执行成功；3 执行失败
@@ -107,8 +127,10 @@ def DataFairnessEvaluate():
             "name":["date_evaluate"],
             # 数据集信息，呈现在结果界面，若干有选择模型还需增加模型字段：model
             "dataset":dataname,
-        }})
-        taskinfo[tid]["dataset"]=dataname
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", dataname)
+        
         try:
             senAttrList=json.loads(inputParam["senAttrList"])
             tarAttrList=json.loads(inputParam["tarAttrList"])
@@ -118,19 +140,20 @@ def DataFairnessEvaluate():
             tarAttrList=inputParam["tarAttrList"]
             staAttrList=inputParam["staAttrList"]
         
-        logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
+        logging = IOtool.get_logger(stid, tid)
         # 执行任务，运行时间超过3分钟的请使用多线程，参考DataFairnessDebias函数的执行部分
         from function.fairness import run_dataset_evaluate
-        res = run_dataset_evaluate(dataname, sensattrs=senAttrList, targetattrs=tarAttrList, staAttrList=staAttrList, logging=logging)
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(run_dataset_evaluate, dataname, sensattrs=senAttrList, targetattrs=tarAttrList, staAttrList=staAttrList, logging=logging)
+        IOtool.add_task_queue(tid, stid, t2, 300)
+        res = t2.result()
+        # res = run_dataset_evaluate(dataname, sensattrs=senAttrList, targetattrs=tarAttrList, staAttrList=staAttrList, logging=logging)
         # 执行完成，结果中的stop置为1，表示结束
         res["stop"] = 1
         # 保存结果
-        IOtool.write_json(res,osp.join(ROOT,"output", tid, stid+"_result.json"))
+        IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
         # 将taskinfo中的状态置为2 代表子任务结果执行成功，此步骤为每个子任务必要步骤，请勿省略
-        taskinfo[tid]["function"][stid]["state"]=2
-        # 任务信息写回任务文件
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        # 调用主任务状态修改函数，此步骤为每个子任务必要步骤，请勿省略
+        IOtool.change_subtask_state(tid, stid, 2)
         IOtool.change_task_success_v2(tid=tid)
         return jsonify(res)
     else:
@@ -152,16 +175,16 @@ def DataFairnessDebias():
         tid = inputParam["tid"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({stid:{
+        value = {
             "type":"data_debias",
             "state":0,
             "name":["data_debias"],
             "dataset":dataname,
             "datamethod":datamethod,
-        }})
-        taskinfo[tid]["dataset"]=dataname
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", dataname)
+        
         try:
             senAttrList=json.loads(inputParam["senAttrList"])
             tarAttrList=json.loads(inputParam["tarAttrList"])
@@ -171,9 +194,12 @@ def DataFairnessDebias():
             tarAttrList=inputParam["tarAttrList"]
             staAttrList=inputParam["staAttrList"]
         # 执行任务
-        t2 = threading.Thread(target=interface.run_data_debias_api,args=(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList))
-        t2.setDaemon(True)
-        t2.start()
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_data_debias_api, tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList)
+        IOtool.add_task_queue(tid, stid, t2, 300)
+        # t2 = threading.Thread(target=interface.run_data_debias_api,args=(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList))
+        # t2.setDaemon(True)
+        # t2.start()
         res = {
             "tid":tid,
             "stid":stid
@@ -198,18 +224,16 @@ def ModelFairnessEvaluate():
         modelname = inputParam["modelname"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({stid:{
+        value = {
             "type":"model_evaluate",
             "state":0,
             "name":["model_evaluate"],
             "dataset":dataname,
             "model":modelname,
-        }})
-        taskinfo[tid]["dataset"]=dataname
-        taskinfo[tid]["model"]=modelname
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", dataname)
+        IOtool.change_task_info(tid, "model", modelname)
         try:
             metrics = json.loads(inputParam["metrics"])
             senAttrList=json.loads(inputParam["senAttrList"])
@@ -220,14 +244,18 @@ def ModelFairnessEvaluate():
             senAttrList=inputParam["senAttrList"]
             tarAttrList=inputParam["tarAttrList"]
             staAttrList=inputParam["staAttrList"]
-        logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
-        res = run_model_evaluate(dataname, modelname, metrics, senAttrList, tarAttrList, staAttrList, logging=logging)
+        logging = IOtool.get_logger(stid, tid)
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(run_model_evaluate, dataname, modelname, metrics, senAttrList, tarAttrList, staAttrList, logging=logging)
+        IOtool.add_task_queue(tid, stid, t2, 300)
+        res = t2.result()
+        # res = run_model_evaluate(dataname, modelname, metrics, senAttrList, tarAttrList, staAttrList, logging=logging)
+        
         res["Consistency"] = float(res["Consistency"])
         res["stop"] = 1
         IOtool.write_json(res,osp.join(ROOT,"output", tid, stid+"_result.json"))
-        taskinfo[tid]["function"][stid]["state"]=2
-        taskinfo[tid]["state"]=2
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        IOtool.change_subtask_state(tid, stid, 2)
+        IOtool.change_task_success_v2(tid=tid)
         return jsonify(res)
     else:
         abort(403)
@@ -249,21 +277,21 @@ def ModelFairnessDebias():
         modelname = inputParam["modelname"]
         tid = inputParam["tid"]
         algorithmname = inputParam["algorithmname"]
-       
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({AAtid:{
+        
+        value = {
             "type":"model_debias",
             "state":0,
             "name":["model_debias"],
             "dataset":dataname,
             "model":modelname,
             "algorithmname":algorithmname
-        }})
-        taskinfo[tid]["dataset"]=dataname
-        taskinfo[tid]["model"]=modelname
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        }
+        IOtool.add_subtask_info(tid, AAtid, value)
+        IOtool.change_task_info(tid, "dataset", dataname)
+        IOtool.change_task_info(tid, "model", modelname)
+        
         try:
             metrics = json.loads(inputParam["metrics"])
             senAttrList=json.loads(inputParam["senAttrList"])
@@ -274,9 +302,12 @@ def ModelFairnessDebias():
             senAttrList=inputParam["senAttrList"]
             tarAttrList=inputParam["tarAttrList"]
             staAttrList=inputParam["staAttrList"]
-        t2 = threading.Thread(target=interface.run_model_debias_api,args=(tid, AAtid, dataname, modelname, algorithmname, metrics, senAttrList, tarAttrList, staAttrList))
-        t2.setDaemon(True)
-        t2.start()
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, senAttrList, tarAttrList, staAttrList)
+        IOtool.add_task_queue(tid, stid, t2, 300)
+        # t2 = threading.Thread(target=interface.run_model_debias_api,args=(tid, AAtid, dataname, modelname, algorithmname, metrics, senAttrList, tarAttrList, staAttrList))
+        # t2.setDaemon(True)
+        # t2.start()
         res = {
             "tid":tid,
             "AAtid":AAtid
@@ -302,7 +333,8 @@ def query_task():
         record = IOtool.atoi(request.form.get("record"))
     if request.form.get("count"):
         count = IOtool.atoi(request.form.get("count"))
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    
+    taskinfo = IOtool.get_task_info()
     
     start_num = 0
     end_num = 0
@@ -349,8 +381,9 @@ def query_single_task():
     Taskid:主任务id
     '''
     if request.method == "GET":
-        tid = request.args.get("Taskid")
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        inputdata = json.loads(request.data)
+        tid = inputdata["Taskid"]
+        taskinfo = IOtool.get_task_info()
         if tid not in taskinfo.keys():
             return jsonify({"code":1002,"msg":"fail,taskid not found!"})
         return jsonify({"code":1,"msg":"success","result":taskinfo[tid]})
@@ -386,13 +419,20 @@ def creat_task():
             file = open(osp.join(ROOT,"output","task_info.json"),"w")
             file.close()
             data = {}
-            IOtool.write_json(data,osp.join(ROOT,"output","task_info.json"))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid] = curinfo
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+            IOtool.reset_task_info(data)
+        
+        IOtool.add_task_info(tid, curinfo)
+        
         with open(osp.join(ROOT,"output","task_list.txt"),"a+") as fp:
             fp.write(tid)
             fp.write("\n")
+        
+        IOtool.add_pool(tid)
+        # if len(IOtool.query_task_queue()) == 0:
+        #     IOtool.task_queue_init(tid)
+        #     t2 = threading.Thread(target = IOtool.check_sub_task_threading)
+        #     t2.setDaemon(True)
+        #     t2.start()
         data = {"Taskid": tid}
         return jsonify(data)
 
@@ -407,11 +447,15 @@ def query_log():
     '''
     Log = {}
     stid_list = []
-    if not request.args.get("Taskid"):
+    tid = request.args.get("Taskid")
+    if not tid:
+        inputdata = json.loads(request.data)
+        tid = inputdata["Taskid"]
+    if not tid:
         body = {"code":1001,"msg":"fail,parameter error"}
         return jsonify(body)
-    tid = request.args.get("Taskid")
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+    taskinfo = IOtool.get_task_info()
+    
     stid_list =taskinfo[tid]["function"].keys()
     for stid in stid_list:
         if osp.exists(osp.join(ROOT, "output", tid, stid+"_log.txt")):
@@ -440,17 +484,13 @@ def delete_task():
             tasklist.append(line.strip())
     
     if tid not in tasklist:
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        del taskinfo[tid]
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        taskinfo = IOtool.del_task_info(tid)
         body = {"code":1002,"msg":"fail,task not found"}
         return jsonify(body)
     
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    del taskinfo[tid]
+    taskinfo = IOtool.del_task_info(tid)
+    
     tasklist.remove(tid)
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-
     with open(osp.join(ROOT,"output","task_list.txt"),"w+") as fp:
         for temp in tasklist:
             fp.write(temp)
@@ -537,16 +577,15 @@ def adv_attack():
         if advInputData["IsPACADetect"]:
             func.append("PACA")
             result["PACA"] = {}
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["dataset"]=data_name
-        taskinfo[tid]["model"]=model_name
-        taskinfo[tid]["function"].update({AAtid:{
+        value = {
             "type":"AdvAttack",
             "state":0,
             "name":func,
             "attackmethod":methods
-        }})
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", data_name)
+        IOtool.change_task_info(tid, "model", model_name)
         # IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
         # IOtool.write_json(result,osp.join(ROOT,"output",tid,AAtid+"_result.json"))
         taskparam = Taskparam(taskinfo[tid],attack_params,result)
@@ -573,15 +612,13 @@ def adv_attack():
         if advInputData["IsPACADetect"] != 1:
             del result["PACA"]
         
-        taskinfo[tid]["function"][AAtid]["state"]=1
-        taskinfo[tid]["state"]=1
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        time.sleep(60*len(methods))
+        IOtool.change_subtask_state(tid, stid, 1)
+        IOtool.change_task_state(tid, 1)
+        time.sleep(6*len(methods))
         result["stop"]=1
         IOtool.write_json(result,osp.join(ROOT,"output",tid,AAtid+"_result.json"))
-        taskinfo[tid]["function"][AAtid]["state"]=2
-        taskinfo[tid]["state"]=2
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        IOtool.change_subtask_state(tid, stid, 2)
+        IOtool.change_task_success_v2(tid=tid)
         return json.dumps({"code":1,"msg":"success","Taskid":tid,"AdvAttackid":AAtid})
     else:
         abort(403)
@@ -603,7 +640,6 @@ def get_result():
         # 使用postman获取参数
         try:
             inputdata = json.loads(request.data)
-            print(inputdata)
             tid = inputdata["Taskid"]
             stidlist = inputdata["sid"]
         except:
@@ -611,15 +647,15 @@ def get_result():
         # 从web上传下来的参数
         if request.args.get("Taskid") != None:
             tid = request.args.get("Taskid")
-        print("tid",tid)
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        
+        taskinfo = IOtool.get_task_info()
+        
         if stidlist== []:
             stidlist = taskinfo[tid]["function"].keys()
         # 如果能获取到子任务列表就使用获取，否则读取主任务下的所有子任务
         
         if request.args.get("stid") != None:
             stidlist = request.args.get("stid")
-        print(stidlist)
         result = {}
         for stid in stidlist:
             attack_type = taskinfo[tid]["function"][stid]["type"]
@@ -637,9 +673,9 @@ def get_result():
                 stopflag = 0
             elif  result[temp]["stop"] != 1:
                 stopflag = 0
-        print(result)
+        # print(result)
+        # print("stopflag", stopflag)
         return jsonify({"code":1,"msg":"success","result":result,"stop":stopflag})
-
 
 # ----------------- 课题1 对抗攻击评估 -----------------
 @app.route('/Attack/AdvAttack', methods=['POST'])
@@ -657,7 +693,7 @@ def AdvAttack():
         print(request.data)
         inputParam = json.loads(request.data)
         tid = inputParam["Taskid"]
-        inputParam["device"] = "cuda:0"
+        # inputParam["device"] = "cuda:0"
         dataname = inputParam["Dataset"]
         model = inputParam["Model"]
         try:
@@ -666,23 +702,25 @@ def AdvAttack():
             adv_method = inputParam["Method"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({stid:{
+        value = {
             "type":"adv_attack",
             "state":0,
             "name":["adv_attack"],
             "dataset":dataname,
             "method":adv_method,
             "model":model,
-        }})
-        taskinfo[tid]["dataset"] = dataname
-        taskinfo[tid]["model"] = model
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", dataname)
+        IOtool.change_task_info(tid, "model", model)
         # 执行任务
-        
-        t2 = threading.Thread(target=interface.run_adv_attack,args=(tid, stid, dataname, model, adv_method, inputParam))
-        t2.setDaemon(True)
-        t2.start()
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_adv_attack, tid, stid, dataname, model, adv_method, inputParam)
+        IOtool.add_task_queue(tid, stid, t2, 300)
+         
+        # t2 = threading.Thread(target=interface.run_adv_attack,args=(tid, stid, dataname, model, adv_method, inputParam))
+        # t2.setDaemon(True)
+        # t2.start()
         res = {
             "tid":tid,
             "stid":stid
@@ -707,7 +745,7 @@ def BackdoorAttack():
         inputParam = json.loads(request.data)
         print(request.data)
         tid = inputParam["Taskid"]
-        inputParam["device"] = "cuda:0"
+        # inputParam["device"] = "cuda:0"
         dataname = inputParam["Dataset"]
         model = inputParam["Model"]
         try:
@@ -716,23 +754,25 @@ def BackdoorAttack():
             adv_method = inputParam["Method"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({stid:{
+        
+        value = {
             "type":"backdoor_attack",
             "state":0,
             "name":["adv_attack"],
             "dataset":dataname,
             "method":adv_method,
             "model":model,
-        }})
-        taskinfo[tid]["dataset"] = dataname
-        taskinfo[tid]["model"] = model
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", dataname)
+        IOtool.change_task_info(tid, "model", model)
         # 执行任务
-        
-        t2 = threading.Thread(target=interface.run_backdoor_attack,args=(tid, stid, dataname, model, adv_method, inputParam))
-        t2.setDaemon(True)
-        t2.start()
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_backdoor_attack, tid, stid, dataname, model, adv_method, inputParam)
+        IOtool.add_task_queue(tid, stid, t2, 7200*len(adv_method))
+        # t2 = threading.Thread(target=interface.run_backdoor_attack,args=(tid, stid, dataname, model, adv_method, inputParam))
+        # t2.setDaemon(True)
+        # t2.start()
         res = {
             "code":1,
             "msg":"success",
@@ -757,33 +797,37 @@ def AttackDimReduciton():
     global LiRPA_LOGS
     if (request.method == "POST"):
         inputParam = json.loads(request.data)
-        print(request.data)
         tid = inputParam["Taskid"]
         datasetparam = inputParam["DatasetParam"]
         modelparam = inputParam["ModelParam"]
         adv_methods = inputParam["AdvMethods"]
         vis_methods = inputParam["VisMethods"]
-        device = "cuda:0"
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({stid:{
+        value = {
             "type":"attack_dim_reduciton",
             "state":0,
             "name":["adv_attack"],
             "dataset":datasetparam["name"],
             "method":adv_methods,
             "model":modelparam["name"],
-        }})
-        taskinfo[tid]["dataset"] = datasetparam["name"]
-        taskinfo[tid]["model"] = modelparam["name"]
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+            "vis_method":vis_methods
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", datasetparam["name"])
+        IOtool.change_task_info(tid, "model", modelparam["name"])
         # 执行任务
         datasetparam["name"] = datasetparam["name"].lower()
         modelparam["name"] = modelparam["name"].lower()
-        t2 = threading.Thread(target=interface.run_dim_reduct,args=(tid, stid, datasetparam, modelparam, vis_methods, adv_methods, device))
-        t2.setDaemon(True)
-        t2.start()
+        pool = IOtool.get_pool(tid)
+        
+        t2 = pool.submit(interface.run_dim_reduct, tid, stid, datasetparam, modelparam, vis_methods, adv_methods)
+        
+        IOtool.add_task_queue(tid, stid, t2, 700)
+        # interface.run_dim_reduct(tid, stid, datasetparam, modelparam, vis_methods, adv_methods)
+        # t2 = threading.Thread(target=interface.run_dim_reduct,args=(tid, stid, datasetparam, modelparam, vis_methods, adv_methods, device))
+        # t2.setDaemon(True)
+        # t2.start()
         res = {
             "code":1,
             "msg":"success",
@@ -821,8 +865,7 @@ def model_reach():
             with open( pic_path, 'wb') as f:
                 f.write(base64.b64decode(pic.replace('data:image/png;base64,','')))
                 f.close()
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({stid:{
+        value = {
             "type":"attack_dim_reduciton",
             "state":0,
             "dataset":dataset,
@@ -830,19 +873,17 @@ def model_reach():
             'label':label,
             'target':target,
             'pic':pic_path
-        }})
-        taskinfo[tid]["dataset"] = dataset
-        taskinfo[tid]["model"] = 'CNN'
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", dataset)
+        IOtool.change_task_info(tid, "model", 'CNN')
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.reach, tid,stid,dataset.upper(),pic_path,label,target)
+        IOtool.add_task_queue(tid, stid, t2, 300)
+        resp = t2.result()
         
-        resp=interface.reach(tid,stid,dataset.upper(),pic_path,label,target)
-        resp['input']=f'static/imgs/tmp_imgs/{tid}/{stid}.png'
-        IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"][stid]["state"] = 2
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        IOtool.change_task_success_v2(tid)
-        print("**************end**********")
+        # resp=interface.reach(tid,stid,dataset.upper(),pic_path,label,target)
+        
         return resp
     return render_template('reach.html')
 @app.route('/knowledge_consistency',methods=["GET","POST"])
@@ -871,28 +912,21 @@ def model_consistency():
             with open( pic_path, 'wb') as f:
                 f.write(base64.b64decode(pic.replace('data:image/png;base64,','')))
                 f.close()
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({stid:{
+        value = {
             "type":"attack_dim_reduciton",
             "state":0,
             "dataset":dataset,
             "layer":layer,
             "model":net,
-        }})
-        taskinfo[tid]["dataset"] = dataset
-        taskinfo[tid]["model"] = net
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        l2,layers=interface.knowledge_consistency(tid, stid, net,dataset,pic_path,layer)
-        resp={'l2':l2,'input':f'static/imgs/tmp_imgs/{tid}/{stid}.png',
-                'output':f'static/imgs/tmp_imgs/{tid}/{stid}_output_{layer}.png',
-                'target':f'static/imgs/tmp_imgs/{tid}/{stid}_target_{layer}.png',
-                'delta':f'static/imgs/tmp_imgs/{tid}/{stid}_delta_{layer}.png',
-            }
-        IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"][stid]["state"] = 2
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        IOtool.change_task_success_v2(tid)
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", dataset)
+        IOtool.change_task_info(tid, "model", net)
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.knowledge_consistency, tid, stid, net,dataset,pic_path,laye)
+        IOtool.add_task_queue(tid, stid, t2, 300)
+        resp = t2.result()
+        # resp=interface.knowledge_consistency(tid, stid, net,dataset,pic_path,layer)
         return json.dumps(resp,ensure_ascii=False)
     
     return render_template('knowledge_consistency.html')
@@ -913,7 +947,6 @@ def auto_verify_img():
         
         pic=inputParam['pic']
         dataset=inputParam['dataset']
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         img_dir=os.path.join(os.getcwd(),"web/static/imgs/tmp_imgs")
         pic_path=os.path.join(img_dir,tid,stid+'.png')
         try:
@@ -930,28 +963,25 @@ def auto_verify_img():
             with open( pic_path, 'wb') as f:
                 f.write(base64.b64decode(pic.replace('data:image/png;base64,','')))
                 f.close()
-        taskinfo[tid]["function"].update({stid:{
+        value = {
             "type":"formal_verify_1",
             "state":0,
             "dataset":dataset,
             "pic_path":pic_path,
             'eps':eps,
             'model':net
-        }})
-        taskinfo[tid]["dataset"] = dataset
-        taskinfo[tid]["model"] = net
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", dataset)
+        IOtool.change_task_info(tid, "model", net)
         if "cifar" in dataset.lower():
             dataset="CIFAR"
-        print("net:",net)
-        print("dataset:",dataset)
-        print("eps:",eps)
-        resp=interface.verify_img(tid, stid, net, dataset.upper(), eps, pic_path)
-        IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"][stid]["state"] = 2
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        IOtool.change_task_success_v2(tid)
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.verify_img, tid, stid, net, dataset.upper(), eps, pic_path)
+        IOtool.add_task_queue(tid, stid, t2, 300)
+        resp = t2.result()
+        # resp=interface.verify_img(tid, stid, net, dataset.upper(), eps, pic_path)
+        
         return json.dumps(resp,ensure_ascii=False)
     return render_template('index_auto_verify.html')
 
@@ -968,83 +998,38 @@ def AttackAttrbutionAnalysis():
     global LiRPA_LOGS
     if (request.method == "POST"):
         inputParam = json.loads(request.data)
-        print(request.data)
         tid = inputParam["Taskid"]
         datasetparam = inputParam["DatasetParam"]
         modelparam = inputParam["ModelParam"]
         adv_methods = inputParam["AdvMethods"]
         ex_methods = inputParam["ExMethods"]
-        device = "cuda:0"
+        use_layer_explain = inputParam["Use_layer_explain"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({stid:{
+        value = {
             "type":"attack_attrbution_analysis",
             "state":0,
-            "name":["adv_attack"],
+            "name":["model"],
             "dataset":datasetparam["name"],
             "method":adv_methods,
             "model":modelparam["name"],
-        }})
-        taskinfo[tid]["dataset"] = datasetparam["name"]
-        taskinfo[tid]["model"] = modelparam["name"]
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        # 执行任务
-        datasetparam["name"] = datasetparam["name"].lower()
-        modelparam["name"] = modelparam["name"].lower()
-        t2 = threading.Thread(target=interface.run_attrbution_analysis,args=(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device))
-        t2.setDaemon(True)
-        t2.start()
-        res = {
-            "code":1,
-            "msg":"success",
-            "tid":tid,
-            "stid":stid
+            "exmethod":ex_methods
         }
-        return jsonify(res)
-    else:
-        abort(403)
-
-@app.route('/Attack/AttackLayerExplain', methods=['POST'])
-def AttackLayerExplain():
-    """
-    模型内部分析解释
-    输入：tid：主任务ID
-    Dataset：数据集名称
-    Model：模型名称
-    AdvMethods:list 对抗攻击算法名称
-    ExMethods:？？
-    """
-    global LiRPA_LOGS
-    if (request.method == "POST"):
-        inputParam = json.loads(request.data)
-        print(request.data)
-        tid = inputParam["Taskid"]
-        datasetparam = inputParam["DatasetParam"]
-        modelparam = inputParam["ModelParam"]
-        adv_methods = inputParam["AdvMethods"]
-        ex_methods = inputParam["ExMethods"]
-        device = "cuda:0"
-        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
-        stid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({stid:{
-            "type":"attack_layer_explain",
-            "state":0,
-            "name":["adv_attack"],
-            "dataset":datasetparam["name"],
-            "method":adv_methods,
-            "model":modelparam["name"],
-        }})
-        taskinfo[tid]["dataset"] = datasetparam["name"]
-        taskinfo[tid]["model"] = modelparam["name"]
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", datasetparam["name"])
+        IOtool.change_task_info(tid, "model", modelparam["name"])
         # 执行任务
         datasetparam["name"] = datasetparam["name"].lower()
         modelparam["name"] = modelparam["name"].lower()
-        t2 = threading.Thread(target=interface.run_layer_explain,args=(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device))
-        t2.setDaemon(True)
-        t2.start()
+        
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_attrbution_analysis, tid, stid, datasetparam, modelparam, ex_methods, adv_methods, use_layer_explain)
+        IOtool.add_task_queue(tid, stid, t2, 400 * len(ex_methods))
+        # print(t2.done())
+        # print(t2.result())
+        # t2 = threading.Thread(target=interface.run_attrbution_analysis,args=(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device, use_layer_explain))
+        # t2.setDaemon(True)
+        # t2.start()
         res = {
             "code":1,
             "msg":"success",
@@ -1074,27 +1059,30 @@ def AttackLime():
         modelparam = inputParam["ModelParam"]
         adv_methods = inputParam["AdvMethods"]
         # ex_methods = inputParam["ExMethods"]
-        device = "cuda:0"
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({stid:{
+        value = {
             "type":"attack_lime",
             "state":0,
-            "name":["adv_attack"],
+            "name":["model"],
             "dataset":datasetparam["name"],
             "method":adv_methods,
             "model":modelparam["name"],
-        }})
-        taskinfo[tid]["dataset"] = datasetparam["name"]
-        taskinfo[tid]["model"] = modelparam["name"]
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", datasetparam["name"])
+        IOtool.change_task_info(tid, "model", modelparam["name"])
         # 执行任务
         datasetparam["name"] = datasetparam["name"].lower()
         modelparam["name"] = modelparam["name"].lower()
-        t2 = threading.Thread(target=interface.run_lime,args=(tid, stid, datasetparam, modelparam, adv_methods, device))
-        t2.setDaemon(True)
-        t2.start()
+        
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_lime, tid, stid, datasetparam, modelparam, adv_methods)
+        IOtool.add_task_queue(tid, stid, t2, 300)
+        
+        # t2 = threading.Thread(target=interface.run_lime,args=(tid, stid, datasetparam, modelparam, adv_methods, device))
+        # t2.setDaemon(True)
+        # t2.start()
         res = {
             "code":1,
             "msg":"success",
@@ -1104,9 +1092,7 @@ def AttackLime():
         return jsonify(res)
     else:
         abort(403)
-from interface import detect
 from werkzeug.utils import secure_filename
-import numpy as np
 # ----------------- 课题1 防御 -----------------
 @app.route("/defense", methods=["GET", "POST"])
 def home():
@@ -1131,29 +1117,22 @@ def Detect():
         adv_nums = inputParam["adv_nums"]
         defense_methods = json.loads(inputParam["defense_methods"])
         tid = inputParam["tid"]
-    print("adv_dataset:",adv_dataset)
-    print("adv_model:",adv_model)
-    print("adv_method:",adv_method)
-    print("adv_nums:",adv_nums)
-    print("defense_methods:",defense_methods)
     format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
     stid = "S"+IOtool.get_task_id(str(format_time))
-    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
+    
     
     adv_nums = int(adv_nums)
-    
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"].update({stid:{
+    value = {
         "type":"attack_defense",
         "state":0,
         "name":["attack_defense"],
         "dataset":adv_dataset,
         "method":defense_methods,
         "model":adv_method,
-    }})
-    taskinfo[tid]["dataset"] = adv_dataset
-    taskinfo[tid]["model"] = adv_model
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    }
+    IOtool.add_subtask_info(tid, stid, value)
+    IOtool.change_task_info(tid, "dataset", adv_dataset)
+    IOtool.change_task_info(tid, "model", adv_model)
     
     if 'adv_examples' in request.files:
         adv_examples = request.files['adv_examples']
@@ -1167,29 +1146,14 @@ def Detect():
     else:
         adv_file_path = None
     
-    detect_rate_dict = {}
-    if "CARTL" in defense_methods:
-        # 调换顺序，将CARTL放在最后执行
-        defense_methods.remove("CARTL")
-        defense_methods.append("CARTL")
-    print("-----------defense_methods:",defense_methods)
-    for defense_method in defense_methods:
-        logging.info("开始执行防御任务{:s}".format(defense_method))
-        detect_rate, no_defense_accuracy = detect(adv_dataset, adv_model, adv_method, adv_nums, defense_method, adv_file_path,logging)
-        detect_rate_dict[defense_method] = round(detect_rate, 4)
-        logging.info("{:s}防御算法执行结束，对抗鲁棒性为：{:.3f}".format(defense_method,round(detect_rate, 4)))
-    no_defense_accuracy_list = no_defense_accuracy.tolist() if isinstance(no_defense_accuracy, np.ndarray) else no_defense_accuracy
-    response_data = {
-        "detect_rates": detect_rate_dict,
-        "no_defense_accuracy": no_defense_accuracy_list
-    }
-    print(response_data)
-    IOtool.write_json(response_data, osp.join(ROOT,"output", tid, stid+"_result.json")) 
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"] = 2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-    IOtool.change_task_success_v2(tid)
+    pool = IOtool.get_pool(tid)
+    t2 = pool.submit(interface.run_detect, tid, stid, defense_methods, adv_dataset, adv_model, adv_method, adv_nums, adv_file_path)
     
+    IOtool.add_task_queue(tid, stid, t2, 300)
+    response_data = t2.result()
+    
+    # response_data = interface.run_detect(tid, stid, defense_methods, adv_dataset, adv_model, adv_method, adv_nums, adv_file_path)
+
     return json.dumps(response_data)
 # ----------------- 课题2 测试样本自动生成 -----------------
 @app.route('/Concolic/SamGenParamGet', methods=['GET','POST'])
@@ -1211,21 +1175,25 @@ def Concolic():
         tid = inputdata["tid"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({AAtid:{
+        value = {
             "type":"Concolic",
             "state":0,
             "name":["Concolic"],
             "dataset":concolic_dataset,
             "model": concolic_model,
             "norm": norm
-        }})
-        taskinfo[tid]["dataset"]=concolic_dataset
-        taskinfo[tid]["model"]=concolic_model
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        t2 = threading.Thread(target=interface.run_concolic,args=(tid,AAtid,concolic_dataset,concolic_model,norm, times))
-        t2.setDaemon(True)
-        t2.start()
+        }
+        
+        IOtool.add_subtask_info(tid, AAtid, value)
+        IOtool.change_task_info(tid, "dataset", concolic_dataset)
+        IOtool.change_task_info(tid, "model", concolic_model)
+        
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_concolic, tid, AAtid, concolic_dataset, concolic_model, norm, times)
+        IOtool.add_task_queue(tid, stid, t2, 300)
+        # t2 = threading.Thread(target=interface.run_concolic,args=(tid,AAtid,concolic_dataset,concolic_model,norm, times))
+        # t2.setDaemon(True)
+        # t2.start()
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
@@ -1251,8 +1219,7 @@ def EnvTest():
             pass
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({AAtid:{
+        value = {
             "type":"EnvTest",
             "state":0,
             "name":["EnvTest"],
@@ -1260,13 +1227,15 @@ def EnvTest():
             "model": "",
             "matchmethod": matchmethod,
             "framework": frameworkname+frameversion
-        }})
-        taskinfo[tid]["dataset"]=""
-        taskinfo[tid]["model"]=""
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        t2 = threading.Thread(target=interface.run_envtest,args=(tid,AAtid,matchmethod, frameworkname,frameversion))
-        t2.setDaemon(True)
-        t2.start()
+        }
+        IOtool.add_subtask_info(tid, AAtid, value)
+        
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_envtest, tid, AAtid, matchmethod, frameworkname, frameversion)
+        IOtool.add_task_queue(tid, stid, t2, 300)
+        # t2 = threading.Thread(target=interface.run_envtest,args=(tid,AAtid,matchmethod, frameworkname,frameversion))
+        # t2.setDaemon(True)
+        # t2.start()
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
@@ -1288,20 +1257,22 @@ def DataClean():
         tid = request.form.get("tid")
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({AAtid:{
+       
+        value = {
             "type":"DataClean",
             "state":0,
             "name":["DataClean"],
             "dataset": dataset,
             "model": "",
-        }})
-        taskinfo[tid]["dataset"]=dataset
-        taskinfo[tid]["model"]=""
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        t2 = threading.Thread(target=interface.run_dataclean,args=(tid,AAtid,dataset))
-        t2.setDaemon(True)
-        t2.start()
+        }
+        IOtool.add_subtask_info(tid, AAtid, value)
+        IOtool.change_task_info(tid, "dataset", dataset)
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_dataclean, tid, AAtid, dataset)
+        IOtool.add_task_queue(tid, stid, t2, 300)
+        # t2 = threading.Thread(target=interface.run_dataclean,args=(tid,AAtid,dataset))
+        # t2.setDaemon(True)
+        # t2.start()
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
@@ -1321,8 +1292,7 @@ def DeepSstParamSet():
         tid = request.form.get("tid")
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({AAtid:{
+        value = {
             "type":"DeepSst",
             "state":0,
             "name":["DeepSst"],
@@ -1330,13 +1300,17 @@ def DeepSstParamSet():
             "model": modelname,
             "pertube": pertube,
             "m_dir": m_dir
-        }})
-        taskinfo[tid]["dataset"]=dataset
-        taskinfo[tid]["model"]=modelname
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        t2 = threading.Thread(target=interface.run_deepsst,args=(tid, AAtid, dataset, modelname, pertube, m_dir))
-        t2.setDaemon(True)
-        t2.start()
+        }
+        IOtool.add_subtask_info(tid, AAtid, value)
+        IOtool.change_task_info(tid, "dataset", dataset)
+        IOtool.change_task_info(tid, "model", modelname)
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_deepsst, tid, AAtid, dataset, modelname, pertube, m_dir)
+        IOtool.add_task_queue(tid, stid, t2, 300)
+
+        # t2 = threading.Thread(target=interface.run_deepsst,args=(tid, AAtid, dataset, modelname, pertube, m_dir))
+        # t2.setDaemon(True)
+        # t2.start()
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
@@ -1352,22 +1326,22 @@ def SideAnalysis():
         tid = inputParam["tid"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({stid:{
+        value = {
             "type":"attack_defense",
             "state":0,
             "name":["attack_defense"],
             "dataset":trs_file,
             "method":methods,
             "model":"",
-        }})
-        taskinfo[tid]["dataset"] = trs_file
-        taskinfo[tid]["model"] = ""
-        print("index root:",ROOT)
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        t2 = threading.Thread(target=interface.run_side_api,args=(trs_file, methods, tid, stid))
-        t2.setDaemon(True)
-        t2.start()
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", trs_file)
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_side_api, trs_file, methods, tid, stid)
+        IOtool.add_task_queue(tid, stid, t2, 300)
+        # t2 = threading.Thread(target=interface.run_side_api,args=(trs_file, methods, tid, stid))
+        # t2.setDaemon(True)
+        # t2.start()
         res = {"code":1,"msg":"success","Taskid":tid,"stid":stid}
         return jsonify(res)
     else:
@@ -1399,28 +1373,32 @@ def FormalVerification():
         tid = inputParam["task_id"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        print("*************************************add stid******************")
-        taskinfo[tid]["function"].update({stid:{
+        value = {
             "type":"formal_verification",
             "state":0,
             "name":["formal_verification"],
             "dataset":inputParam["dataset"],
             "model":inputParam['model']
-        }})
-        taskinfo[tid]["dataset"]=inputParam["dataset"]
-        taskinfo[tid]["model"]=inputParam['model']
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        t2 = threading.Thread(target=interface.run_verify, args=(tid, stid, param))
-        t2.setDaemon(True)
-        t2.start()
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", inputParam["dataset"])
+        IOtool.change_task_info(tid, "model", inputParam["model"])
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_verify, tid, stid, param)
+        IOtool.add_task_queue(tid, stid, t2, 300)
+        # t2 = threading.Thread(target=interface.run_verify, args=(tid, stid, param))
+        # t2.setDaemon(True)
+        # t2.start()
         res = {
             "tid":tid,
             "stid":stid
         }
         return jsonify(res)
 
-
 def app_run(args):
+    
     web_config={'host':args.host,'port':args.port,'debug':args.debug}
     app.run(**web_config)
+    
+
+    
