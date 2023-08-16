@@ -8,6 +8,8 @@ import os
 from flask import Flask
 from jinja2.sandbox import SandboxedEnvironment
 from werkzeug.routing import BaseConverter
+import threading
+from IOtool import IOtool
 # import utils.functional as F
 __version__ = "0.1.0"
 
@@ -72,8 +74,13 @@ def main_index():
     parser.add_argument('--debug',type=bool,default=True,help='debugifopen')
     args = parser.parse_args()
     from web.index import app_run
+    
     app = app_run(args)
     # app.run(debug=True, threaded=True, host=args.host, port=args.port)
 
 if __name__ == "__main__":
+    print("***************************threading*****************")
+    t2 = threading.Thread(target=IOtool.check_sub_task_threading)
+    t2.setDaemon(True)
+    t2.start()
     main_index()
