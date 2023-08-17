@@ -61,9 +61,10 @@ def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics,
     :params modelname:模型名称
     :params algorithmname:优化算法名称
     """
-    logging = IOtool.get_logger(stid)
     IOtool.change_subtask_state(tid, stid, 1)
     IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    logging = IOtool.get_logger(stid)
     res = run_model_debias(dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList, logging=logging)
     res["stop"] = 1
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
@@ -79,9 +80,10 @@ def run_data_debias_api(tid, stid, dataname, datamethod, senAttrList, tarAttrLis
     :params dataname:数据集名称
     :params datamethod:优化算法名称
     """
-    logging = IOtool.get_logger(stid)
     IOtool.change_subtask_state(tid, stid, 1)
     IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    logging = IOtool.get_logger(stid)
     res = run_dataset_debias(dataname, datamethod, senAttrList, tarAttrList, staAttrList, logging=logging)
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, stid+"_result.json"))
@@ -181,9 +183,10 @@ def get_model_loader(dataset, modelparam, logging, train_loader=None, test_loade
     return model, trainer, summary
 
 def run_verify(tid, AAtid, param):
-    logging = IOtool.get_logger(AAtid)
     IOtool.change_subtask_state(tid, AAtid, 1)
     IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, AAtid, time.time())
+    logging = IOtool.get_logger(AAtid)
     N = param['size']
     device = 'cpu'
     verify = vision_verify
@@ -234,13 +237,14 @@ def run_concolic(tid, AAtid, dataname, modelname, norm, times):
     :params modelname:模型名称
     :params norm:范数约束
     """
-    logging = IOtool.get_logger(AAtid)
-    IOtool.change_subtask_state(tid, stid, 1)
+    
+    IOtool.change_subtask_state(tid, AAtid, 1)
     IOtool.change_task_state(tid, 1)
+    logging = IOtool.get_logger(AAtid)
     res = concolic.run_concolic(dataname.lower(), modelname.lower(), norm.lower(), int(times), osp.join(ROOT,"output", tid, AAtid), logging)
     res["stop"]=1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
-    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_subtask_state(tid, AAtid, 2)
     IOtool.change_task_success_v2(tid=tid)
 
 def run_dataclean(tid, AAtid, dataname):
@@ -250,11 +254,11 @@ def run_dataclean(tid, AAtid, dataname):
     :params dataname:数据集名称
     :output res:需保存到子任务json中的返回结果/路径
     """
-    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_subtask_state(tid, AAtid, 1)
     IOtool.change_task_state(tid, 1)
     res = dataclean.run_dataclean(dataname)
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
-    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_subtask_state(tid, AAtid, 2)
     IOtool.change_task_success_v2(tid=tid)
 
 def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
@@ -266,16 +270,16 @@ def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
     :params frameversion:框架版本
     :output res:需保存到子任务json中的返回结果/路径
     """
-    logging = IOtool.get_logger(AAtid)
-    IOtool.change_subtask_state(tid, stid, 1)
-    IOtool.change_task_state(tid, 1)
     
+    IOtool.change_subtask_state(tid, AAtid, 1)
+    IOtool.change_task_state(tid, 1)
+    logging = IOtool.get_logger(AAtid)
     res = env_test.run_env_frame(matchmethod,frameworkname,frameversion, osp.join(ROOT,"output", tid, AAtid), logging)
     # res = concolic.run_concolic(dataname, modelname, norm)  
     res["detection_result"]=IOtool.load_json(res["env_test"]["detection_result"])
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
-    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_subtask_state(tid, AAtid, 2)
     IOtool.change_task_success_v2(tid=tid)
 
 def run_coverage(tid,AAtid,dataset,modelname):
@@ -291,13 +295,15 @@ def run_deepsst(tid,AAtid,dataset,modelname,pertube,m_dir):
     :params m_dir: 敏感度值文件位置
     :output res:需保存到子任务json中的返回结果/路径
     """
-    logging = IOtool.get_logger(AAtid)
-    IOtool.change_subtask_state(tid, stid, 1)
+    
+    IOtool.change_subtask_state(tid, AAtid, 1)
     IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    logging = IOtool.get_logger(AAtid)
     res = deepsst.run_deepsst(dataset.lower(), modelname, float(pertube.strip("%"))/100, m_dir, osp.join(ROOT,"output", tid, AAtid), logging)
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
-    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_subtask_state(tid, AAtid, 2)
     IOtool.change_task_success_v2(tid=tid)
 
 
@@ -310,10 +316,12 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
     :params methods:list，对抗攻击方法
     :params inputParam:输入参数
     """
-    logging = IOtool.get_logger(stid)
+    
     # 开始执行标记任务状态
     IOtool.change_subtask_state(tid, stid, 1)
     IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    logging = IOtool.get_logger(stid)
     inputParam['device'] = IOtool.get_device()
     modelpath = osp.join("./model/ckpt",dataname.upper() + "_" + model.lower()+".pth")
     device = torch.device(inputParam['device'])
@@ -352,9 +360,11 @@ def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
     :params inputParam:输入参数
     """
     # 开始执行标记任务状态
-    logging = IOtool.get_logger(stid)
+    
     IOtool.change_subtask_state(tid, stid, 1)
     IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    logging = IOtool.get_logger(stid)
     inputParam['device'] = IOtool.get_device()
     modelpath = osp.join("./model/ckpt",dataname.upper() + "_" + model.lower()+".pth")
     if (not osp.exists(modelpath)):
@@ -523,6 +533,9 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, device):
     """
     IOtool.change_subtask_state(tid, stid, 1)
     IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    device = IOtool.get_device()
+    logging = IOtool.get_logger(stid)
     params = {
         "dataset": datasetparam,
         "model": modelparam,
@@ -574,6 +587,8 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, device):
 def verify_img(tid, stid, net, dataset, eps, pic_path):
     IOtool.change_subtask_state(tid, stid, 1)
     IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    logging = IOtool.get_logger(stid)
     b1=[]
     b2=[]
     model=''
@@ -605,6 +620,9 @@ def verify_img(tid, stid, net, dataset, eps, pic_path):
 def knowledge_consistency(tid, stid, arch,dataset,img_path,layer):
     IOtool.change_subtask_state(tid, stid, 1)
     IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    device = IOtool.get_device()
+    logging = IOtool.get_logger(stid)
     base=os.path.join(os.getcwd(),"model","ckpt")
     base_path=os.path.join(base,'knowledge_consistency_checkpoints')
     if arch=='vgg16_bn' and dataset=='mnist':
@@ -700,6 +718,8 @@ def knowledge_consistency(tid, stid, arch,dataset,img_path,layer):
 def reach(tid,stid,dataset,pic_path,label,target_label):
     IOtool.change_subtask_state(tid, stid, 1)
     IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    device = IOtool.get_device()
     logging = IOtool.get_logger(stid)
     logging.info(f"The reachability task starts ，dateset: {dataset}")
     base=os.path.join(os.getcwd(),"model","ckpt")
@@ -761,9 +781,11 @@ def reach(tid,stid,dataset,pic_path,label,target_label):
     return resp
 
 def run_detect(tid, stid, defense_methods, adv_dataset, adv_model, adv_method, adv_nums, adv_file_path):
-    logging = IOtool.get_logger(stid)
     IOtool.change_subtask_state(tid, stid, 1)
     IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    device = IOtool.get_device()
+    logging = IOtool.get_logger(stid)
     detect_rate_dict = {}
     if "CARTL" in defense_methods:
         # 调换顺序，将CARTL放在最后执行
@@ -787,8 +809,10 @@ def run_detect(tid, stid, defense_methods, adv_dataset, adv_model, adv_method, a
     return response_data
 
 def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_examples=None, logging=None):
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    
+    # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    # device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = IOtool.get_device()
     if torch.cuda.is_available():
         print("got GPU")
     logging.info("加载模型{:s}".format(adv_model))
@@ -884,6 +908,8 @@ def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_ex
 def run_side_api(trs_file, methods, tid, stid):
     IOtool.change_subtask_state(tid, stid, 1)
     IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    device = IOtool.get_device()
     logging = IOtool.get_logger(stid)
     logging.info("开始执行侧信道分析")
     res={}
