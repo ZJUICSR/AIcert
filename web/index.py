@@ -304,13 +304,14 @@ def ModelFairnessDebias():
             staAttrList=inputParam["staAttrList"]
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, senAttrList, tarAttrList, staAttrList)
-        IOtool.add_task_queue(tid, stid, t2, 300)
+        IOtool.add_task_queue(tid, AAtid, t2, 300)
+        # interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, senAttrList, tarAttrList, staAttrList)
         # t2 = threading.Thread(target=interface.run_model_debias_api,args=(tid, AAtid, dataname, modelname, algorithmname, metrics, senAttrList, tarAttrList, staAttrList))
         # t2.setDaemon(True)
         # t2.start()
         res = {
             "tid":tid,
-            "AAtid":AAtid
+            "stid":AAtid
         }
         return jsonify(res)
     else:
@@ -465,6 +466,7 @@ def query_log():
         body = {"code":1003,"msg":"fail,log is NULL","Log":Log}
     else:
         body = {"code":1,"msg":"success","Log":Log}
+    # print(body)
     return jsonify(body)
 # 删除任务
 @app.route('/Task/DeleteTask', methods=['DELETE'])
@@ -660,7 +662,7 @@ def get_result():
         for stid in stidlist:
             attack_type = taskinfo[tid]["function"][stid]["type"]
             # 如果子任务状态不是执行成功，则返回子任务结果为空
-            if taskinfo[tid]["function"][stid]["state"] != 2:
+            if taskinfo[tid]["function"][stid]["state"] < 2 :
                 result[attack_type]= {}
             # 如果子任务状态结果文件不存在，则返回子任务结果为空
             elif not osp.exists(osp.join(ROOT,"output",tid,stid+"_result.json")):
@@ -669,12 +671,15 @@ def get_result():
                 result[attack_type] = (IOtool.load_json(osp.join(ROOT,"output",tid,stid+"_result.json")))
         stopflag = 1
         for temp in  result.keys():
+            print("result[temp]:", temp,result)
             if "stop" not in result[temp].keys():
                 stopflag = 0
-            elif  result[temp]["stop"] != 1:
+            elif  result[temp]["stop"] == 0:
                 stopflag = 0
+            elif result[temp]["stop"] == 2:
+                stopflag = 2
         # print(result)
-        # print("stopflag", stopflag)
+        print("stopflag", stopflag)
         return jsonify({"code":1,"msg":"success","result":result,"stop":stopflag})
 
 # ----------------- 课题1 对抗攻击评估 -----------------
@@ -716,7 +721,7 @@ def AdvAttack():
         # 执行任务
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_adv_attack, tid, stid, dataname, model, adv_method, inputParam)
-        IOtool.add_task_queue(tid, stid, t2, 300)
+        IOtool.add_task_queue(tid, stid, t2, 300*len(adv_method))
          
         # t2 = threading.Thread(target=interface.run_adv_attack,args=(tid, stid, dataname, model, adv_method, inputParam))
         # t2.setDaemon(True)
@@ -823,7 +828,7 @@ def AttackDimReduciton():
         
         t2 = pool.submit(interface.run_dim_reduct, tid, stid, datasetparam, modelparam, vis_methods, adv_methods)
         
-        IOtool.add_task_queue(tid, stid, t2, 700)
+        IOtool.add_task_queue(tid, stid, t2, 400 * len(vis_methods) + 300*len(adv_methods))
         # interface.run_dim_reduct(tid, stid, datasetparam, modelparam, vis_methods, adv_methods)
         # t2 = threading.Thread(target=interface.run_dim_reduct,args=(tid, stid, datasetparam, modelparam, vis_methods, adv_methods, device))
         # t2.setDaemon(True)
@@ -1024,7 +1029,7 @@ def AttackAttrbutionAnalysis():
         
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_attrbution_analysis, tid, stid, datasetparam, modelparam, ex_methods, adv_methods, use_layer_explain)
-        IOtool.add_task_queue(tid, stid, t2, 400 * len(ex_methods))
+        IOtool.add_task_queue(tid, stid, t2, 400 * len(ex_methods) + 300*len(adv_methods))
         # print(t2.done())
         # print(t2.result())
         # t2 = threading.Thread(target=interface.run_attrbution_analysis,args=(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device, use_layer_explain))
@@ -1190,7 +1195,7 @@ def Concolic():
         
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_concolic, tid, AAtid, concolic_dataset, concolic_model, norm, times)
-        IOtool.add_task_queue(tid, stid, t2, 300)
+        IOtool.add_task_queue(tid, AAtid, t2, 300)
         # t2 = threading.Thread(target=interface.run_concolic,args=(tid,AAtid,concolic_dataset,concolic_model,norm, times))
         # t2.setDaemon(True)
         # t2.start()
@@ -1232,7 +1237,7 @@ def EnvTest():
         
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_envtest, tid, AAtid, matchmethod, frameworkname, frameversion)
-        IOtool.add_task_queue(tid, stid, t2, 300)
+        IOtool.add_task_queue(tid, AAtid, t2, 300)
         # t2 = threading.Thread(target=interface.run_envtest,args=(tid,AAtid,matchmethod, frameworkname,frameversion))
         # t2.setDaemon(True)
         # t2.start()
