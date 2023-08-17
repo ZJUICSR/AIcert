@@ -453,6 +453,8 @@ class Logger:
             logger.addHandler(sh)
             logger.addHandler(th)
             self.__loggers.update({stid:logger})
+        else:
+            logger = self.__loggers[stid]
         return logger
     
     def get_sub_logger(self, stid):
