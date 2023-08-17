@@ -44,7 +44,6 @@ class IOtool:
     @staticmethod
     def get_pool(tid):
         # 判断tid是否在任务队列中，不在就增加到队列中
-        print("get_pool :" ,tid)
         if tid not in IOtool.__curpoollist.keys() and tid not in IOtool.__poollist:
             IOtool.add_pool(tid)
         
@@ -77,7 +76,9 @@ class IOtool:
     def get_logger(stid=None, tid=None):
         if stid:
             if IOtool.__logger.get_sub_logger(stid) == -1 and tid:
+                print("---------111----")
                 IOtool.__logger.add_logger(stid=stid, filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
+                print("IOtool.__logger.get_sub_logger(stid):",IOtool.__logger.get_sub_logger(stid))
             return IOtool.__logger.get_sub_logger(stid)
         else:
             return IOtool.__logger
