@@ -1,48 +1,12 @@
-output/*
-record
-web/static/imgs/tmp_imgs/*
-datasets/**
-results/**
-dataset/CIFAR10/*
-dataset/MNIST/*
-dataset/adv_examples/*
-function/defense/trainer/test/*
-web/static/images/adv_images
-model/model-cifar-wideResNet/*
-model/model-mnist-smallCNN/*
-function/side/CMake_Research3/Build/*
-function/side/CMake_Research3/Trs/*
-log.txt
-*.pth
-*.pyc
-*.*.pyc
-model/ckpt/*
-dataset/auto_LiRPA_dataset
->>>>>>> 0c1c6771b8c797027631adbdd26e9cb819444828
-dataset/data/CIFAR10/cifar-10-python.tar.gz
-function/DeepLogic/adv_train/model-resnet18-fashionminist/Standard-fashionminist-model-resnet18-epoch300.pt
-function/concolic/Utils/Models/cifar10_vgg16.pth
-function/env_test/valid_extract.pkl
-output/*
-<<<<<<< HEAD
-model/robnet-resnet18-cifar10.pth
-function/defense/trainer/cartl/checkpoint/*
-function/defense/trainer/cartl/runs/*
-function/defense/trainer/cartl/trained_models/*
-function/defense/trainer/cartl/logs/*
+# custom
+data/
+record/
 
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-
-function/formal_verify/auto_LiRPA_verifiy/vision/data
-
-=======
-function/formal_verify/auto_LiRPA_verifiy/vision/data
-output/task_list.txt
-<<<<<<< HEAD
-output/task_info.json
->>>>>>> 0c1c6771b8c797027631adbdd26e9cb819444828
-model/ckpt/*
-dataset/cifar10/*
 # C extensions
 *.so
 
@@ -134,7 +98,22 @@ ipython_config.py
 #   install all needed dependencies.
 #Pipfile.lock
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+# poetry
+#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
+#   This is especially recommended for binary packages to ensure reproducibility, and is more
+#   commonly ignored for libraries.
+#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
+#poetry.lock
+
+# pdm
+#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
+#pdm.lock
+#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
+#   in version control.
+#   https://pdm.fming.dev/#use-with-ide
+.pdm.toml
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
 __pypackages__/
 
 # Celery stuff
@@ -177,35 +156,9 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# output cache
-output
-
-# model ckpt
-model
-
-# dataset data
-dataset
-
-<<<<<<< HEAD
-/dev.env
-<<<<<<< HEAD
-output/task_info.json
-# 忽略所有子目录中的__pycache__目录
-**/__pycache__/
-
-# 忽略jpeg格式的图片
-*.jpeg
-
-function/side/CMake_Research3-bak/*
-=======
-/dev.env
->>>>>>> 44e5eacc3b06d5b327a7e59a490107de34a78ca0
-=======
-<<<<<<< HEAD
-=======
-output/task_info.json
->>>>>>> c156776f07b8272d684983de60bf7942f840182b
-=======
-
->>>>>>> gitee/develop
->>>>>>> 0c1c6771b8c797027631adbdd26e9cb819444828
+# PyCharm
+#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
+#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
+#  and can be added to the global gitignore or merged into this file.  For a more nuclear
+#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
+#.idea/

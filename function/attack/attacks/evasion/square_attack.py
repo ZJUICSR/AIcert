@@ -256,11 +256,11 @@ class SquareAttack(EvasionAttack):
                 x_best = torch.clamp(x + self.eps * self.random_choice(
                     [x.shape[0], c, 1, w]), 0., 1.)
                 margin_min, loss_min = self.margin_and_loss(x_best, y)
-                n_queries = torch.ones(x.shape[0]).to(self.estimator.device)
+                self.n_queries = torch.ones(x.shape[0]).to(self.estimator.device)
                 s_init = int(math.sqrt(self.p_init * n_features / c))
                 
                 if (margin_min < 0.0).all():
-                    return n_queries, x_best
+                    return self.n_queries, x_best
                 
                 for i_iter in range(self.n_queries):
                     idx_to_fool = (margin_min > 0.0).nonzero().squeeze()
@@ -307,7 +307,7 @@ class SquareAttack(EvasionAttack):
                         *[1]*len(x.shape[:-1])])
                     x_best[idx_to_fool] = idx_improved * x_new + (
                         1. - idx_improved) * x_best_curr
-                    n_queries[idx_to_fool] += 1.
+                    self.n_queries[idx_to_fool] += 1.
 
                     ind_succ = (margin_min <= 0.).nonzero().squeeze()
 
@@ -331,11 +331,11 @@ class SquareAttack(EvasionAttack):
                 x_best = torch.clamp(x + self.normalize(delta_init
                     ) * self.eps, 0., 1.)
                 margin_min, loss_min = self.margin_and_loss(x_best, y)
-                n_queries = torch.ones(x.shape[0]).to(self.estimator.device)
+                self.n_queries = torch.ones(x.shape[0]).to(self.estimator.device)
                 s_init = int(math.sqrt(self.p_init * n_features / c))
                 
                 if (margin_min < 0.0).all():
-                    return n_queries, x_best
+                    return self.n_queries, x_best
 
                 for i_iter in range(self.n_queries):
                     idx_to_fool = (margin_min > 0.0).nonzero().squeeze()
@@ -411,7 +411,7 @@ class SquareAttack(EvasionAttack):
                         *[1]*len(x.shape[:-1])])
                     x_best[idx_to_fool] = idx_improved * x_new + (
                         1. - idx_improved) * x_best_curr
-                    n_queries[idx_to_fool] += 1.
+                    self.n_queries[idx_to_fool] += 1.
 
                     ind_succ = (margin_min <= 0.).nonzero().squeeze()
 
