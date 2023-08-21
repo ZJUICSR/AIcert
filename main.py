@@ -79,7 +79,6 @@ def main_index():
     # app.run(debug=True, threaded=True, host=args.host, port=args.port)
 
 if __name__ == "__main__":
-    print("***************************threading*****************")
     t2 = threading.Thread(target=IOtool.check_sub_task_threading)
     t2.setDaemon(True)
     t2.start()
