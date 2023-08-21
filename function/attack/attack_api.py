@@ -183,8 +183,10 @@ class BackdoorAttacker():
         self.norm_param = ""
         if dataset == "cifar10":
             self.loaddataset = load_cifar10
+            self.backdoor_color = 1
         elif dataset == "mnist":
             self.loaddataset = load_mnist
+            self.backdoor_color = 2
         else:
             raise ValueError("Dataset not supported")
     
@@ -224,10 +226,10 @@ class BackdoorAttacker():
             # 总样本上的准确率
             self.accuracy, _ = compute_accuracy(self.classifier.predict(xs, batch_size=batch_size), ys)
             # 干净样本上的准确率
-            self.accuracyonbm, _ = compute_accuracy(self.classifier.predict(x_clean, batch_size=batch_size), y_clean)
+            self.accuracyonb, _ = compute_accuracy(self.classifier.predict(x_clean, batch_size=batch_size), y_clean)
             # 后门样本上的攻击成功率
             self.attack_success_rate, _ = compute_accuracy(self.classifier.predict(x_poisoned, batch_size=batch_size), y_poisoned)
-        return self.accuracy, self.accuracyonbm, self.attack_success_rate
+        return self.accuracy, self.accuracyonb, self.attack_success_rate
 
     def save_model(self, path:str="./output/cache/", desc:str="backdoor_model", epoch:int=0):
         path = os.path.join(path, self.method)
