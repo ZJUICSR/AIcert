@@ -29,7 +29,6 @@ from function.ex_methods.module.load_model import load_model as load_model_ex
 from function.ex_methods import attribution_maps, layer_explain, dim_reduciton_visualize
 from function.ex_methods.module.model_Lenet import lenet
 from function.ex_methods.lime import lime_image_ex
-
 from function.formal_verify.auto_verify import auto_verify_img
 from function.formal_verify.knowledge_consistency import load_checkpoint,get_feature
 from function.formal_verify.knowledge_consistency import Model_zoo as models
@@ -53,7 +52,7 @@ from torchvision.models import vgg16
 from function.side import *
 
 ROOT = osp.dirname(osp.abspath(__file__))
-def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList):
+def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics = [], sensattrs = [], targetattr=None, staAttrList= [], test_mode = True):
     """模型公平性提升
     :params tid:主任务ID
     :params stid:子任务id
@@ -65,8 +64,12 @@ def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics,
     IOtool.change_task_state(tid, 1)
     IOtool.set_task_starttime(tid, stid, time.time())
     logging = IOtool.get_logger(stid)
-    res = run_model_debias(dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList, logging=logging)
+    if dataname in ["Compas", "Adult", "German"]:
+        res = run_model_debias(dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList, logging=logging)
+    else:
+        res = run_image_model_debias(dataname, modelname, algorithmname, merics, test_mode, logging=logging)
     res["stop"] = 1
+    
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
     
     IOtool.change_subtask_state(tid, stid, 2)
@@ -114,7 +117,6 @@ def get_data_loader(data_path, data_name, params, transform =None):
     else:
         dataloader = ArgpLoader(data_root=data_path, dataset=data_name, **params)
         train_loader, test_loader = dataloader.get_loader()
-
         params = dataloader.__config__(dataset=data_name)
         return test_loader,train_loader,params
 
