@@ -8,6 +8,7 @@ from function.attack.attacks.attack import PoisoningAttackWhiteBox
 from function.attack.estimators import BaseEstimator, NeuralNetworkMixin
 from function.attack.estimators.classification.classifier import ClassifierMixin
 from function.attack.estimators.classification.pytorch import PyTorchClassifier
+from function.attack.estimators.classification.keras import KerasClassifier
 if TYPE_CHECKING:
     from function.attack.attacks.utils import CLASSIFIER_NEURALNETWORK_TYPE
 logger = logging.getLogger(__name__)
