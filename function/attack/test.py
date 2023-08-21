@@ -7,22 +7,22 @@ from function.attack.attacks.utils import load_mnist, load_cifar10
 
 # 对抗攻击测试
 ## MNIST
-# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# a = EvasionAttacker(modelnet=ResNet18(1), modelpath="./model/model_ckpt/ckpt-resnet18-mnist_epoch3_acc0.9898.pth", 
-#     dataset="mnist", datasetpath="./datasets/", nb_classes=10, datanormalize = False, 
-#     device=device, sample_num=2)
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+a = EvasionAttacker(modelnet=ResNet18(1), modelpath="./model/model_ckpt/ckpt-resnet18-mnist_epoch3_acc0.9898.pth", 
+    dataset="mnist", datasetpath="./datasets/", nb_classes=10, datanormalize = False, 
+    device=device, sample_num=4)
 ## white box attack
 # a.generate(method="FastGradientMethod", norm="inf", save_num=32)
 # a.print_res()
-# a.generate(method="ProjectedGradientDescent", norm="inf", save_num=32)
+# a.generate(method="ProjectedGradientDescent", norm=2, save_num=32, eps=5, eps_step=0.1)
 # a.print_res()
 # a.generate(method="BasicIterativeMethod", norm="inf", save_num=32)
 # a.print_res()
-# a.generate(method="DeepFool", save_num=32)
+# a.generate(method="DeepFool", save_num=32, norm="inf")
 # a.print_res()
 # a.generate(method="SaliencyMapMethod", save_num=32)
 # a.print_res()
-# a.generate(method="UniversalPerturbation", save_num=32)
+# a.generate(method="UniversalPerturbation", save_num=32, norm="inf", eps=2, attacker="PGD")
 # a.print_res()
 # a.generate(method="AutoAttack", save_num=32)
 # a.print_res()
@@ -30,16 +30,24 @@ from function.attack.attacks.utils import load_mnist, load_cifar10
 # a.print_res()
 # a.generate(method="CarliniWagner", save_num=32)
 # a.print_res()
-### BlackBox ScoreBased Attak
+# ## BlackBox ScoreBased Attak
 # a.generate(method="PixelAttack", save_num=32)
 # a.print_res()
 # a.generate(method="SimBA", save_num=32)
 # a.print_res()
-a.generate(method="ZooAttack", save_num=32)
-a.print_res()
-# a.generate(method="SquareAttack", save_num=32)
+# a.generate(method="ZooAttack", save_num=32)
 # a.print_res()
-### BlackBox DecesionBased Attak
+# a.generate(method="SquareAttack", save_num=4, eps=15, norm=1)
+# a.print_res()
+# ## BlackBox DecesionBased Attak
+# a.generate(method="BoundaryAttack", save_num=32)
+# a.print_res()
+# a.generate(method="HopSkipJump", save_num=32)
+# a.print_res()
+# a.generate(method="GeoDA", save_num=32)
+# a.print_res()
+# a.generate(method="Fastdrop", save_num=32)
+# a.print_res()
 
 # ## CIFAR10
 # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -89,10 +97,10 @@ a.print_res()
 # b.train()
 
 ## CIFAR10
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-b = BackdoorAttacker(modelnet=ResNet18(3), modelpath="./model/model_ckpt/resnet_cifar10_random.pth", 
-    dataset="cifar10", datasetpath="./datasets/", nb_classes=10, datanormalize = False, 
-    device=device)
+# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# b = BackdoorAttacker(modelnet=ResNet18(3), modelpath="./model/model_ckpt/resnet_cifar10_random.pth", 
+#     dataset="cifar10", datasetpath="./datasets/", nb_classes=10, datanormalize = False, 
+#     device=device)
 ### PoisoningAttackBackdoor
 # b.poision(method="PoisoningAttackBackdoor", trigger=[16,16,3,1], pp_poison=0.01, save_num=32, test_sample_num=4096, source=0, target=3)
 # b.train(num_epochs=20, batch_size=128, save_model=True)
@@ -103,5 +111,5 @@ b = BackdoorAttacker(modelnet=ResNet18(3), modelpath="./model/model_ckpt/resnet_
 # b.poision(method="FeatureCollisionAttack", trigger=[16,16,3,1], pp_poison=0.01)
 # b.train()
 ### PoisoningAttackAdversarialEmbedding
-b.poision(method="PoisoningAttackAdversarialEmbedding", trigger=[16,16,3,1], pp_poison=0.01)
-b.train()
+# b.poision(method="PoisoningAttackAdversarialEmbedding", trigger=[16,16,3,1], pp_poison=0.01)
+# b.train()
