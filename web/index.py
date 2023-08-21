@@ -11,7 +11,7 @@ from flask import render_template, redirect, url_for, Flask, request, jsonify, s
 from flask import current_app as abort
 from multiprocessing import Process
 from gol import Taskparam
-from function.fairness import run_model_evaluate
+from function.fairness import run_model_evaluate, run_image_model_evaluate
 from flask_cors import *
 import threading
 import hashlib,base64
@@ -234,24 +234,31 @@ def ModelFairnessEvaluate():
         IOtool.add_subtask_info(tid, stid, value)
         IOtool.change_task_info(tid, "dataset", dataname)
         IOtool.change_task_info(tid, "model", modelname)
-        try:
-            metrics = json.loads(inputParam["metrics"])
-            senAttrList=json.loads(inputParam["senAttrList"])
-            tarAttrList=inputParam["tarAttrList"]
-            staAttrList=json.loads(inputParam["staAttrList"])
-        except:
-            metrics = inputParam["metrics"]
-            senAttrList=inputParam["senAttrList"]
-            tarAttrList=inputParam["tarAttrList"]
-            staAttrList=inputParam["staAttrList"]
+        
         logging = IOtool.get_logger(stid, tid)
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(run_model_evaluate, dataname, modelname, metrics, senAttrList, tarAttrList, staAttrList, logging=logging)
+        if dataname in ["Compas", "Adult", "German"]:
+            try:
+                metrics = json.loads(inputParam["metrics"])
+                senAttrList=json.loads(inputParam["senAttrList"])
+                tarAttrList=inputParam["tarAttrList"]
+                staAttrList=json.loads(inputParam["staAttrList"])
+            except:
+                metrics = inputParam["metrics"]
+                senAttrList=inputParam["senAttrList"]
+                tarAttrList=inputParam["tarAttrList"]
+                staAttrList=inputParam["staAttrList"]
+                
+            t2 = pool.submit(run_model_evaluate, dataname, modelname, metrics, senAttrList, tarAttrList, staAttrList, logging=logging)
+        else:
+            metrics = inputParam["metrics"]
+            test_mode = inputParam["test_mode"]
+            t2 = pool.submit(run_image_model_evaluate, dataname, modelname, metrics, test_mode, logging)
         IOtool.add_task_queue(tid, stid, t2, 300)
         res = t2.result()
         # res = run_model_evaluate(dataname, modelname, metrics, senAttrList, tarAttrList, staAttrList, logging=logging)
-        
-        res["Consistency"] = float(res["Consistency"])
+        if "Consistency" in res.keys():
+            res["Consistency"] = float(res["Consistency"])
         res["stop"] = 1
         IOtool.write_json(res,osp.join(ROOT,"output", tid, stid+"_result.json"))
         IOtool.change_subtask_state(tid, stid, 2)
@@ -291,19 +298,24 @@ def ModelFairnessDebias():
         IOtool.add_subtask_info(tid, AAtid, value)
         IOtool.change_task_info(tid, "dataset", dataname)
         IOtool.change_task_info(tid, "model", modelname)
-        
-        try:
-            metrics = json.loads(inputParam["metrics"])
-            senAttrList=json.loads(inputParam["senAttrList"])
-            tarAttrList=inputParam["tarAttrList"]
-            staAttrList=json.loads(inputParam["staAttrList"])
-        except:
-            metrics = inputParam["metrics"]
-            senAttrList=inputParam["senAttrList"]
-            tarAttrList=inputParam["tarAttrList"]
-            staAttrList=inputParam["staAttrList"]
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, senAttrList, tarAttrList, staAttrList)
+        
+        if dataname in ["Compas", "Adult", "German"]:
+            try:
+                metrics = json.loads(inputParam["metrics"])
+                senAttrList=json.loads(inputParam["senAttrList"])
+                tarAttrList=inputParam["tarAttrList"]
+                staAttrList=json.loads(inputParam["staAttrList"])
+            except:
+                metrics = inputParam["metrics"]
+                senAttrList=inputParam["senAttrList"]
+                tarAttrList=inputParam["tarAttrList"]
+                staAttrList=inputParam["staAttrList"]
+            t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, sensattrs = senAttrList, targetattr = tarAttrList, staAttrList = staAttrList)
+        else:
+            metrics = json.loads(inputParam["metrics"])
+            test_mode = inputParam["test_mode"]
+            t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, test_mode = test_mode)
         IOtool.add_task_queue(tid, AAtid, t2, 300)
         # interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, senAttrList, tarAttrList, staAttrList)
         # t2 = threading.Thread(target=interface.run_model_debias_api,args=(tid, AAtid, dataname, modelname, algorithmname, metrics, senAttrList, tarAttrList, staAttrList))
