@@ -32,6 +32,7 @@ from function.attack.attacks.attack import EvasionAttack
 from function.attack.attacks.config import MY_NUMPY_DTYPE
 from function.attack.estimators.estimator import BaseEstimator
 from function.attack.estimators.classification.classifier import ClassifierMixin
+from function.attack.attacks.utils import get_labels_np_array
 
 if TYPE_CHECKING:
     from function.attack.attacks.utils import CLASSIFIER_TYPE
@@ -91,7 +92,7 @@ class VirtualAdversarialMethod(EvasionAttack):
         :return: An array holding the adversarial examples.
         """
         x_adv = x.astype(MY_NUMPY_DTYPE)
-        preds = self.estimator.predict(x_adv, batch_size=self.batch_size)
+        preds = get_labels_np_array(self.estimator.predict(x_adv, batch_size=self.batch_size))
 
         if self.estimator.nb_classes == 2 and preds.shape[1] == 1:
             raise ValueError(
@@ -120,7 +121,7 @@ class VirtualAdversarialMethod(EvasionAttack):
             # Main loop of the algorithm
             for _ in range(self.max_iter):
                 var_d = self._normalize(var_d)
-                preds_new = self.estimator.predict((batch + var_d).reshape((-1,) + self.estimator.input_shape))
+                preds_new = get_labels_np_array(self.estimator.predict((batch + var_d).reshape((-1,) + self.estimator.input_shape)))
                 if (preds_new < 0.0).any() or (preds_new > 1.0).any():
                     raise TypeError(
                         "This attack requires a classifier predicting probabilities in the range [0, 1] as "
@@ -139,7 +140,7 @@ class VirtualAdversarialMethod(EvasionAttack):
                 var_d_new = np.zeros(var_d.shape).astype(MY_NUMPY_DTYPE)
                 for current_index in range(var_d.shape[1]):
                     var_d[:, current_index] += self.finite_diff
-                    preds_new = self.estimator.predict((batch + var_d).reshape((-1,) + self.estimator.input_shape))
+                    preds_new = get_labels_np_array(self.estimator.predict((batch + var_d).reshape((-1,) + self.estimator.input_shape)))
                     if (preds_new < 0.0).any() or (preds_new > 1.0).any():
                         raise TypeError(
                             "This attack requires a classifier predicting probabilities in the range [0, 1]"

@@ -185,7 +185,8 @@ class GRAPHITEWhiteboxPyTorch(EvasionAttack):
         pts = kwargs.get("pts") if "pts" in kwargs else None
 
         if y is None:
-            raise ValueError("Target labels `y` need to be provided.")
+            # raise ValueError("Target labels `y` need to be provided.")
+            y = self.estimator.predict(x)
 
         y = check_and_transform_label_format(y, self.estimator.nb_classes)
 
