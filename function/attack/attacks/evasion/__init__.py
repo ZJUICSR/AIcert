@@ -33,3 +33,5 @@ from function.attack.attacks.evasion.spatial_transformation import SpatialTransf
 from function.attack.attacks.evasion.targeted_universal_perturbation import TargetedUniversalPerturbation
 from function.attack.attacks.evasion.virtual_adversarial import VirtualAdversarialMethod
 from function.attack.attacks.evasion.wasserstein import Wasserstein
+from function.attack.attacks.evasion.sign_opt import SignOPTAttack
+
