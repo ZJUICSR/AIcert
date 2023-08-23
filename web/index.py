@@ -683,7 +683,7 @@ def get_result():
                 result[attack_type] = (IOtool.load_json(osp.join(ROOT,"output",tid,stid+"_result.json")))
         stopflag = 1
         for temp in  result.keys():
-            print("result[temp]:", temp,result)
+            # print("result[temp]:", temp,result)
             if "stop" not in result[temp].keys():
                 stopflag = 0
             elif  result[temp]["stop"] == 0:
@@ -691,7 +691,7 @@ def get_result():
             elif result[temp]["stop"] == 2:
                 stopflag = 2
         # print(result)
-        print("stopflag", stopflag)
+        # print("stopflag", stopflag)
         return jsonify({"code":1,"msg":"success","result":result,"stop":stopflag})
 
 # ----------------- 课题1 对抗攻击评估 -----------------
@@ -734,7 +734,7 @@ def AdvAttack():
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_adv_attack, tid, stid, dataname, model, adv_method, inputParam)
         IOtool.add_task_queue(tid, stid, t2, 300*len(adv_method))
-         
+        # interface.run_adv_attack(tid, stid, dataname, model, adv_method, inputParam)
         # t2 = threading.Thread(target=interface.run_adv_attack,args=(tid, stid, dataname, model, adv_method, inputParam))
         # t2.setDaemon(True)
         # t2.start()

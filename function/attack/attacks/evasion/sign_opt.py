@@ -90,7 +90,7 @@ class SignOPTAttack(EvasionAttack):
     def __init__(
         self,
         estimator: "CLASSIFIER_TYPE",
-        targeted: bool = True,
+        targeted: bool = False,
         epsilon: float = 0.001,
         num_trial: int = 100,
         max_iter: int = 1000,
@@ -100,7 +100,7 @@ class SignOPTAttack(EvasionAttack):
         beta: float = 0.001,
         eval_perform: bool = False,
         batch_size: int = 64,
-        verbose: bool = False,
+        verbose: bool = True,
     ) -> None:
         """
         Create a Sign_OPT attack instance.
