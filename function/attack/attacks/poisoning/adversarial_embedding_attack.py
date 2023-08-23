@@ -62,8 +62,8 @@ class PoisoningAttackAdversarialEmbedding(PoisoningAttackTransformer):
         # super().__init__(classifier=classifier)
         self.device = device
         self.backdoor = backdoor
-        self.lr = 0.001
-        self.alpha = 1
+        self.device = device
+        
     
     def poison_estimator(self, x: np.ndarray, y: np.ndarray, **kwargs) -> "CLASSIFIER_TYPE":
         return super().poison_estimator(x, y, **kwargs)
@@ -80,13 +80,8 @@ class PoisoningAttackAdversarialEmbedding(PoisoningAttackTransformer):
         input_test=x_train[0]
         input_test=input_test[np.newaxis, :]
         input_test[0,:] = 1
-        
-        if tmp_model == None:
-            self.model = model
-            self.new_model = NewModel(self.model, input_test=input_test, device=self.device).to(self.device)
-        else:
-            self.new_model = tmp_model
-        
+
+        self.new_model = NewModel(self.model, input_test=input_test, device=self.device).to(self.device)
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = optim.Adam(self.new_model.parameters(), lr=self.lr)
 
@@ -98,24 +93,14 @@ class PoisoningAttackAdversarialEmbedding(PoisoningAttackTransformer):
         num_batch = int(np.ceil(len(x_train) / float(batch_size)))
         total_step = len(x_train)
 
-        train_loss1 = 0
-        train_loss2 = 0
-        for m in range(num_batch):
-            # Batch indexes
-            optimizer.zero_grad()
-            begin, end = (
-                m * batch_size,
-                min((m + 1) * batch_size, x_train.shape[0]),
-            )
-            # 前向传播
-            model_outputs1, model_outputs2 = self.new_model.forward(torch.from_numpy(x_train[begin:end]).to(self.device), epoch_num=epoch_num)
-            # 损失计算
-            loss1 = criterion(model_outputs1, torch.from_numpy(y_train[begin:end]).to(self.device))
-            loss2 = criterion(model_outputs2, torch.from_numpy(B[begin:end]).to(self.device).to(torch.int64))
-            loss = loss1 - self.alpha * loss2
-            loss.backward()
-            optimizer.step()
-            train_loss1 += loss1.item()
-            train_loss2 += loss2.item()
-        
-        return self.new_model, train_loss1 / total_step, train_loss2 / total_step
+        self.classifier = PyTorchClassifier (
+            model=model,
+            clip_values=(0.0, 1.0),
+            loss=criterion,
+            optimizer=optimizer,
+            input_shape=(3, 32, 32),
+            nb_classes=10,
+            device=self.device
+        )
+        acc, _ = compute_accuracy(self.classifier.predict(x_train, batch_size=batch_size), y_train)
+        print("Epoch [{}/{}], train_loss: {:.6f}, discriminator_loss: {:.16f}, accuracy: {:.6f}".format(epoch+1, num_epochs, train_loss1 / total_step, train_loss2 / total_step, acc))

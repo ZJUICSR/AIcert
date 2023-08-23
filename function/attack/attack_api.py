@@ -109,7 +109,7 @@ class EvasionAttacker():
         self.psra= compute_predict_accuracy(adv_predictions, real_lables)
         # 计算真正的攻击成功率，将本来分类错误的样本排除在外
         self.coverrate, self.asr  = compute_attack_success(real_lables, clean_predictions, adv_predictions)
-        self.save_examples(save_num, real_lables, cln_examples, clean_predictions, adv_examples, adv_predictions, kwargs["save_path"])
+        self.save_examples(save_num, self.nb_classes, real_lables, cln_examples, clean_predictions, adv_examples, adv_predictions, kwargs["save_path"])
         return adv_examples
     
     def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, clean_prediction: np.ndarray, adv_example: np.ndarray, adv_prediction: np.ndarray, path:str="./results/"):
@@ -120,33 +120,31 @@ class EvasionAttacker():
         except Exception as e:
             shutil.rmtree(os.path.join(path,self.method))
             os.makedirs(os.path.join(path,self.method))
-
-        if save_num <= 0:
-            return
-        else:
-            l = np.argmax(label,1)
-            s = np.argmax(clean_prediction,1)
-            d = np.argmax(adv_prediction, 1)
-            real_adv_examples = adv_example.take(np.where(s != d), axis=0)[0]
-
-            random_index = random.sample(range(0, len(real_adv_examples)), len(real_adv_examples))
-            l = np.argmax(label,1)
-            for i in range(len(real_adv_examples)):
-                if clean_example[random_index[i]].shape[0] == 1:
-                    tmpc = clean_example[random_index[i]][0]
-                    tmpa = adv_example[random_index[i]][0]
-                else:
-                    tmpc = clean_example[random_index[i]].transpose(1,2,0)
-                    tmpa = adv_example[random_index[i]].transpose(1,2,0)
-                clean = Image.fromarray(np.uint8(255*tmpc))
-                clean.save(path+"index{}_clean_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]]))
-                adv = Image.fromarray(np.uint8(255*tmpa))
-                adv.save(path+"index{}_adv_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]]))
-                per = np.uint8(255*tmpc) - np.uint8(255*tmpa)
-                per = per + np.abs(np.min(per))
-                per = Image.fromarray(np.uint8(255*per))
-                per.save(path+"index{}_per_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]]))
-                if i >= save_num - 1:
+        
+        l = np.argmax(label,1)
+        s = np.argmax(clean_prediction,1)
+        d = np.argmax(adv_prediction, 1)
+        used_list = []
+        for i in range(save_num):
+            for k in range(len(s)):
+                if s[k] != d[k] and l[k] == i%class_num and s[k] == l[k]:
+                    if k in used_list:
+                        break
+                    used_list.append(k)
+                    if clean_example[k].shape[0] == 1:
+                        tmpc = clean_example[k][0]
+                        tmpa = adv_example[k][0]
+                    else:
+                        tmpc = clean_example[k].transpose(1,2,0)
+                        tmpa = adv_example[k].transpose(1,2,0)
+                    clean = Image.fromarray(np.uint8(255*tmpc))
+                    clean.save(path+"/"+self.method+"/"+"index{}_clean_l{}_t{}.jpeg".format(i, l[k], d[k]))
+                    adv = Image.fromarray(np.uint8(255*tmpa))
+                    adv.save(path+"/"+self.method+"/"+"index{}_adv_l{}_t{}.jpeg".format(i, l[k], d[k]))
+                    per = np.uint8(255*tmpc) - np.uint8(255*tmpa)
+                    per = per + np.abs(np.min(per))
+                    per = Image.fromarray(np.uint8(255*per))
+                    per.save(path+"/"+self.method+"/"+"index{}_per_l{}_t{}.jpeg".format(i, l[k], d[k]))
                     break
 
     def print_res(self) -> None:
@@ -178,12 +176,96 @@ class BackdoorAttacker():
             raise ValueError("Dataset not supported")
     
     # 添加固定样式的后门
-    def add_backdoor(self, x: np.ndarray):
-        if self.px+self.l >= x.shape[2] or self.py+self.l >= x.shape[3]:
+    def add_backdoor(x: np.ndarray, px=25, py=25, l=2, value=2):
+        if px+l >= x.shape[2] or py+l >= x.shape[3]:
             raise ValueError("Invalid px or py!")
         xt = x.copy()
         xt[:, :, self.px:self.px+self.l, self.py:self.py+self.l] = self.value
         return xt
+    
+    # 传入整个将用于训练的数据集，按照比例和目标进行自动的投毒
+    # 返回投毒后的数据集和一个用来标识投毒样本的列表
+    def poison(self, xs: np.ndarray, ys: np.ndarray, target: np.ndarray, pp_poison: float, add_backdoor_func = add_backdoor, batch_size=256):
+        
+        # backdoor_item是为了应对FeatureCollisionAttack中对于攻击实体的选择
+        # 默认将最后一层作为特征层
+        name = [item[0] for item in self.model._modules.items()]
+        if self.method == "PoisoningAttackBackdoor":
+            self.attacker = PoisoningAttackBackdoor(add_backdoor_func)
+        elif self.method == "PoisoningAttackCleanLabelBackdoor":
+            # 这种情况下的投毒比例是对于一个类的样本而言的
+            self.attackerbase = PoisoningAttackBackdoor(add_backdoor_func)
+            self.attacker = PoisoningAttackCleanLabelBackdoor(target=target, pp_poison=pp_poison, proxy_classifier=self.classifier, batch_size=batch_size, backdoor=self.attackerbase)
+        elif self.method == "FeatureCollisionAttack":
+            # 本方法中的target是指作为后门实体的一个样本
+            all_indices = np.arange(len(xs))
+            source_indices = all_indices[np.all(ys == self.source, axis=1)]
+            selected_indices = np.random.choice(len(source_indices), 1)
+            backdoor_item = xs[selected_indices[0]:selected_indices[0]+1,:]
+            self.attacker = FeatureCollisionAttack(classifier=self.classifier, target=backdoor_item, feature_layer=name[len(name)-1])
+        else:
+            # PoisoningAttackAdversarialEmbedding
+            self.attackerbase = PoisoningAttackBackdoor(add_backdoor_func)
+            self.attacker = PoisoningAttackAdversarialEmbedding(backdoor=self.attackerbase, device=self.device)
+
+        # 对于没有自动选择样本进行投毒操作的，这里通过比例和攻击要求为其选择样本进行投毒
+        # 防止修改原样本
+        x, y = xs.copy(), ys.copy()
+        total_num = len(x)
+        if self.method == "PoisoningAttackBackdoor":
+            select_list = random.sample(range(0, total_num), int(total_num*pp_poison))
+            print(int(total_num*pp_poison))
+            x_needp = x.take(select_list, axis=0)
+            # y_needp = y.take(select_list, axis=0)
+            x_p, y_p = self.attacker.poison(x_needp, target)
+            for i, j in enumerate(select_list):
+                x[j,:,:,:] = x_p[i,:,:,:]
+                y[j,:] = y_p[i,:]
+            return x, y, select_list
+        elif self.method == "PoisoningAttackAdversarialEmbedding":
+            select_list = random.sample(range(0, total_num), int(total_num*pp_poison))
+            print(int(total_num*pp_poison))
+            x_needp = x.take(select_list, axis=0)
+            # y_needp = y.take(select_list, axis=0)
+            x_p, y_p = self.attacker.poison(x_needp, target)
+            for i, j in enumerate(select_list):
+                x[j,:,:,:] = x_p[i,:,:,:]
+                y[j,:] = y_p[i,:]
+            return x, y, select_list
+        elif self.method == "FeatureCollisionAttack":
+            data = np.copy(x)
+            estimated_labels = np.copy(y)
+            all_indices = np.arange(len(data))
+            target_indices = all_indices[np.all(estimated_labels == target, axis=1)]
+            print(int(len(target_indices)*pp_poison))
+            num_poison = int(pp_poison * len(target_indices))
+            selected_indices = np.random.choice(len(target_indices), num_poison)
+            xp = x.take(selected_indices, axis=0)
+            xp = self.attacker.poison(xp)
+            for i, j in enumerate(selected_indices):
+                x[j] = xp[i]
+                y[i] = target[0]
+            return x, y, selected_indices
+        else:
+            return self.attacker.poison(x, y)
+
+    def finetune(self, x_train: np.ndarray, y_train: np.ndarray, x_test: np.ndarray, y_test: np.ndarray, select_list: list=[], test_list: list=[], num_epochs: int=40, batch_size: int=700, lr=0.001, alpha=500):
+        """
+        模型在投毒样本上重新训练和微调
+        """
+        print("(总体样本准确率，干净样本准确率，投毒样本准确率)")
+        if self.method == "PoisoningAttackAdversarialEmbedding":
+            self.attacker.fintune(self.model, x_train, y_train, select_list, num_epochs=num_epochs, batch_size=batch_size, lr=0.001, alpha=alpha)
+            all, clean, backdoor = self.evaluate(x_test, y_test, test_list)
+            print((all, clean, backdoor))
+            self.save_model(desc="all{}_clean{}_backdoor{}".format(all, clean, backdoor))
+        else:
+            num_batch = int(np.ceil(len(x_train) / float(batch_size)))
+            for i in tqdm(range(num_epochs), desc="Training"):
+                self.classifier.fit(x_train, y_train, nb_epochs=1, batch_size=num_batch, show=False)
+                all, clean, backdoor = self.evaluate(x_test, y_test, test_list)
+                print((all, clean, backdoor))
+                self.save_model(desc="all{}_clean{}_backdoor{}".format(all, clean, backdoor), epoch=i)
     
     # 两个评价函数
     def compute_accuracy(self, x: np.ndarray, y: np.ndarray, batch_size:int=100):
@@ -205,7 +287,7 @@ class BackdoorAttacker():
             # 总样本上的准确率
             self.accuracy, _ = compute_accuracy(self.classifier.predict(xs, batch_size=batch_size), ys)
             # 干净样本上的准确率
-            self.accuracyonbm, _ = compute_accuracy(self.classifier.predict(x_clean, batch_size=batch_size), y_clean)
+            self.accuracyonbm = self.accuracy
             # 攻击成功率
             # 对于冲突碰撞攻击，当一个样本的真实标签为原标签且预测标签为目标标签的时候认为攻击成功
             self.attack_success_rate = np.sum(np.logical_and(np.argmax(ys, axis=1) == np.argmax(self.source, axis=0), np.argmax(self.classifier.predict(xs, batch_size=batch_size), axis=1) == np.argmax(self.target, axis=0)))/ np.sum(np.argmax(ys, axis=1) == np.argmax(self.source, axis=0))
@@ -280,23 +362,21 @@ class BackdoorAttacker():
         if self.method == "FeatureCollisionAttack":
             x_test = x_select_tmp
             y_test = y_select_tmp
-            test_plist = np.arange(len(x_select))[np.all(y_select == self.source, axis=1)]
+            test_plist = [0]
         else:
-            x_test, y_test, test_plist = self.data_poison(x_select_tmp, y_select_tmp, self.target, self.source, pp_poison=0.5)
+            x_test, y_test, test_plist = self.poison(x_select_tmp, y_select_tmp, self.target, pp_poison=0.5)
+        
         # 根据比例进行训练集投毒
-        if self.method in ["PoisoningAttackBackdoor", "PoisoningAttackAdversarialEmbedding"]:
-            self.poisoned_num = int(pp_poison*len(x_train_tmp))
-        else:
-            self.poisoned_num = int(pp_poison*np.sum(np.argmax(y_train_tmp, axis=1) == np.argmax(self.target, axis=0)))
+        x_train, y_train, plist= self.poison(x_train_tmp, y_train_tmp, self.target, pp_poison=pp_poison)
+        self.poisoned_num = len(plist)
         print("投毒样本数目:{}".format(self.poisoned_num))
-        x_train, y_train, plist= self.data_poison(x_train_tmp, y_train_tmp, self.target, self.source, pp_poison=pp_poison)
+
         # 保存部分投毒样本
         if save_path != None:
-            self.save_examples(save_num=32, label=y_train_tmp[plist], clean_example=x_train_tmp[plist], poisoned_example=x_train[plist], path=save_path)
+            self.save_examples(save_num=32, class_num=self.classifier.nb_classes, label=y_train_tmp[plist], clean_example=x_train_tmp[plist], poisoned_example=x_train[plist], path=save_path)
         
         # 测试投毒攻击效果的时候都在测试样本上进行
         # 对于特征冲突攻击，不需要考虑测试数据集的投毒
-        print("(总体样本准确率，干净样本准确率，投毒样本准确率)")
         print(self.evaluate(x_test, y_test, test_plist, batch_size=batch_size))
         self.finetune(x_train, y_train, x_test, y_test, plist, test_plist, batch_size=batch_size, num_epochs=num_epochs)
         print(self.evaluate(x_test, y_test, test_plist, batch_size=batch_size))
@@ -312,9 +392,12 @@ class BackdoorAttacker():
                 os.makedirs(path)
         path = path + desc + ".pth"
         torch.save(self.classifier.model.state_dict(), path)
-
-    def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, poisoned_example: np.ndarray, path:str="./results/"):
-        path = path+self.method+"/example/"
+    
+    def save_examples(self, save_num, class_num, label: np.ndarray, clean_example: np.ndarray, poisoned_example: np.ndarray, path:str="./results/"):
+        # 尽量均匀到类
+        if save_num <= 0:
+            return
+        path = os.path.join(path,self.method,"example")
         try:
             os.makedirs(path)
         except Exception as e:
