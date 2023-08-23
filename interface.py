@@ -21,7 +21,7 @@ from model.model_net.lenet import Lenet
 from model.model_net.resnet import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
 from function.attack import run_adversarial, run_backdoor
 import cv2
-from function.fairness import run_dataset_debias, run_model_debias
+from function.fairness import run_dataset_debias, run_model_debias, run_image_model_debias
 from function import concolic, env_test, deepsst, dataclean
 from function.ex_methods.module.func import get_loader, Logger, recreate_image, get_batchsize
 from function.ex_methods.module.generate_adv import get_adv_loader, sample_untargeted_attack
@@ -67,7 +67,7 @@ def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics 
     if dataname in ["Compas", "Adult", "German"]:
         res = run_model_debias(dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList, logging=logging)
     else:
-        res = run_image_model_debias(dataname, modelname, algorithmname, merics, test_mode, logging=logging)
+        res = run_image_model_debias(dataname, modelname, algorithmname, metrics, test_mode, logging=logging)
     res["stop"] = 1
     
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
