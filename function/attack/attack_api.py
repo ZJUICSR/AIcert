@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 # 逃逸攻击接口
+from .attacks.evasion import *
 from .attacks.evasion import FastGradientMethod, ProjectedGradientDescent, BasicIterativeMethod, DeepFool, SaliencyMapMethod, UniversalPerturbation, AutoAttack, GDUAP, CarliniWagner
 from .attacks.evasion import PixelAttack, SimBA, ZooAttack, SquareAttack
 from .attacks.evasion import BoundaryAttack, HopSkipJump, GeoDA, Fastdrop
