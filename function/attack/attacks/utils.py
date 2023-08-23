@@ -1342,6 +1342,7 @@ def get_file(filename: str, url: str, path: Optional[str] = None, extract: bool 
         path_ = os.path.expanduser("./")
     else:
         path_ = os.path.expanduser(path)
+        
     if not os.access(path_, os.W_OK):
         path_ = os.path.join("/tmp", ".Attack")
 
