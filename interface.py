@@ -200,7 +200,7 @@ def run_verify(tid, AAtid, param):
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
     
     
-def run_concolic(tid, AAtid, dataname, modelname, norm, times):
+def run_concolic(tid, AAtid, dataname, modelname, norm):
     """测试样本自动生成
     :params tid:主任务ID
     :params AAtid:子任务id
@@ -217,18 +217,19 @@ def run_concolic(tid, AAtid, dataname, modelname, norm, times):
     taskinfo[tid]["state"]=2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
     
-def run_dataclean(tid, AAtid, dataname, upload_flag, upload_path):
+def run_dataclean(tid, AAtid, dataname):
     """异常数据检测
     :params tid:主任务ID
     :params AAtid:子任务id
     :params dataname:数据集名称
-    :params upload_flag:上传标志
-    :params upload_path:上传文件路径
     :output res:需保存到子任务json中的返回结果/路径
     """
     logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
+    
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    res = dataclean.run_dataclean(dataname, int(upload_flag), upload_path, osp.join(ROOT,"output", tid, AAtid), logging)   
+    res = env_test.run_env_frame(matchmethod,frameworkname,frameversion, osp.join(ROOT,"output", tid, AAtid), logging)
+    # res = concolic.run_concolic(dataname, modelname, norm)  
+    res["detection_result"]=IOtool.load_json(res["env_test"]["detection_result"]) 
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     taskinfo[tid]["function"][AAtid]["state"]=2
@@ -255,7 +256,7 @@ def run_envtest(tid,AAtid,matchmethod,frameworkname,frameversion):
     taskinfo[tid]["function"][AAtid]["state"]=2
     taskinfo[tid]["state"]=2
     IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-
+    
 def run_coverage_neural(tid,AAtid,dataset,model, k, N):
     """单神经元测试准则
     :params tid:主任务ID
@@ -412,6 +413,7 @@ def run_modulardevelop(tid,AAtid, dataset, modelname, tuner, init, epoch, iternu
     # taskinfo[tid]["state"]=2
     # IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
 
+
 def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
     """对抗攻击评估
     :params tid:主任务ID
@@ -493,7 +495,7 @@ def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
         save_path = osp.join(ROOT,"output", tid, stid)
         if not osp.exists(save_path):
             os.makedirs(save_path)
-        res[method]= run_backdoor(model, modelpath, dataname, method, pp_poison=inputParam[method]["pp_poison"], source=inputParam[method]["source"], target=inputParam[method]["target"],trigger=inputParam[method]["trigger"], device=inputParam["device"], save_path=save_path)
+        res[method]= run_backdoor(model, modelpath, dataname, method, inputParam[method]["pp_poison"], inputParam[method]["target"], inputParam["device"], save_path)
         logging.info("[执行后门攻击]:{:s}后门攻击运行结束，投毒率为{}时，攻击成功率为{}%".format(method, inputParam[method]["pp_poison"], res[method]["attack_success_rate"]))
     res["stop"] = 1
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
