@@ -602,7 +602,7 @@ def get_result():
         # 使用postman获取参数
         try:
             inputdata = json.loads(request.data)
-            # print(inputdata)
+            print(inputdata)
             tid = inputdata["Taskid"]
             stidlist = inputdata["sid"]
         except:
@@ -610,7 +610,7 @@ def get_result():
         # 从web上传下来的参数
         if request.args.get("Taskid") != None:
             tid = request.args.get("Taskid")
-        # print("tid",tid)
+        print("tid",tid)
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         if stidlist== []:
             stidlist = taskinfo[tid]["function"].keys()
@@ -618,7 +618,7 @@ def get_result():
         
         if request.args.get("stid") != None:
             stidlist = request.args.get("stid")
-        # print(stidlist)
+        print(stidlist)
         result = {}
         for stid in stidlist:
             attack_type = taskinfo[tid]["function"][stid]["type"]
@@ -636,7 +636,7 @@ def get_result():
                 stopflag = 0
             elif  result[temp]["stop"] != 1:
                 stopflag = 0
-        # print(result)
+        print(result)
         return jsonify({"code":1,"msg":"success","result":result,"stop":stopflag})
 
 # ----------------- 课题4 形式化验证 -----------------
@@ -987,18 +987,21 @@ def Concolic():
     if (request.method == "GET"):
         return render_template("")
     elif (request.method == "POST"):
-        # concolic_dataset = request.form.get("dataname")
-        # concolic_model = request.form.get("modelname")
-        # norm = request.form.get("norm")
-        # times = request.form.get("times")
-        # tid = request.form.get("tid")
-        inputdata = json.loads(request.data)
-        print(inputdata)
-        concolic_dataset = inputdata["dataname"]
-        concolic_model = inputdata["modelname"]
-        norm = inputdata["norm"]
-        times = inputdata["times"]
-        tid = inputdata["tid"]
+        concolic_dataset = request.form.get("dataname")
+        concolic_model = request.form.get("modelname")
+        norm = request.form.get("norm")
+        times = request.form.get("times")
+        tid = request.form.get("tid")
+        try:
+            inputdata = json.loads(request.data)
+            print(inputdata)
+            concolic_dataset = inputdata["dataname"]
+            concolic_model = inputdata["modelname"]
+            norm = inputdata["norm"]
+            times = inputdata["times"]
+            tid = inputdata["tid"]
+        except:
+            pass
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
@@ -1210,17 +1213,20 @@ def DeepSstParamSet():
     if (request.method == "GET"):
         return render_template("")
     elif (request.method == "POST"):
-        inputdata = json.loads(request.data)
-        dataset = inputdata["dataset"]
-        modelname = inputdata["model"]
-        pertube = inputdata["pertube"]
-        m_dir = inputdata["m_dir"]
-        tid = inputdata["tid"]
-        # dataset = request.form.get("dataset")
-        # modelname = request.form.get("model")
-        # pertube = request.form.get("pertube")
-        # m_dir = request.form.get("m_dir")
-        # tid = request.form.get("tid")
+        dataset = request.form.get("dataset")
+        modelname = request.form.get("modelname")
+        pertube = request.form.get("pertube")
+        m_dir = request.form.get("m_dir")
+        tid = request.form.get("tid")
+        try:
+            inputdata = json.loads(request.data)
+            dataset = inputdata["dataset"]
+            modelname = inputdata["model"]
+            pertube = inputdata["pertube"]
+            m_dir = inputdata["m_dir"]
+            tid = inputdata["tid"]
+        except:
+            pass
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
