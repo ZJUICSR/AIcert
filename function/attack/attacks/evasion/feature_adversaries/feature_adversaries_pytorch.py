@@ -188,7 +188,8 @@ class FeatureAdversariesPyTorch(EvasionAttack):
         import torch  # lgtm [py/repeated-import]
 
         if y is None:
-            raise ValueError("The value of guide `y` cannot be None. Please provide a `np.ndarray` of guide inputs.")
+            # raise ValueError("The value of guide `y` cannot be None. Please provide a `np.ndarray` of guide inputs.")
+            y = x
         if x.shape != y.shape:
             raise ValueError("The shape of source `x` and guide `y` must be of same shape.")
         if x.shape[1:] != self.estimator.input_shape:  # pragma: no cover
