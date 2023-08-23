@@ -1323,7 +1323,6 @@ def ModelMeasureParamSet():
         tid = inputdata["tid"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
-        # AAtid = "S20230731_1708_42109a0"
         taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
         taskinfo[tid]["function"].update({AAtid:{
             "type":"ModelMeasure",
@@ -1332,7 +1331,7 @@ def ModelMeasureParamSet():
             "dataset": dataset,
             "model": model
         }})
-        taskinfo[tid]["dataset"]=""
+        taskinfo[tid]["dataset"]=dataset
         taskinfo[tid]["model"]=model
         IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
         t2 = threading.Thread(target=interface.run_modelmeasure,args=(tid, AAtid, dataset, model, naturemethod, natureargs, advmethod, advargs, measuremethod))
@@ -1343,7 +1342,40 @@ def ModelMeasureParamSet():
     else:
         abort(403)
 
-
+# ----------------- 课题2 模型模块化开发 -------------------
+@app.route('/MDTest/ModularDevelopParamSet', methods=['GET','POST']) 
+def ModularDevelopParamSet():
+    if (request.method == "GET"):
+        return render_template("")
+    elif (request.method == "POST"):
+        inputdata = json.loads(request.data)
+        dataset = inputdata["dataset"]
+        model = inputdata["model"]
+        tuner = inputdata["tuner"]
+        init = inputdata["init"]
+        epoch = inputdata["epoch"]
+        iternum = inputdata["iternum"]
+        tid = inputdata["tid"]
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        AAtid = "S"+IOtool.get_task_id(str(format_time))
+        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
+        taskinfo[tid]["function"].update({AAtid:{
+            "type":"ModularDevelop",
+            "state":0,
+            "name":["ModularDevelop"],
+            "dataset": dataset,
+            "model": model
+        }})
+        taskinfo[tid]["dataset"]=dataset
+        taskinfo[tid]["model"]=model
+        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        t2 = threading.Thread(target=interface.run_modulardevelop,args=(tid, AAtid, dataset, model, tuner, init, epoch, iternum))
+        t2.setDaemon(True)
+        t2.start()
+        res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
+        return jsonify(res)
+    else:
+        abort(403)
 
 def app_run(args):
     web_config={'host':args.host,'port':args.port,'debug':args.debug}
