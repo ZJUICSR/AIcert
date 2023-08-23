@@ -96,7 +96,8 @@ class TargetedUniversalPerturbation(EvasionAttack):
         :return: An array holding the adversarial examples.
         """
         if y is None:
-            raise ValueError("Labels `y` cannot be None.")
+            y = self.estimator.predict(x)
+            # raise ValueError("Labels `y` cannot be None.")
 
         if self.estimator.nb_classes == 2 and y.shape[1] == 1:
             raise ValueError(
