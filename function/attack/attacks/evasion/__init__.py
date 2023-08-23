@@ -17,7 +17,7 @@ from function.attack.attacks.evasion.zoo import ZooAttack
 from function.attack.attacks.evasion.gd_uap import GDUAP
 from function.attack.attacks.evasion.fastdrop import Fastdrop
 
-from function.attack.attacks.evasion.adversarial_patch.adversarial_patch import AdversarialPatch
+# from function.attack.attacks.evasion.adversarial_patch.adversarial_patch import AdversarialPatch
 from function.attack.attacks.evasion.auto_projected_gradient_descent import AutoProjectedGradientDescent
 from function.attack.attacks.evasion.auto_conjugate_gradient import AutoConjugateGradient
 from function.attack.attacks.evasion.boundary import BoundaryAttack
@@ -30,5 +30,5 @@ from function.attack.attacks.evasion.newtonfool import NewtonFool
 from function.attack.attacks.evasion.spatial_transformation import SpatialTransformation
 from function.attack.attacks.evasion.targeted_universal_perturbation import TargetedUniversalPerturbation
 from function.attack.attacks.evasion.virtual_adversarial import VirtualAdversarialMethod
-from function.attack.attacks.evasion.wasserstein import Wasserstein
+# from function.attack.attacks.evasion.wasserstein import Wasserstein
 from function.attack.attacks.evasion.sign_opt import SignOPTAttack
