@@ -99,7 +99,7 @@ class GRAPHITEWhiteboxPyTorch(EvasionAttack):
     def __init__(
         self,
         classifier: "PyTorchClassifier",
-        net_size: Tuple[int, int],
+        net_size: Tuple[int, int] = (10, 10),
         min_tr: float = 0.8,
         num_xforms: int = 100,
         step_size: float = 0.0157,

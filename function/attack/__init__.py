@@ -60,15 +60,47 @@ def run_adversarial(model, modelpath, dataname, method, attackparam, device):
         "TIFGSM":"TIFGSM",
         "TPGD":"TPGD",
         "VMIFGSM":"VMIFGSM",
-        "VNIFGSM":"VNIFGSM"
+        "VNIFGSM":"VNIFGSM",
+        "AdversarialPatch":"AdversarialPatch",
+        "AutoPGDL1":"AutoProjectedGradientDescent",
+        "AutoPGDL2":"AutoProjectedGradientDescent",
+        "AutoPGDLinf":"AutoProjectedGradientDescent",
+        "Auto-CGL1":"AutoConjugateGradient",
+        "Auto-CGL2":"AutoConjugateGradient",
+        "Auto-CGLinf":"AutoConjugateGradient",
+        "BoundaryAttack":"BoundaryAttack",
+        "ElasticNetL1":"ElasticNet",
+        "ElasticNetL2":"ElasticNet",
+        "ElasticNet-EN":"ElasticNet",
+        "FeatureAdversaries":"FeatureAdversariesPyTorch",
+        "GRAPHITE":"GRAPHITEWhiteboxPyTorch",
+        # "LaserAttack":"LaserAttack",
+        "NewtonFool":"NewtonFool",
+        # "ThresholdAttack":"ThresholdAttack",
+        "SpatialTransformation":"SpatialTransformation",
+        "TargetedUniversalPerturbationL2":"TargetedUniversalPerturbation",
+        "TargetedUniversalPerturbationLinf":"TargetedUniversalPerturbation",
+        "VirtualAdversarialMethod":"VirtualAdversarialMethod",
+        "Wasserstein":"Wasserstein",
+        "SignOPTAttack":"SignOPTAttack"
     }
-    if method not in ["FABL1","FABL2","PGDRSL2"]:
+    if methoddict[method] == "ElasticNet":
+        if "L1" in method :
+            attackparam["decision_rule"] = "L1"
+        elif "L2" in method :
+            attackparam["decision_rule"] = "L2"
+        elif "-EN" in method :
+            attackparam["decision_rule"] = "EN"
+    elif method not in ["FABL1","FABL2","PGDRSL2"]:
         if "L1" in method :
             attackparam["norm"] = 1
         elif "L2" in method :
             attackparam["norm"] = 2
         elif "Linf" in method :
             attackparam["norm"] = "inf"
+    if method == "AdversarialPatch":
+        attackparam["patch_shape"] = tuple(attackparam["patch_shape"])
+        print("attackparam:",attackparam)
     res, piclist = a.generate(methoddict[method], **attackparam)
     return a.print_res(),piclist
 
