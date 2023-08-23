@@ -21,7 +21,7 @@ from model.model_net.lenet import Lenet
 from model.model_net.resnet import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
 from function.attack import run_adversarial, run_backdoor
 import cv2
-from function.fairness import run_dataset_debias, run_model_debias, run_image_model_debias
+from function.fairness import run_dataset_debias, run_model_debias, run_image_model_debias, run_model_evaluate, run_image_model_evaluate
 from function import concolic, env_test, deepsst, dataclean
 from function.ex_methods.module.func import get_loader, Logger, recreate_image, get_batchsize
 from function.ex_methods.module.generate_adv import get_adv_loader, sample_untargeted_attack
@@ -75,6 +75,30 @@ def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics 
     IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid=tid)
 
+def run_model_eva_api(tid, stid, dataname, modelname, metrics = [], senAttrList = [], tarAttrList = [], staAttrList= [], test_mode = True):
+    """模型公平性提升
+    :params tid:主任务ID
+    :params stid:子任务id
+    :params dataname:数据集名称
+    :params modelname:模型名称
+    :params algorithmname:优化算法名称
+    """
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    logging = IOtool.get_logger(stid)
+    if dataname in ["Compas", "Adult", "German"]:
+        res = run_model_evaluate(dataname, modelname, metrics, senAttrList, tarAttrList, staAttrList, logging=logging)
+    else:
+        res = run_image_model_evaluate(dataname, modelname, metrics, test_mode, logging=logging)
+    if "Consistency" in res.keys():
+        res["Consistency"] = float(res["Consistency"])
+    res["stop"] = 1
+    
+    IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
+    
+    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_task_success_v2(tid=tid)
 
 def run_data_debias_api(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList):
     """数据集公平性提升
