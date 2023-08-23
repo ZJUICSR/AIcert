@@ -313,7 +313,7 @@ def ModelFairnessDebias():
                 staAttrList=inputParam["staAttrList"]
             t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, sensattrs = senAttrList, targetattr = tarAttrList, staAttrList = staAttrList)
         else:
-            metrics = json.loads(inputParam["metrics"])
+            metrics = inputParam["metrics"]
             test_mode = inputParam["test_mode"]
             t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, test_mode = test_mode)
         IOtool.add_task_queue(tid, AAtid, t2, 300)
