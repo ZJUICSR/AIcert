@@ -11,7 +11,6 @@ from flask import render_template, redirect, url_for, Flask, request, jsonify, s
 from flask import current_app as abort
 from multiprocessing import Process
 from gol import Taskparam
-from function.fairness import run_model_evaluate, run_image_model_evaluate
 from flask_cors import *
 import threading
 import hashlib,base64
@@ -235,7 +234,6 @@ def ModelFairnessEvaluate():
         IOtool.change_task_info(tid, "dataset", dataname)
         IOtool.change_task_info(tid, "model", modelname)
         
-        logging = IOtool.get_logger(stid, tid)
         pool = IOtool.get_pool(tid)
         if dataname in ["Compas", "Adult", "German"]:
             try:
@@ -249,20 +247,16 @@ def ModelFairnessEvaluate():
                 tarAttrList=inputParam["tarAttrList"]
                 staAttrList=inputParam["staAttrList"]
                 
-            t2 = pool.submit(run_model_evaluate, dataname, modelname, metrics, senAttrList, tarAttrList, staAttrList, logging=logging)
+            t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname, modelname, metrics = metrics, senAttrList = senAttrList, tarAttrList = tarAttrList, staAttrList = staAttrList)
         else:
             metrics = inputParam["metrics"]
             test_mode = inputParam["test_mode"]
-            t2 = pool.submit(run_image_model_evaluate, dataname, modelname, metrics, test_mode, logging)
+            t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname, modelname, metrics = metrics, test_mode = test_mode)
         IOtool.add_task_queue(tid, stid, t2, 300)
-        res = t2.result()
-        # res = run_model_evaluate(dataname, modelname, metrics, senAttrList, tarAttrList, staAttrList, logging=logging)
-        if "Consistency" in res.keys():
-            res["Consistency"] = float(res["Consistency"])
-        res["stop"] = 1
-        IOtool.write_json(res,osp.join(ROOT,"output", tid, stid+"_result.json"))
-        IOtool.change_subtask_state(tid, stid, 2)
-        IOtool.change_task_success_v2(tid=tid)
+        res = {
+            "tid":tid,
+            "stid":stid
+        }
         return jsonify(res)
     else:
         abort(403)
