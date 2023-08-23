@@ -61,7 +61,7 @@ def run_adversarial(model, modelpath, dataname, method, attackparam, device):
         "TPGD":"TPGD",
         "VMIFGSM":"VMIFGSM",
         "VNIFGSM":"VNIFGSM",
-        "AdversarialPatch":"AdversarialPatch",
+        # "AdversarialPatch":"AdversarialPatch",
         "AutoPGDL1":"AutoProjectedGradientDescent",
         "AutoPGDL2":"AutoProjectedGradientDescent",
         "AutoPGDLinf":"AutoProjectedGradientDescent",
@@ -81,7 +81,7 @@ def run_adversarial(model, modelpath, dataname, method, attackparam, device):
         "TargetedUniversalPerturbationL2":"TargetedUniversalPerturbation",
         "TargetedUniversalPerturbationLinf":"TargetedUniversalPerturbation",
         "VirtualAdversarialMethod":"VirtualAdversarialMethod",
-        "Wasserstein":"Wasserstein",
+        # "Wasserstein":"Wasserstein",
         "SignOPTAttack":"SignOPTAttack"
     }
     if methoddict[method] == "ElasticNet":
