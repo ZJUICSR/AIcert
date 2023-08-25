@@ -191,11 +191,10 @@ class Explanation(object):
         See as_html() for parameters.
         This will throw an error if you don't have IPython installed"""
 
-        from IPython.core.display import display, HTML
-        display(HTML(self.as_html(labels=labels,
+        return self.as_html(labels=labels,
                                   predict_proba=predict_proba,
                                   show_predicted_value=show_predicted_value,
-                                  **kwargs)))
+                                  **kwargs)
 
     def save_to_file(self,
                      file_path,
@@ -246,15 +245,8 @@ class Explanation(object):
         if labels is None and self.mode == "classification":
             labels = self.available_labels()
 
-        this_dir, _ = os.path.split(__file__)
-        bundle = open(os.path.join(this_dir, 'bundle.js'),
-                      encoding="utf8").read()
-
-        out = u'''<html>
-        <meta http-equiv="content-type" content="text/html; charset=UTF8">
-        <head><script>%s </script></head><body>''' % bundle
         random_id = id_generator(size=15, random_state=check_random_state(self.random_state))
-        out += u'''
+        out = u'''
         <div class="lime top_div" id="top_div%s"></div>
         ''' % random_id
 
@@ -321,6 +313,6 @@ class Explanation(object):
         %s
         </script>
         ''' % (random_id, predict_proba_js, predict_value_js, exp_js, raw_js)
-        out += u'</body></html>'
+        
 
         return out

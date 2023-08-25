@@ -326,7 +326,7 @@ class PerturbationSynonym(Perturbation):
         return 'perturbation(Synonym-based word substitution budget={}, eps={})'.format(
             self.budget, self.eps)
 
-    def _load_synonyms(self, path='third_party/auto_LiRPA/data/synonyms.json'):
+    def _load_synonyms(self, path='dataset/auto_LiRPA_dataset/data/synonyms.json'):
         with open(path) as file:
             self.synonym = json.loads(file.read())
         logger.info('Synonym list loaded for {} words'.format(len(self.synonym)))
