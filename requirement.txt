@@ -12,18 +12,21 @@ cleanlab==1.0
 seaborn==0.11.2
 graphviz==0.17
 pyecharts==1.9.1
-adversarial-robustness-toolbox==1.7.2
 ai_benchmark==0.1.2
 gpustat==0.6.0
 networks==0.3.7
 opencv-python==4.5.5.64
-
+thop==0.1.1
+advertorch==0.2.3
+pydantic==1.8.2
+adversarial-robustness-toolbox==1.14.1
+scikit-learn==1.0.2
 --find-links https://download.pytorch.org/whl/cu113/torch_stable.html
 torch==1.10.2+cu113
 torchvision==0.11.3+cu113
 torchaudio==0.10.2+cu113
-
-
+python-dotenv==0.19.2
+toml==0.10.2
 chardet-5.1.0
 Flask==2.0.3
 Jinja2==3.1.1
