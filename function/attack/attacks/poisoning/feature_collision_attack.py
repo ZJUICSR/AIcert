@@ -24,7 +24,6 @@ class FeatureCollisionAttack(PoisoningAttackWhiteBox):
         "max_iter",
         "similarity_coeff",
         "watermark",
-        "verbose",
     ]
     _estimator_requirements = (BaseEstimator, NeuralNetworkMixin, ClassifierMixin)
 
@@ -72,7 +71,8 @@ class FeatureCollisionAttack(PoisoningAttackWhiteBox):
         if num_poison == 0:  # pragma: no cover
             raise ValueError("Must input at least one poison point")
         target_features = self.estimator.get_activations(self.target, self.feature_layer, 1)
-        for init_attack in trange(x, desc="Feature collision"):
+        for index in trange(len(x), desc="Feature collision", disable=True):
+            init_attack = x[index]
             old_attack = np.expand_dims(np.copy(init_attack), axis=0)
             poison_features = self.estimator.get_activations(old_attack, self.feature_layer, 1)
             old_objective = self.objective(poison_features, target_features, init_attack, old_attack)
