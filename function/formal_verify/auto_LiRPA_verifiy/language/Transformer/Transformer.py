@@ -23,11 +23,10 @@ import torch.nn as nn
 from auto_LiRPA_verifiy.language.Transformer.modeling import BertForSequenceClassification, BertConfig
 from auto_LiRPA_verifiy.language.Transformer.utils import convert_examples_to_features
 from auto_LiRPA_verifiy.language.language_utils import build_vocab
-from auto_LiRPA.auto_LiRPA.utils import logger
+
 from auto_LiRPA_verifiy.language.data_utils import get_sst_data
 
-PRE_TRAIN_MODEL = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                               'model',
+PRE_TRAIN_MODEL = os.path.join("model/auto_LiRPA_model",
                                'ckpt_transformer')
 
 

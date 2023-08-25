@@ -1338,10 +1338,12 @@ def get_file(filename: str, url: str, path: Optional[str] = None, extract: bool 
     :param verbose: If true, print download progress bar.
     :return: Path to the downloaded file.
     """
+    print("path:", path)
     if path is None:
         path_ = os.path.expanduser("./")
     else:
         path_ = os.path.expanduser(path)
+        
     if not os.access(path_, os.W_OK):
         path_ = os.path.join("/tmp", ".Attack")
 
@@ -1353,10 +1355,8 @@ def get_file(filename: str, url: str, path: Optional[str] = None, extract: bool 
         full_path = extract_path + ".tar.gz"
     else:
         full_path = os.path.join(path_, filename)
-
     # Determine if dataset needs downloading
     download = not os.path.exists(full_path)
-
     if download:
         logger.info("Downloading data from %s", url)
         error_msg = "URL fetch failure on {}: {} -- {}"
