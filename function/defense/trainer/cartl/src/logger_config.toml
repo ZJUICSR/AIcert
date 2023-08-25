@@ -1,0 +1,24 @@
+version = 1
+
+[formatters]
+    [formatters.base]
+    format = "%(asctime)s | %(name)s | %(levelname)s => %(message)s"
+    datefmt = "%Y-%m-%d %H:%M:%S"
+
+[handlers]
+    [handlers.console]
+    class = "logging.StreamHandler"
+    level = "INFO"
+    formatter = "base"
+    [handlers.file]
+    class = "logging.FileHandler"
+    level = "DEBUG"
+    formatter = "base"
+
+[loggers]
+    [loggers.StreamLogger]
+    handlers = ["console"]
+    level = "INFO"
+    [loggers.FileLogger]
+    handlers = ["console", "file"]
+    level = "DEBUG"
