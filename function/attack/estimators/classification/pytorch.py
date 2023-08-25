@@ -54,7 +54,7 @@ class PyTorchClassifier(ClassGradientsMixin, ClassifierMixin, PyTorchEstimator):
         loss: "torch.nn.modules.loss._Loss",
         input_shape: Tuple[int, ...],
         nb_classes: int,
-        device=torch.device("cuda:1" if torch.cuda.is_available() else "cpu"),
+        device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
         optimizer: Optional["torch.optim.Optimizer"] = None,  # type: ignore
         use_amp: bool = False,
         opt_level: str = "O1",
