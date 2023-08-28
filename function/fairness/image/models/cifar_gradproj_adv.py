@@ -9,7 +9,7 @@ from tensorboardX import SummaryWriter
 from image.models import basenet
 from image.models import dataloader
 from image.models.cifar_core import CifarModel
-import utils
+from image import utils
 
 class CifarGradProjAdv(CifarModel):
     def __init__(self, opt):
