@@ -10,7 +10,7 @@ import torchvision.transforms as transforms
 from tensorboardX import SummaryWriter
 from image.models import basenet
 from image.models import dataloader
-from image import utils
+from image logging.info(stid, "
 
 class CelebaModel():
     def __init__(self, opt):
