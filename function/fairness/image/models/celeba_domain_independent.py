@@ -11,7 +11,7 @@ from tensorboardX import SummaryWriter
 from image.models import basenet
 from image.models import dataloader
 from image.models.celeba_core import CelebaModel
-import utils
+from image import utils
 
 class CelebaDomainIndependent(CelebaModel):
     def __init__(self, opt):
