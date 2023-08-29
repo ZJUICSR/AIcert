@@ -1377,6 +1377,21 @@ def ModularDevelopParamSet():
     else:
         abort(403)
 
+
+@app.route('/Task/UploadData', methods=['POST'])
+def UploadData():
+     if request.method == "POST":
+         file = request.files.get('file')
+         data_type = request.form.get('type')
+         file_name = file.filename
+         suffix = os.path.splitext(file_name)[-1]
+         basePath = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)
+         save_dir = os.path.join(basePath[0], 'dataset/data/ckpt', data_type+'_data'+suffix)
+         # file_name = request.form.get()
+        #  save_dir = os.path.join(basePath, 'upload_data'+suffix)
+         file.save(save_dir)
+         return jsonify({'save_dir': save_dir})
+
 def app_run(args):
     web_config={'host':args.host,'port':args.port,'debug':args.debug}
     app.run(**web_config)
