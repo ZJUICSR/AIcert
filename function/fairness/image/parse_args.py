@@ -5,6 +5,7 @@ import torch
 from image import models
 from image import utils
 from image.metrics import *
+from IOtool import IOtool
 
 def collect_args():
     parser = argparse.ArgumentParser()
@@ -70,6 +71,7 @@ def create_exerpiment_setting(opt):
     # common experiment setting
     if opt['experiment'].startswith('cifar'):
         opt['device'] = torch.device('cuda' if opt['cuda'] else 'cpu')
+        # opt['device'] = IOtool.get_device()
         opt['print_freq'] = 50
         opt['batch_size'] = 128
         # opt['total_epochs'] = 200
@@ -89,7 +91,8 @@ def create_exerpiment_setting(opt):
         opt['metrics_list'] = sl_metrics
         
     elif opt['experiment'].startswith('celeba'):
-        opt['device'] = torch.device('cuda' if opt['cuda'] else 'cpu')
+        # opt['device'] = torch.device('cuda' if opt['cuda'] else 'cpu')
+        opt['device'] = IOtool.get_device()
         opt['print_freq'] = 50
         opt['batch_size'] = 32
         opt['total_epochs'] = 50
