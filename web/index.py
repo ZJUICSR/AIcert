@@ -249,10 +249,18 @@ def ModelFairnessEvaluate():
                 
             t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname, modelname, metrics = metrics, senAttrList = senAttrList, tarAttrList = tarAttrList, staAttrList = staAttrList)
         else:
-            metrics = inputParam["metrics"]
+            dataname = dataname.lower()
+            if dataname == "cifar10-s":
+                dataname = "cifar-s" 
+            try:
+                metrics = inputParam["metrics"]
+            except:
+                metrics = json.loads(inputParam["metrics"])
             test_mode = inputParam["test_mode"]
             t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname, modelname, metrics = metrics, test_mode = test_mode)
+            
         IOtool.add_task_queue(tid, stid, t2, 300)
+        # interface.run_model_eva_api( tid, stid, dataname, modelname, metrics = metrics, test_mode = test_mode)
         res = {
             "tid":tid,
             "stid":stid
@@ -307,14 +315,22 @@ def ModelFairnessDebias():
                 staAttrList=inputParam["staAttrList"]
             t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, sensattrs = senAttrList, targetattr = tarAttrList, staAttrList = staAttrList)
         else:
-            metrics = inputParam["metrics"]
+            dataname = dataname.lower()
+            # time.sleep(20)
+            if dataname == "cifar10-s":
+                dataname = "cifar-s" 
+            try:
+                metrics = inputParam["metrics"]
+            except:
+                metrics = json.loads(inputParam["metrics"])
             test_mode = inputParam["test_mode"]
             t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, test_mode = test_mode)
+            # time.sleep(20)
+            
         IOtool.add_task_queue(tid, AAtid, t2, 300)
+        # interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, test_mode = test_mode)
         # interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, senAttrList, tarAttrList, staAttrList)
-        # t2 = threading.Thread(target=interface.run_model_debias_api,args=(tid, AAtid, dataname, modelname, algorithmname, metrics, senAttrList, tarAttrList, staAttrList))
-        # t2.setDaemon(True)
-        # t2.start()
+        
         res = {
             "tid":tid,
             "stid":AAtid
