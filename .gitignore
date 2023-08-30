@@ -1,11 +1,11 @@
 output/*
+
 record
 web/static/imgs/tmp_imgs/*
 datasets/**
 results/**
 function/defense/trainer/test/*
 model/model-cifar-wideResNet/*
-model/model-mnist-smallCNN/*
 function/side/CMake_Research3/Build/*
 function/side/CMake_Research3/Trs/*
 function/side/CMake_Research3-bak
@@ -13,8 +13,6 @@ log.txt
 *.pth
 *.pyc
 *.*.pyc
-model/ckpt/*
-
 function/env_test/valid_extract.pkl
 model/robnet-resnet18-cifar10.pth
 function/defense/trainer/cartl/checkpoint/*
@@ -24,4 +22,12 @@ function/defense/trainer/cartl/logs/*
 function/formal_verify/auto_LiRPA_verifiy/vision/data
 *.pkl
 dataset
-model
+model/auto_LiRPA_model
+model/ckpt
+model/gan_model
+model/model-cifar-resnet18
+model/model-cifar-vgg16
+model/model-mnist-smallCNN
+model/model-mnist-vgg16
+__pycache__
+**/__pycache__
