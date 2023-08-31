@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from auto_LiRPA import PerturbationLpNorm, BoundedParameter
 
 
 # CNN, relatively large 4-layer
