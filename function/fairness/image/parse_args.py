@@ -76,7 +76,7 @@ def create_exerpiment_setting(opt):
         opt['batch_size'] = 128
         # opt['total_epochs'] = 200
         opt['total_epochs'] = 2
-        opt['save_folder'] = os.path.join('record/'+opt['experiment'], 
+        opt['save_folder'] = os.path.join('output/cache/record/'+opt['experiment'], 
                                           opt['experiment_name'])
         utils.creat_folder(opt['save_folder'])
     
@@ -94,9 +94,9 @@ def create_exerpiment_setting(opt):
         # opt['device'] = torch.device('cuda' if opt['cuda'] else 'cpu')
         opt['device'] = IOtool.get_device()
         opt['print_freq'] = 50
-        opt['batch_size'] = 32
+        opt['batch_size'] = 64
         opt['total_epochs'] = 50
-        opt['save_folder'] = os.path.join('record/'+opt['experiment'], 
+        opt['save_folder'] = os.path.join('output/cache/record/'+opt['experiment'], 
                                           opt['experiment_name'])
         utils.creat_folder(opt['save_folder'])
         opt['output_dim'] = 39
