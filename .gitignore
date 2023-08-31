@@ -31,3 +31,6 @@ model/model-mnist-smallCNN
 model/model-mnist-vgg16
 __pycache__
 **/__pycache__
+web/static/imgs/tmp_imgs
+output/task_info.json
+output/task_list.txt

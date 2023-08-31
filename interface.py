@@ -5,11 +5,12 @@ __author__ = 'chunlai'
 __copyright__ = 'Copyright © 2021/11/01, ZJUICSR'
 
 import os, json, copy, torch
-import os.path as osp
+import os.path as osp, cv2
 
 from IOtool import IOtool
 from torchvision import  transforms
 from function.formal_verify import *
+from function.formal_verify.knowledge_consistency import Model_zoo as zoomodels
 from PIL import Image
 from model.model_net.lenet import Lenet
 from model.model_net.resnet import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
@@ -679,111 +680,13 @@ def verify_img(tid, stid, net, dataset, eps, pic_path):
     IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
     return resp
-
-def knowledge_consistency(tid, stid, arch,dataset,img_path,layer):
+from ipdb import set_trace
+def reach(tid, stid, dataset, pic_path,label, target_label):
     IOtool.change_subtask_state(tid, stid, 1)
     IOtool.change_task_state(tid, 1)
     IOtool.set_task_starttime(tid, stid, time.time())
-    device = IOtool.get_device()
     logging = IOtool.get_logger(stid)
-    base=os.path.join(os.getcwd(),"model","ckpt")
-    base_path=os.path.join(base,'knowledge_consistency_checkpoints')
-    if arch=='vgg16_bn' and dataset=='mnist':
-        conv_layer=30
-        model_path1=os.path.join(base_path,'checkpoint_mnist_vgg16_bn_lr-2_sd0.pth.tar')
-        model_path2=os.path.join(base_path,'checkpoint_mnist_vgg16_bn_lr-2_sd5.pth.tar')
-        resume=os.path.join(base_path,f'{dataset}_{arch}','checkpoint_L30__a0.1_lr-4.pth.tar')
-    elif arch=='vgg16_bn' and dataset=='cifar10':
-        conv_layer=30
-        model_path1=os.path.join(base_path,'checkpoint_cifar10_vgg16_bn_lr-2_sd0.pth.tar')
-        model_path2=os.path.join(base_path,'checkpoint_cifar10_vgg16_bn_lr-2_sd5.pth.tar')
-        resume=os.path.join(base_path,f'{dataset}_{arch}','checkpoint_L30__a0.1_lr-4.pth.tar')
-    elif arch=='resnet18' and dataset=='mnist':
-        conv_layer=3
-        model_path1=os.path.join(base_path,'checkpoint_mnist_resnet18_lr-2_sd0.pth.tar')
-        model_path2=os.path.join(base_path,'checkpoint_mnist_resnet18_lr-2_sd5.pth.tar')
-        resume=os.path.join(base_path,f'{dataset}_{arch}','checkpoint_L3__a0.1_lr-4.pth.tar')
-    elif arch=='resnet18' and dataset=='cifar10':
-        conv_layer=3
-        model_path1=os.path.join(base_path,'checkpoint_cifar10_resnet18_lr-2_sd0.pth.tar')
-        model_path2=os.path.join(base_path,'checkpoint_cifar10_resnet18_lr-2_sd5.pth.tar')
-        resume=os.path.join(base_path,f'{dataset}_{arch}','checkpoint_L3__a0.1_lr-3.pth.tar')
-    else:
-        print(arch,dataset)
-        return None
-    if dataset=='mnist':
-        transform=transforms.Compose([transforms.Resize((224,224)),transforms.Grayscale(num_output_channels=3),
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))])
-    elif dataset=='cifar10':
-        transform=transforms.Compose([transforms.Resize((224,224)),transforms.ToTensor(),
-                                  transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])])
-    net1 = models.__dict__[arch](num_classes=10)
-    load_checkpoint(model_path1, net1)
-    net2 = models.__dict__[arch](num_classes=10)
-    load_checkpoint(model_path2, net2)
-    img = Image.open(img_path)
-    img = img.convert('RGB')
-
-    x_ori = transform(img)
-    y = net1(x_ori.unsqueeze(0))
-    y = np.argmax(y.cpu().detach().numpy())
-    x = get_feature(x_ori, net1,arch,conv_layer)
-    input_size = x.shape
-    output_size = x.shape
-    model = models.LinearTester(input_size,output_size, affine=False, bn = False, instance_bn=True).cuda()
-    checkpoint = torch.load(resume, map_location=torch.device(0))
-    model.load_state_dict(checkpoint['state_dict'])
-    del checkpoint
-    input = get_feature(x_ori,net1,arch,conv_layer)
-    target = get_feature(x_ori,net2,arch,conv_layer)
-    model.eval()
-    output, output_n, output_contrib, res = model.val_linearity(input.unsqueeze(0).cuda())
-    t=0
-    img_name=os.path.basename(img_path).split('.')[0]
-    pic_dir=os.path.dirname(img_path)
-    delta = target - output
-    # for t in range(len(output)):
-    t=layer
-    plt.figure(frameon=False)
-    plt.axis('off')
-    plt.imshow(output[t], cmap='jet', norm=None, vmin=output.min(), vmax=output.max())
-    plt.savefig(os.path.join(pic_dir,stid+f'_output_{t}.png'),bbox_inches='tight')
-    plt.close()
-    plt.figure(frameon=False)
-    plt.axis('off')
-    plt.imshow(input[t], cmap='jet', norm=None, vmin=input.min(), vmax=input.max())
-    plt.savefig(os.path.join(pic_dir,stid+f'_input_{t}.png'),bbox_inches='tight')
-    plt.close()
-    plt.figure(frameon=False)
-    plt.axis('off')
-    plt.imshow(target[t], cmap='jet', norm=None, vmin=target.min(), vmax=target.max())
-    plt.savefig(os.path.join(pic_dir,stid+f'_target_{t}.png'),bbox_inches='tight')
-    plt.close()
-    plt.figure(frameon=False)
-    plt.axis('off')
-    plt.imshow(delta[t], cmap='jet', norm=None, vmin=delta.min(), vmax=delta.max())
-    plt.savefig(os.path.join(pic_dir,stid+f'_delta_{t}.png'),bbox_inches='tight')
-    plt.close()
-    l2 = torch.norm(delta, p=2).numpy().tolist()
-    layers = len(target)
-    resp={'l2':l2,'input':f'static/imgs/tmp_imgs/{tid}/{stid}.png',
-                'output':f'static/imgs/tmp_imgs/{tid}/{stid}_output_{layer}.png',
-                'target':f'static/imgs/tmp_imgs/{tid}/{stid}_target_{layer}.png',
-                'delta':f'static/imgs/tmp_imgs/{tid}/{stid}_delta_{layer}.png',
-            }
-    resp["stop"] = 1
-    IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
-    IOtool.change_subtask_state(tid, stid, 2)
-    IOtool.change_task_success_v2(tid)
-    return resp,
-
-def reach(tid,stid,dataset,pic_path,label,target_label):
-    IOtool.change_subtask_state(tid, stid, 1)
-    IOtool.change_task_state(tid, 1)
-    IOtool.set_task_starttime(tid, stid, time.time())
-    device = IOtool.get_device()
-    logging = IOtool.get_logger(stid)
+    save_path = osp.join("output", tid, stid)
     logging.info(f"The reachability task starts ，dateset: {dataset}")
     base=os.path.join(os.getcwd(),"model","ckpt")
     base_path=os.path.join(base,'reach_checkpoints')
@@ -809,11 +712,11 @@ def reach(tid,stid,dataset,pic_path,label,target_label):
     epsilon = 0.02
     relaxation = 0.01
     logging.info(f"reachability verification")
-    reach_model = ReachMethod(model, image, label, 'logs',
+    set_trace()
+    reach_model = ReachMethod(model, image, label, save_path,
                          attack_block=attack_block,
                          epsilon=epsilon,
-                         relaxation=relaxation,
-                         logging=logging)
+                         relaxation=relaxation)
     output_sets = reach_model.reach()
     # sims = reach_model.simulate(num=100) 
     # num 越小越快
@@ -995,3 +898,104 @@ def run_side_api(trs_file, methods, tid, stid):
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
     IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
+
+
+
+def knowledge_consistency(tid, stid, arch,dataset,img_path,layer):
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    device = IOtool.get_device()
+    logging = IOtool.get_logger(stid)
+    base=os.path.join(os.getcwd(),"model","ckpt")
+    base_path=os.path.join(base,'knowledge_consistency_checkpoints')
+    if arch=='vgg16_bn' and dataset=='mnist':
+        conv_layer=30
+        model_path1=os.path.join(base_path,'checkpoint_mnist_vgg16_bn_lr-2_sd0.pth.tar')
+        model_path2=os.path.join(base_path,'checkpoint_mnist_vgg16_bn_lr-2_sd5.pth.tar')
+        resume=os.path.join(base_path,f'{dataset}_{arch}','checkpoint_L30__a0.1_lr-4.pth.tar')
+    elif arch=='vgg16_bn' and dataset=='cifar10':
+        conv_layer=30
+        model_path1=os.path.join(base_path,'checkpoint_cifar10_vgg16_bn_lr-2_sd0.pth.tar')
+        model_path2=os.path.join(base_path,'checkpoint_cifar10_vgg16_bn_lr-2_sd5.pth.tar')
+        resume=os.path.join(base_path,f'{dataset}_{arch}','checkpoint_L30__a0.1_lr-4.pth.tar')
+    elif arch=='resnet18' and dataset=='mnist':
+        conv_layer=3
+        model_path1=os.path.join(base_path,'checkpoint_mnist_resnet18_lr-2_sd0.pth.tar')
+        model_path2=os.path.join(base_path,'checkpoint_mnist_resnet18_lr-2_sd5.pth.tar')
+        resume=os.path.join(base_path,f'{dataset}_{arch}','checkpoint_L3__a0.1_lr-4.pth.tar')
+    elif arch=='resnet18' and dataset=='cifar10':
+        conv_layer=3
+        model_path1=os.path.join(base_path,'checkpoint_cifar10_resnet18_lr-2_sd0.pth.tar')
+        model_path2=os.path.join(base_path,'checkpoint_cifar10_resnet18_lr-2_sd5.pth.tar')
+        resume=os.path.join(base_path,f'{dataset}_{arch}','checkpoint_L3__a0.1_lr-3.pth.tar')
+    else:
+        print(arch,dataset)
+        return None
+    if dataset=='mnist':
+        transform=transforms.Compose([transforms.Resize((224,224)),transforms.Grayscale(num_output_channels=3),
+            transforms.ToTensor(),
+            transforms.Normalize((0.1307,), (0.3081,))])
+    elif dataset=='cifar10':
+        transform=transforms.Compose([transforms.Resize((224,224)),transforms.ToTensor(),
+                                  transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])])
+    net1 = zoomodels.__dict__[arch](num_classes=10)
+    load_checkpoint(model_path1, net1)
+    net2 = zoomodels.__dict__[arch](num_classes=10)
+    load_checkpoint(model_path2, net2)
+    img = Image.open(img_path)
+    img = img.convert('RGB')
+
+    x_ori = transform(img)
+    y = net1(x_ori.unsqueeze(0))
+    y = np.argmax(y.cpu().detach().numpy())
+    x = get_feature(x_ori, net1,arch,conv_layer)
+    input_size = x.shape
+    output_size = x.shape
+    model = zoomodels.LinearTester(input_size,output_size, affine=False, bn = False, instance_bn=True).cuda()
+    checkpoint = torch.load(resume, map_location=torch.device(0))
+    model.load_state_dict(checkpoint['state_dict'])
+    del checkpoint
+    input = get_feature(x_ori,net1,arch,conv_layer)
+    target = get_feature(x_ori,net2,arch,conv_layer)
+    model.eval()
+    output, output_n, output_contrib, res = model.val_linearity(input.unsqueeze(0).cuda())
+    t=0
+    img_name=os.path.basename(img_path).split('.')[0]
+    pic_dir=os.path.dirname(img_path)
+    delta = target - output
+    # for t in range(len(output)):
+    t=layer
+    plt.figure(frameon=False)
+    plt.axis('off')
+    plt.imshow(output[t], cmap='jet', norm=None, vmin=output.min(), vmax=output.max())
+    plt.savefig(os.path.join(pic_dir,stid+f'_output_{t}.png'),bbox_inches='tight')
+    plt.close()
+    plt.figure(frameon=False)
+    plt.axis('off')
+    plt.imshow(input[t], cmap='jet', norm=None, vmin=input.min(), vmax=input.max())
+    plt.savefig(os.path.join(pic_dir,stid+f'_input_{t}.png'),bbox_inches='tight')
+    plt.close()
+    plt.figure(frameon=False)
+    plt.axis('off')
+    plt.imshow(target[t], cmap='jet', norm=None, vmin=target.min(), vmax=target.max())
+    plt.savefig(os.path.join(pic_dir,stid+f'_target_{t}.png'),bbox_inches='tight')
+    plt.close()
+    plt.figure(frameon=False)
+    plt.axis('off')
+    plt.imshow(delta[t], cmap='jet', norm=None, vmin=delta.min(), vmax=delta.max())
+    plt.savefig(os.path.join(pic_dir,stid+f'_delta_{t}.png'),bbox_inches='tight')
+    plt.close()
+    l2 = torch.norm(delta, p=2).numpy().tolist()
+    layers = len(target)
+    resp={'l2':l2,'input':f'static/imgs/tmp_imgs/{tid}/{stid}.png',
+                'output':f'static/imgs/tmp_imgs/{tid}/{stid}_output_{layer}.png',
+                'target':f'static/imgs/tmp_imgs/{tid}/{stid}_target_{layer}.png',
+                'delta':f'static/imgs/tmp_imgs/{tid}/{stid}_delta_{layer}.png',
+            }
+    resp["stop"] = 1
+    IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_task_success_v2(tid)
+    return resp
+
