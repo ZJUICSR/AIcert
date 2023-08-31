@@ -2,20 +2,14 @@
 # -*- coding:utf-8 -*-
 import os.path as osp
 import interface
-import os, json, datetime, pickle, io, ast, time
+import os, json, datetime, time, base64, threading
 import pytz,shutil
-from function.attack.config import Conf
-import argparse
 from IOtool import IOtool
 from flask import render_template, redirect, url_for, Flask, request, jsonify, send_from_directory
 from flask import current_app as abort
-from multiprocessing import Process
-from gol import Taskparam
 from flask_cors import *
-import threading
-import hashlib,base64
+
 ROOT = os.getcwd()
-from concurrent.futures import ThreadPoolExecutor
 
 
 poollist = []
@@ -542,120 +536,6 @@ def index_evaluate():
     else:
         abort(403)
 
-# 对抗攻击评估和鲁棒性增强
-@app.route('/Attack/AdvAttack_old', methods=['POST'])
-def adv_attack():
-    if request.method == "POST":
-        data_path = osp.join(ROOT, "dataset/data")
-        # advInputData=json.loads(request.data)
-        advInputDatastr = list(request.form.to_dict())[0]
-        advInputData = json.loads(advInputDatastr)
-        for method in advInputData["Method"]:
-            for method_key in advInputData[method].keys():
-                if method_key in ["steps","inf_batch","popsize", "pixels", "sampling", "n_restarts","n_classes","eot_iter", "n_queries"]:
-                    advInputData[method][method_key]=int(advInputData[method][method_key])
-                elif method_key == "attacks":
-                    advInputData[method][method_key]=ast.literal_eval(advInputData[method][method_key])
-                elif method_key not in ["random_start", "norm", "loss", "version"]:
-                    advInputData[method][method_key]=float(advInputData[method][method_key])
-        tid = advInputData["Taskid"]
-        data_name = advInputData["Dataset"]["name"]
-        model_name = advInputData["Model"]["name"].lower()
-        pretrained = advInputData["Model"]["pretrained"]
-        methods = advInputData["Method"]
-        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
-        AAtid = "S"+IOtool.get_task_id(str(format_time))
-        outpath = osp.join(ROOT,"output",tid)
-        cachepath = osp.join(ROOT,"output/cache")
-        
-        attack_params={
-            'out_path': outpath,
-            'cache_path': cachepath,
-            "device": 0,
-            "tid":tid,
-            "stid":AAtid,
-            'model': {
-                'name': model_name,
-                'path': osp.join("models/ckpt",f"{data_name}_{model_name}.pt"),
-                'pretrained': pretrained
-                }
-        }
-        for method in methods:
-            attack_params[method]=advInputData[method]
-        print("******************root:",ROOT)
-        result = {
-            "summary":{},
-            "type":"AdvAttack",
-            "stop": 0
-        }
-        func = []
-        if advInputData["IsAdvAttack"]:
-            func.append("AdvAttack")
-            result["AdvAttack"] = {}
-        if advInputData["IsAdvTrain"]:
-            func.append("AdvTrain")
-            result["AdvTrain"] = {}
-        if advInputData["IsEnsembleDefense"]:
-            func.append("EnsembleDefense")
-            result["EnsembleDefense"] = {}
-        if advInputData["IsPACADetect"]:
-            func.append("PACA")
-            result["PACA"] = {}
-        value = {
-            "type":"AdvAttack",
-            "state":0,
-            "name":func,
-            "attackmethod":methods
-        }
-        IOtool.add_subtask_info(tid, stid, value)
-        IOtool.change_task_info(tid, "dataset", data_name)
-        IOtool.change_task_info(tid, "model", model_name)
-        # IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        # IOtool.write_json(result,osp.join(ROOT,"output",tid,AAtid+"_result.json"))
-        taskparam = Taskparam(taskinfo[tid],attack_params,result)
-        print("***************IsAdvAttack:")
-        print(advInputData["IsAdvAttack"])
-        print(method)
-        print("读取结果中……")
-        methodsall = ["FGSM","FFGSM","RFGSM","MIFGSM","BIM","PGD","PGDL2","DI2FGSM","EOTPGD"]
-        result = IOtool.load_json(osp.join(ROOT,"output","S20230103_1556_929f12a_result.json"))
-        for key in methodsall:
-            if key not in methods:
-                del result["AdvAttack"]["atk_acc"][key]
-                del result["AdvAttack"]["atk_asr"][key]
-                del result["AdvAttack"][key]
-                del result["AdvTrain"]["def_acc"][key]
-                del result["AdvTrain"]["def_asr"][key]
-                del result["EnsembleDefense"]["ens_asr"][key]
-                del result["EnsembleDefense"]["ens_acc"][key]
-                del result["PACA"][key]
-        if advInputData["IsAdvTrain"] != 1:
-            del result["AdvTrain"]
-        if advInputData["IsEnsembleDefense"] != 1:
-            del result["EnsembleDefense"]
-        if advInputData["IsPACADetect"] != 1:
-            del result["PACA"]
-        
-        IOtool.change_subtask_state(tid, stid, 1)
-        IOtool.change_task_state(tid, 1)
-        time.sleep(6*len(methods))
-        result["stop"]=1
-        IOtool.write_json(result,osp.join(ROOT,"output",tid,AAtid+"_result.json"))
-        IOtool.change_subtask_state(tid, stid, 2)
-        IOtool.change_task_success_v2(tid=tid)
-        return json.dumps({"code":1,"msg":"success","Taskid":tid,"AdvAttackid":AAtid})
-    else:
-        abort(403)
-        # advInputDatastr = list(request.form.to_dict())[0]
-        # advInputData = json.loads(advInputDatastr)
-        # tid = advInputData["Taskid"]
-        # format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
-        # AAtid = "S"+IOtool.get_task_id(str(format_time))
-        # from function.attack.old import adv_attack
-        # adv_attack.adv_attack(advInputData=advInputData,AAtid=AAtid)
-        # return json.dumps({"code":1,"msg":"success","Taskid":tid,"AdvAttackid":AAtid})
-   
-
 # 结果输出
 @app.route("/output/Resultdata", methods=["GET"])
 def get_result():
@@ -894,7 +774,7 @@ def model_reach():
                 f.write(base64.b64decode(pic.replace('data:image/png;base64,','')))
                 f.close()
         value = {
-            "type":"attack_dim_reduciton",
+            "type":"model_reach",
             "state":0,
             "dataset":dataset,
             "model":'CNN',
@@ -941,7 +821,7 @@ def model_consistency():
                 f.write(base64.b64decode(pic.replace('data:image/png;base64,','')))
                 f.close()
         value = {
-            "type":"attack_dim_reduciton",
+            "type":"model_consistency",
             "state":0,
             "dataset":dataset,
             "layer":layer,
@@ -951,8 +831,9 @@ def model_consistency():
         IOtool.change_task_info(tid, "dataset", dataset)
         IOtool.change_task_info(tid, "model", net)
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.knowledge_consistency, tid, stid, net,dataset,pic_path,laye)
+        t2 = pool.submit(interface.knowledge_consistency, tid, stid, net,dataset,pic_path,layer)
         IOtool.add_task_queue(tid, stid, t2, 300)
+        interface.knowledge_consistency(tid, stid, net,dataset,pic_path,layer)
         resp = t2.result()
         # resp=interface.knowledge_consistency(tid, stid, net,dataset,pic_path,layer)
         return json.dumps(resp,ensure_ascii=False)
@@ -992,7 +873,7 @@ def auto_verify_img():
                 f.write(base64.b64decode(pic.replace('data:image/png;base64,','')))
                 f.close()
         value = {
-            "type":"formal_verify_1",
+            "type":"auto_verify",
             "state":0,
             "dataset":dataset,
             "pic_path":pic_path,
