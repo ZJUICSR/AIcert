@@ -120,10 +120,9 @@ class EvasionAttacker():
         piclist = self.save_examples(save_num, real_lables, cln_examples, clean_predictions, adv_examples, adv_predictions, kwargs["save_path"])
         return adv_examples, piclist
     
-    def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, clean_prediction: np.ndarray, adv_example: np.ndarray, adv_prediction: np.ndarray, path:str="./results/"):
+    def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, clean_prediction: np.ndarray, adv_example: np.ndarray, adv_prediction: np.ndarray, path:str="output/cache/results/"):
         
         path = os.path.join(path, self.method+self.norm_param)
-        print("************path:",path)
         try:
             os.makedirs(path)
         except Exception as e:
@@ -245,7 +244,7 @@ class BackdoorAttacker():
         path =os.path.join( path , desc + ".pth")
         torch.save(self.classifier.model.state_dict(), path)
 
-    def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, poisoned_example: np.ndarray, path:str="./results/"):
+    def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, poisoned_example: np.ndarray, path:str="output/cache/results/"):
         path = os.path.join(path, self.method+self.norm_param)
         try:
             os.makedirs(path)
