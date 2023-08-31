@@ -14,7 +14,6 @@ from auto_LiRPA_verifiy.language.Transformer.Transformer import get_transformer_
 from auto_LiRPA_verifiy.language.lstm import get_lstm_demo_model
 from function.formal_verify.auto_verify import auto_verify_img
 from function.formal_verify.knowledge_consistency import load_checkpoint,get_feature
-from function.formal_verify.knowledge_consistency import Model_zoo as models
 from function.formal_verify.veritex import Net as reachNet
 from function.formal_verify.veritex.networks.cnn import Method as ReachMethod
 from function.formal_verify.veritex.utils.plot_poly import plot_polytope2d
