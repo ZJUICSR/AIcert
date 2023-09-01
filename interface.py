@@ -681,6 +681,15 @@ def verify_img(tid, stid, net, dataset, eps, pic_path):
     IOtool.change_task_success_v2(tid)
     return resp
 from ipdb import set_trace
+
+def submitAandB(tid, stid, a, b):
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_task_success_v2(tid)
+    return a + b
+
 def reach(tid, stid, dataset, pic_path,label, target_label):
     IOtool.change_subtask_state(tid, stid, 1)
     IOtool.change_task_state(tid, 1)
@@ -727,6 +736,9 @@ def reach(tid, stid, dataset, pic_path,label, target_label):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     logging.info(f"Output data process, reachable area drawing")
+    print("output_sets[0]:", output_sets[0])
+    print("output_sets[0][0]: ", output_sets[0][0])
+    print("[dim0, dim1]:", dim0, dim1 )
     for item in output_sets:
         out_vertices = item[0]
         plot_polytope2d(out_vertices[:, [dim0, dim1]], ax, color='b', alpha=1.0, edgecolor='k', linewidth=0.0,zorder=2)
