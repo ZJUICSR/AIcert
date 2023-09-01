@@ -67,10 +67,10 @@ class Network:
         self.layer_gradients = layer_gradients
         self.relaxation = relaxation
         self.label = label
-        set_trace()
+        
         for param in net.parameters():
             param.requires_grad = False
-
+        set_trace()
         self.sequential = self.forward_layer_sequential(net)
         self.layer_num = len(self.sequential) # the number of layers
         self.layer_inputs = self.forward_layer_input(image)
@@ -96,18 +96,21 @@ class Network:
             sequential_layers (sequential): Sequential model
         """
         net_layers = []
-        set_trace()
+        print("forward_layer_sequential sequential: ", len(net.sequential))
         for i in range(len(net.sequential)):
             type_name = type(net.sequential[i]).__name__
+            print("forward_layer_sequential type_name: ", type_name)
             if type_name in ['Flatten', 'MaxPool2d', 'BatchNorm2d','ReLU','DataParallel','Linear','Conv2d']:
                 net_layers.append(net.sequential[i])
             if type_name == 'Flatten':
                 self.flatten_pos = i
-        set_trace()
+        print("forward_layer_sequential end for: ", self.flatten_pos, net_layers)
         if self.is_cuda:
             sequential_layers = nn.Sequential(*net_layers).eval().cuda()
         else:
             sequential_layers = nn.Sequential(*net_layers).eval()
+            print("forward_layer_sequential sequential_layers: ", sequential_layers)
+        
         for param in sequential_layers.parameters():
             param.requires_grad = False
 
@@ -151,11 +154,9 @@ class Network:
             layer_fls_out (list): Output reachable sets represented by their vertices
             and vertices of their corresponding subset in the input domain
         """
-        set_trace()
-        layer_fls = [input_image_fl]
+        layer_fls = input_image_fl
         for self._layer in range(self.layer_num):
             self.reach_single_layer(layer_fls)
-        set_trace()
         layer_fls_out = [[afl.vertices, afl.vertices_init] for afl in layer_fls]
         return layer_fls_out
 
@@ -275,7 +276,6 @@ class Network:
         elif type_name == 'Conv2d':
             rp = self.layer_process_range[self._layer]
             self._image_frame = self.layer_inputs[self._layer][:, :, rp[0][0]:rp[1][0] + 1, rp[0][1]:rp[1][1] + 1]
-
             self.conv2d_layer(all_fls)
 
         elif type_name == 'ReLU' and self._layer<self.flatten_pos:
@@ -393,11 +393,9 @@ class Network:
                 im_input = cp.deepcopy(self._image_frame).repeat(im_fl.vertices.shape[0], axis=0)
                 ap2 = ap - rp[0]
                 im_input[:, :, ap2[0][0]:ap2[1][0] + 1, ap2[0][1]:ap2[1][1] + 1] = im_fl.vertices
-
                 im_input0 = torch.from_numpy(im_input)
                 im_output0 = self.sequential[self._layer](im_input0)
                 im_output = im_output0.numpy()
-
                 ap3 = ap_next - rp[0]
                 im_fl.vertices = cp.deepcopy(im_output[:, :, ap3[0][0]:ap3[1][0] + 1, ap3[0][1]:ap3[1][1] + 1])
 
@@ -866,10 +864,12 @@ class Method:
         # Partition input set into subsets
         all_input_fls = cl.partition_input(self.attack_range, pnum=4, poss=self.attack_poss)
         # pool = torch.multiprocessing.Pool(self.num_core)  # multiprocessing
-        pool = torch.multiprocessing.Pool(3)
+        pool = torch.multiprocessing.Pool(1)
         outputSets = []
-        outputSets.extend(pool.imap(net.regular_reach, all_input_fls))
-        pool.close()
+        outputSets = net.regular_reach(all_input_fls)
+        # outputSets.extend(pool.imap(net.regular_reach, all_input_fls))
+        # pool.close()
+        print("pool close")
         self.elapsed_time = time.time() - t0
         all_fls = [item for sublist in outputSets for item in sublist]
         print(f'Running time: {self.elapsed_time}')
@@ -961,10 +961,8 @@ class Method:
         hook_back = []
         print("get layer gradients")
         for layer in list(self.model._modules.items()):
-            print(f"get layer gradients {layer}")
             if layer[1]._modules != {}:
                 for sub_layer in list(layer[1]._modules.items()):
-                    print(f"get layer gradients {sub_layer}")
                     if (type(sub_layer[1]).__name__ != 'Dropout2d') and \
                             (type(sub_layer[1]).__name__ != 'Dropout'):
                         hook_back.append(Hook(sub_layer[1], backward=True))
@@ -990,7 +988,6 @@ class Method:
 
         layer_gradients = []
         for layer in hook_back:
-            print(f"hook back: {hook_back}")
             if layer.input != None:
                 for ele in layer.input:
                     if ele != None:
