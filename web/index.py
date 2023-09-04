@@ -31,53 +31,7 @@ def index():
 def index_function_introduction():
     if request.method == "GET":
         # return render_template("index_function_introduction.html")
-        return render_template("knowledge_consistency.html")
-
-@app.route('/index_task_center', methods=['GET'])
-def index_task_center():
-    if request.method == "GET":
-        return render_template("index_task_center.html")
-
-@app.route('/index_params_1', methods=['GET'])
-def index_params_1():
-    if request.method == "GET":
-        return render_template("index_params_1.html")
-
-@app.route('/index_params_2', methods=['GET'])
-def index_params_2():
-    if request.method == "GET":
-        return render_template("index_params_2.html")
-
-
-# 鲁棒性增强平台
-@app.route('/ModelRobust', methods=['GET'])
-def ModelRobust():
-    if (request.method == "GET"):
-        return render_template("model_robust.html")
-    else:
-        abort(403)
-
-# 公平性平台
-@app.route('/Fairness', methods=['GET'])
-def Fairness():
-    if (request.method == "GET"):
-        return render_template("fairness.html")
-    else:
-        abort(403)
-
-# 数据集公平性网页
-@app.route('/FairnessEva', methods=['GET'])
-def DataFairness():
-    if (request.method == "GET"):
-        return render_template("fairness_eva.html")
-    else:
-        abort(403)
-@app.route('/FairnessDebias', methods=['GET'])
-def ModelFairness():
-    if (request.method == "GET"):
-        return render_template("ModelFairness.html")
-    else:
-        abort(403)
+        return render_template("task_center.html")
 
 @app.route('/ex/uploadModel', methods=['POST'])
 def ExUploadModel():
@@ -519,22 +473,22 @@ def delete_task():
     body = {"code":1,"msg":"success"}
     return jsonify(body)
 # 输出界面
-@app.route("/index_results", methods=["GET", "POST"])
-def index_results():
-    if request.method == "GET":
-        tid = request.args.get('tid')
-        print(tid)
-        return render_template("index_results.html",tid=tid)
-    else:
-        abort(403)
+# @app.route("/index_results", methods=["GET", "POST"])
+# def index_results():
+#     if request.method == "GET":
+#         tid = request.args.get('tid')
+#         print(tid)
+#         return render_template("index_results.html",tid=tid)
+#     else:
+#         abort(403)
 
 # 执行界面
-@app.route("/index_evaluate", methods=["GET", "POST"])
-def index_evaluate():
-    if request.method == "GET":
-        return render_template("index_evaluate.html")
-    else:
-        abort(403)
+# @app.route("/index_evaluate", methods=["GET", "POST"])
+# def index_evaluate():
+#     if request.method == "GET":
+#         return render_template("index_evaluate.html")
+#     else:
+#         abort(403)
 
 # 结果输出
 @app.route("/output/Resultdata", methods=["GET"])
@@ -757,7 +711,7 @@ def model_reach():
         tid = inputParam["tid"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
-        img_dir=os.path.join(os.getcwd(),"web/static/imgs/tmp_imgs")
+        img_dir=os.path.join(os.getcwd(),"web/static/img/tmp_imgs")
         pic_path=os.path.join(img_dir,tid,stid+'.png')
         try:
             os.mkdir(os.path.join(img_dir,tid))
@@ -795,7 +749,7 @@ def model_reach():
         # resp=interface.reach(tid,stid,dataset.upper(),pic_path,label,target)
         
         return resp
-    return render_template('reach.html')
+    # return render_template('reach.html')
 @app.route('/knowledge_consistency',methods=["GET","POST"])
 def model_consistency():
     if request.method=='POST':
@@ -807,7 +761,7 @@ def model_consistency():
         pic=inputParam['pic']
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
-        img_dir=os.path.join(os.getcwd(),"web/static/imgs/tmp_imgs")
+        img_dir=os.path.join(os.getcwd(),"web/static/img/tmp_imgs")
         pic_path=os.path.join(img_dir,tid,stid+'.png')
         try:
             os.mkdir(os.path.join(img_dir,tid))
@@ -841,7 +795,7 @@ def model_consistency():
         # resp=interface.knowledge_consistency(tid, stid, net,dataset,pic_path,layer)
         return json.dumps(resp,ensure_ascii=False)
     
-    return render_template('knowledge_consistency.html')
+    # return render_template('knowledge_consistency.html')
 
 @app.route('/auto_verify_img',methods=["GET","POST"])
 def auto_verify_img():
@@ -859,7 +813,7 @@ def auto_verify_img():
         
         pic=inputParam['pic']
         dataset=inputParam['dataset']
-        img_dir=os.path.join(os.getcwd(),"web/static/imgs/tmp_imgs")
+        img_dir=os.path.join(os.getcwd(),"web/static/img/tmp_imgs")
         pic_path=os.path.join(img_dir,tid,stid+'.png')
         try:
             os.mkdir(os.path.join(img_dir,tid))
@@ -895,7 +849,7 @@ def auto_verify_img():
         # resp=interface.verify_img(tid, stid, net, dataset.upper(), eps, pic_path)
         
         return json.dumps(resp,ensure_ascii=False)
-    return render_template('index_auto_verify.html')
+    # return render_template('index_auto_verify.html')
 
 @app.route('/Attack/AttackAttrbutionAnalysis', methods=['POST'])
 def AttackAttrbutionAnalysis():
