@@ -34,3 +34,6 @@ __pycache__
 web/static/imgs/tmp_imgs
 output/task_info.json
 output/task_list.txt
+web/static/output
+web/static_back/
+web/templates_bak/
