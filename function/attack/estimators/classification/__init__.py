@@ -9,3 +9,8 @@ from function.attack.estimators.classification.detector_classifier import Detect
 from function.attack.estimators.classification.ensemble import EnsembleClassifier
 from function.attack.estimators.classification.GPy import GPyGaussianProcessClassifier
 from function.attack.estimators.classification.pytorch import PyTorchClassifier
+from art.estimators.classification.tensorflow import (
+    TFClassifier,
+    TensorFlowClassifier,
+    TensorFlowV2Classifier,
+)

@@ -65,7 +65,7 @@ def save_image(im, path):
         im = format_np_output(im)
         im = Image.fromarray(im)
     im.save(path)
-    return path.split("/")[-5] + "/" + path.split("/")[-4] + "/" + path.split("/")[-3] + "/" + path.split("/")[-2] + "/" + path.split("/")[-1]
+    return path.split("/")[-3] + "/" + path.split("/")[-2] + "/" + path.split("/")[-1]
 
 def save_gradient_images(gradient, file_name):
     """
@@ -268,7 +268,7 @@ def save_ex_img(root, img, img_name):
     if not os.path.exists(root+'/adv_explain/'):
         os.makedirs(root+'/adv_explain/')
     img.save(path)
-    return path.split("/")[-3] + "/" + path.split("/")[-2] + "/" + path.split("/")[-1]
+    return path.split("/")[-2] + "/" + path.split("/")[-1]
 
 '''将tensor存储的样本逆转换成image格式的list'''
 def loader2imagelist(dataloader, dataset, size):
@@ -289,10 +289,22 @@ def loader2imagelist(dataloader, dataset, size):
             raise ValueError("not supported data set!")
     return image_list
 
+def get_batchsize(model_name, dataset):
+    model = model_name.lower()
+    dataset = dataset.lower()
+    if dataset == "imagenet":
+        if model in ['vgg11','vgg13','vgg16','vgg19','resnet18','resnet34']:
+            return 16 
+        elif model in ['resnet50','densenet121']:
+            return 8
+        else: 
+            return 4
+    else:
+        return 32
 
-def target_layer(model,dataset):
+def target_layer(model_name, dataset):
     target_layer_ = None
-    model = model.lower()
+    model = model_name.lower()
     dataset = dataset.lower()
     if dataset == "imagenet":
         if model == 'vgg11':
@@ -352,6 +364,38 @@ def target_layer(model,dataset):
             raise NotImplementedError("selected model is not supported!")
     return target_layer_
 
+def get_conv_layer(model_name):
+    cnn_layers = None
+    model = model_name.lower()
+    if model == 'vgg11':
+        cnn_layers = ['1','4','7','9','12','14','17','19']
+    elif model == 'vgg13':
+        cnn_layers = ['1','3','6','8','11','13','16','18','21','23']
+    elif model == 'vgg16':
+        cnn_layers = ['1','3','6','8','11','13','15','18','20','22','25','27','29']
+    elif model == 'vgg19':
+        cnn_layers = ["1", "3", "6", "8", "11", "13", "15", "17", "20", "22", "24", "26", "29", "31", "33", "35"]
+    elif model == 'resnet18':
+        cnn_layers = ['4','5','6','7','8','9','10','11']
+    elif model == 'resnet34':
+        cnn_layers = [str(layer) for layer in range(4,19,2)]
+    elif model == 'resnet50':
+        cnn_layers = [str(layer) for layer in range(4,19,2)]
+    elif model == 'resnet101':
+        cnn_layers = [str(layer) for layer in range(4,36,3)]
+    elif model == 'resnet152':
+        cnn_layers = [str(layer) for layer in range(4,53,5)]
+    elif model == 'densenet121':
+        cnn_layers = [str(layer) for layer in range(4,64,6)]
+    elif model == 'densenet161':
+        cnn_layers = [str(layer) for layer in range(4,84,8)]
+    elif model == 'densenet169':
+        cnn_layers = [str(layer) for layer in range(4,88,8)]
+    elif model == 'densenet201':
+        cnn_layers = [str(layer) for layer in range(4,104,10)]
+    else:
+        raise NotImplementedError("selected model is not supported!")
+    return cnn_layers
 
 def lrp_visualize(R_lrp, gamma=0.9):
     heatmaps_lrp = []
@@ -379,7 +423,7 @@ def grad_visualize(R_grad, image):
 
 import logging
 from logging import handlers
-
+from logging.handlers import RotatingFileHandler
 class Logger:
     level_relations = {
         'debug':logging.DEBUG,
@@ -388,31 +432,42 @@ class Logger:
         'error':logging.ERROR,
         'crit':logging.CRITICAL
     }
-    def __init__(self,filename,
-                 level='info',
-                 when='D',
-                 backCount=3,
-                 fmt='%(asctime)s [%(levelname)s] %(message)s'
-                 #fmt='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s'
-                 ):
-        self.logger = logging.getLogger(filename)
-        format_str = logging.Formatter(fmt)#设置日志格式
-        self.logger.setLevel(self.level_relations.get(level))#设置日志级别
-        sh = logging.StreamHandler()#往屏幕上输出
-        sh.setFormatter(format_str) #设置屏幕上显示的格式
-        th = handlers.TimedRotatingFileHandler(filename=filename, when=when, backupCount=backCount, encoding='utf-8')
-        #实例化TimedRotatingFileHandler
-        #interval是时间间隔，backupCount是备份文件的个数，如果超过这个个数，就会自动删除，when是间隔的时间单位，单位有以下几种：
-        # S 秒
-        # M 分
-        # H 小时、
-        # D 天、
-        # W 每星期（interval==0时代表星期一）
-        # midnight 每天凌晨
-        th.setFormatter(format_str)#设置文件里写入的格式
-        self.logger.addHandler(sh) #把对象加到logger里
-        self.logger.addHandler(th)
+    def __init__(self):
+        self.__loggers = {}
+    
+    def add_logger(self, stid,
+        filename,
+        level='info',
+        when='D',
+        backCount=3,
+        # fmt='%(asctime)s [%(levelname)s] %(filename)-12s %(funcName)-24s Line: %(lineno)-6s Msg: %(message)s'
+        fmt='%(asctime)s [%(levelname)s]  Msg: %(message)s'):
+        if stid not in self.__loggers.keys():
+            logger = logging.getLogger(stid)
+            format_str = logging.Formatter(fmt)#设置日志格式
+            sh = logging.StreamHandler()#往屏幕上输出
+            sh.setFormatter(format_str) #设置屏幕上显示的格式
+            th = handlers.TimedRotatingFileHandler(filename=filename, when=when, backupCount=backCount, encoding='utf-8')
+            th.setFormatter(format_str)#设置文件里写入的格式
+            logger.setLevel(self.level_relations.get(level))#设置日志级别
+            logger.addHandler(sh)
+            logger.addHandler(th)
+            self.__loggers.update({stid:logger})
+        else:
+            logger = self.__loggers[stid]
+        return logger
+    
+    def get_sub_logger(self, stid):
+        if stid not in self.__loggers.keys():
+            return -1
+        return self.__loggers[stid]
+    
+    def del_logger(self, stid):
+        del self.__loggers[stid]
+        return 1
+        
 
-    def info(self, msg):
-        return self.logger.info(msg)
+    def info(self, stid, msg):
+        return self.__loggers[stid].info(msg)
+        # return self.logger.info(msg)
 
