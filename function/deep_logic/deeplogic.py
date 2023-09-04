@@ -11,9 +11,7 @@ import torchvision
 from torch.autograd import Variable
 import torch.optim as optim
 from torchvision import datasets, transforms
-# from models.resnet import *
-# from models.vggnet import *
-# from models.mynet import *
+
 from model.model_net.resnet import *
 from model.model_net.vggnet import *
 from model.model_net.mynet import *
