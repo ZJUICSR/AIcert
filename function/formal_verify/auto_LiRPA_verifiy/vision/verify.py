@@ -51,9 +51,7 @@ class VisionAutoLirpaVerify(object):
 
     def write_logs(self, info: str, task_finish=False):
         if self.log_func is not None:
-            self.log_func(info=info,
-                          task_id=self.task_id,
-                          task_finish=task_finish)
+            self.log_func.info(info)
         print(info)
 
     def computer_eps_range(self):

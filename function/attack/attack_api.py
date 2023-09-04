@@ -3,9 +3,11 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 # 逃逸攻击接口
+from .attacks.evasion import *
 from .attacks.evasion import FastGradientMethod, ProjectedGradientDescent, BasicIterativeMethod, DeepFool, SaliencyMapMethod, UniversalPerturbation, AutoAttack, GDUAP, CarliniWagner
 from .attacks.evasion import PixelAttack, SimBA, ZooAttack, SquareAttack
 from .attacks.evasion import BoundaryAttack, HopSkipJump, GeoDA, Fastdrop
+from .attacks.torchattack import *
 # 后门攻击接口
 from .attacks.poisoning import PoisoningAttackBackdoor, PoisoningAttackCleanLabelBackdoor, FeatureCollisionAttack, PoisoningAttackAdversarialEmbedding
 # 工具函数
@@ -22,6 +24,8 @@ import shutil
 import os
 from tqdm import tqdm
 
+# norm [1,2,"inf",np.inf]
+
 class EvasionAttacker():
     def __init__(self, modelnet=None, modelpath: str="ckpt-resnet18-mnist_epoch3_acc0.9898.pth", 
     dataset="mnist", datasetpath="./datasets/", nb_classes=10, datanormalize: bool = False, 
@@ -33,6 +37,7 @@ class EvasionAttacker():
         self.device = device
         self.nb_classes = nb_classes
         self.datanormalize = datanormalize
+        self.norm_param = ""
         if dataset == "cifar10":
             self.loaddataset = load_cifar10
         elif dataset == "mnist":
@@ -42,7 +47,7 @@ class EvasionAttacker():
         if sample_num > 0:
             self.input_shape, (self.x_select, self.y_select), _, _, self.min_pixel_value, self.max_pixel_value = self.loaddataset(self.datasetpath, sample_num, normalize=self.datanormalize)
 
-    def generate(self, method: str="FastGradientMethod", save_num: int = 0, **kwargs) -> None:
+    def generate(self, method: str="FastGradientMethod", save_num: int = 1, **kwargs) -> None:
         # 模型加载
         self.model = self.modelnet.to(self.device)
         checkpoint = torch.load(self.modelpath)
@@ -82,6 +87,8 @@ class EvasionAttacker():
                     error = "{} is not the parameter of {}".format(key, method)
                     raise ValueError(error)
             else:
+                if key == "norm":
+                    self.norm_param = str(value)
                 setattr(self.attack, key, value)
         for key in self.attack.attack_params:
             try:
@@ -95,6 +102,7 @@ class EvasionAttacker():
             starttime = time.clock()
         except:
             starttime = time.perf_counter()
+        # adv_examples  = self.attack.generate(cln_examples, real_lables)
         adv_examples  = self.attack.generate(cln_examples)
         try:
             endtime = time.clock()
@@ -109,20 +117,20 @@ class EvasionAttacker():
         self.psra= compute_predict_accuracy(adv_predictions, real_lables)
         # 计算真正的攻击成功率，将本来分类错误的样本排除在外
         self.coverrate, self.asr  = compute_attack_success(real_lables, clean_predictions, adv_predictions)
-        self.save_examples(save_num, real_lables, cln_examples, clean_predictions, adv_examples, adv_predictions, kwargs["save_path"])
-        return adv_examples
+        piclist = self.save_examples(save_num, real_lables, cln_examples, clean_predictions, adv_examples, adv_predictions, kwargs["save_path"])
+        return adv_examples, piclist
     
-    def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, clean_prediction: np.ndarray, adv_example: np.ndarray, adv_prediction: np.ndarray, path:str="./results/"):
+    def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, clean_prediction: np.ndarray, adv_example: np.ndarray, adv_prediction: np.ndarray, path:str="output/cache/results/"):
         
-        path = path+self.method+"/"
+        path = os.path.join(path, self.method+self.norm_param)
         try:
-            os.makedirs(os.path.join(path,self.method))
+            os.makedirs(path)
         except Exception as e:
-            shutil.rmtree(os.path.join(path,self.method))
-            os.makedirs(os.path.join(path,self.method))
-
+            shutil.rmtree(path)
+            os.makedirs(path)
+        piclist = []
         if save_num <= 0:
-            return
+            return piclist
         else:
             l = np.argmax(label,1)
             s = np.argmax(clean_prediction,1)
@@ -139,16 +147,20 @@ class EvasionAttacker():
                     tmpc = clean_example[random_index[i]].transpose(1,2,0)
                     tmpa = adv_example[random_index[i]].transpose(1,2,0)
                 clean = Image.fromarray(np.uint8(255*tmpc))
-                clean.save(path+"index{}_clean_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]]))
+                cleanname = os.path.join(path, "index{}_clean_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]]))
+                clean.save(cleanname)
                 adv = Image.fromarray(np.uint8(255*tmpa))
-                adv.save(path+"index{}_adv_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]]))
+                advname = os.path.join(path, "index{}_adv_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]]))
+                adv.save(advname)
                 per = np.uint8(255*tmpc) - np.uint8(255*tmpa)
                 per = per + np.abs(np.min(per))
                 per = Image.fromarray(np.uint8(255*per))
-                per.save(path+"index{}_per_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]]))
+                pername = os.path.join(path, "index{}_per_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]])) 
+                per.save(pername)
+                piclist = [cleanname,advname,pername]
                 if i >= save_num - 1:
                     break
-
+        return piclist
     def print_res(self) -> None:
         print("Before {} attack, the accuracy on benign test examples: {}%".format(self.method, self.psrb* 100))
         print("After {} attack, the accuracy on adversarial test examples: {}%".format(self.method, self.psra*100))
@@ -168,6 +180,7 @@ class BackdoorAttacker():
         self.device = device
         self.nb_classes = nb_classes
         self.datanormalize = datanormalize
+        self.norm_param = ""
         if dataset == "cifar10":
             self.loaddataset = load_cifar10
             self.backdoor_color = 1
@@ -218,103 +231,21 @@ class BackdoorAttacker():
             self.attack_success_rate, _ = compute_accuracy(self.classifier.predict(x_poisoned, batch_size=batch_size), y_poisoned)
         return self.accuracy, self.accuracyonb, self.attack_success_rate
 
-    def backdoorattack(self, method: str="PoisoningAttackBackdoor", pp_poison: float=0.5, source: int = 0, target: int=3, batch_size:int=700, num_epochs=40, lr=0.01, alpha=50, test_sample_num:int=2048, save_num: int=32, save_path=None):
-        """
-        为了简化后门攻击接口的使用提出的一个后门攻击样例方法
-        该函数按照目标和投毒比例自动完成攻击
-        """
-
-        self.px=25
-        self.py=25
-        self.l=2
-        self.value=1
-
-        self.support_method = ["PoisoningAttackBackdoor", "PoisoningAttackCleanLabelBackdoor", "FeatureCollisionAttack", "PoisoningAttackAdversarialEmbedding"]
-        if method not in self.support_method:
-            raise ValueError("This method is not supported")
-        self.method = method
-
-        self.model = self.modelnet
-        checkpoint = torch.load(self.modelpath)
-        try:
-            self.model.load_state_dict(checkpoint)
-        except:
-            self.model.load_state_dict(checkpoint['net'])
-        
-        self.model.to(self.device)
-        self.datasetpath = self.datasetpath
-        self.batch_size = batch_size
-
-        # 训练参数
-        self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
-
-        # 数据集加载
-        input_shape, (x_select, y_select), (x_train, y_train), _, min_pixel_value, max_pixel_value = self.loaddataset(self.datasetpath, test_sample_num)
-        # 数据集规范
-        x_train_tmp = x_train.astype(MY_NUMPY_DTYPE)
-        y_train_tmp = y_train.astype(MY_NUMPY_DTYPE)
-        x_select_tmp = x_select.astype(MY_NUMPY_DTYPE)
-        y_select_tmp = y_select.astype(MY_NUMPY_DTYPE)
-        # 构造分类器方便使用
-        self.classifier = PyTorchClassifier (
-            model=self.model,
-            clip_values=(min_pixel_value, max_pixel_value),
-            loss=self.criterion,
-            optimizer=self.optimizer,
-            input_shape=input_shape,
-            nb_classes=10,
-            device=self.device,
-        )
-
-        # 对于特征碰撞攻击，需要设置原目标类
-        self.source = np.zeros((10))
-        self.source[source] = 1
-        # 决定目标
-        self.target = np.zeros((10))
-        self.target[target] = 1
-
-        # 测试集用来测试攻击效果，测试集中一般的样本被投毒
-        # 主要是为了区分开测试集和训练集
-        # 对于特征碰撞攻击，测试数据集是不需要投毒的
-        if self.method == "FeatureCollisionAttack":
-            x_test = x_select_tmp
-            y_test = y_select_tmp
-            test_plist = np.arange(len(x_select))[np.all(y_select == self.source, axis=1)]
-        else:
-            x_test, y_test, test_plist = self.data_poison(x_select_tmp, y_select_tmp, self.target, self.source, pp_poison=0.5)
-        # 根据比例进行训练集投毒
-        if self.method in ["PoisoningAttackBackdoor", "PoisoningAttackAdversarialEmbedding"]:
-            self.poisoned_num = int(pp_poison*len(x_train_tmp))
-        else:
-            self.poisoned_num = int(pp_poison*np.sum(np.argmax(y_train_tmp, axis=1) == np.argmax(self.target, axis=0)))
-        print("投毒样本数目:{}".format(self.poisoned_num))
-        x_train, y_train, plist= self.data_poison(x_train_tmp, y_train_tmp, self.target, self.source, pp_poison=pp_poison)
-        # 保存部分投毒样本
-        if save_path != None:
-            self.save_examples(save_num=32, label=y_train_tmp[plist], clean_example=x_train_tmp[plist], poisoned_example=x_train[plist], path=save_path)
-        
-        # 测试投毒攻击效果的时候都在测试样本上进行
-        # 对于特征冲突攻击，不需要考虑测试数据集的投毒
-        print("(总体样本准确率，干净样本准确率，投毒样本准确率)")
-        print(self.evaluate(x_test, y_test, test_plist, batch_size=batch_size))
-        self.finetune(x_train, y_train, x_test, y_test, plist, test_plist, batch_size=batch_size, num_epochs=num_epochs)
-        print(self.evaluate(x_test, y_test, test_plist, batch_size=batch_size))
-        return self.evaluate(x_test, y_test, test_plist, batch_size=batch_size)
-
-    def save_model(self, path:str="./results/", desc:str="backdoor_model", epoch:int=0):
-        path = path+self.method+"/backdoor_model/"
-        if epoch == 0:
+    def save_model(self, path:str="./output/cache/", desc:str="backdoor_model", epoch:int=0):
+        path = os.path.join(path, self.method)
+        if not os.path.exists(path):
             try:
                 os.makedirs(path)
             except Exception as e:
                 shutil.rmtree(path)
                 os.makedirs(path)
-        path = path + desc + ".pth"
+        print(f"path:{path}")
+        print(f"exist:{os.path.exists(path)}")
+        path =os.path.join( path , desc + ".pth")
         torch.save(self.classifier.model.state_dict(), path)
 
-    def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, poisoned_example: np.ndarray, path:str="./results/"):
-        path = path+self.method+"/example/"
+    def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, poisoned_example: np.ndarray, path:str="output/cache/results/"):
+        path = os.path.join(path, self.method+self.norm_param)
         try:
             os.makedirs(path)
         except Exception as e:
@@ -334,19 +265,19 @@ class BackdoorAttacker():
                     tmpc = clean_example[random_index[i]].transpose(1,2,0)
                     tmpa = poisoned_example[random_index[i]].transpose(1,2,0)
                 clean = Image.fromarray(np.uint8(255*tmpc))
-                clean.save(path+"index{}_clean.jpeg".format(i, l[i]))
+                clean.save(os.path.join(path,"index{}_clean.jpeg".format(i, l[i])))
                 adv = Image.fromarray(np.uint8(255*tmpa))
-                adv.save(path+"index{}_poisoned.jpeg".format(i, l[i]))
+                adv.save(os.path.join(path, "index{}_poisoned.jpeg".format(i, l[i])))
                 backdoor = np.uint8(255*tmpc) - np.uint8(255*tmpa)
                 backdoor = backdoor + np.abs(np.min(backdoor))
                 backdoor = Image.fromarray(np.uint8(255*backdoor))
-                backdoor.save(path+"index{}_backdoor.jpeg".format(i, l[i]))
+                backdoor.save(os.path.join(path, "index{}_backdoor.jpeg".format(i, l[i])))
                 if i >= save_num - 1:
                     break
     
     # 训练集投毒函数
     # **kwargs中是除了poision函数参数以外的其他投毒参数
-    def poision(self, pp_poison: float=0.001, method: str="PoisoningAttackBackdoor", save_num: int=32, test_sample_num: int = 4096, source: int = 0, target: int=3, trigger: List=[25, 25, 2, 1], **kwargs):
+    def poision(self, method: str="PoisoningAttackBackdoor", pp_poison: float=0.001, save_num: int=32, test_sample_num: int = 4096, target: int=3, trigger: List=[25, 25, 2, 1], **kwargs):
         
         self.support_method = ["PoisoningAttackBackdoor", "PoisoningAttackCleanLabelBackdoor", "FeatureCollisionAttack", "PoisoningAttackAdversarialEmbedding"]
         if method not in self.support_method:
@@ -393,7 +324,7 @@ class BackdoorAttacker():
         
         # 对于特征碰撞攻击，需要设置原目标类
         self.source = np.zeros((10))
-        self.source[source] = 1
+        self.source[(target+1)%self.classifier.nb_classes] = 1
         self.target = np.zeros((10))
         self.target[target] = 1
 
@@ -422,6 +353,8 @@ class BackdoorAttacker():
                 error = "{} is not the parameter of {}".format(key, self.method)
                 raise ValueError(error)
             else:
+                if key == "norm":
+                    self.norm_param = str(value)
                 setattr(self.attack, key, value)
         for key in self.attack.attack_params:
             try:
