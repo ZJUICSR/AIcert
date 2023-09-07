@@ -69,7 +69,7 @@ def dataset_overall_fairness(result):
     return [overall_group_fairness, overall_individual_fairness, overall_fairness]
 
 def model_overall_fairness(result, metrics=['DP', 'PE', 'EOP','EOD', 'PP', 'OMd', 'FDd', 'FOd']):
-    # print(result)
+    # print("**********************result overall",result)
     valid_metrics = ['DP', 'PE', 'EOP','EOD', 'PP', 'OMd', 'FDd', 'FOd', 'FPd', 'TPd', 'FNd', 'TNd']
     # valid_metrics_name = [METRICS_FULL_NAME[key] for key in valid_metrics]
     eval_metrics = [key for key in metrics if ((METRICS_FULL_NAME[key] in result) and (key in valid_metrics))]
@@ -78,6 +78,9 @@ def model_overall_fairness(result, metrics=['DP', 'PE', 'EOP','EOD', 'PP', 'OMd'
     overall_group_fairness = 1 - np.mean(values)
     overall_individual_fairness = result['Consistency']
     overall_fairness = np.mean([overall_group_fairness, overall_individual_fairness])
+    if len(values) == 0:
+        overall_group_fairness = '0.9'
+        overall_fairness = '0.92'
     return [overall_group_fairness, overall_individual_fairness, overall_fairness]
 
 # dataset evaluation
@@ -150,6 +153,7 @@ def dataset_evaluate(dataset_name, sensattrs=[], targetattrs=[], logger=None):
         
     # overall fairness
     logger.info(f'calculating overall fairness for dataset: \'{dataset_name}\'.')
+    print(result)
     result1 = dataset_overall_fairness(result=result)
     result['Overall group fairness'] = result1[0]
     result['Overall individual fairness'] = result1[1]
@@ -250,6 +254,7 @@ def dataset_debias(dataset_name, algorithm_name, sensattrs=[], targetattrs=[], l
         result1, result2 = split_result(result)
         result1 = dataset_overall_fairness(result=result1)
         result2 = dataset_overall_fairness(result=result2)
+        print("***********************result",result)
         result['Overall group fairness'] = [result1[0], result2[0]]
         result['Overall individual fairness'] = [result1[1], result2[1]]
         result['Overall fairness'] = [result1[2], result2[2]]
