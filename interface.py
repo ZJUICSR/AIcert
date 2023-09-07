@@ -378,7 +378,6 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
     logging = IOtool.get_logger(stid)
     inputParam['device'] = IOtool.get_device()
     modelpath = osp.join("./model/ckpt", dataname.upper() + "_" + model.lower()+".pth")
-    device = torch.device(inputParam['device'])
     if (not osp.exists(modelpath)):
             logging.info("[模型获取]:服务器上模型不存在")
             if dataname.upper() == "CIFAR10":
@@ -401,6 +400,10 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
         os.mkdir(osp.join(ROOT,"output", tid, stid))
     resultlist={}
     for method in methods:
+        if method == FeatureAdversaries:
+            device = "cpu"
+        else:
+            device = torch.device(inputParam['device'])
         logging.info("[执行对抗攻击]:正在执行{:s}对抗攻击".format(method))
         attackparam = inputParam[method]
         attackparam["save_path"] = osp.join(ROOT,"output", tid, stid)
@@ -751,7 +754,7 @@ def reach(tid, stid, dataset, pic_path,label, target_label):
     plt.close()
     logging.info(f"The reachable areas is drawn. The reachability verification is complete")
     resp={"path":os.path.join(pt_dir,stid+'.png')}
-    resp['input']=f'static/imgs/tmp_imgs/{tid}/{stid}.png'
+    resp['input']=f'static/img/tmp_imgs/{tid}/{stid}.png'
     resp["stop"] = 1
     IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
     IOtool.change_subtask_state(tid, stid, 2)
@@ -762,7 +765,7 @@ def run_detect(tid, stid, defense_methods, adv_dataset, adv_model, adv_method, a
     IOtool.change_subtask_state(tid, stid, 1)
     IOtool.change_task_state(tid, 1)
     IOtool.set_task_starttime(tid, stid, time.time())
-    device = IOtool.get_device()
+    # device = IOtool.get_device()
     logging = IOtool.get_logger(stid)
     detect_rate_dict = {}
     if "CARTL" in defense_methods:
@@ -788,9 +791,9 @@ def run_detect(tid, stid, defense_methods, adv_dataset, adv_model, adv_method, a
 
 def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_examples=None, logging=None):
     
-    # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    # device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    device = IOtool.get_device()
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    # device = IOtool.get_device()
     if torch.cuda.is_available():
         print("got GPU")
     logging.info("加载模型{:s}".format(adv_model))
@@ -1000,10 +1003,10 @@ def knowledge_consistency(tid, stid, arch,dataset,img_path,layer):
     plt.close()
     l2 = torch.norm(delta, p=2).numpy().tolist()
     layers = len(target)
-    resp={'l2':l2,'input':f'static/imgs/tmp_imgs/{tid}/{stid}.png',
-                'output':f'static/imgs/tmp_imgs/{tid}/{stid}_output_{layer}.png',
-                'target':f'static/imgs/tmp_imgs/{tid}/{stid}_target_{layer}.png',
-                'delta':f'static/imgs/tmp_imgs/{tid}/{stid}_delta_{layer}.png',
+    resp={'l2':l2,'input':f'static/img/tmp_imgs/{tid}/{stid}.png',
+                'output':f'static/img/tmp_imgs/{tid}/{stid}_output_{layer}.png',
+                'target':f'static/img/tmp_imgs/{tid}/{stid}_target_{layer}.png',
+                'delta':f'static/img/tmp_imgs/{tid}/{stid}_delta_{layer}.png',
             }
     resp["stop"] = 1
     IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
