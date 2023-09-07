@@ -57,7 +57,6 @@ def model_evaluate(dataset_name, model_name="Resnet50", metrics=['mPre', 'mFPR',
     return result
 
 def model_debias(dataset_name,  model_name="Resnet50", algorithm_name="sampling", metrics=['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTPR', 'mAcc', 'mF1', 'mBA'], test_mode=True, logger=None):
-    
     logger.info(f"start improving fairness of model: \'{model_name}\' on dataset: \'{dataset_name}\'.")
     model, opt = collect_args(dataset_name, algorithm_name=algorithm_name)
     opt['test_mode'] = test_mode
@@ -71,7 +70,6 @@ def model_debias(dataset_name,  model_name="Resnet50", algorithm_name="sampling"
     result = {}
     cal_func = opt['evaluate_func']
     metrics_ls = opt['metrics_list']
-
     for m in metrics:
         logger.info(f'start in-process debiasing with algoritm \'{m}\'.')
         value = cal_func(metric_func=metrics_ls[m], **td)
