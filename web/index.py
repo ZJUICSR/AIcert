@@ -201,9 +201,12 @@ def ModelFairnessEvaluate():
             if dataname == "cifar10-s":
                 dataname = "cifar-s" 
             try:
-                metrics = inputParam["metrics"]
-            except:
                 metrics = json.loads(inputParam["metrics"])
+                
+                print(1,type(metrics))
+            except:
+                metrics = inputParam["metrics"]
+            print(metrics)
             test_mode = inputParam["test_mode"]
             t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname, modelname, metrics = metrics, test_mode = test_mode)
             
@@ -268,9 +271,10 @@ def ModelFairnessDebias():
             if dataname == "cifar10-s":
                 dataname = "cifar-s" 
             try:
-                metrics = inputParam["metrics"]
-            except:
                 metrics = json.loads(inputParam["metrics"])
+                
+            except:
+                metrics = inputParam["metrics"]
             test_mode = inputParam["test_mode"]
             t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, test_mode = test_mode)
             # time.sleep(20)
@@ -577,7 +581,7 @@ def AdvAttack():
         # 执行任务
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_adv_attack, tid, stid, dataname, model, adv_method, inputParam)
-        IOtool.add_task_queue(tid, stid, t2, 300*len(adv_method))
+        IOtool.add_task_queue(tid, stid, t2, 3000*len(adv_method))
         # interface.run_adv_attack(tid, stid, dataname, model, adv_method, inputParam)
         # t2 = threading.Thread(target=interface.run_adv_attack,args=(tid, stid, dataname, model, adv_method, inputParam))
         # t2.setDaemon(True)
@@ -712,6 +716,8 @@ def model_reach():
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
         img_dir=os.path.join(os.getcwd(),"web/static/img/tmp_imgs")
+        if not os.path.exists(img_dir):
+            os.mkdir(img_dir)
         pic_path=os.path.join(img_dir,tid,stid+'.png')
         try:
             os.mkdir(os.path.join(img_dir,tid))
@@ -762,6 +768,8 @@ def model_consistency():
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
         img_dir=os.path.join(os.getcwd(),"web/static/img/tmp_imgs")
+        if not os.path.exists(img_dir):
+            os.mkdir(img_dir)
         pic_path=os.path.join(img_dir,tid,stid+'.png')
         try:
             os.mkdir(os.path.join(img_dir,tid))
@@ -814,6 +822,8 @@ def auto_verify_img():
         pic=inputParam['pic']
         dataset=inputParam['dataset']
         img_dir=os.path.join(os.getcwd(),"web/static/img/tmp_imgs")
+        if not os.path.exists(img_dir):
+            os.mkdir(img_dir)
         pic_path=os.path.join(img_dir,tid,stid+'.png')
         try:
             os.mkdir(os.path.join(img_dir,tid))
