@@ -51,7 +51,7 @@ matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
-output_dict = {}
+# output_dict = {}
 
 def call_bn(bn, x):
     return bn(x)
@@ -479,7 +479,7 @@ def run_format_clean(inputfile,outputfile,filler,root):
     # json_path = osp.join(root, "output.json")
     # with open(json_path, 'r') as f:
     #     res_dict = json.load(f)
-
+    output_dict = {}
     output_dict["before"] = wrong_txt
     output_dict["after"] = correct_txt
     output_dict["fix_rate"] = 1.00 # 预先测试得到的数据
@@ -522,6 +522,7 @@ def run_encoding_clean(inputfile,outputfile,root):
     # with open(json_path, 'r') as f:
     #     res_dict = json.load(f)
     # res_dict["abnormal_encoding"]={}
+    output_dict = {}
     output_dict["before"] = wrong_txt
     output_dict["after"] = correct_txt
     output_dict["fix_rate"] = 1.00 # 预先测试得到的数据
@@ -640,6 +641,7 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
     # with open(json_path, 'w') as f:
     #     json.dump(res_dict, f)
     # print(fix_rate)
+    output_dict = {}
     output_dict["num_images"] = str(10000)
     output_dict["num_detect"] = str(sum(noise_idx))
     output_dict["fix_rate"] = fix_rate
@@ -689,6 +691,7 @@ def run_abnormal_table(inputfile,outputfile,root, logging=None):
     plt.axis("square")
     plt.legend(handles=handles, labels=["outliers", "inliers"], title="true class")
     plt.savefig(osp.join(root,'Iso.jpg'))
+    output_dict = {}
     output_dict["result_origin"] = str(osp.join(root,'Iso.jpg')) # 绘制图保存路径
 
     # 输出清洁样本
