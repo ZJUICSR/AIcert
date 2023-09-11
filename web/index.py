@@ -1032,7 +1032,7 @@ def Detect():
 
     return json.dumps(response_data)
 # ----------------- 课题2 测试样本自动生成 -----------------
-@app.route('/Concolic/SamGenParamGet', methods=['GET','POST'])
+@app.route('/Concolic/SamGenParamSet', methods=['GET','POST'])
 def Concolic():
     if (request.method == "GET"):
         return render_template("")
