@@ -1032,7 +1032,7 @@ def Detect():
 
     return json.dumps(response_data)
 # ----------------- 课题2 测试样本自动生成 -----------------
-@app.route('/Concolic/SamGenParamGet', methods=['GET','POST'])
+@app.route('/Concolic/SamGenParamSet', methods=['GET','POST'])
 def Concolic():
     if (request.method == "GET"):
         return render_template("")
@@ -1515,6 +1515,21 @@ def FormalVerification():
             "stid":stid
         }
         return jsonify(res)
+
+
+@app.route('/Task/UploadData', methods=['POST'])
+def UploadData():
+     if request.method == "POST":
+         file = request.files.get('file')
+         data_type = request.form.get('type')
+         file_name = file.filename
+         suffix = os.path.splitext(file_name)[-1]
+         basePath = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)
+         save_dir = os.path.join(basePath[0], 'dataset/data/ckpt', data_type+'_data'+suffix)
+         # file_name = request.form.get()
+        #  save_dir = os.path.join(basePath, 'upload_data'+suffix)
+         file.save(save_dir)
+         return jsonify({'save_dir': save_dir})
 
 def app_run(args):
     
