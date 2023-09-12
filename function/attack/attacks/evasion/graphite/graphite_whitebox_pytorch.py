@@ -99,7 +99,7 @@ class GRAPHITEWhiteboxPyTorch(EvasionAttack):
     def __init__(
         self,
         classifier: "PyTorchClassifier",
-        net_size: Tuple[int, int] = (10, 10),
+        net_size: Tuple[int, int] = (28, 28),
         min_tr: float = 0.8,
         num_xforms: int = 100,
         step_size: float = 0.0157,
@@ -188,7 +188,7 @@ class GRAPHITEWhiteboxPyTorch(EvasionAttack):
             # raise ValueError("Target labels `y` need to be provided.")
             y = self.estimator.predict(x)
 
-        y = check_and_transform_label_format(y, self.estimator.nb_classes)
+        # y = check_and_transform_label_format(y, self.estimator.nb_classes)
 
         if self.estimator.nb_classes == 2 and y.shape[1] == 1:  # pragma: no cover
             raise ValueError(

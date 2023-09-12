@@ -377,6 +377,7 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
     IOtool.set_task_starttime(tid, stid, time.time())
     logging = IOtool.get_logger(stid)
     inputParam['device'] = IOtool.get_device()
+    device = torch.device(inputParam['device'])
     modelpath = osp.join("./model/ckpt", dataname.upper() + "_" + model.lower()+".pth")
     if (not osp.exists(modelpath)):
             logging.info("[模型获取]:服务器上模型不存在")
@@ -400,10 +401,10 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
         os.mkdir(osp.join(ROOT,"output", tid, stid))
     resultlist={}
     for method in methods:
-        if method == FeatureAdversaries:
-            device = "cpu"
-        else:
-            device = torch.device(inputParam['device'])
+        # if method == "FeatureAdversaries":
+        #     device = "cpu"
+        # else:
+        #     device = torch.device(inputParam['device'])
         logging.info("[执行对抗攻击]:正在执行{:s}对抗攻击".format(method))
         attackparam = inputParam[method]
         attackparam["save_path"] = osp.join(ROOT,"output", tid, stid)
