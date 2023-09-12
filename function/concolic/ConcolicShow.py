@@ -155,7 +155,7 @@ class ConcolicShow(object):
             net, loadr = MNIST.get_back(basepath)
             for i in range(times):
                 try:
-                    TestMachine = InvConcolic()
+                    TestMachine = InvConcolic(logging)
                     TestMachine.run(model=net, seedsLoader=loadr, datasetLoader=loadr, device="cpu",
                                     outdir=basepath + '/GeneratedCases/' + data_name + "_" + norm + "/",
                                     norm=norm, initnumber=6, reset=0, metric='nc', maxiteration=30, testTargetLayer=[],
