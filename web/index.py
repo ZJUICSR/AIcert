@@ -46,7 +46,57 @@ def ExUploadModel():
     }
     return jsonify(res)
     # 
-    
+@app.route('/login', methods=['POST'])
+def login():
+    if request.method == 'POST' and request.form.get('username') and request.form.get('password'):
+        datax = request.form.to_dict()
+        usernamx = datax.get("username")
+        passwordx = datax.get("password")
+        print(usernamx,passwordx)
+        if osp.exists(os.path.join(ROOT,"output","user_info.json")):
+            userinfo = IOtool.load_json(osp.join(ROOT,"output","user_info.json"))
+            if usernamx in userinfo.keys() and userinfo[usernamx] == passwordx:
+                resp = {
+                    "code":"1",
+                    "msg":"Login Success"
+                }
+            else:
+                resp = {
+                    "code":"-1",
+                    "msg":"Login Fail"
+                }
+        else:
+            resp = {
+                "code":"-1",
+                "msg":"Login Fail"
+            }
+        return jsonify(resp)
+    else:
+        abort(403)
+
+@app.route('/register', methods=['POST'])
+def register():
+    if request.method == 'POST' and request.form.get('username') and request.form.get('password'):
+        datax = request.form.to_dict()
+        usernamx = datax.get("username")
+        passwordx = datax.get("password")
+        if osp.exists(os.path.join(ROOT,"output","user_info.json")):
+            userinfo = IOtool.load_json(osp.join(ROOT,"output","user_info.json"))
+        else:
+            userinfo = {}
+        if usernamx in userinfo.keys() or usernamx=='unknown':
+            resp = {"code":-1,"msg":"You input the user name already exists, please re-entry."}
+        else:
+            userinfo.update({usernamx:passwordx})
+            IOtool.write_json(userinfo, osp.join(ROOT,"output","user_info.json"))
+            resp = {
+                "code":1,
+                "msg":"success"
+            }
+        return jsonify(resp)
+    else:
+        return "no"
+
 # ---------------模板：数据集公平性评估---------
 @app.route('/DataFairnessEvaluate', methods=['POST'])
 def DataFairnessEvaluate():
@@ -314,13 +364,21 @@ def query_task():
     start_num = 0
     end_num = 0
     taskresult = {}
-    with open(osp.join(ROOT,"output","task_list.txt"),"r") as fp:
-        tasklist = []
-        for line in fp.readlines():
-            tasklist.append(line.strip())
+    username = request.headers.get('user')  if request.headers.get('user') else 'unknown'
+    if osp.exists(osp.join(ROOT,"output","task_list.json")):
+        task_user_info = IOtool.load_json(osp.join(ROOT,"output","task_list.json"))
+        if username not in task_user_info.keys():
+            body = {"code":1,"msg":"success","TaskList":{},"Number":0}
+            return jsonify(body)
+        tasklist = task_user_info[username]
+    else:
+        body = {"code":1001,"msg":"fail,parameter error","TaskList":{}}
+        return jsonify(body)
     task_num = len(tasklist)
     if count < 0 and record < 0:
-        body = {"code":1,"msg":"success","TaskList":taskinfo,"Number":len(taskinfo)}
+        for temp in tasklist:
+            taskresult.update({temp:taskinfo[temp]})
+        body = {"code":1,"msg":"success","TaskList":taskresult,"Number":len(taskresult)}
         return jsonify(body)
     elif count >= 0 and record < 0:
         start_num = 0
@@ -344,7 +402,7 @@ def query_task():
         elif end_num > task_num:
             end_num = task_num
     for i in range(start_num,end_num):
-        taskresult.update(taskinfo[tasklist[i]])
+        taskresult.update({tasklist[i]:taskinfo[tasklist[i]]})
     body = {"code":1,"msg":"success","TaskList":taskresult,"Number":len(taskresult)}
     return jsonify(body)
 
@@ -377,6 +435,7 @@ def creat_task():
     if request.method == "POST":
         format_time = str(datetime.datetime.now(pytz.timezone('Asia/Shanghai')).strftime("%Y%m%d%H%M"))
         tid = IOtool.get_task_id(str(format_time))
+        username = request.headers.get('user')  if request.headers.get('user') else 'unknown'
         outpath = osp.join(ROOT,"output",tid)
         cachepath = osp.join(ROOT,"output/cache")
         if not osp.exists(outpath):
@@ -397,11 +456,17 @@ def creat_task():
             IOtool.reset_task_info(data)
         
         IOtool.add_task_info(tid, curinfo)
-        
-        with open(osp.join(ROOT,"output","task_list.txt"),"a+") as fp:
-            fp.write(tid)
-            fp.write("\n")
-        
+        if osp.exists(osp.join(ROOT,"output","task_list.json")):
+            task_user_info = IOtool.load_json(osp.join(ROOT,"output","task_list.json"))
+        else:
+            task_user_info = {"unknown":[]}
+            file = open(osp.join(ROOT,"output","task_list.json"),"w")
+            file.close()
+        if username in task_user_info.keys():
+            task_user_info[username].append(tid)
+        else:
+            task_user_info.update({username:[tid]})
+        IOtool.write_json(task_user_info, osp.join(ROOT,"output","task_list.json"))
         IOtool.add_pool(tid)
         # if len(IOtool.query_task_queue()) == 0:
         #     IOtool.task_queue_init(tid)
@@ -454,23 +519,23 @@ def delete_task():
         return jsonify(body)
 
     tid = request.form.get("Taskid")
-    with open(osp.join(ROOT,"output","task_list.txt"),"r") as fp:
-        tasklist = []
-        for line in fp.readlines():
-            tasklist.append(line.strip())
-    
-    if tid not in tasklist:
+    username = request.headers.get('user')  if request.headers.get('user') else 'unknown'
+    if osp.exists(osp.join(ROOT,"output","task_list.json")):
+        task_user_info = IOtool.load_json(osp.join(ROOT,"output","task_list.json"))
+    else:
         taskinfo = IOtool.del_task_info(tid)
         body = {"code":1002,"msg":"fail,task not found"}
         return jsonify(body)
     
-    taskinfo = IOtool.del_task_info(tid)
-    
-    tasklist.remove(tid)
-    with open(osp.join(ROOT,"output","task_list.txt"),"w+") as fp:
-        for temp in tasklist:
-            fp.write(temp)
-            fp.write("\n")
+    if username not in task_user_info.keys():
+        return jsonify({"code":1002,"msg":"fail,task not found"})
+    else:
+        if tid not in task_user_info[username]:
+            return jsonify({"code":1002,"msg":"fail,task not found"})
+        else:
+            task_user_info[username].remove(tid)
+    taskinfo = IOtool.del_task_info(tid) 
+    IOtool.write_json(task_user_info, osp.join(ROOT,"output","task_list.json"))
     outpath = osp.join(ROOT,"output",tid)
     if osp.exists(outpath):
         shutil.rmtree(outpath)
@@ -583,9 +648,6 @@ def AdvAttack():
         t2 = pool.submit(interface.run_adv_attack, tid, stid, dataname, model, adv_method, inputParam)
         IOtool.add_task_queue(tid, stid, t2, 3000*len(adv_method))
         # interface.run_adv_attack(tid, stid, dataname, model, adv_method, inputParam)
-        # t2 = threading.Thread(target=interface.run_adv_attack,args=(tid, stid, dataname, model, adv_method, inputParam))
-        # t2.setDaemon(True)
-        # t2.start()
         res = {
             "tid":tid,
             "stid":stid
@@ -1507,6 +1569,7 @@ def FormalVerification():
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_verify, tid, stid, param)
         IOtool.add_task_queue(tid, stid, t2, 300)
+        interface.run_verify(tid, stid, param)
         # t2 = threading.Thread(target=interface.run_verify, args=(tid, stid, param))
         # t2.setDaemon(True)
         # t2.start()
