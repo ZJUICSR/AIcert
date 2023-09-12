@@ -73,13 +73,13 @@ class Transformer(nn.Module):
         config.hidden_dropout_prob = dropout
         self.model = BertForSequenceClassification(
             config, self.num_labels, vocab=self.vocab).to(self.device)
-        logger.info("Model initialized")
+        print("Model initialized")
         if load:
             checkpoint = torch.load(load, map_location=torch.device(self.device))
             epoch = checkpoint['epoch']
             self.model.embeddings.load_state_dict(checkpoint['state_dict_embeddings'])
             self.model.model_from_embeddings.load_state_dict(checkpoint['state_dict_model_from_embeddings'])
-            logger.info('Checkpoint loaded: {}'.format(load))
+            print('Checkpoint loaded: {}'.format(load))
 
         self.model_from_embeddings = self.model.model_from_embeddings
         self.word_embeddings = self.model.embeddings.word_embeddings
@@ -93,7 +93,7 @@ class Transformer(nn.Module):
             'state_dict_model_from_embeddings': self.model.model_from_embeddings.state_dict(), 
             'epoch': epoch
         }, path)
-        logger.info("Model saved to {}".format(path))
+        print("Model saved to {}".format(path))
         
     def build_optimizer(self):
         # update the original model with the converted model
