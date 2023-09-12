@@ -64,14 +64,14 @@ class FeatureAdversariesPyTorch(EvasionAttack):
     def __init__(
         self,
         estimator: "PYTORCH_ESTIMATOR_TYPE",
-        delta: float,
+        delta: float = 0.02,
         optimizer: Optional["Optimizer"] = None,
         optimizer_kwargs: Optional[dict] = None,
         lambda_: float = 0.0,
         layer: Union[int, str, Tuple[int, ...], Tuple[str, ...]] = -1,
         max_iter: int = 100,
         batch_size: int = 32,
-        step_size: Optional[Union[int, float]] = None,
+        step_size: Optional[Union[int, float]] = 0.0002,
         random_start: bool = False,
         verbose: bool = True,
     ):
@@ -188,7 +188,11 @@ class FeatureAdversariesPyTorch(EvasionAttack):
         import torch  # lgtm [py/repeated-import]
 
         if y is None:
-            raise ValueError("The value of guide `y` cannot be None. Please provide a `np.ndarray` of guide inputs.")
+            # raise ValueError("The value of guide `y` cannot be None. Please provide a `np.ndarray` of guide inputs.")
+            tmp_x = torch.tensor(x)
+            idx = torch.randperm(tmp_x.shape[0])
+            y = tmp_x[idx,:].view(tmp_x.size())
+            y = y.to(self.estimator.device)
         if x.shape != y.shape:
             raise ValueError("The shape of source `x` and guide `y` must be of same shape.")
         if x.shape[1:] != self.estimator.input_shape:  # pragma: no cover
@@ -204,8 +208,8 @@ class FeatureAdversariesPyTorch(EvasionAttack):
             begin, end = m * self.batch_size, min((m + 1) * self.batch_size, nb_samples)
 
             # create batch of adversarial examples
-            source_batch = torch.tensor(x[begin:end])
-            guide_batch = torch.tensor(y[begin:end])
+            source_batch = torch.tensor(x[begin:end]).to(self.estimator.device)
+            guide_batch = torch.tensor(y[begin:end]).to(self.estimator.device)
             x_adversarial[begin:end] = self._generate_batch(source_batch, guide_batch).numpy()
         return np.array(x_adversarial, dtype=x.dtype)
 
