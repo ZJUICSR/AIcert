@@ -28,7 +28,7 @@ import types
 from typing import Any, Dict, Optional, Union, TYPE_CHECKING
 
 import numpy as np
-
+import copy
 from function.attack.attacks.attack import EvasionAttack
 from function.attack.estimators.estimator import BaseEstimator
 from function.attack.estimators.classification.classifier import ClassifierMixin
@@ -49,8 +49,8 @@ class TargetedUniversalPerturbation(EvasionAttack):
     """
 
     attacks_dict = {
-        "fgsm": "art.attacks.evasion.fast_gradient.FastGradientMethod",
-        "simba": "art.attacks.evasion.simba.SimBA",
+        "fgsm": "function.attack.attacks.evasion.fast_gradient.FastGradientMethod",
+        "simba": "function.attack.attacks.evasion.simba.SimBA",
     }
     attack_params = EvasionAttack.attack_params + ["attacker", "attacker_params", "delta", "max_iter", "eps", "norm"]
 
@@ -96,7 +96,9 @@ class TargetedUniversalPerturbation(EvasionAttack):
         :return: An array holding the adversarial examples.
         """
         if y is None:
-            y = self.estimator.predict(x)
+            tmp_x = copy.deepcopy(x)
+            np.random.shuffle(tmp_x)
+            y = self.estimator.predict(tmp_x)
             # raise ValueError("Labels `y` cannot be None.")
 
         if self.estimator.nb_classes == 2 and y.shape[1] == 1:
