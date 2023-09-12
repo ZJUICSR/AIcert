@@ -61,7 +61,6 @@ def run_adversarial(model, modelpath, dataname, method, attackparam, device):
         "TPGD":"TPGD",
         "VMIFGSM":"VMIFGSM",
         "VNIFGSM":"VNIFGSM",
-        # "AdversarialPatch":"AdversarialPatch",
         "AutoPGDL1":"AutoProjectedGradientDescent",
         "AutoPGDL2":"AutoProjectedGradientDescent",
         "AutoPGDLinf":"AutoProjectedGradientDescent",
@@ -73,15 +72,11 @@ def run_adversarial(model, modelpath, dataname, method, attackparam, device):
         "ElasticNetL2":"ElasticNet",
         "ElasticNet-EN":"ElasticNet",
         "FeatureAdversaries":"FeatureAdversariesPyTorch",
-        "GRAPHITE":"GRAPHITEWhiteboxPyTorch",
-        # "LaserAttack":"LaserAttack",
         "NewtonFool":"NewtonFool",
-        # "ThresholdAttack":"ThresholdAttack",
         "SpatialTransformation":"SpatialTransformation",
         "TargetedUniversalPerturbationL2":"TargetedUniversalPerturbation",
         "TargetedUniversalPerturbationLinf":"TargetedUniversalPerturbation",
         "VirtualAdversarialMethod":"VirtualAdversarialMethod",
-        # "Wasserstein":"Wasserstein",
         "SignOPTAttack":"SignOPTAttack"
     }
     if methoddict[method] == "ElasticNet":
