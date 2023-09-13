@@ -16,6 +16,8 @@ def run_framework_test_exec(model, framework, out_path, logging=None):
     # 执行镜像，挂载目录
     logging.info("新建容器，配置环境中...")
     
+    if not os.path.exists(out_path):
+        os.mkdir(out_path)
     os.system("sudo docker run --name framework_args -v " +out_path+":/root/framework_test/frame_test_result -it -d framework_test:1.1_args")
     # 执行命令，结果保存
     logging.info("执行开发环境安全结构度量中...")
