@@ -308,22 +308,38 @@ class ModelImageCIFAR10(nn.Module):
         logit_output = logit_output.view(-1, 32, 32, 1, 256)
         return logit_output
 
-def bpda(model, adv_dataset, examples, labels):
-    from advertorch.attacks import LinfPGDAttack
-    if adv_dataset == 'CIFAR10':
-        eps = 0.031
-        nb_iter = 20
-        eps_iter = 0.003
-    elif adv_dataset == 'MNIST':
-        eps = 0.3
-        nb_iter = 40
-        eps_iter = 0.01
-    adversary = LinfPGDAttack(
-        model, loss_fn=torch.nn.CrossEntropyLoss(reduction="sum"), eps=eps,
-        nb_iter=nb_iter, eps_iter=eps_iter, rand_init=True, clip_min=0.0, clip_max=1.0,
-        targeted=False)
-    adv_examples = adversary.perturb(examples, labels)
-    return adv_examples
+class BPDAattack(object):
+    def __init__(self, model, defense, device, epsilon, step_size, num_steps):
+        self.model = model
+        self.epsilon = epsilon
+        self.defense = defense
+        self.step_size = step_size
+        self.num_steps = num_steps
+        self.device = device
+
+    def generate(self, X, y):
+        from torch.autograd import Variable
+        X_pgd = Variable(X.data, requires_grad=True)
+        if True:
+            random_noise = torch.FloatTensor(*X_pgd.shape).uniform_(-self.epsilon, self.epsilon).to(self.device)
+            X_pgd = Variable(X_pgd.data + random_noise, requires_grad=True)
+
+        for i in range(self.num_steps):
+            print(i)
+            adv_purified, _ = self.defense(X_pgd.detach().cpu().numpy()) #pixdefend处理
+            adv_purified = torch.from_numpy(adv_purified).to(self.device) #转成tensor
+            opt = optim.SGD([X_pgd], lr=1e-3)
+            opt.zero_grad()
+
+            with torch.enable_grad():
+                loss = nn.CrossEntropyLoss()(self.model(X_pgd), y)
+            loss.backward()
+            eta = self.step_size * X_pgd.grad.data.sign()
+            X_pgd = Variable(X_pgd.data + eta, requires_grad=True)
+            eta = torch.clamp(X_pgd.data - X.data, -self.epsilon, self.epsilon)
+            X_pgd = Variable(X.data + eta, requires_grad=True)
+            X_pgd = Variable(torch.clamp(X_pgd, 0, 1.0), requires_grad=True)
+        return X_pgd
 
 class Pixel_defend(Prepro):
     def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
@@ -356,11 +372,101 @@ class Pixel_defend(Prepro):
         )
         preprocess = PixelDefend(eps=64, pixel_cnn=pixel_cnn)
         if self.adv_method == 'BPDA':
-            defend_examples, _ = preprocess(cln_imgs.cpu().numpy()) #pixdefend处理
-            defend_examples = torch.from_numpy(defend_examples).to(self.device) #转成tensor
-            bpda_examples = bpda(self.model, self.adv_dataset, defend_examples, true_labels) #bpda攻击
+            if self.adv_dataset == 'CIFAR10':
+                epsilon = 0.031
+                step_size = 0.003
+                num_steps = 20
+            elif self.adv_dataset == 'MNIST':
+                epsilon = 0.3
+                step_size = 0.01
+                num_steps = 20
+            adversary = BPDAattack(model=self.model, defense=preprocess, device=self.device, epsilon=epsilon, step_size=step_size, num_steps=num_steps)
+            bpda_examples = adversary.generate(cln_imgs, true_labels)
             with torch.no_grad():
                 predictions_bpda = self.model(bpda_examples)
+            bpda_robustness = torch.sum(torch.argmax(predictions_bpda, dim = 1) == true_labels) / float(len(adv_imgs))
+            self.detect_rate = float(bpda_robustness.cpu())
+            # print('bpda_robustness:', float(bpda_robustness.cpu()))
+        else:
+            adv_imgs_ss, _ = preprocess(adv_imgs.cpu().numpy()) #
+            with torch.no_grad():
+                # predictions = self.model(cln_imgs)
+                # predictions_adv = self.model(adv_imgs)
+                predictions_ss = self.model(torch.from_numpy(adv_imgs_ss).to(self.device))
+            # accuracy = torch.sum(torch.argmax(predictions, dim = 1) == true_labels) / float(len(adv_imgs)) #0.9360000491142273 
+            # robustness = torch.sum(torch.argmax(predictions_adv, dim = 1) == true_labels) / float(len(adv_imgs)) #0.017000000923871994
+            # print('accuracy:', float(accuracy.cpu()), 'robustness:', float(robustness.cpu()))
+            detect_rate = torch.sum(torch.argmax(predictions_ss, dim = 1) == true_labels) / float(len(adv_imgs)) #0.029000001028180122
+            self.detect_rate = float(detect_rate.cpu())
+        if self.adv_examples is None:
+            attack_method = 'from user'
+        else:
+            attack_method = self.adv_method
+
+        return attack_method, self.detect_num, self.detect_rate, self.no_defense_accuracy
+    
+class Pixel_defend_enhanced(Prepro):
+    def __init__(self, model, mean, std, adv_examples, adv_method, adv_dataset, adv_nums, device):
+        super().__init__(model = model, mean = mean, std = std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+        
+    def detect(self):
+        if self.adv_examples is None:
+            adv_imgs, cln_imgs, true_labels = self.generate_adv_examples()
+        else:
+            adv_imgs, cln_imgs, true_labels = self.load_adv_examples() 
+        with torch.no_grad():
+            adv_predictions = self.model(adv_imgs)
+        no_defense_accuracy = torch.sum(torch.argmax(adv_predictions, dim = 1) == true_labels) / float(len(adv_imgs))
+        self.no_defense_accuracy = no_defense_accuracy.cpu().numpy() 
+        if self.adv_dataset == 'CIFAR10':
+            input_shape = (3, 32, 32)
+            model = ModelImageCIFAR10()
+        elif self.adv_dataset == 'MNIST':
+            if self.model.__class__.__name__ == 'VGG':
+                input_shape = (1, 32, 32)
+                model = ModelImageMNISTVGG()
+            else:
+                input_shape = (1, 28, 28)
+                model = ModelImageMNIST()
+        loss_fn = nn.CrossEntropyLoss()
+        optimizer = optim.Adam(model.parameters(), lr=0.01)
+
+        pixel_cnn = PyTorchClassifier(
+            model=model, loss=loss_fn, optimizer=optimizer, input_shape=input_shape, nb_classes=10, clip_values=(0, 1)
+        )
+        preprocess = PixelDefend(eps=64, pixel_cnn=pixel_cnn)
+        if self.adv_method == 'BPDA':
+            if self.adv_dataset == 'CIFAR10':
+                epsilon = 0.031
+                step_size = 0.003
+                num_steps = 20
+                if self.model.__class__.__name__ == 'ResNet':
+                    bpda_model = ResNet18()
+                    checkpoint = torch.load('/mnt/data2/yxl/AI-platform/model/model-cifar-resnet18/model-res-epoch90.pt')
+                elif self.model.__class__.__name__ == 'VGG':
+                    bpda_model = vgg16()
+                    bpda_model.classifier[6] = nn.Linear(4096, 10)
+                    checkpoint = torch.load('/mnt/data2/yxl/AI-platform/model/model-cifar-vgg16/model-vgg16-epoch89.pt')
+                bpda_model.load_state_dict(checkpoint)
+                bpda_model = bpda_model.to(self.device)
+            elif self.adv_dataset == 'MNIST':
+                epsilon = 0.3
+                step_size = 0.01
+                num_steps = 20
+                if self.model.__class__.__name__ == 'SmallCNN':
+                    bpda_model = SmallCNN()
+                    checkpoint = torch.load('/mnt/data2/yxl/AI-platform/model/model-mnist-smallCNN/model-nn-epoch99.pt')
+                elif self.model.__class__.__name__ == 'VGG':
+                    bpda_model = vgg16()
+                    bpda_model.features[0] = nn.Conv2d(1, 64, kernel_size=3, padding=1)
+                    bpda_model.classifier[6] = nn.Linear(4096, 10)
+                    checkpoint = torch.load('/mnt/data2/yxl/AI-platform/model/model-mnist-vgg16/model-vgg16-epoch57.pt')
+                bpda_model.load_state_dict(checkpoint)
+                bpda_model = bpda_model.to(self.device).eval()    
+            adversary = BPDAattack(model=self.model, defense=preprocess, device=self.device, epsilon=epsilon, step_size=step_size, num_steps=num_steps)
+            bpda_examples = adversary.generate(cln_imgs, true_labels)
+            with torch.no_grad():
+                predictions_bpda = bpda_model(bpda_examples)
             bpda_robustness = torch.sum(torch.argmax(predictions_bpda, dim = 1) == true_labels) / float(len(adv_imgs))
             self.detect_rate = float(bpda_robustness.cpu())
             # print('bpda_robustness:', float(bpda_robustness.cpu()))
