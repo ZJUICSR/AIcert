@@ -48,6 +48,8 @@ def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_ex
         model.load_state_dict(checkpoint)
         model = model.to(device).eval()    
 
+    if defense_methods not in ['Pixel Defend', 'Pixel Defend Enhanced'] and adv_method == 'BPDA':
+        raise Exception('BPDA can only use to attack Pixel Defend and Pixel Defend Enhanced!')
     if defense_methods == 'JPEG':
         detector =  Jpeg(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Feature Squeeze':
@@ -68,6 +70,8 @@ def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_ex
         detector =  Total_var_min(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Pixel Defend':
         detector =  Pixel_defend(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Pixel Defend Enhanced':
+        detector =  Pixel_defend_enhanced(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'InverseGAN':
         detector =  Inverse_gan(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'DefenseGAN':
