@@ -3,9 +3,7 @@ import torchvision.transforms as transforms
 from torchvision.datasets import CIFAR10, mnist
 from torch.utils.data import DataLoader
 import torch.optim as optim
-import tqdm, copy, random
-import numpy as np
-import torch.nn.functional as F
+import tqdm
 
 def adjust_learning_rate(optimizer, epoch, lr_):
     """decrease the learning rate"""
@@ -102,140 +100,19 @@ def Train(model_name, model, dataset, device):
     test_acc = eval_test(model, test_loader, device, criterion)
 
     return test_acc, model
-   
-def robust_train(model, train_loader, test_loader, adv_loader, device, epochs=40, method=None, adv_param=None, rate=0.25, **kwargs):
-    """
-    用于系统内定的对抗算法做鲁棒训练
-    :param model:
-    :param train_loader:
-    :param test_loader:
-    :param adv_loader:
-    :param epochs:
-    :param atk:
-    :param epoch_fn:
-    :param rate:
-    :param kwargs:
-    :return:
-    """
-    assert "atk_method" in kwargs.keys()
-    assert "def_method" in kwargs.keys()
-    train_res = {}
-    train_batchsize = 128  # 训练批大小
-    test_batchsize = 128  # 测试批大小
-    num_epoches = 0  # 训练轮次
-    lr = 0.1  # 学习率
-    momentum = 0.9  # 动量参数，用于优化算法
-    import torchattacks as attacks
-    copy_model1 = copy.deepcopy(model)
     
-    model = model.to(device)
-    
-    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=2e-4)
-    lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer,
-                                                        milestones=[100, 150], last_epoch=-1)
-    best_acc = 0.0
-    best_loss = 0.0
-    best_epoch = 0
-    train_list = []
-    test_list = []
-    criterion = torch.nn.CrossEntropyLoss()
-    print(f"-> 开始鲁棒训练，服务运行在显卡:{device}")
-    _eps = copy.deepcopy(adv_param['eps'])
-    from IOtool import IOtool
-    for epoch in range(1, epochs + 1):
-        print("-> For epoch:{:d} adv training on device: {:s}".format(epoch, str(device)))
-        model.train()
-        model = model.to(device)
-        num_step = len(train_loader)
-        total, sum_correct, sum_loss = 0, 0, 0.0
-        for step, (x, y) in enumerate(train_loader):
-            if method is not None:
-                size = int(rate * len(x))
-                idx = np.random.choice(len(x), size=size, replace=False)
-                adv_param['eps'] = _eps * (random.randint(80, 180) * 0.01)
-                x, y = x.to(device), y.to(device)
-                attackObj = eval("attacks.{:s}".format(method))(copy_model1.to(device), **adv_param)
-                x[idx] = attackObj(copy.deepcopy(x[idx]), copy.deepcopy(y[idx]))
 
-            x, y = x.to(device), y.to(device)
-            # 向模型中输入数据
-            out = model.forward(x)
-            # 计算损失值
-            loss = criterion(out, y)
-            # 清理当前优化器中梯度信息
-            optimizer.zero_grad()
-            # 根据损失值计算梯度
-            loss.backward()
-            # 根据梯度信息进行模型优化
-            optimizer.step()
-            # 统计损失信息
-            sum_loss += loss.item()
-            
-            total += y.size(0)
-   
-            _, pred = out.max(1)
-            # sum_correct = (pred == y).sum().item()
-            sum_correct += pred.eq(y.view_as(pred)).sum().item()
-            info = "[Train] Attack:{:s}_{:.4f} Defense:{:s} Loss: {:.6f} Acc:{:.3f}%".format(
-                kwargs["atk_method"],
-                adv_param['eps'],
-                kwargs["def_method"],
-                sum_loss / total,
-                100.0 * (sum_correct / total)
-            )
-            IOtool.progress_bar(step, num_step, info)
-            
-        adv_param['eps'] = _eps
-        train_acc, train_loss = 100.0 * (sum_correct / total), sum_loss / total
-        test_acc = eval_test(model, test_loader, device)
-        adv_test_acc = eval_test(model, adv_loader, device)
-
-        if best_acc < test_acc:
-            best_acc = test_acc
-            best_epoch = epoch
-
-        train_list.append(train_acc)
-        test_list.append(test_acc)
-        epoch_result = {
-            "epoch": epoch,
-            "best_acc": best_acc,
-            "best_loss": best_loss,
-            "best_epoch": best_epoch,
-            "train": train_acc,
-            "test": test_acc,
-            "train_list": train_list,
-            "test_list": test_list
-        }
-        # lr_scheduler.step()
-    print(epoch_result)
-    model = model.cpu()
-    return model
-
-def test_batch(model, test_loader, device=None, **kwargs):
-        model.to(device)
-        with torch.no_grad():
-            x, y = iter(test_loader).next()
-            x = x.to(device)
-            output = model(x).detach().cpu()
-            loss = F.cross_entropy(output, y).detach().cpu()
-            pred = output.argmax(dim=1, keepdim=True)
-            correct = pred.eq(y.view_as(pred)).sum().item()
-            acc = 100.0 * float(correct / len(x))
-            return output, round(float(acc), 3), round(float(loss), 5)
-
-def eval_test(model, test_loader, device, criterion=None):
+def eval_test(model, test_loader, device, criterion):
     # 进行模型评估
     eval_loss = 0
     eval_acc = 0
-    # copy_model = copy.deepcopy(model).eval().to(device)
-    copy_model = model.eval().to(device)
-    if criterion== None:
-        criterion = torch.nn.CrossEntropyLoss()
+    model.eval()
+
     for img, label in test_loader:
         img = img.to(device)
         label = label.to(device)
 
-        out = copy_model.forward(img)
+        out = model.forward(img)
         loss = criterion(out, label)
 
         # 记录误差
@@ -247,4 +124,4 @@ def eval_test(model, test_loader, device, criterion=None):
         acc = num_correct / img.shape[0]
         eval_acc += acc
 
-    return 100*(eval_acc/ len(test_loader))
+    return eval_acc/ len(test_loader)
