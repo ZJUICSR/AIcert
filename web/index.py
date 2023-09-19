@@ -5,7 +5,7 @@ import interface
 import os, json, datetime, time, base64, threading
 import pytz,shutil
 from IOtool import IOtool
-from flask import render_template, redirect, url_for, Flask, request, jsonify, send_from_directory
+from flask import render_template, redirect, url_for, Flask, request, jsonify, send_from_directory, send_file
 from flask import current_app as abort
 from flask_cors import *
 
@@ -1287,6 +1287,7 @@ def CoverageLayerParamSet():
         IOtool.change_task_info(tid, "model", model)
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_coverage_layer, tid, AAtid, dataset, model, k, N)
+        IOtool.add_task_queue(tid, AAtid, t2, 300)
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
@@ -1593,6 +1594,25 @@ def UploadData():
         #  save_dir = os.path.join(basePath, 'upload_data'+suffix)
          file.save(save_dir)
          return jsonify({'save_dir': save_dir})
+
+@app.route('/Task/DownloadData', methods=['POST'])
+def DownloadData():
+     if request.method == "POST":
+            download_path = request.form.get('file')
+            input_path,input_name=os.path.split(download_path)
+            if os.path.isdir(download_path): 
+                print("it's a directory")
+                outFullName = input_path +'/'+ input_name+'.zip'
+                # if not os.path.exists(outFullName):
+                interface.zipDir(download_path, outFullName)
+                return send_from_directory(input_path,
+                                    input_name+'.zip', as_attachment=True)
+            elif os.path.isfile(download_path):
+                print("it's a normal file")
+                return send_from_directory(input_path,
+                                    input_name, as_attachment=True)
+            else:
+                return jsonify(bool=False, msg='No such file, please check file path')
 
 def app_run(args):
     
