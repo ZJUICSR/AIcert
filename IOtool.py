@@ -10,7 +10,7 @@ import threading
 import torch.nn as nn
 from concurrent.futures import ThreadPoolExecutor, TimeoutError, as_completed
 from function.ex_methods.module.func import Logger
-from sklearn.manifold import TSNE
+
 _, term_width = os.popen('stty size', 'r').read().split()
 term_width = int(term_width)
 TOTAL_BAR_LENGTH = 65.
@@ -53,6 +53,12 @@ class IOtool:
 
         return IOtool.__curpoollist[tid]["pool"]
         
+    # @staticmethod
+    # def task_queue_init(tid):
+    #     IOtool.__task_queue_lock.acquire()
+    #     IOtool.__task_queue[tid] = {}
+    #     IOtool.__task_queue_lock.release()
+    
 
     @staticmethod
     def add_task_queue(tid, stid, feature, outtime):
@@ -82,6 +88,12 @@ class IOtool:
         IOtool.__curpoollist[tid][stid]["starttime"] = timevalue
         IOtool.__task_queue_lock.release()
     
+    # @staticmethod
+    # def query_task_queue():
+    #     IOtool.__task_queue_lock.acquire()
+    #     task = IOtool.__task_queue.keys()
+    #     IOtool.__task_queue_lock.release()
+    #     return IOtool.__task_queue
      
     @staticmethod
     def check_feature_state(task_queue):
@@ -232,7 +244,7 @@ class IOtool:
     @staticmethod
     def save(model, arch, task, tag, pre_path=None):
         if pre_path is None:
-            pre_path = osp.join(ROOT, "model/ckpt")
+            pre_path = osp.join(ROOT, "models/ckpt")
         weights = model.cpu().state_dict()
 
         path = osp.join(pre_path, f"{task}_{arch}_{tag}.pt")
@@ -242,7 +254,7 @@ class IOtool:
     @staticmethod
     def load(arch, task, tag, pre_path=None):
         if pre_path is None:
-            pre_path = osp.join(ROOT, "model/ckpt")
+            pre_path = osp.join(ROOT, "models/ckpt")
         path = osp.join(pre_path, f"{task}_{arch}_{tag}.pt")
         if osp.exists(path):
             print(f"-> load check point: {path}")
@@ -480,14 +492,7 @@ class IOtool:
             sys.stdout.write('\n')
         sys.stdout.flush()
 
-    @staticmethod
-    def prob_scatter(ben_prob, adv_prob, seed=100):
-        _min = int(min(len(ben_prob), len(adv_prob)))
-        ben_prob = ben_prob[:_min]
-        adv_prob = adv_prob[:_min]
-        probs = torch.cat([ben_prob, adv_prob]).cpu().numpy()
-        x = TSNE(n_components=2, n_iter=1000, random_state=seed).fit_transform(probs)
-        return x
+
     @staticmethod
     def summary_dict(model, input_size, batch_size=-1, device=torch.device('cpu'), dtypes=None):
         if dtypes == None:
