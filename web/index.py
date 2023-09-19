@@ -618,12 +618,12 @@ def AdvAttack():
     """
     global LiRPA_LOGS
     if (request.method == "POST"):
-        print(request.data)
         inputParam = json.loads(request.data)
         tid = inputParam["Taskid"]
         # inputParam["device"] = "cuda:0"
         dataname = inputParam["Dataset"]
         model = inputParam["Model"]
+        sample_num = inputParam["sample_num"]
         try:
             adv_method = json.loads(inputParam["Method"])
         except:
@@ -643,7 +643,7 @@ def AdvAttack():
         IOtool.change_task_info(tid, "model", model)
         # 执行任务
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.run_adv_attack, tid, stid, dataname, model, adv_method, inputParam)
+        t2 = pool.submit(interface.run_adv_attack, tid, stid, dataname, model, adv_method, inputParam, sample_num)
         IOtool.add_task_queue(tid, stid, t2, 3000*len(adv_method))
         # interface.run_adv_attack(tid, stid, dataname, model, adv_method, inputParam)
         res = {
@@ -1603,11 +1603,12 @@ def ensemble():
         # 执行任务
         datasetparam["name"] = datasetparam["name"].lower()
         modelparam["name"] = modelparam["name"].lower()
+        adv_param = {}
         for temp in adv_methods:
             adv_param.update({temp:inputParam[temp]})
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_ensemble_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
-        adv_param = {}
+        
         
         IOtool.add_task_queue(tid, stid, t2, 30000*len(adv_methods))
         res = {
