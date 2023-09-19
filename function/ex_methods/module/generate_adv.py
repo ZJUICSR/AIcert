@@ -121,7 +121,7 @@ def untargeted_attack(dataset, method, model, data_loader, device, params, mean,
 
 '''加载对抗样本'''
 def get_adv_loader(model, dataloader, method, param, batchsize, logging):
-    dataset = param["dataset"]["name"]
+    dataset = param["dataset"]["name"].lower()
     model_name = param["model"]["name"]
     device = param["device"]
     root = param["root"]
@@ -130,14 +130,17 @@ def get_adv_loader(model, dataloader, method, param, batchsize, logging):
     with open(osp.join(root, "function/ex_methods/cache/adv_params.json")) as fp:
         def_params = json.load(fp)
     
-    eps = def_params[dataset][method]["eps"]
+    if "eps" not in def_params[dataset][method].keys():
+        eps = 0.1
+    else:
+        eps = def_params[dataset][method]["eps"]
 
     if "steps" not in def_params[dataset][method].keys():
         steps = 1
     else:
         steps = def_params[dataset][method]["steps"]
 
-    save_root = osp.join(root,f"dataset/{dataset}/adv_data")
+    save_root = osp.join(root,f"dataset/adv_data")
     if not osp.exists(save_root):
         os.makedirs(save_root)
     path = osp.join(save_root, "adv_{:s}_{:s}_{:s}_{:04d}_{:.5f}.pt".format(
