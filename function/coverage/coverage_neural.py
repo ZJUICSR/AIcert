@@ -458,7 +458,7 @@ def run_visualize_neural(
         if now_conv > best_conv + 0.05:
             best_conv = now_conv
             saves.append((i, now_conv))
-            g = DrawNet_overlap(result, format='svg', type_net=model_type, outputdir=outputdir, imagename=str(i),
+            g = DrawNet_overlap(result, format='png', type_net=model_type, outputdir=outputdir, imagename=str(i),
                             number_per_dot=number_per_dot)
             # print('conv:', now_conv)
             # break
@@ -473,7 +473,7 @@ def run_visualize_neural(
         json_data['coverage_test_yz']['coverage_neural'] = []
         for idx, conv in saves:
             # json_data['coverage_test_yz']['coverage_neural'].append([conv, f'{outputdir}/{idx}.svg']) 
-            json_data['coverage_test_yz']['coverage_neural'].append({"coverage":conv, "imgUrl":f'{outputdir}/{idx}.svg'}) 
+            json_data['coverage_test_yz']['coverage_neural'].append({"coverage":conv, "imgUrl":f'{outputdir}/{idx}.png'}) 
         if i == number_of_image:
             break
         
