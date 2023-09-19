@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>人工智能安全理论及验证平台</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/indexcss/common.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css//indexcss/swiper.min.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css/indexcss/index.css" />
+    <link href="favicon.ico" rel="shortcut icon">
+  </head>
+  <body>
+    <div class="page flex-col">
+      <div class="group_1 flex-col">
+        <div class="section_1 flex-row">
+          <div class="block_1 flex-col"></div>
+          <img
+            class="image_1"
+            referrerpolicy="no-referrer"
+            src="../static/img/head_line_1.png"
+          />
+          <a href="/"><button class="text_1">平台介绍</button></a>
+          <img
+            class="image_2"
+            referrerpolicy="no-referrer"
+            src="../static/img/head_line_2.png"
+          />
+          <a href="/"><button class="text_index">解决方案</button></a>
+          <!-- <a href="/index_task_center"><button class="text_3">在线体验</button></a> -->
+          <button class="text_index" onclick="open_function_introduction()">在线体验</button>
+          <a href="../static/pdf/AI平台介绍文档v8.pdf"><button class="text_index">帮助文档</button></a>
+          <a href="https://icsr.zju.edu.cn"><button class="text_index">关于我们</button></a>
+          <div class="block_2 flex-col" onclick="window.open('https://github.com/AISecurity2030/Attack', '_self')"></div>
+        </div>
+        <div class="text-wrapper_1 flex-row">
+          <span class="text_6">人工智能安全理论及验证平台</span>
+        </div>
+        <div class="text-wrapper_2 flex-row">
+          <span class="text_7">适用于大规模人工智能系统的评估与验证</span>
+        </div>
+      </div>
+      <div class="group_2 flex-col">
+        <span class="text_8">系统架构图</span>
+        <video class="image_4" loop autoplay muted>
+          <source src="../static/img/architecture.mp4" type="video/mp4">
+        </video>
+        <div class="box_1 flex-col">
+          <div class="section_2 flex-col">
+            <span class="text_9">平台功能</span>
+            <img class="image_5" referrerpolicy="no-referrer" src="../static/img/head_line_4.png" />
+            <div class="pc-banner">
+              <div class="swiper-container swiper-container-horizontal">
+                  <div class="swiper-wrapper" style="transform: translate3d(-1080px, 0px, 0px); transition-duration: 1000ms;">
+                    <div class="swiper-slide swiper-slide-duplicate swiper-slide-duplicate-prev" data-swiper-slide-index="3"  >
+                      <img src="../static/img/对抗攻击评估.png" onclick="goto_adv_attack()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-duplicate swiper-slide-duplicate-active" data-swiper-slide-index="4"  >
+                      <img src="../static/img/鲁棒性增强.png" onclick="goto_robust_enhance()">
+                    </div>
+                      <div class="swiper-slide swiper-slide-duplicate-next" data-swiper-slide-index="0"  >
+                        <img src="../static/img/公平性.png" onclick="goto_fairness()">
+                      </div>
+                      <div class="swiper-slide" data-swiper-slide-index="1"  >
+                        <img src="../static/img/后门攻击.png" onclick="goto_bkd_attack()">
+                      </div>
+                      <div class="swiper-slide" data-swiper-slide-index="2"  >
+                        <img src="../static/img/形式化验证.png" onclick="goto_formal_verification()">
+                      </div>
+                      <div class="swiper-slide swiper-slide-prev" data-swiper-slide-index="3"  >
+                        <img src="../static/img/对抗攻击评估.png" onclick="goto_adv_attack()">
+                      </div>
+                      <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="4"  >
+                        <img src="../static/img/鲁棒性增强.png" onclick="goto_robust_enhance()">
+                      </div>
+                    <div class="swiper-slide swiper-slide-center none-effect swiper-slide-duplicate swiper-slide-next" data-swiper-slide-index="0"  >
+                      <img src="../static/img/公平性.png" onclick="goto_fairness()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-duplicate" data-swiper-slide-index="1"  >
+                      <img src="../static/img/后门攻击.png" onclick="goto_bkd_attack()">
+                    </div>
+                  </div>
+                </div> 
+            </div>
+            <div class="swiper-pagination swiper-pagination-clickable swiper-pagination-bullets">
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet swiper-pagination-bullet-active"></span>
+            </div>
+            <div class="button">
+              <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
+            </div>
+          </div>
+        </div>
+        <span class="text_14">平台优势</span>
+        <img
+          class="image_8"
+          referrerpolicy="no-referrer"
+          src="../static/img/head_line_3.png"
+        />
+        <div class="list_1 flex-row">
+          <div class="list-items_1-0 flex-col">
+            <div class="image-wrapper_3-0 flex-col">
+              <img
+                class="image_9-0"
+                referrerpolicy="no-referrer"
+                src="../static/img/advantage_1.png"
+              />
+            </div>
+            <span class="text_15-0">一站式检测</span>
+            <span class="text_16-0">
+              平台对人工智能数据和模型进行安全性评估并给出加固方案，用户无需切换多个平台，实现一站式检测。
+              <!-- 支持多种经典和SOTA软硬件攻击，一体化全面检测人工智能模型，并给出加固方案。 -->
+            </span>
+          </div>
+          <div class="list-items_1-1 flex-col">
+            <div class="image-wrapper_3-1 flex-col">
+              <img
+                class="image_9-1"
+                referrerpolicy="no-referrer"
+                src="../static/img/advantage_2.png"
+              />
+            </div>
+            <!-- <span class="text_15-1">准确率高</span> -->
+            <span class="text_15-1">场景可拓展</span>
+            <span class="text_16-1">
+              平台内置多场景数据和模型，同时支持自定义数据集和模型算法上传，平台核心能力得到充分发挥。
+              <!-- 持续更新业内各类攻击算法，全面覆盖新型安全风险，攻击抵抗率90%以上 -->
+            </span>
+          </div>
+          <div class="list-items_1-2 flex-col">
+            <div class="image-wrapper_3-2 flex-col">
+              <img
+                class="image_9-2"
+                referrerpolicy="no-referrer"
+                src="../static/img/advantage_3.png"
+              />
+            </div>
+            <span class="text_15-2">全周期评估</span>
+            <span class="text_16-2">
+              从鲁棒性、公平性、完整性等多维度出发，平台对数据和模型全生命周期存在的安全风险进行评估和防御。
+            </span>
+          </div>
+        </div>
+        <div class="box_2 flex-col">
+          <span class="text_17">行业应用</span>
+          <img
+            class="image_10"
+            referrerpolicy="no-referrer"
+            src="../static/img/head_line_3.png"
+          />
+          <div class="box_3 flex-col"></div>
+          <div class="box_4 flex-col">
+            <div class="group_4 flex-col">
+              <img
+                class="image_11"
+                referrerpolicy="no-referrer"
+                src="../static/img/app_1.png"
+              />
+              <span class="text_18">人脸识别</span>
+            </div>
+          </div>
+          <div class="box_5 flex-col">
+            <img
+              class="image_12"
+              referrerpolicy="no-referrer"
+              src="../static/img/app_2.png"
+            />
+            <span class="text_19">自动驾驶</span>
+          </div>
+          <div class="box_6 flex-col">
+            <img
+              class="image_13"
+              referrerpolicy="no-referrer"
+              src="../static/img/app_3.png"
+            />
+            <span class="text_20">语音识别</span>
+          </div>
+          <div class="box_7 flex-col">
+            <img
+              class="image_14"
+              referrerpolicy="no-referrer"
+              src="../static/img/app_4.png"
+            />
+            <span class="text_21">智慧城市</span>
+          </div>
+          <div class="box_8 flex-col">
+            <img
+              class="image_15"
+              referrerpolicy="no-referrer"
+              src="../static/img/app_5.png"
+            />
+            <span class="text_22">用户画像</span>
+          </div>
+        </div>
+      </div>
+      <div class="group_5 flex-col">
+        <div class="box_9 flex-row justify-between">
+          <div class="box_10 flex-col"></div>
+          <span class="text_23">人工智能安全理论及验证平台</span>
+        </div>
+        <div class="box_11 flex-row justify-between">
+          <div class="image-text_1 flex-row justify-between">
+            <img
+              class="image_16"
+              referrerpolicy="no-referrer"
+              src="../static/img/email.png"
+            />
+            <span class="text-group_1">xxxx&#64;xxxx.com</span>
+          </div>
+          <div class="image-text_2 flex-row justify-between">
+            <img
+              class="thumbnail_1"
+              referrerpolicy="no-referrer"
+              src="../static/img/tel.png"
+            />
+            <span class="text-group_2">0571-XXXXXXXXX</span>
+          </div>
+          <div class="image-text_3 flex-row justify-between">
+            <img
+              class="thumbnail_2"
+              referrerpolicy="no-referrer"
+              src="../static/img/address.png"
+            />
+            <span class="text-group_3">浙江省杭州市xxxxxxxxxx</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+<script type="text/javascript" src="../static/js/indexjs/echarts.min.js"></script>
+<script type="text/javascript" src="../static/js/indexjs/jquery-3.6.1.js"></script>
+<script type="text/javascript" src="../static/js/indexjs/swiper.min.js"></script>
+<script type="text/javascript" src="../static/js/indexjs/flexible.js"></script>
+<script type="text/javascript" src="../static/js/indexjs/index.js"></script>
+<script type="text/javascript" src="../static/js/indexjs/use.js"></script>
