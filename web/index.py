@@ -1287,6 +1287,7 @@ def CoverageLayerParamSet():
         IOtool.change_task_info(tid, "model", model)
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_coverage_layer, tid, AAtid, dataset, model, k, N)
+        IOtool.add_task_queue(tid, AAtid, t2, 300)
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
