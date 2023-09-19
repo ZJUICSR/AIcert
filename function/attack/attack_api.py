@@ -118,7 +118,7 @@ class EvasionAttacker():
         # 计算真正的攻击成功率，将本来分类错误的样本排除在外
         self.coverrate, self.asr  = compute_attack_success(real_lables, clean_predictions, adv_predictions)
         piclist = self.save_examples(save_num, real_lables, cln_examples, clean_predictions, adv_examples, adv_predictions, kwargs["save_path"])
-        return adv_examples, piclist
+        return adv_examples, real_lables, piclist
     
     def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, clean_prediction: np.ndarray, adv_example: np.ndarray, adv_prediction: np.ndarray, path:str="output/cache/results/"):
         
