@@ -11,9 +11,7 @@ from flask_cors import *
 
 ROOT = os.getcwd()
 
-
 poollist = []
-#  {tid:{stid:feature}}
 task_list = {}
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -777,14 +775,10 @@ def model_reach():
         tid = inputParam["tid"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
-        img_dir=os.path.join(os.getcwd(),"web/static/img/tmp_imgs")
+        img_dir=os.path.join(os.getcwd(),"output",tid, stid)
         if not os.path.exists(img_dir):
             os.mkdir(img_dir)
-        pic_path=os.path.join(img_dir,tid,stid+'.png')
-        try:
-            os.mkdir(os.path.join(img_dir,tid))
-        except:
-            pass
+        pic_path=os.path.join(img_dir,'input.png')
         if "image/jpeg;" in pic:
             
             with open( pic_path, 'wb') as f:
@@ -808,15 +802,13 @@ def model_reach():
         IOtool.change_task_info(tid, "dataset", dataset)
         IOtool.change_task_info(tid, "model", 'CNN')
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.reach, tid,stid,dataset.upper(),pic_path,label,target)
-        t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+        t2 = pool.submit(interface.reach, tid,stid,dataset.upper(),pic_path,label,target)
+        
         IOtool.add_task_queue(tid, stid, t2, 300)
-        interface.reach(tid, stid, dataset.upper(), pic_path, label, target)
+        # interface.reach(tid, stid, dataset.upper(), pic_path, label, target)
         resp = t2.result()
-        
-        # resp=interface.reach(tid,stid,dataset.upper(),pic_path,label,target)
-        
-        return resp
+        print(resp)
+        return jsonify(resp)
     # return render_template('reach.html')
 @app.route('/knowledge_consistency',methods=["GET","POST"])
 def model_consistency():
@@ -963,11 +955,6 @@ def AttackAttrbutionAnalysis():
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_attrbution_analysis, tid, stid, datasetparam, modelparam, ex_methods, adv_methods, use_layer_explain)
         IOtool.add_task_queue(tid, stid, t2, 400 * len(ex_methods) + 300*len(adv_methods))
-        # print(t2.done())
-        # print(t2.result())
-        # t2 = threading.Thread(target=interface.run_attrbution_analysis,args=(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device, use_layer_explain))
-        # t2.setDaemon(True)
-        # t2.start()
         res = {
             "code":1,
             "msg":"success",
@@ -1053,7 +1040,8 @@ def Detect():
         adv_model = inputParam["adv_model"]
         adv_method = inputParam["adv_method"]
         adv_nums = inputParam["adv_nums"]
-        defense_methods = json.loads(inputParam["defense_methods"])
+        defense_methods = inputParam["defense_methods"]
+        # defense_methods = json.loads(inputParam["defense_methods"])
         tid = inputParam["tid"]
     format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
     stid = "S"+IOtool.get_task_id(str(format_time))
@@ -1522,6 +1510,7 @@ def SideAnalysis():
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_side_api, trs_file, methods, tid, stid)
         IOtool.add_task_queue(tid, stid, t2, 300)
+        interface.run_side_api(trs_file, methods, tid, stid)
         # t2 = threading.Thread(target=interface.run_side_api,args=(trs_file, methods, tid, stid))
         # t2.setDaemon(True)
         # t2.start()
@@ -1579,6 +1568,57 @@ def FormalVerification():
         }
         return jsonify(res)
 
+@app.route('/Defense/Ensemble', methods=['POST'])
+def ensemble():
+    """
+    对抗图像归因解释
+    输入：tid：主任务ID
+    Dataset：数据集名称
+    Model：模型名称
+    AdvMethods:list 对抗攻击算法名称
+    ExMethods:攻击机理解释方法名称
+    """
+    global LiRPA_LOGS
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        tid = inputParam["Taskid"]
+        datasetparam = inputParam["DatasetParam"]
+        modelparam = inputParam["ModelParam"]
+        adv_methods = inputParam["AdvMethods"]
+        defense_methods = inputParam["DefMethod"]
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        value = {
+            "type":"Defense_Ensemble",
+            "state":0,
+            "name":["Defense_Ensemble"],
+            "dataset":datasetparam["name"],
+            "method":adv_methods,
+            "model":modelparam["name"],
+            "def_method":defense_methods
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", datasetparam["name"])
+        IOtool.change_task_info(tid, "model", modelparam["name"])
+        # 执行任务
+        datasetparam["name"] = datasetparam["name"].lower()
+        modelparam["name"] = modelparam["name"].lower()
+        for temp in adv_methods:
+            adv_param.update({temp:inputParam[temp]})
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_ensemble_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
+        adv_param = {}
+        
+        IOtool.add_task_queue(tid, stid, t2, 30000*len(adv_methods))
+        res = {
+            "code":1,
+            "msg":"success",
+            "tid":tid,
+            "stid":stid
+        }
+        return jsonify(res)
+    else:
+        abort(403)
 
 @app.route('/Task/UploadData', methods=['POST'])
 def UploadData():
@@ -1594,6 +1634,49 @@ def UploadData():
          file.save(save_dir)
          return jsonify({'save_dir': save_dir})
 
+
+@app.route('/Task/UploadPic', methods=['POST'])
+def UploadPic():
+    if request.method == "POST":
+        file = request.files.get('avatar')
+        basePath = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)
+        save_dir = os.path.join(basePath[0], 'dataset/data/ckpt',"upload.jpg")
+        file.save(save_dir)
+        return jsonify({'save_dir': save_dir})
+
+@app.route('/Attack/LLM_attack', methods=['POST'])
+def LLM_attack():
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        tid = inputParam["Taskid"]
+        modelname = inputParam['model']
+        goal = inputParam['goal']
+        target = inputParam['target']
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        value = {
+            "type":"LLM_attack",
+            "state":0,
+            "name":["LLM_attack"],
+            "dataset":goal,
+            "method":"LLM attack",
+            "model":modelname,
+        }
+        print(goal)
+        print(target)
+        IOtool.add_subtask_info(tid, stid, value)
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+        IOtool.add_task_queue(tid, stid, t2, 30000)
+        interface.llm_attack(tid, stid, goal, target)
+        res = {
+            "code":1,
+            "msg":"success",
+            "tid":tid,
+            "stid":stid
+        }
+        return jsonify(res)
+    
 def app_run(args):
     
     web_config={'host':args.host,'port':args.port,'debug':args.debug}

@@ -1,0 +1,47 @@
+{
+    "attack_methods": [
+        "fgsm",
+        "ffgsm"
+    ],
+    "attack_param": {
+        "fgsm": {
+            "eps": 0.05
+        },
+        "ffgsm": {
+            "eps": 0.05
+        },
+        "bim": {
+            "eps": 0.05
+        },
+        "rfgsm": {
+            "eps": 0.05
+        },
+        "c&w": {
+            "eps": 0.05
+        },
+        "pgd": {
+            "eps": 0.05
+        },
+        "tpgd": {
+            "eps": 0.05
+        },
+        "mi-fgsm": {
+            "eps": 0.05
+        },
+        "autopgd": {
+            "eps": 0.05
+        },
+        "fab": {
+            "eps": 0.05
+        },
+        "square": {
+            "eps": 0.05
+        },
+        "deepfool": {
+            "eps": 0.05
+        },
+        "difgsm": {
+            "eps": 0.05
+        }
+    }
+}
