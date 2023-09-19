@@ -1,10 +1,9 @@
 output/*
-
+function/ensemble/paca_detect/detect_models/*
 record
 web/static/imgs/tmp_imgs/*
 web/static/img/tmp_imgs/
-web/static
-web/templates
+
 datasets/**
 results/**
 function/defense/trainer/test/*
