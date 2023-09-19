@@ -365,7 +365,7 @@ def run_modulardevelop(tid,AAtid, dataset, modelname, tuner, init, epoch, iternu
 
 from train_network import train_resnet_mnist, train_resnet_cifar10
 
-def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
+def run_adv_attack(tid, stid, dataname, model, methods, inputParam, sample_num=128):
     """对抗攻击评估
     :params tid:主任务ID
     :params stid:子任务id
@@ -410,7 +410,7 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam):
         attackparam["save_path"] = osp.join(ROOT,"output", tid, stid)
         if "norm" in attackparam.keys() and attackparam["norm"]=="np.inf":
             attackparam["norm"]=np.inf
-        resultlist[method] ,resultlist[method]["pic"]= run_adversarial(model, modelpath, dataname, method, attackparam, device)
+        resultlist[method] ,resultlist[method]["pic"], resultlist[method]["path"], resultlist[method]["num"]= run_adversarial(model, modelpath, dataname, method, attackparam, device, sample_num)
         logging.info("[执行对抗攻击中]:{:s}对抗攻击结束，攻击成功率为{}%".format(method,resultlist[method]["asr"]))
     logging.info("[执行对抗攻击]:对抗攻击执行完成，数据保存中")
     resultlist["stop"] = 1
@@ -775,7 +775,6 @@ def run_detect(tid, stid, defense_methods, adv_dataset, adv_model, adv_method, a
         # 调换顺序，将CARTL放在最后执行
         defense_methods.remove("CARTL")
         defense_methods.append("CARTL")
-    print("-----------defense_methods:",defense_methods)
     for defense_method in defense_methods:
         logging.info("开始执行防御任务{:s}".format(defense_method))
         detect_rate, no_defense_accuracy = detect(adv_dataset, adv_model, adv_method, adv_nums, defense_method, adv_file_path,logging)
@@ -830,6 +829,9 @@ def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_ex
         model.load_state_dict(checkpoint)
         model = model.to(device).eval()
     logging.info("{:s}模型加载结束".format(adv_model))
+    print(defense_methods)
+    if defense_methods not in ['Pixel Defend', 'Pixel Defend Enhanced'] and adv_method == 'BPDA':
+        raise Exception('BPDA can only use to attack Pixel Defend and Pixel Defend Enhanced!')
     if defense_methods == 'JPEG':
         detector = Jpeg(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Feature Squeeze':
@@ -850,6 +852,8 @@ def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_ex
         detector = Total_var_min(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'Pixel Defend':
         detector = Pixel_defend(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
+    elif defense_methods == 'Pixel Defend Enhanced':
+        detector =  Pixel_defend_enhanced(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'InverseGAN':
         detector = Inverse_gan(model, mean, std, adv_examples=adv_examples, adv_method=adv_method, adv_dataset=adv_dataset, adv_nums=adv_nums, device=device)
     elif defense_methods == 'DefenseGAN':
