@@ -64,7 +64,7 @@ def main(_):
             train_targets,
             workers,
             control_init=params.control_init,
-            logfile=f"{params.result_prefix}_{timestamp}.json",
+            logfile=f"{params.result_prefix}.json",
             managers=managers,
             test_goals=getattr(params, 'test_goals', []),
             test_targets=getattr(params, 'test_targets', []),

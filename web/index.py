@@ -5,13 +5,15 @@ import interface
 import os, json, datetime, time, base64, threading
 import pytz,shutil
 from IOtool import IOtool
-from flask import render_template, redirect, url_for, Flask, request, jsonify, send_from_directory
+from flask import render_template, redirect, url_for, Flask, request, jsonify, send_from_directory, send_file, make_response
 from flask import current_app as abort
 from flask_cors import *
 
 ROOT = os.getcwd()
 
+
 poollist = []
+#  {tid:{stid:feature}}
 task_list = {}
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -809,7 +811,7 @@ def model_reach():
         resp = t2.result()
         print(resp)
         return jsonify(resp)
-    # return render_template('reach.html')
+    
 @app.route('/knowledge_consistency',methods=["GET","POST"])
 def model_consistency():
     if request.method=='POST':
@@ -955,6 +957,11 @@ def AttackAttrbutionAnalysis():
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_attrbution_analysis, tid, stid, datasetparam, modelparam, ex_methods, adv_methods, use_layer_explain)
         IOtool.add_task_queue(tid, stid, t2, 400 * len(ex_methods) + 300*len(adv_methods))
+        # print(t2.done())
+        # print(t2.result())
+        # t2 = threading.Thread(target=interface.run_attrbution_analysis,args=(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device, use_layer_explain))
+        # t2.setDaemon(True)
+        # t2.start()
         res = {
             "code":1,
             "msg":"success",
@@ -1025,24 +1032,19 @@ def home():
 
 @app.route("/detect", methods=["POST"])
 def Detect():
+    
+    inputParam = json.loads(request.data)
+    adv_dataset = inputParam["adv_dataset"]
+    adv_model = inputParam["adv_model"]
+    adv_method = inputParam["adv_method"]
+    adv_nums = inputParam["adv_nums"]
     try:
-        adv_dataset = request.form.get("adv_dataset")
-        adv_model = request.form.get("adv_model")
-        adv_method = request.form.get("adv_method")
-        adv_nums = request.form.get("adv_nums")
-        defense_methods_str = request.form.get("defense_methods")
-        defense_methods = json.loads(defense_methods_str)
-        # tid=request.form.get("tid")
-        tid="20230625_0948_fd3c890"
+        defense_methods = json.loads(inputParam["defense_methods"])
     except:
-        inputParam = json.loads(request.data)
-        adv_dataset = inputParam["adv_dataset"]
-        adv_model = inputParam["adv_model"]
-        adv_method = inputParam["adv_method"]
-        adv_nums = inputParam["adv_nums"]
         defense_methods = inputParam["defense_methods"]
-        # defense_methods = json.loads(inputParam["defense_methods"])
-        tid = inputParam["tid"]
+    
+    print(defense_methods,type(defense_methods))
+    tid = inputParam["tid"]
     format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
     stid = "S"+IOtool.get_task_id(str(format_time))
     
@@ -1275,6 +1277,7 @@ def CoverageLayerParamSet():
         IOtool.change_task_info(tid, "model", model)
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_coverage_layer, tid, AAtid, dataset, model, k, N)
+        IOtool.add_task_queue(tid, AAtid, t2, 300)
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
@@ -1510,7 +1513,6 @@ def SideAnalysis():
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_side_api, trs_file, methods, tid, stid)
         IOtool.add_task_queue(tid, stid, t2, 300)
-        interface.run_side_api(trs_file, methods, tid, stid)
         # t2 = threading.Thread(target=interface.run_side_api,args=(trs_file, methods, tid, stid))
         # t2.setDaemon(True)
         # t2.start()
@@ -1607,10 +1609,10 @@ def ensemble():
         for temp in adv_methods:
             adv_param.update({temp:inputParam[temp]})
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.run_ensemble_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
-        
-        
+        # t2 = pool.submit(interface.run_ensemble_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
+        t2 = pool.submit(interface.submitAandB, tid, stid, 10, 20)
         IOtool.add_task_queue(tid, stid, t2, 30000*len(adv_methods))
+        interface.run_ensemble_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
         res = {
             "code":1,
             "msg":"success",
@@ -1635,6 +1637,49 @@ def UploadData():
          file.save(save_dir)
          return jsonify({'save_dir': save_dir})
 
+@app.route('/Task/DownloadData', methods=['POST'])
+def DownloadData():
+     if request.method == "POST":
+            download_path = request.form.get('file')
+            input_path,input_name=os.path.split(download_path)
+            if os.path.isdir(download_path): 
+                print("it's a directory")
+                outFullName = input_path +'/'+ input_name+'.zip'
+                # if not os.path.exists(outFullName):
+                interface.zipDir(download_path, outFullName)
+                return send_from_directory(input_path,
+                                    input_name+'.zip', as_attachment=True)
+            elif os.path.isfile(download_path):
+                print("it's a normal file")
+                if ROOT not in input_path:
+                    input_path = osp.join(ROOT, input_path)
+                import zipfile
+                outFullName = osp.join(input_path,"download.zip")
+                if osp.exists(outFullName):
+                    os.remove(outFullName)
+                zip = zipfile.ZipFile(outFullName, "w", zipfile.ZIP_DEFLATED)
+                zip.write(os.path.join(input_path, input_name),input_name)
+                zip.close
+                
+                # response = make_response()
+                # print(response)
+                down_path,down_name = os.path.split(outFullName)
+                print(down_path)
+                print(down_name)
+                time.sleep(1)
+                # response1 = send_from_directory(down_path,
+                #                     input_name, as_attachment=True)
+                # response2 = send_from_directory(down_path,
+                #                     down_name, as_attachment=True)
+                # print(response1.content)
+                # print(response2.content)
+                # print()
+                # return send_from_directory(input_path,
+                #                     "download.zip", as_attachment=True)
+                return send_from_directory(down_path,
+                                    input_name, as_attachment=True)
+            else:
+                return jsonify(bool=False, msg='No such file, please check file path')
 
 @app.route('/Task/UploadPic', methods=['POST'])
 def UploadPic():
@@ -1677,7 +1722,6 @@ def LLM_attack():
             "stid":stid
         }
         return jsonify(res)
-    
 def app_run(args):
     
     web_config={'host':args.host,'port':args.port,'debug':args.debug}

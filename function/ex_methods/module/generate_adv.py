@@ -107,7 +107,7 @@ def untargeted_attack(dataset, method, model, data_loader, device, params, mean,
         ben_x.append(x.cpu())
         adv_x.append(z.cpu())
         ben_y.append(y.cpu())
-    print(adv_x)
+
     data = {
         "x": adv_x,
         "y": ben_y
