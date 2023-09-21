@@ -488,6 +488,7 @@ class IOtool:
         probs = torch.cat([ben_prob, adv_prob]).cpu().numpy()
         x = TSNE(n_components=2, n_iter=1000, random_state=seed).fit_transform(probs)
         return x
+    
     @staticmethod
     def summary_dict(model, input_size, batch_size=-1, device=torch.device('cpu'), dtypes=None):
         if dtypes == None:
