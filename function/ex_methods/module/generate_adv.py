@@ -121,7 +121,7 @@ def untargeted_attack(dataset, method, model, data_loader, device, params, mean,
 
 '''加载对抗样本'''
 def get_adv_loader(model, dataloader, method, param, batchsize, logging):
-    dataset = param["dataset"]["name"]
+    dataset = param["dataset"]["name"].lower()
     model_name = param["model"]["name"]
     device = param["device"]
     root = param["root"]

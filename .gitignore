@@ -1,8 +1,10 @@
 output/*
-
+function/ensemble/paca_detect/detect_models/*
 record
 web/static/imgs/tmp_imgs/*
 web/static/img/tmp_imgs/
+function/ensemble/paca_detect/results
+function/attack/llm-attacks/experiments/results
 datasets/**
 results/**
 function/defense/trainer/test/*

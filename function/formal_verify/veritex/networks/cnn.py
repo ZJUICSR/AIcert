@@ -16,7 +16,6 @@ from torch.autograd import Variable
 import veritex.sets.cubelattice as cl
 from function.ex_methods.module.func import Logger
 import pickle, time, sys, os
-from ipdb import set_trace
 
 class Flatten(nn.Module):
     """
@@ -70,7 +69,6 @@ class Network:
         
         for param in net.parameters():
             param.requires_grad = False
-        set_trace()
         self.sequential = self.forward_layer_sequential(net)
         self.layer_num = len(self.sequential) # the number of layers
         self.layer_inputs = self.forward_layer_input(image)
@@ -96,20 +94,20 @@ class Network:
             sequential_layers (sequential): Sequential model
         """
         net_layers = []
-        print("forward_layer_sequential sequential: ", len(net.sequential))
+
         for i in range(len(net.sequential)):
             type_name = type(net.sequential[i]).__name__
-            print("forward_layer_sequential type_name: ", type_name)
+
             if type_name in ['Flatten', 'MaxPool2d', 'BatchNorm2d','ReLU','DataParallel','Linear','Conv2d']:
                 net_layers.append(net.sequential[i])
             if type_name == 'Flatten':
                 self.flatten_pos = i
-        print("forward_layer_sequential end for: ", self.flatten_pos, net_layers)
+
         if self.is_cuda:
             sequential_layers = nn.Sequential(*net_layers).eval().cuda()
         else:
             sequential_layers = nn.Sequential(*net_layers).eval()
-            print("forward_layer_sequential sequential_layers: ", sequential_layers)
+
         
         for param in sequential_layers.parameters():
             param.requires_grad = False
@@ -864,16 +862,14 @@ class Method:
         # Partition input set into subsets
         all_input_fls = cl.partition_input(self.attack_range, pnum=4, poss=self.attack_poss)
         # pool = torch.multiprocessing.Pool(self.num_core)  # multiprocessing
-        pool = torch.multiprocessing.Pool(1)
+        # pool = torch.multiprocessing.Pool(1)
         outputSets = []
-        outputSets = net.regular_reach(all_input_fls)
+        outputSets.append(net.regular_reach(all_input_fls))
         # outputSets.extend(pool.imap(net.regular_reach, all_input_fls))
         # pool.close()
-        print("pool close")
         self.elapsed_time = time.time() - t0
         all_fls = [item for sublist in outputSets for item in sublist]
-        print(f'Running time: {self.elapsed_time}')
-        print(f'Number of Output Sets: {len(all_fls)}')
+
         filename = f'image_label_{self.label.numpy()}_epsilon' \
                    f'_{self.epsilon}_relaxation_{self.relaxation}'
         with open(self.savepath+'/'+filename+'.pkl', 'wb') as f:
@@ -959,7 +955,7 @@ class Method:
 
         # create hooks for computation of gradients
         hook_back = []
-        print("get layer gradients")
+
         for layer in list(self.model._modules.items()):
             if layer[1]._modules != {}:
                 for sub_layer in list(layer[1]._modules.items()):
@@ -975,7 +971,6 @@ class Method:
         x = Variable(self.image, requires_grad=True)
         y = self.model.forward(x)
         if self.label != y.argmax(axis=-1):
-            print(self.label,y.argmax(axis=-1))
             print('This shouldn\' happen!')
             self.label = y.argmax(axis=-1)
 
