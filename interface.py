@@ -543,7 +543,6 @@ def run_attrbution_analysis(tid, stid, datasetparam, modelparam, ex_methods, adv
         "adv_methods":{"methods":adv_methods},
         "root":ROOT,
         "stid":stid
-        
     }
 
     root = ROOT
@@ -738,7 +737,7 @@ def reach(tid, stid, dataset, pic_path,label, target_label):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     logging.info(f"Output data process, reachable area drawing")
-
+    
     for item in output_sets:
         out_vertices = item[0]
         plot_polytope2d(out_vertices[:, [dim0, dim1]], ax, color='b', alpha=1.0, edgecolor='k', linewidth=0.0,zorder=2)
@@ -897,6 +896,7 @@ def run_side_api(trs_file, methods, tid, stid):
     IOtool.change_subtask_state(tid, stid, 1)
     IOtool.change_task_state(tid, 1)
     IOtool.set_task_starttime(tid, stid, time.time())
+    device = IOtool.get_device()
     logging = IOtool.get_logger(stid)
     logging.info("开始执行侧信道分析")
     res={}
@@ -934,9 +934,6 @@ def run_side_api(trs_file, methods, tid, stid):
             while j < (count+1):
                 res[method]["X"].append(j)
                 j += 1
-            
-            
-                
         else:
             # 其他方法结果处理
             pass
@@ -1046,6 +1043,7 @@ def knowledge_consistency(tid, stid, arch,dataset,img_path,layer):
     IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
     return resp
+
 from function.ensemble import ensemble_defense
 
 from dataset import ArgpLoader
@@ -1304,7 +1302,7 @@ def llm_attack(tid, stid, goal, target):
         writer.writerow([goal,target])
     os.system("bash -c 'source ~/anaconda3/etc/profile.d/conda.sh && conda activate gpt && cd function/attack/llm-attacks/experiments/launch_scripts && bash run_gcg_individual.sh vicuna behaviors >> "+ logpath+"'")
     logging.info("end LLM attack... ")
-    os.system("bash -c 'source ~/anaconda3/etc/profile.d/conda.sh && conda deactivate")
+    os.system("bash -c 'source ~/anaconda3/etc/profile.d/conda.sh && conda deactivate'")
     resp = IOtool.load_json(osp.join("function/attack/llm-attacks/experiments/results","individual_behaviors_vicuna_gcg_offset0.json"))
     resp['stop'] = 1
     IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json"))
@@ -1312,3 +1310,19 @@ def llm_attack(tid, stid, goal, target):
     IOtool.change_task_success_v2(tid)
     logging.info("end LLM attack... ")
     return resp
+def zipDir(dirpath, outFullName):
+    """
+    压缩指定文件夹
+    :param dirpath: 目标文件夹路径
+    :param outFullName: 压缩文件保存路径+xxxx.zip
+    :return: 无
+    """
+    import zipfile
+    zip = zipfile.ZipFile(outFullName, "w", zipfile.ZIP_DEFLATED)
+    for path, dirnames, filenames in os.walk(dirpath):
+        # 去掉目标跟路径，只对目标文件夹下边的文件及文件夹进行压缩
+        fpath = path.replace(dirpath, '')
+ 
+        for filename in filenames:
+            zip.write(os.path.join(path, filename), os.path.join(fpath, filename))
+    zip.close()
