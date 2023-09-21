@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding:utf-8 -*-
-
 __author__ = 'homeway'
 __copyright__ = 'Copyright © 2021/07/01, ZJUICSR'
 
@@ -425,14 +422,3 @@ if __name__ == '__main__':
     print(dataset[2])
     print(dataset[2][0].shape)
     data_loader = DataLoader(dataset=dataset, batch_size=64, shuffle=True)
-
-
-
-
-
-
-
-
-
-
-

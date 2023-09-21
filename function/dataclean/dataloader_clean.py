@@ -617,7 +617,8 @@ def run_cleanlab(train_loader, test_loader, root, dataset='MNIST', batch_size=12
         img_labels=img_labels,
         img_pred=img_pred,
         img_fns=img_fns,
-        figsize=(40, MAX_IMAGES / 1.1),
+        # figsize=(40, MAX_IMAGES / 1.1),
+        figsize=(MAX_IMAGES, MAX_IMAGES/2.2),
         red_boxes=False,
         #     savefig = savefig,
     )
