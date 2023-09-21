@@ -5,7 +5,7 @@ import interface
 import os, json, datetime, time, base64, threading
 import pytz,shutil
 from IOtool import IOtool
-from flask import render_template, redirect, url_for, Flask, request, jsonify, send_from_directory, send_file
+from flask import render_template, redirect, url_for, Flask, request, jsonify, send_from_directory, send_file, make_response
 from flask import current_app as abort
 from flask_cors import *
 
@@ -620,12 +620,12 @@ def AdvAttack():
     """
     global LiRPA_LOGS
     if (request.method == "POST"):
-        print(request.data)
         inputParam = json.loads(request.data)
         tid = inputParam["Taskid"]
         # inputParam["device"] = "cuda:0"
         dataname = inputParam["Dataset"]
         model = inputParam["Model"]
+        sample_num = inputParam["sample_num"]
         try:
             adv_method = json.loads(inputParam["Method"])
         except:
@@ -645,7 +645,7 @@ def AdvAttack():
         IOtool.change_task_info(tid, "model", model)
         # 执行任务
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.run_adv_attack, tid, stid, dataname, model, adv_method, inputParam)
+        t2 = pool.submit(interface.run_adv_attack, tid, stid, dataname, model, adv_method, inputParam, sample_num)
         IOtool.add_task_queue(tid, stid, t2, 3000*len(adv_method))
         # interface.run_adv_attack(tid, stid, dataname, model, adv_method, inputParam)
         res = {
@@ -777,14 +777,10 @@ def model_reach():
         tid = inputParam["tid"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
-        img_dir=os.path.join(os.getcwd(),"web/static/img/tmp_imgs")
+        img_dir=os.path.join(os.getcwd(),"output",tid, stid)
         if not os.path.exists(img_dir):
             os.mkdir(img_dir)
-        pic_path=os.path.join(img_dir,tid,stid+'.png')
-        try:
-            os.mkdir(os.path.join(img_dir,tid))
-        except:
-            pass
+        pic_path=os.path.join(img_dir,'input.png')
         if "image/jpeg;" in pic:
             
             with open( pic_path, 'wb') as f:
@@ -808,16 +804,14 @@ def model_reach():
         IOtool.change_task_info(tid, "dataset", dataset)
         IOtool.change_task_info(tid, "model", 'CNN')
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.reach, tid,stid,dataset.upper(),pic_path,label,target)
-        t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+        t2 = pool.submit(interface.reach, tid,stid,dataset.upper(),pic_path,label,target)
+        
         IOtool.add_task_queue(tid, stid, t2, 300)
-        interface.reach(tid, stid, dataset.upper(), pic_path, label, target)
+        # interface.reach(tid, stid, dataset.upper(), pic_path, label, target)
         resp = t2.result()
-        
-        # resp=interface.reach(tid,stid,dataset.upper(),pic_path,label,target)
-        
-        return resp
-    # return render_template('reach.html')
+        print(resp)
+        return jsonify(resp)
+    
 @app.route('/knowledge_consistency',methods=["GET","POST"])
 def model_consistency():
     if request.method=='POST':
@@ -1038,23 +1032,19 @@ def home():
 
 @app.route("/detect", methods=["POST"])
 def Detect():
+    
+    inputParam = json.loads(request.data)
+    adv_dataset = inputParam["adv_dataset"]
+    adv_model = inputParam["adv_model"]
+    adv_method = inputParam["adv_method"]
+    adv_nums = inputParam["adv_nums"]
     try:
-        adv_dataset = request.form.get("adv_dataset")
-        adv_model = request.form.get("adv_model")
-        adv_method = request.form.get("adv_method")
-        adv_nums = request.form.get("adv_nums")
-        defense_methods_str = request.form.get("defense_methods")
-        defense_methods = json.loads(defense_methods_str)
-        # tid=request.form.get("tid")
-        tid="20230625_0948_fd3c890"
-    except:
-        inputParam = json.loads(request.data)
-        adv_dataset = inputParam["adv_dataset"]
-        adv_model = inputParam["adv_model"]
-        adv_method = inputParam["adv_method"]
-        adv_nums = inputParam["adv_nums"]
         defense_methods = json.loads(inputParam["defense_methods"])
-        tid = inputParam["tid"]
+    except:
+        defense_methods = inputParam["defense_methods"]
+    
+    print(defense_methods,type(defense_methods))
+    tid = inputParam["tid"]
     format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
     stid = "S"+IOtool.get_task_id(str(format_time))
     
@@ -1580,6 +1570,58 @@ def FormalVerification():
         }
         return jsonify(res)
 
+@app.route('/Defense/Ensemble', methods=['POST'])
+def ensemble():
+    """
+    对抗图像归因解释
+    输入：tid：主任务ID
+    Dataset：数据集名称
+    Model：模型名称
+    AdvMethods:list 对抗攻击算法名称
+    ExMethods:攻击机理解释方法名称
+    """
+    global LiRPA_LOGS
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        tid = inputParam["Taskid"]
+        datasetparam = inputParam["DatasetParam"]
+        modelparam = inputParam["ModelParam"]
+        adv_methods = inputParam["AdvMethods"]
+        defense_methods = inputParam["DefMethod"]
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        value = {
+            "type":"Defense_Ensemble",
+            "state":0,
+            "name":["Defense_Ensemble"],
+            "dataset":datasetparam["name"],
+            "method":adv_methods,
+            "model":modelparam["name"],
+            "def_method":defense_methods
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", datasetparam["name"])
+        IOtool.change_task_info(tid, "model", modelparam["name"])
+        # 执行任务
+        datasetparam["name"] = datasetparam["name"].lower()
+        modelparam["name"] = modelparam["name"].lower()
+        adv_param = {}
+        for temp in adv_methods:
+            adv_param.update({temp:inputParam[temp]})
+        pool = IOtool.get_pool(tid)
+        # t2 = pool.submit(interface.run_ensemble_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
+        t2 = pool.submit(interface.submitAandB, tid, stid, 10, 20)
+        IOtool.add_task_queue(tid, stid, t2, 30000*len(adv_methods))
+        interface.run_ensemble_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
+        res = {
+            "code":1,
+            "msg":"success",
+            "tid":tid,
+            "stid":stid
+        }
+        return jsonify(res)
+    else:
+        abort(403)
 
 @app.route('/Task/UploadData', methods=['POST'])
 def UploadData():
@@ -1609,11 +1651,77 @@ def DownloadData():
                                     input_name+'.zip', as_attachment=True)
             elif os.path.isfile(download_path):
                 print("it's a normal file")
-                return send_from_directory(input_path,
+                if ROOT not in input_path:
+                    input_path = osp.join(ROOT, input_path)
+                import zipfile
+                outFullName = osp.join(input_path,"download.zip")
+                if osp.exists(outFullName):
+                    os.remove(outFullName)
+                zip = zipfile.ZipFile(outFullName, "w", zipfile.ZIP_DEFLATED)
+                zip.write(os.path.join(input_path, input_name),input_name)
+                zip.close
+                
+                # response = make_response()
+                # print(response)
+                down_path,down_name = os.path.split(outFullName)
+                print(down_path)
+                print(down_name)
+                time.sleep(1)
+                # response1 = send_from_directory(down_path,
+                #                     input_name, as_attachment=True)
+                # response2 = send_from_directory(down_path,
+                #                     down_name, as_attachment=True)
+                # print(response1.content)
+                # print(response2.content)
+                # print()
+                # return send_from_directory(input_path,
+                #                     "download.zip", as_attachment=True)
+                return send_from_directory(down_path,
                                     input_name, as_attachment=True)
             else:
                 return jsonify(bool=False, msg='No such file, please check file path')
 
+@app.route('/Task/UploadPic', methods=['POST'])
+def UploadPic():
+    if request.method == "POST":
+        file = request.files.get('avatar')
+        basePath = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)
+        save_dir = os.path.join(basePath[0], 'dataset/data/ckpt',"upload.jpg")
+        file.save(save_dir)
+        return jsonify({'save_dir': save_dir})
+
+@app.route('/Attack/LLM_attack', methods=['POST'])
+def LLM_attack():
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        tid = inputParam["Taskid"]
+        modelname = inputParam['model']
+        goal = inputParam['goal']
+        target = inputParam['target']
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        value = {
+            "type":"LLM_attack",
+            "state":0,
+            "name":["LLM_attack"],
+            "dataset":goal,
+            "method":"LLM attack",
+            "model":modelname,
+        }
+        print(goal)
+        print(target)
+        IOtool.add_subtask_info(tid, stid, value)
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+        IOtool.add_task_queue(tid, stid, t2, 30000)
+        interface.llm_attack(tid, stid, goal, target)
+        res = {
+            "code":1,
+            "msg":"success",
+            "tid":tid,
+            "stid":stid
+        }
+        return jsonify(res)
 def app_run(args):
     
     web_config={'host':args.host,'port':args.port,'debug':args.debug}
