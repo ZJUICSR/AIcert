@@ -50,6 +50,7 @@ public:
 
 	static void generateFileName(char* name,int buflen,char* fixedName,int index,char* postfix);
 	static int hToD(char* str);
+	static void byteToH(uint8_t i, char* str);
 	static int charToNumD(char* str);
 };
 
