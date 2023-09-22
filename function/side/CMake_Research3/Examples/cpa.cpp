@@ -20,13 +20,13 @@ void cpa(char* inFile, char* outFile){
     param.setSampleFile(inFile);
     param.setRandFile(inFile);//"./CMake_Research3/Trs/random/cpa/randdata_cpa_-9.trs"
     param.setOutFile(outFile);
-    param.setAttackIndex(num[0]);
+    param.setAttackIndex(num[0]/100, num[0]/10%10, num[0]%10);
     param.setPointNumStart(num[1]);
     param.setPointNumEnd(num[2]);
     param.setTraceNum(5000);
 
     start=clock();
-    correlationPowerAnalysis_correlation_distinguish(&param, cifar10_nn_run_cpa_dpa);
+    correlationPowerAnalysis_correlation_distinguish_optimize(&param, cifar10_nn_run_cpa_dpa);
     end=clock();
 
     printf("time:%d\n", end-start);
