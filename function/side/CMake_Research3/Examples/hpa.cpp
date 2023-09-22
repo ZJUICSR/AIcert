@@ -22,7 +22,7 @@ void hpa(char* inFile, char* outFile){
     param.setSampleFile(inFile);
     param.setRandFile(inFile);//"./CMake_Research3/Trs/random/cpa/randdata_cpa_-9.trs"
     param.setOutFile(outFile);
-    param.setAttackIndex(num[0]);
+    param.setAttackIndex(num[0]/100, num[0]/10%10, num[0]%10);
     param.setPointNumStart(num[1]);
     param.setPointNumEnd(num[2]);
     param.setTraceNum(9);
