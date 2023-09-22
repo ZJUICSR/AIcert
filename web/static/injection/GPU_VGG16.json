@@ -1,0 +1,10 @@
+
+  {
+	"name":"VGG16",
+  "hard":"NVIDIA TITAN-V GPU",
+	"dataset":"CIFAR10",
+  "label":["vanilla VGG16","Lightweight VGG16(Before quantization)","Lightweight VGG16(After quantization)"],
+	"time":[14.9815,3.73843,0.8954],
+  "ACC":[0.9238,0.9233,0.9219],
+  "size":[59.6249,14.2878,3.7384]
+}

@@ -1501,9 +1501,9 @@ def SideAnalysis():
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
         value = {
-            "type":"attack_defense",
+            "type":"side",
             "state":0,
-            "name":["attack_defense"],
+            "name":["side"],
             "dataset":trs_file,
             "method":methods,
             "model":"",
@@ -1513,6 +1513,7 @@ def SideAnalysis():
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_side_api, trs_file, methods, tid, stid)
         IOtool.add_task_queue(tid, stid, t2, 300)
+        # interface.run_side_api(trs_file, methods, tid, stid)
         # t2 = threading.Thread(target=interface.run_side_api,args=(trs_file, methods, tid, stid))
         # t2.setDaemon(True)
         # t2.start()

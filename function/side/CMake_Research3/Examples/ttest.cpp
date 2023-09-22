@@ -16,14 +16,15 @@ void ttest(char* inFile, char* outFile){
 
     int num[SIZE] = {0};
     selectParenthesesNum(inFile, num);
+    printf("%d %d %d %d\n", num[0], num[1], num[2], num[3]);
         
     Parameters param;
     param.setSampleFile(inFile);
     param.setRandFile(inFile);//"./CMake_Research3/Trs/random/cpa/randdata_cpa_-9.trs"
     param.setOutFile(outFile);
-    param.setAttackIndex(num[0]);
+    param.setAttackIndex(num[0]/100, num[0]/10%10, num[0]%10);
     param.setPointNumStart(1);
-    param.setPointNumEnd(123);
+    param.setPointNumEnd(175);
     param.setTraceNum(5000);
     param.setWtForWhiteBoxTest(num[3]);
 
