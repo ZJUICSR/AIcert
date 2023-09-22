@@ -328,3 +328,35 @@ void TraceTools::cor(TrsData *baseTrsData, TrsData *srcTrsData, int samplePointN
 	free(trsData_result.samples);
 }
 
+void TraceTools::corr(TrsData *baseTrsData, TrsData *srcTrsData, int samplePointNum, int length, int immp, TrsHead trsHead, const char *fileout)
+{
+	TrsData trsData_result;
+	trsData_result.samples = new float[samplePointNum - length];
+	for (int i = 0; i < samplePointNum - length; i+=7)
+	{
+		trsData_result.samples[i] = BaseTools::correlate(baseTrsData->samples, srcTrsData->samples + i + immp, length);
+		trsData_result.samples[i+1] = trsData_result.samples[i];
+		trsData_result.samples[i+2] = trsData_result.samples[i];
+		trsData_result.samples[i+3] = trsData_result.samples[i];
+		trsData_result.samples[i+4] = trsData_result.samples[i];
+		trsData_result.samples[i+5] = trsData_result.samples[i];
+		trsData_result.samples[i+6] = trsData_result.samples[i];
+	}
+
+
+	TrsHead trsHead_result = trsHead;
+	trsHead_result.NT = 1;
+	trsHead_result.NS = samplePointNum - length;
+	trsHead_result.DS = 0;
+	trsHead_result.YS = 1;
+	trsHead_result.SC = 0x14;
+	trsHead_result.GT_length = 0;
+	trsHead_result.DC_length = 0;
+	trsHead_result.XL_length = 0;
+	trsHead_result.YL_length = 0;
+	trsHead_result.TS = 0;
+	Trace trace;
+
+	trace.createTrace(fileout, &trsHead_result, &trsData_result);
+}
+

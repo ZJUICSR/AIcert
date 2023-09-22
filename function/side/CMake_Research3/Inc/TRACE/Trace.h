@@ -75,6 +75,7 @@ private:
 public:
 	Trace();
 	Trace(const char* file);
+	Trace(const string file);
 	//重载构造函数
 	Trace(const char* file, int inDataLen, int outDataLen);
 	//读取全部数据

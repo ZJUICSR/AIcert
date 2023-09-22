@@ -12,5 +12,6 @@ public:
 	static void pca(char* fileName, char *outfileName);
 	//spa
 	static void cor(TrsData *baseTrsData, TrsData *srcTrsData, int samplePointNum, int length, int immp, TrsHead trsHead, const char *trsfileout);
+	static void corr(TrsData *baseTrsData, TrsData *srcTrsData, int samplePointNum, int length, int immp, TrsHead trsHead, const char *fileout);
 };
 
