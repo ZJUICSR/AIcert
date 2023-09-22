@@ -892,7 +892,7 @@ def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_ex
     return detect_rate, no_defense_accuracy
 
 
-def run_side_api(trs_file, methods, tid, stid):
+def run_side_api(trs_file, method, tid, stid):
     IOtool.change_subtask_state(tid, stid, 1)
     IOtool.change_task_state(tid, 1)
     IOtool.set_task_starttime(tid, stid, time.time())
@@ -900,44 +900,67 @@ def run_side_api(trs_file, methods, tid, stid):
     logging = IOtool.get_logger(stid)
     logging.info("开始执行侧信道分析")
     res={}
-    for method in methods:
-        logging.info("当前分析文件为{:s}，分析方法为{:s}，分析时间较久，约需50分钟".format(trs_file, method))
-        number = trs_file.split(".trs")[0].split("_")[-1]
+    if method in ['cpa','dpa']:
+        logging.info("当前分析文件为{:s}，分析方法为{:s}，分析时间较久，约需2分钟".format(trs_file, method))
+    else:
+        logging.info("当前分析文件为{:s}，分析方法为{:s}".format(trs_file, method))
+    number = trs_file.split(".trs")[0].split("_")[-1]
+    # outpath = osp.join(ROOT,"output", tid,stid + "_" + method+"_"+number+"_out.txt")
+    # trs_file_path = osp.join(ROOT,"dataset/Trs/samples",trs_file)
+    if method in ['cpa', 'dpa', 'hpa']:
+        trs_file_path = osp.join(ROOT, "dataset/Trs/samples", method, "elmotrace"+number, trs_file)
         outpath = osp.join(ROOT,"output", tid,stid + "_" + method+"_"+number+"_out.txt")
-        trs_file_path = osp.join(ROOT,"dataset/Trs/samples",trs_file)
-        use_time = run_side(trs_file_path, method, outpath)
-        res[method] = {}
-        index = 128+ int(number)
-        # res[method].append([float(s) for s in line.split()])
-        if method in ["cpa","dpa","hpa","ttest"]:
-            res[method]["Y"] = []
-            res[method]["X"] = []
-            count = 9 if method == 'hpa' else 100
-            cur = 0
-            for line in open(outpath, 'r'):
-                values = [float(s) for s in line.split()]
-                if method == 'ttest':
-                    count == 127 if len(values) >127 else len(values)
-                Y = []
-                i = 0
-                while i < count:
-                    Y.append(values[i])
-                    i += 1
-                if cur == index:
-                    res[method]["true"] = Y
-                if cur == index+1:
-                    res[method]["false"] = Y
-                else:
-                    res[method]["Y"].append(Y)
-                cur += 1
-            j = 1
-            while j < (count+1):
-                res[method]["X"].append(j)
-                j += 1
-        else:
-            # 其他方法结果处理
-            pass
+    elif method == "dpa":
+        trs_file_path = osp.join(ROOT, "dataset/Trs/samples", "cpa", "elmotrace"+number, trs_file)
+        outpath = osp.join(ROOT,"output", tid,stid + "_" + method+"_"+number+"_out.txt")
+    elif method == "spa":
+        trs_file_path = osp.join(ROOT, "dataset/Trs/samples", method, trs_file)
+        outpath = osp.join(ROOT,"output", tid, stid)
+        if not osp.exists(outpath):
+            os.makedirs(outpath)
+    elif method in ['ttest', "x2test"]:
+        trs_file_path = osp.join(ROOT, "dataset/Trs/samples", "cpa", "elmotrace"+number, trs_file)
+        outpath = osp.join(ROOT,"output", tid,stid + "_" + method+"_"+number+"_out.txt")
+    use_time = run_side(trs_file_path, method, outpath)
+    res[method] = {}
+    
+    index = 128+ int(number)
+    # res[method].append([float(s) for s in line.split()])
+    if method in ["cpa","dpa","hpa","ttest", "x2test"]:
+        res[method]["Y"] = []
+        res[method]["X"] = []
+        count = 9 if method == 'hpa' else 100
+        cur = 0
+        for line in open(outpath, 'r'):
+            values = [float(s) for s in line.split()]
+            if method in ['x2test', 'ttest'] :
+                count == 127 if len(values) >127 else len(values)
+            Y = []
+            i = 0
+            while i < count:
+                Y.append(values[i])
+                i += 1
+            if cur == index:
+                res[method]["true"] = Y
+            if cur == index+1:
+                res[method]["false"] = Y
+            else:
+                res[method]["Y"].append(Y)
+            cur += 1
+        j = 1
+        while j < (count+1):
+            res[method]["X"].append(j)
+            j += 1
+    else:
+        # 其他方法结果处理
+        pass
+    if method in ["cpa","dpa"]:
+        logging.info("分析方法{:s}执行结束，运行100次耗时{:s}s".format(method,str(round(use_time,1))))
+        logging.info("系统平均耗时{:s}s".format(method,str(round(use_time,1)/100)))
+        res[method]["runTime"] = use_time/100
+    else:
         logging.info("分析方法{:s}执行结束，耗时{:s}s".format(method,str(round(use_time,1))))
+        res[method]["runTime"] = use_time
     logging.info("侧信道分析执行结束！")
     res["stop"] = 1
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
@@ -1304,6 +1327,8 @@ def llm_attack(tid, stid, goal, target):
     logging.info("end LLM attack... ")
     os.system("bash -c 'source ~/anaconda3/etc/profile.d/conda.sh && conda deactivate'")
     resp = IOtool.load_json(osp.join("function/attack/llm-attacks/experiments/results","individual_behaviors_vicuna_gcg_offset0.json"))
+    resp2 = IOtool.load_json("function/attack/llm-attacks/experiments/launch_scripts/params.json")
+    resp["LLMparams"] = resp2["LLMparams"]
     resp['stop'] = 1
     IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json"))
     IOtool.change_subtask_state(tid, stid, 2)
