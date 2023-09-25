@@ -11,7 +11,8 @@ function/defense/trainer/test/*
 model/model-cifar-wideResNet/*
 function/side/CMake_Research3/Build/*
 function/side/CMake_Research3/Trs/*
-function/side/CMake_Research3-bak
+function/side/CMake_Research3_bak
+function/side/CMake_Research3/template/
 log.txt
 *.pth
 *.pyc

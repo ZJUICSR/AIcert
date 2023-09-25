@@ -41,13 +41,15 @@ void x2_test(Parameters* param, int8_t* (*f)(Parameters*)){
     uint8_t sort[param->getTraceNum()] = {0};
 
     //attackindex -->> i j k m n l
-    int attackIndex = param->getAttackIndex();
-    param->setForI(attackIndex/75);//
-    param->setForJ(2);
-    param->setForK(2);
-    param->setForM(attackIndex%75/15);//
-    param->setForN(attackIndex%75%15/3);//
-    param->setForL(attackIndex%3);//
+    int attackIndex1 = *param->getAttackIndex();
+    int attackIndex2 = *(param->getAttackIndex()+1);
+    int attackIndex3 = *(param->getAttackIndex()+2);
+    param->setForI(attackIndex1/75);//
+    param->setForJ(attackIndex2);
+    param->setForK(attackIndex3);
+    param->setForM(attackIndex1%75/15);//
+    param->setForN(attackIndex1%75%15/3);//
+    param->setForL(attackIndex1%3);//
 
     
 
@@ -59,21 +61,25 @@ void x2_test(Parameters* param, int8_t* (*f)(Parameters*)){
         traceR.readIndexTrace(&trsDataR,i); 
 
         param->setImageDataPoint(trsDataR.data);//param读imagedata参数
-        fmap[param->getAttackIndex()] = param->getWtForWhiteBoxTest();
+        fmap[*param->getAttackIndex()] = param->getWtForWhiteBoxTest();
 
         (*f)(param);
         hw[i] = param->getMidHW();
 
+        // printf("%d ", hw[i]);
+
 
         for(int j=0; j < param->getPointNum() ; j++){
             sample[j][i] = trsDataS.samples[j+param->getPointNumStart()];
+            
         }
 
     }
     
 
     for(int i=0; i < param->getPointNum() ; i++){
-        trsData_result.samples[i] =  BaseTools::x2test(hw, sample[i], param->getTraceNum())/10000;
+        trsData_result.samples[i] =  BaseTools::x2test(hw, sample[i], param->getTraceNum())/(float)10000;
+        printf("%f ", trsData_result.samples[i]);
     }
 
     ofstream* outfile=new ofstream();   
@@ -98,6 +104,7 @@ void x2_test(Parameters* param, int8_t* (*f)(Parameters*)){
 
     #if 1 //save as txt
     for(int i = 0; i < param->getPointNum(); i++){
+        // printf("%f ", trsData_result.samples[i]);
         *outfile<<trsData_result.samples[i]<<" ";
     }
     *outfile<<"\n";

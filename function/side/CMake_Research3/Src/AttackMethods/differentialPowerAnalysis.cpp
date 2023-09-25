@@ -49,13 +49,15 @@ void differentialPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*)){
     float result_max_abs[param->getGuessSize()]={0.0};
 
     //attackindex -->> i j k m n l
-    int attackIndex = param->getAttackIndex();
-    param->setForI(attackIndex/75);//
-    param->setForJ(2);
-    param->setForK(2);
-    param->setForM(attackIndex%75/15);//
-    param->setForN(attackIndex%75%15/3);//
-    param->setForL(attackIndex%3);//
+    int attackIndex1 = *param->getAttackIndex();
+    int attackIndex2 = *(param->getAttackIndex()+1);
+    int attackIndex3 = *(param->getAttackIndex()+2);
+    param->setForI(attackIndex1/75);//
+    param->setForJ(attackIndex2);
+    param->setForK(attackIndex3);
+    param->setForM(attackIndex1%75/15);//
+    param->setForN(attackIndex1%75%15/3);//
+    param->setForL(attackIndex1%3);//
 
 
     for(int i=0; i < param->getTraceNum(); i++){
@@ -71,7 +73,7 @@ void differentialPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*)){
         for(int j=0;j < param->getGuessSize();j++){ 
             
             
-            fmap[param->getAttackIndex()] = wt[j];
+            fmap[*param->getAttackIndex()] = wt[j];
             // param->setFmapPoint(fmap);//param读fmap参数
             
             #if 1
@@ -243,13 +245,15 @@ void differentialPowerAnalysis_correlation_distinguish_index(Parameters* param, 
     float result_max_abs[param->getGuessSize()]={0.0};
 
     //attackindex -->> i j k m n l
-    int attackIndex = param->getAttackIndex();
-    param->setForI(attackIndex/75);//
-    param->setForJ(2);
-    param->setForK(2);
-    param->setForM(attackIndex%75/15);//
-    param->setForN(attackIndex%75%15/3);//
-    param->setForL(attackIndex%3);//
+    int attackIndex1 = *param->getAttackIndex();
+    int attackIndex2 = *(param->getAttackIndex()+1);
+    int attackIndex3 = *(param->getAttackIndex()+2);
+    param->setForI(attackIndex1/75);//
+    param->setForJ(attackIndex2);
+    param->setForK(attackIndex3);
+    param->setForM(attackIndex1%75/15);//
+    param->setForN(attackIndex1%75%15/3);//
+    param->setForL(attackIndex1%3);//
 
 
     for(int i=0; i < tem_trace_num; i++){
@@ -265,7 +269,7 @@ void differentialPowerAnalysis_correlation_distinguish_index(Parameters* param, 
         for(int j=0;j < param->getGuessSize();j++){ 
             
             
-            fmap[param->getAttackIndex()] = wt[j];
+            fmap[*param->getAttackIndex()] = wt[j];
             // param->setFmapPoint(fmap);//param读fmap参数
             
             #if 1
@@ -446,9 +450,210 @@ void differentialPowerAnalysis_correlation_distinguish(Parameters* param, int8_t
 
 
 
+//---------------优化--------------------------------------------------------
+void generate_midvaluehw_samples_dpa(Parameters* param, int8_t* (*f)(Parameters*), float** sample, uint8_t** hw){
+
+    //fmap初始化
+    q7_t fmap[param->getFmapNum()]={0};
+    fmapInitial(param, fmap);
+
+
+    //wt初始化
+    q7_t wt[param->getGuessSize()];
+    for(int i=0; i < param->getGuessSize(); i++){
+        wt[i]=i-128;
+    }
+
+    Trace traceR(param->getRandFile());
+	Trace traceS(param->getSampleFile());
+    TrsData trsDataR;
+	TrsData trsDataS;
+
+    float result_max[param->getGuessSize()]={0.0};
+    float result_max_abs[param->getGuessSize()]={0.0};
+
+    //attackindex -->> i j k m n l
+    int attackIndex1 = *param->getAttackIndex();
+    int attackIndex2 = *(param->getAttackIndex()+1);
+    int attackIndex3 = *(param->getAttackIndex()+2);
+    param->setForI(attackIndex1/75);//
+    param->setForJ(attackIndex2);
+    param->setForK(attackIndex3);
+    param->setForM(attackIndex1%75/15);//
+    param->setForN(attackIndex1%75%15/3);//
+    param->setForL(attackIndex1%3);//
+
+
+    for(int i=0; i < param->getTraceNum(); i++){
+
+        
+
+        //读一条
+        traceS.readIndexTrace(&trsDataS,i);
+        traceR.readIndexTrace(&trsDataR,i); 
+
+        param->setImageDataPoint(trsDataR.data);//param读imagedata参数
+        //像素初始化
+        for(int j=0;j < param->getGuessSize();j++){ 
+            
+            
+            fmap[*param->getAttackIndex()] = wt[j];
+            // param->setFmapPoint(fmap);//param读fmap参数
+            
+            #if 1
+
+            (*f)(param);
+            hw[j][i] = param->getMidHW();
+            // printf("%d ", hw[j][i]);
+
+            #endif
+
+        }
+
+        // printf("%d ", i);
+        // printf("\n");
+        
+        for(int j=0; j < param->getPointNum() ; j++){
+            sample[j][i]=trsDataS.samples[j+param->getPointNumStart()];
+        }  
+        
+    }
+
+    free(trsDataS.samples);
+    free(trsDataS.data);
+    free(trsDataS.TSData);
+
+    free(trsDataR.samples);
+    free(trsDataR.data);
+    free(trsDataR.TSData);
+
+
+    // outfile->close();
+    // free(outfile);
+    
+
+    return;
+
+    
+    
+}
 
 
 
+void differentialPowerAnalysis_correlation_distinguish_optimize(Parameters* param, int8_t* (*f)(Parameters*)){
+
+    int bias=50;
+    int gap=50;
+
+    TrsData* trsData_result=(TrsData*)malloc(param->getGuessSize() * sizeof(TrsData));
+    for(int i=0;i<param->getGuessSize();i++){
+        trsData_result[i].samples=(float*)malloc(((param->getTraceNum()-bias)/gap+1) * sizeof(float));
+        std::memset(trsData_result[i].samples, 0.0, ((param->getTraceNum()-bias)/gap+1) * sizeof(float));
+    }
+
+    // float* result[param->getGuessSize()]={nullptr};
+    // for(int i =0 ;i<param->getGuessSize();i++){
+    //     result[i]=(float*)malloc(((param->getTraceNum()-bias)/gap+1)*sizeof(float));
+    //     memset(result[i], 0.0, ((param->getTraceNum()-bias)/gap+1));
+    // }
+
+    float* res_diff = (float*)malloc(param->getPointNum() * sizeof(float));
+
+    //初始化 samples[][]
+    float* sample[param->getPointNum()] = {nullptr};
+    for(int i=0;i< param->getPointNum() ;i++){
+        sample[i]=(float*)malloc(param->getTraceNum()*sizeof(float));
+        std::memset(sample[i], 0.0, param->getTraceNum() * sizeof(float));
+    }
+
+    //初始化 hw[][]
+    uint8_t* hw[param->getGuessSize()] = {nullptr};
+    for(int i=0;i<param->getGuessSize();i++){
+        hw[i]=(uint8_t*)malloc(param->getTraceNum() * sizeof(uint8_t));
+        std::memset(hw[i], 0, param->getTraceNum() * sizeof(uint8_t));
+    }
+
+    //计算mid 读入samples
+    generate_midvaluehw_samples_dpa(param, f, sample, hw);
+
+    //计算相关性
+    for(int index = 0; index < (param->getTraceNum()-bias)/gap+1; index++){
+
+        
+        
+        for (int i = 0; i < param->getGuessSize(); i++){
+            for (int j = 0; j < param->getPointNum(); j++){
+                
+                //问题出现在这行，检查内存是否溢出？
+                res_diff[j] = (float)abs(BaseTools::diff(hw[i], sample[j], bias + index * gap, 25));
+                if(i==128){
+                    res_diff[j] = 0;
+                }
+            }
+            trsData_result[i].samples[index]=res_diff[BaseTools::findMaxCorr(res_diff,param->getPointNum())];
+        }
+        #if 0
+        printf("%d_max:%f;\n",i-128,result_max[i]);
+        #endif
+
+
+        
+    }
+
+    
+        
+    
+
+    //保存至文件
+    ofstream* outfile=new ofstream();   
+    outfile->open(param->getOutFile(), ios::out | ios::binary | ios::trunc);
+    #if 1//读入 txt
+    
+    for(int i =0;i<param->getGuessSize();i++){
+        for(int j =0; j<(param->getTraceNum()-bias)/gap+1; j++){
+            *outfile<<trsData_result[i].samples[j]<<" ";
+        }
+        *outfile<<"\n";
+    }
+
+    #else//读入trs
+    ofstream* outfile=new ofstream();   
+    outfile->open(param->getOutFile(), ios::out | ios::binary | ios::trunc);
+
+    TrsHead trsHead_result;
+    trsHead_result.NT = param->getGuessSize();
+    trsHead_result.NS = param->getPointNum();
+    trsHead_result.DS = 0;
+    trsHead_result.YS = 1;
+    trsHead_result.SC = 0x14;//float存储类型
+    trsHead_result.GT_length = 0;
+    trsHead_result.DC_length = 0;
+    trsHead_result.XL_length = 0;
+    trsHead_result.YL_length = 0;
+    trsHead_result.TS = 0;
+    Trace::writeHead(outfile, trsHead_result);
+    
+    for(int i= 0;i<param->getGuessSize();i++){
+        Trace::writeNext(outfile, &trsData_result[i], trsHead_result);
+    }
+    
+    #endif
+
+    //释放内存
+    for(int i =0 ;i<param->getGuessSize();i++){
+        free(trsData_result[i].samples);
+    }
+    free(trsData_result);
+    outfile->close();
+    free(outfile);
+    for(int i=0;i < param->getGuessSize(); i++){
+        free(hw[i]);
+    }
+    for(int i=0;i < param->getPointNum();i++){
+        free(sample[i]);
+    }
+
+}
 
 
 
