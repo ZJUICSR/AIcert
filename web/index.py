@@ -1472,24 +1472,24 @@ def ModularDevelopParamSet():
         tid = inputdata["tid"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({AAtid:{
+        value = {
             "type":"ModularDevelop",
             "state":0,
             "name":["ModularDevelop"],
             "dataset": dataset,
             "model": model
-        }})
-        taskinfo[tid]["dataset"]=dataset
-        taskinfo[tid]["model"]=model
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-        t2 = threading.Thread(target=interface.run_modulardevelop,args=(tid, AAtid, dataset, model, tuner, init, epoch, iternum))
-        t2.setDaemon(True)
-        t2.start()
+        }
+        IOtool.add_subtask_info(tid, AAtid, value)
+        IOtool.change_task_info(tid, "dataset", dataset)
+        IOtool.change_task_info(tid, "model", model)
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_modulardevelop, tid, AAtid, dataset, model, tuner, init, epoch, iternum)
+        IOtool.add_task_queue(tid, AAtid, t2, 30000)
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
         abort(403)
+        
 # ----------------- 课题3 侧信道分析 -----------------
 @app.route('/SideAnalysis', methods=["POST"])
 def SideAnalysis():
@@ -1512,7 +1512,7 @@ def SideAnalysis():
         IOtool.change_task_info(tid, "dataset", trs_file)
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_side_api, trs_file, methods, tid, stid)
-        IOtool.add_task_queue(tid, stid, t2, 300)
+        IOtool.add_task_queue(tid, stid, t2, 3000)
         # interface.run_side_api(trs_file, methods, tid, stid)
         # t2 = threading.Thread(target=interface.run_side_api,args=(trs_file, methods, tid, stid))
         # t2.setDaemon(True)
