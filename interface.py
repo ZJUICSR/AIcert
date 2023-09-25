@@ -15,7 +15,7 @@ from model.model_net.lenet import Lenet
 from model.model_net.resnet import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
 from function.attack import run_adversarial, run_backdoor
 from function.fairness import run_dataset_debias, run_model_debias, run_image_model_debias, run_model_evaluate, run_image_model_evaluate
-from function import concolic, env_test, coverage, deepsst, deep_logic, dataclean, framework_test, modelmeasure
+from function import concolic, env_test, coverage, deepsst, deep_logic, dataclean, framework_test, modelmeasure, modulardevelop
 from function.ex_methods import *
 import matplotlib.pyplot as plt
 from function.defense import *
@@ -351,17 +351,16 @@ def run_modulardevelop(tid,AAtid, dataset, modelname, tuner, init, epoch, iternu
     :params iternum: 每次搜索迭代轮数
     :output res:需保存到子任务json中的返回结果/路径
     """
-    pass
-    # logging = Logger(filename=osp.join(ROOT,"output", tid, AAtid +"_log.txt"))
-    # taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    # devive = IOtool.get_device()
-    # res = modulardevelop.run_modulardevelop(dataset.lower(), modelname.lower(), tuner.lower(), init, epoch, iternum, devive, osp.join(ROOT,"output", tid, AAtid), logging)  
-    # res["stop"] = 1
-    # IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
-    # taskinfo[tid]["function"][AAtid]["state"]=2
-    # taskinfo[tid]["state"]=2
-    # IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
-
+    IOtool.change_subtask_state(tid, AAtid, 1)
+    IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, AAtid, time.time())
+    devive = IOtool.get_device()
+    logging = IOtool.get_logger(AAtid)
+    res = modulardevelop.run_modulardevelop(dataset.lower(), modelname.lower(), tuner.lower(), init.lower(), epoch, iternum, devive, osp.join(ROOT,"output", tid, AAtid), logging)  
+    res["stop"] = 1
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+    IOtool.change_subtask_state(tid, AAtid, 2)
+    IOtool.change_task_success_v2(tid=tid)
 
 from train_network import train_resnet_mnist, train_resnet_cifar10
 
@@ -966,8 +965,6 @@ def run_side_api(trs_file, method, tid, stid):
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
     IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
-
-
 
 def knowledge_consistency(tid, stid, arch,dataset,img_path,layer):
     IOtool.change_subtask_state(tid, stid, 1)
