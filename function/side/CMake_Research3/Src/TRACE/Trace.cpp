@@ -26,6 +26,20 @@ Trace::Trace(const char* file)
 	this->readHeard(file);//打开文件并读取头文件
 }
 
+Trace::Trace(const string file)
+{
+	// 打开文件
+	this->infile.open(file, ios::in | ios::binary);
+	if (!this->infile)
+	{
+		cerr << "Failed to open the file!";
+		exit(0);
+	}
+	this->currentTrace = 0;//初始化
+	this->trsHead.TS = 0;//初始化
+	this->readHeard(file.data());//打开文件并读取头文件
+}
+
 Trace::Trace(const char* file, int inDataLen, int outDataLen)//默认读取模式为单条功耗
 {
 	// 打开文件
