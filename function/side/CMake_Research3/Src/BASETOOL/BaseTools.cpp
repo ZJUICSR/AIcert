@@ -356,6 +356,81 @@ void BaseTools::generateFileName(char* name,int buflen,char* fixedName,int index
 	#endif
 }
 
+void BaseTools::byteToH(uint8_t ui8, char* str){
+	
+	uint8_t i = ui8/16;
+	uint8_t j = ui8%16;
+
+	if (i == 0){
+		str[0] = '0';
+	}else if(i == 1){
+		str[0] = '1';
+	}else if(i == 2){
+		str[0] = '2';
+	}else if(i == 3){
+		str[0] = '3';
+	}else if(i == 4){
+		str[0] = '4';
+	}else if(i == 5){
+		str[0] = '5';
+	}else if(i == 6){
+		str[0] = '6';
+	}else if(i == 7){
+		str[0] = '7';
+	}else if(i == 8){
+		str[0] = '8';
+	}else if(i == 9){
+		str[0] = '9';
+	}else if(i == 10){
+		str[0] = 'A';
+	}else if(i == 11){
+		str[0] = 'B';
+	}else if(i == 12){
+		str[0] = 'C';
+	}else if(i == 13){
+		str[0] = 'D';
+	}else if(i == 14){
+		str[0] = 'E';
+	}else if(i == 15){
+		str[0] = 'F';
+	}
+
+	if (j == 0){
+		str[1] = '0';
+	}else if(j == 1){
+		str[1] = '1';
+	}else if(j == 2){
+		str[1] = '2';
+	}else if(j == 3){
+		str[1] = '3';
+	}else if(j == 4){
+		str[1] = '4';
+	}else if(j == 5){
+		str[1] = '5';
+	}else if(j == 6){
+		str[1] = '6';
+	}else if(j == 7){
+		str[1] = '7';
+	}else if(j == 8){
+		str[1] = '8';
+	}else if(j == 9){
+		str[1] = '9';
+	}else if(j == 10){
+		str[1] = 'A';
+	}else if(j == 11){
+		str[1] = 'B';
+	}else if(j == 12){
+		str[1] = 'C';
+	}else if(j == 13){
+		str[1] = 'D';
+	}else if(j == 14){
+		str[1] = 'E';
+	}else if(j == 15){
+		str[1] = 'F';
+	}
+
+}
+
 int BaseTools::hToD(char* str){
 	int re=0;
 

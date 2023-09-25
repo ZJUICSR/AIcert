@@ -37,7 +37,7 @@ typedef struct{
     char randFile[SIZE];
     char outFile[SIZE];
     int trace_num;
-    int attackindex;
+    int attackindex[3];
     int point_num_start;
     int point_num_end;
     int mid;
@@ -121,11 +121,13 @@ class Parameters{
         return in->trace_num;
     };
 
-    void setAttackIndex(int i){
-        in->attackindex = i;
+    void setAttackIndex(int i, int j, int k){
+        in->attackindex[0] = i;
+        in->attackindex[1] = j;
+        in->attackindex[2] = k;
     };
 
-    int getAttackIndex(){
+    int* getAttackIndex(){
         return in->attackindex;
     };
 
@@ -326,7 +328,9 @@ class Parameters{
         strcpy(in->outFile, "\0");
 
         in->trace_num = 0;
-        in->attackindex = 0;
+        *in->attackindex = 0;
+        *(in->attackindex+1) = 0;
+        *(in->attackindex+2) = 0;
         in->point_num_start = -1;
         in->point_num_end = 0;
         in->mid = 0;
@@ -436,8 +440,8 @@ inline void selectParenthesesNum(char* str, int* num){//printf("done1\n");
 inline void fmapInitial(Parameters* param, int8_t* fm){
 
     int8_t fmap[]=CONV1_WT;
-    memset(fmap+param->getAttackIndex(), 0, (param->getFmapNum() - param->getAttackIndex()) * sizeof(int8_t));
-    memcpy(fm, fmap, param->getAttackIndex() * sizeof(int8_t));
+    memset(fmap+(*param->getAttackIndex()), 0, (param->getFmapNum() - (*param->getAttackIndex())) * sizeof(int8_t));
+    memcpy(fm, fmap, (*param->getAttackIndex()) * sizeof(int8_t));
     param->setFmapPoint(fm);//param读fmap参数
     // for(int i =0;i<2400;i++){
     //     printf("%d ", fmap[i]);
@@ -448,10 +452,13 @@ inline void fmapInitial(Parameters* param, int8_t* fm){
 //CPA
 void correlationPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*));
 void correlationPowerAnalysis_correlation_distinguish(Parameters* param, int8_t* (*f)(Parameters*));
+void correlationPowerAnalysis_correlation_distinguish_optimize(Parameters* param, int8_t* (*f)(Parameters*));
 
 //DPA
 void differentialPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*));
 void differentialPowerAnalysis_correlation_distinguish(Parameters* param, int8_t* (*f)(Parameters*));
+void differentialPowerAnalysis_correlation_distinguish_optimize(Parameters* param, int8_t* (*f)(Parameters*));
+
 
 //HPA
 void horizontalPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*));
@@ -459,7 +466,12 @@ void horizontalPowerAnalysis_correlation_distinguish(Parameters* param, int8_t* 
 
 //TTEST
 void ttest_non_specific(Parameters* param, int8_t* (*f)(Parameters*));
+void ttest_specific();
 void x2_test(Parameters* param, int8_t* (*f)(Parameters*));
+
+//SPA
+#define ISTHREAD 1
+void simplePowerAnalysis(Parameters* param);
 
 #endif
 

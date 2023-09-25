@@ -14,7 +14,7 @@ project(resreach3)
 
 include_directories(Inc)
 
-add_library(resreach3 SHARED Src/dummy.cpp)
+add_library(resreach3 SHARED Src/dummy.cpp)#SHARED
 
 aux_source_directory(Src/AttackMethods ATTACKMETHODS_SRC)
 target_sources(resreach3 PRIVATE ${ATTACKMETHODS_SRC})

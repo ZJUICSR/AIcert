@@ -47,7 +47,7 @@ void horizontalPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*)){
     float result_max_abs[param->getGuessSize()]={0.0};
 
     //attackindex -->> i j k m n l
-    int attackIndex = param->getAttackIndex();
+    int attackIndex = *param->getAttackIndex();
     param->setForI(attackIndex/75);//
     // param->setForJ(2);
     // param->setForK(2);
@@ -59,7 +59,7 @@ void horizontalPowerAnalysis(Parameters* param, int8_t* (*f)(Parameters*)){
 
 
     for(param->setHorMidX(0); param->getHorMidX() < param->getGuessSize(); param->setHorMidX(param->getHorMidX() + 1)){
-        fmap[param->getAttackIndex()] = wt[param->getHorMidX()];
+        fmap[*param->getAttackIndex()] = wt[param->getHorMidX()];
         
         for(int i = 0 ; i < param->getTraceNum(); i++){
             traceR.readIndexTrace(&trsDataR,i*param->getMidvaluePerTrace()); 
@@ -239,7 +239,7 @@ void horizontalPowerAnalysis_correlation_distinguish_index(Parameters* param, in
     float result_max_abs[param->getGuessSize()]={0.0};
 
     //attackindex -->> i j k m n l
-    int attackIndex = param->getAttackIndex();
+    int attackIndex = *param->getAttackIndex();
     param->setForI(attackIndex/75);//
     // param->setForJ(2);
     // param->setForK(2);
@@ -251,7 +251,7 @@ void horizontalPowerAnalysis_correlation_distinguish_index(Parameters* param, in
 
 
     for(param->setHorMidX(0); param->getHorMidX() < param->getGuessSize(); param->setHorMidX(param->getHorMidX() + 1)){
-        fmap[param->getAttackIndex()] = wt[param->getHorMidX()];
+        fmap[*param->getAttackIndex()] = wt[param->getHorMidX()];
         
         for(int i = 0 ; i < tem_trace_num; i++){
             traceR.readIndexTrace(&trsDataR,i*param->getMidvaluePerTrace()); 
