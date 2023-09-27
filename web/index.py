@@ -646,8 +646,8 @@ def AdvAttack():
         # 执行任务
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_adv_attack, tid, stid, dataname, model, adv_method, inputParam, sample_num)
-        IOtool.add_task_queue(tid, stid, t2, 3000*len(adv_method))
-        # interface.run_adv_attack(tid, stid, dataname, model, adv_method, inputParam)
+        IOtool.add_task_queue(tid, stid, t2, 72000*len(adv_method))
+        interface.run_adv_attack(tid, stid, dataname, model, adv_method, inputParam)
         res = {
             "tid":tid,
             "stid":stid
@@ -696,7 +696,7 @@ def BackdoorAttack():
         # 执行任务
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_backdoor_attack, tid, stid, dataname, model, adv_method, inputParam)
-        IOtool.add_task_queue(tid, stid, t2, 7200*len(adv_method))
+        IOtool.add_task_queue(tid, stid, t2, 72000*len(adv_method))
         # t2 = threading.Thread(target=interface.run_backdoor_attack,args=(tid, stid, dataname, model, adv_method, inputParam))
         # t2.setDaemon(True)
         # t2.start()
@@ -751,7 +751,7 @@ def AttackDimReduciton():
         
         t2 = pool.submit(interface.run_dim_reduct, tid, stid, datasetparam, modelparam, vis_methods, adv_methods)
         
-        IOtool.add_task_queue(tid, stid, t2, 400 * len(vis_methods) + 300*len(adv_methods))
+        IOtool.add_task_queue(tid, stid, t2, 4000 * len(vis_methods) + 3000*len(adv_methods))
         # interface.run_dim_reduct(tid, stid, datasetparam, modelparam, vis_methods, adv_methods)
         # t2 = threading.Thread(target=interface.run_dim_reduct,args=(tid, stid, datasetparam, modelparam, vis_methods, adv_methods, device))
         # t2.setDaemon(True)
@@ -956,7 +956,7 @@ def AttackAttrbutionAnalysis():
         
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_attrbution_analysis, tid, stid, datasetparam, modelparam, ex_methods, adv_methods, use_layer_explain)
-        IOtool.add_task_queue(tid, stid, t2, 400 * len(ex_methods) + 300*len(adv_methods))
+        IOtool.add_task_queue(tid, stid, t2, 40000 * len(ex_methods) + 30000*len(adv_methods))
         # print(t2.done())
         # print(t2.result())
         # t2 = threading.Thread(target=interface.run_attrbution_analysis,args=(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device, use_layer_explain))
@@ -1043,7 +1043,6 @@ def Detect():
     except:
         defense_methods = inputParam["defense_methods"]
     
-    print(defense_methods,type(defense_methods))
     tid = inputParam["tid"]
     format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
     stid = "S"+IOtool.get_task_id(str(format_time))
@@ -1077,7 +1076,7 @@ def Detect():
     pool = IOtool.get_pool(tid)
     t2 = pool.submit(interface.run_detect, tid, stid, defense_methods, adv_dataset, adv_model, adv_method, adv_nums, adv_file_path)
     
-    IOtool.add_task_queue(tid, stid, t2, 300)
+    IOtool.add_task_queue(tid, stid, t2, 30000*len(defense_methods))
     response_data = t2.result()
     
     # response_data = interface.run_detect(tid, stid, defense_methods, adv_dataset, adv_model, adv_method, adv_nums, adv_file_path)
@@ -1559,8 +1558,10 @@ def FormalVerification():
         IOtool.change_task_info(tid, "dataset", inputParam["dataset"])
         IOtool.change_task_info(tid, "model", inputParam["model"])
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.run_verify, tid, stid, param)
-        IOtool.add_task_queue(tid, stid, t2, 300)
+        # t2 = pool.submit(interface.run_modulardevelop, tid, stid, param)
+        t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+        
+        IOtool.add_task_queue(tid, stid, t2, 30000)
         interface.run_verify(tid, stid, param)
         # t2 = threading.Thread(target=interface.run_verify, args=(tid, stid, param))
         # t2.setDaemon(True)
@@ -1612,7 +1613,7 @@ def ensemble():
         pool = IOtool.get_pool(tid)
         # t2 = pool.submit(interface.run_ensemble_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
         t2 = pool.submit(interface.submitAandB, tid, stid, 10, 20)
-        IOtool.add_task_queue(tid, stid, t2, 30000*len(adv_methods))
+        IOtool.add_task_queue(tid, stid, t2, 72000*len(adv_methods))
         interface.run_ensemble_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
         res = {
             "code":1,
@@ -1668,15 +1669,6 @@ def DownloadData():
                 print(down_path)
                 print(down_name)
                 time.sleep(1)
-                # response1 = send_from_directory(down_path,
-                #                     input_name, as_attachment=True)
-                # response2 = send_from_directory(down_path,
-                #                     down_name, as_attachment=True)
-                # print(response1.content)
-                # print(response2.content)
-                # print()
-                # return send_from_directory(input_path,
-                #                     "download.zip", as_attachment=True)
                 return send_from_directory(down_path,
                                     input_name, as_attachment=True)
             else:
