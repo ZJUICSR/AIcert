@@ -1,0 +1,27 @@
+前端输入接口：dict格式
+
+1. 模型种类'block_type'。['efficient'，'resnet'，'xception'，'vgg']
+2. 自动化构造模型'search'。自动化根据模型种类构建性能优秀的模型。 True or False （仅True可用）
+3. 数据集'data'： 预处理好的numpy文件
+4. 模型存储目录'save_dir'，所有输出和中间结果都会存在这个目录里
+5. 模型训练epoch上限'epoch'，默认为200， 用户可不选
+
+TRUE: # 对应demo1
+	1. 模型搜索方法'tuner'。当自动化构造模型为False时可选，[ 'greedy', 'random']。随机出事种子并开始自动化搜索模型。  用户可不选
+	2. 模型搜索次数上限'trial'，默认为50。  用户可不选
+
+FALSE：# 对应demo2
+	1. 模型超参数路径'param_path'。当自动化构造模型为False时可选， json文件，存储构成模型的具体超参数，可选参数包括但不限于模型的版本，trainable，优化器等	。需要用户编写并指定json的路径。 用户可不选，则自动加载我们预载的模型
+
+
+输出接口：
+	1. 保存在模型存储目录'save_dir'的模型'model.h5'和对应训练历史文件'history.pkl'。
+	history.pkl会随着训练不断更新。其中包含训练的accuracy、loss、valaccuracy、valloss， 前端可以每隔一段时间读一次该文件
+
+
+
+算法依赖库版本：
+Python 3.6.9           	#3.6.9是考虑和框架测试结合，如果其他人的工作无法在3.6.9环境下，可用3.7.7，并在组会和我们一并跟老师沟通
+TensorFlow 2.3
+AutoKeras 1.0.12
+Kerastuner 1.0.2
