@@ -659,18 +659,8 @@ def verify_img(tid, stid, net, dataset, eps, pic_path):
     logging = IOtool.get_logger(stid)
     b1=[]
     b2=[]
-    model=''
-    if net=='cnn_7layer_bn':
-        model='cnn_7layer_bn'
-    elif net=='Densenet' and dataset=='CIFAR':
-        model='Densenet_cifar_32'
-    elif net=='Resnet' and dataset=='MNIST':
-        model='resnet'
-    elif net=='Resnet' and dataset=='CIFAR':
-        model='ResNeXt_cifar'
-    elif net=='Wide Resnet' and dataset=='CIFAR':
-        model='wide_resnet_cifar_bn_wo_pooling'
-    print(model,net)
+    print(net, dataset)
+
     lb1,ub1,lb2,ub2,predicted,score_IBP,score_CROWN=auto_verify_img(net, dataset, eps, pic_path)
     categories=[]
     for i in range(len(lb1)):
@@ -1151,6 +1141,32 @@ def run_ensemble_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_p
             IOtool.change_subtask_state(tid, stid, 2)
             IOtool.change_task_success_v2(tid)
             return
+        else:
+            defense_methods.remove("PACA")
+    if "CAFD" in defense_methods:
+        result.update({"CAFD":{
+            "CAFD_acc":{},
+            "CAFD_asr":{},
+        }})
+        from function.GroupDefense.CAFD.train_or_test_denoiser import cafd
+        methods = ['fgsm', 'bim', 'rfgsm', 'cw', 'pgd', 'tpgd', 'mi-fgsm', 'autopgd', 'square', 'deepfool', 'difgsm']
+        for method in adv_methods:
+            if method.lower() == "mifgsm":
+                method1 = 'mi-fgsm'
+            else:
+                method1 = method.lower()
+            if method1 in methods:
+                result["CAFD"]['CAFD_acc'][method] = cafd(target_model=copy_model1, dataloader=test_loader, method=method1, eps=1, channel=1, data_size=28, weight_adv=5e-3,
+                weight_act=1e3, weight_weight=1e-3, lr=0.001, itr=10,
+                batch_size=128, weight_decay=2e-4, print_freq=10, save_freq=2, device='cuda')
+        if len(defense_methods)==1:
+            result['stop'] = 1
+            IOtool.write_json(result, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+            IOtool.change_subtask_state(tid, stid, 2)
+            IOtool.change_task_success_v2(tid)
+            return
+        else:
+            defense_methods.remove("CAFD")
     # 对抗训练 & 攻防博弈
     logging.info('[攻防推演阶段]即将执行【自动化攻防测试】算法')
     logging.info('[攻防推演阶段]即将进行攻防推演，选择预设的{:d}种模型，调整参数并开始攻防推演'.format(len(adv_methods)))
