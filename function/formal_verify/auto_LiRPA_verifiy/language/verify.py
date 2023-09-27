@@ -1,5 +1,7 @@
-from auto_LiRPA.auto_LiRPA import BoundedModule, BoundedTensor
-from auto_LiRPA.auto_LiRPA.perturbations import *
+# from auto_LiRPA.auto_LiRPA import BoundedModule, BoundedTensor
+# from auto_LiRPA.auto_LiRPA.perturbations import *
+from auto_LiRPA import BoundedModule, BoundedTensor
+from auto_LiRPA.perturbations import *
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
