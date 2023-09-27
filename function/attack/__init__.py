@@ -156,7 +156,7 @@ def run_backdoor(model, modelpath, dataname, method, pp_poison, save_num, test_s
     res["accuracy"] = round(res["accuracy"],1)
     res["accuracyonb"] = round(res["accuracyonb"],1)
     res["attack_success_rate"] = round(res["attack_success_rate"],1)
-    for i in range(10):
+    for i in range(5):
         temp_pp_poison = 0.001 + 0.1 * i
         # b.poision(method=methoddict[method], pp_poison=temp_pp_poison, test_sample_num=test_sample_num, target=target, trigger=trigger, **method_param)
         b.poision(method=methoddict[method], **method_param)
