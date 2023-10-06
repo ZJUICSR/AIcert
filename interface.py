@@ -304,7 +304,7 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, mode):
     adv_loader = {}
     res = {}
     class_list = get_class_list(dataset, root)
-    class_name = 
+    # class_name = 
 
     for adv_method in adv_methods:
         logging.info("[数据集获取]：获取图像{:s}对抗样本".format(adv_method))
