@@ -15,7 +15,6 @@ import pickle
 import tensorflow.keras as keras
 import sys
 import json
-sys.path.append(os.path.dirname(__file__).rsplit('/',1)[0])
 sys.path.append("..")
 
 
@@ -147,16 +146,13 @@ def model_generate(
         shutil.rmtree(root_path)
     if os.path.exists(tmp_dir):
         shutil.rmtree(tmp_dir)
-    if os.path.exists('./tmp'):
-        shutil.rmtree('./tmp')
     os.makedirs(root_path)
     os.makedirs(tmp_dir)
-    os.makedirs('./tmp')
     log_path=os.path.join(root_path,'log.pkl')
-    
+
     if data=='mnist':
         (x_train, y_train), (x_test, y_test) = mnist_load_data()
-    elif data=='cifar10':
+    elif data=='cifar':
         (x_train, y_train), (x_test, y_test) = cifar10_load_data()
     else:
         (x_train, y_train), (x_test, y_test)=data #TODO: 如果是处理过的数据，需要给出数据路径或者读取方法
@@ -213,19 +209,10 @@ def model_generate(
         else:
             #yzx+ deepalchemy
             from Deepalchemy import deepalchemy as da
-            if len(x_train.shape) == 3:
-                x_train = np.expand_dims(x_train,-1)
-            if len(x_test.shape) == 3:
-                x_test = np.expand_dims(x_test,-1)
-                
-            np.save('./tmp/xtr.npy',x_train)
-            np.save('./tmp/ytr.npy',y_train)
-            np.save('./tmp/xte.npy',x_test)
-            np.save('./tmp/yte.npy',y_test)
-            # np.save(x_train, '../xtr.npy')
-            # np.save(y_train, '../ytr.npy')
-            # np.save(x_test, '../xte.npy')
-            # np.save(y_test, '../yte.npy')
+            np.save(x_train, '../xtr.npy')
+            np.save(y_train, '../ytr.npy')
+            np.save(x_test, '../xte.npy')
+            np.save(y_test, '../yte.npy')
             trainfunc, nmax = da.gen_train_function(False, gpu, block_type, epoch, [x_train, y_train, x_test, y_test])
             wmin, wmax, dmin, dmax = da.NM_search_min(block_type, trainfunc, nmax, init, iter_num)
 
@@ -233,7 +220,8 @@ def model_generate(
             model_path = os.path.join(root_path, 'best_model.h5')
             valloss = trainfunc(dmin, dmax, wmin, wmax)
             shutil.copyfile("./best.h5",model_path)
-            shutil.copyfile("./tmp/best_param.pkl", os.path.join(root_path, 'best_param.pkl'))           
+            shutil.copyfile("../best_param.pkl", os.path.join(root_path, 'best_param.pkl'))
+
     else:
         # DEMO 2
         with open('./hypermodel.pkl', 'rb') as f:
@@ -306,11 +294,10 @@ def summarize_result(json_path,save_dir):
     best_history['val_loss']=[]
     best_history['val_accuracy']=[]
     
-    if os.path.exists('../history_da.pkl'):
-        with open('../history_da.pkl', 'rb') as f:
-            best_history = pickle.load(f)
-        os.remove('../history_da.pkl')
-    elif os.path.exists('../history.pkl'):
+    # with open(log_path, 'rb') as f:
+    #     log_dict = pickle.load(f)
+    # key_list=list(log_dict.keys())
+    if os.path.exists('../history.pkl'):
         with open('../history.pkl', 'rb') as f:
             best_history = pickle.load(f)
     else:
@@ -436,7 +423,7 @@ def paddle_convert(model_path,save_dir):
     print('========Converting ONNX Model...===========')
     onnx_path=onnx_convert(model_path,save_dir)
     paddle_model_dir=os.path.join(save_dir,'paddle_model')
-    params_command='source activate autotrain; x2paddle --framework=onnx --model={} --save_dir={}'
+    params_command='source activate ak2.3; x2paddle --framework=onnx --model={} --save_dir={}'
     print('==========Converting PaddlePaddle Model...============')
     import subprocess
     out_path=os.path.join(save_dir,'out')
