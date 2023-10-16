@@ -7,7 +7,9 @@ import autokeras as ak
 import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import sys 
-sys.path.append('./utils')
+sys.path.append(os.path.dirname(__file__))
+sys.path.append(os.path.join(os.path.dirname(__file__),'utils'))
+# sys.path.append('./utils')
 from operation_test_utils import modify_model
 import argparse
 from tensorflow.keras.datasets import mnist,cifar10
