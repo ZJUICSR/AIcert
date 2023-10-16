@@ -136,10 +136,10 @@ class DenseNet(Module):
 
         super(DenseNet, self).__init__()
 
-        conv1 = Conv2d(input_channel, 64, kernel_size=7, stride=2, padding=3,
+        conv1 = Conv2d(input_channel, num_init_features, kernel_size=7, stride=2, padding=3,
                             bias=False)
         if num_classes == 10:
-            conv1 = Conv2d(input_channel, 64, kernel_size=3, stride=1, padding=1, bias=False)
+            conv1 = Conv2d(input_channel, num_init_features, kernel_size=3, stride=1, padding=1, bias=False)
         # First convolution
         self.layers = []
         self.layers.append(conv1)
