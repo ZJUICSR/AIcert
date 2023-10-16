@@ -125,7 +125,8 @@ class DreamOracle(kerastuner.Oracle):
         import os
         import pickle
         import sys
-        sys.path.append('./utils')
+        sys.path.append(os.path.dirname(__file__))
+        # sys.path.append('./utils')
         from load_test_utils import check_move
     
         
@@ -147,6 +148,7 @@ class DreamOracle(kerastuner.Oracle):
         import os
         import pickle
         import sys
+        sys.path.append(os.path.dirname(__file__))
         sys.path.append('./utils')
         from load_test_utils import traversalDir_FirstDir
 
@@ -194,6 +196,7 @@ class DreamOracle(kerastuner.Oracle):
         import pickle
         import time
         import sys
+        sys.path.append(os.path.dirname(__file__))
         sys.path.append('./utils')
         from load_test_utils import judge_dirs,load_evaluation,check_move,get_true_value,special_action,write_opt,sort_opt_wgt_dict,update_candidate,select_action
         start=time.time()
@@ -247,6 +250,7 @@ class DreamOracle(kerastuner.Oracle):
         import pickle
         import time
         import sys
+        sys.path.append(os.path.dirname(__file__))
         sys.path.append('./utils')
         from load_test_utils import judge_dirs,load_evaluation,check_move,get_true_value,special_action,write_opt,sort_opt_wgt_dict,update_candidate,select_action,choose_random_select
         start=time.time()
@@ -329,6 +333,7 @@ class DreamOracle(kerastuner.Oracle):
         import pickle
         import sys
         import copy
+        sys.path.append(os.path.dirname(__file__))
         sys.path.append('./utils')
         from load_test_utils import judge_dirs,load_evaluation,check_move,get_true_value,special_action,write_opt,sort_opt_wgt_dict,append_list
 
@@ -459,6 +464,7 @@ class DreamOracle(kerastuner.Oracle):
         import pickle
         import random
         import sys
+        sys.path.append(os.path.dirname(__file__))
         sys.path.append('./utils')
         from load_test_utils import judge_dirs,load_evaluation,check_move,get_true_value,special_action,write_opt,sort_opt_wgt_dict,multi_action_search,get_opti_value
         additional_hp_list=['step_1_ratio','step_2_lr_scale','step_1_freeze','end_learning_rate','weight_decay_rate','momentum','triple_train']
