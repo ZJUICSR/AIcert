@@ -5,10 +5,36 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 from torch.utils.data import TensorDataset
 import torchattacks as attacks
-from function.ex_methods.module.func import get_loader, get_normalize_para, recreate_image
+from function.ex_methods.module.func import get_loader, get_normalize_para
 import os.path as osp
+import torchvision.transforms as transforms
 import os
 import json
+from function.ex_methods.module.sequential import Sequential, Module
+
+class Normalize(Module):
+    def __init__(self, mean, std) :
+        super(Normalize, self).__init__()
+        self.register_buffer('mean', torch.Tensor(mean))
+        self.register_buffer('std', torch.Tensor(std))
+        
+    def forward(self, input):
+        # Broadcasting
+        mean = self.mean.reshape(1, 3, 1, 1)
+        std = self.std.reshape(1, 3, 1, 1)
+        return (input - mean) / std
+    
+class torch_Normalize(torch.nn.Module):
+    def __init__(self, mean, std) :
+        super(torch_Normalize, self).__init__()
+        self.register_buffer('mean', torch.Tensor(mean))
+        self.register_buffer('std', torch.Tensor(std))
+        
+    def forward(self, input):
+        # Broadcasting
+        mean = self.mean.reshape(1, 3, 1, 1)
+        std = self.std.reshape(1, 3, 1, 1)
+        return (input - mean) / std
 
 def get_targeted_loader(data):
     x = torch.cat(data["x"],dim=0).float().cpu()
@@ -58,20 +84,28 @@ def get_accuracy(dataloader,model,device,mean,std):
 def sample_untargeted_attack(dataset, method, model, img_x, label, device, root):
     with open(osp.join(root, "function/ex_methods/cache/adv_params.json")) as fp:
         def_params = json.load(fp)
+
+    mean, std = get_normalize_para(dataset)
+    normalize_layer = torch_Normalize(mean,std)
+    model = torch.nn.Sequential(normalize_layer, model)
+    model.eval().to(device)
+    
     attack = get_attack(dataset, method, model, def_params)
     img_x = img_x.to(device)
     label = label.to(device)
     adv_img_x = attack(img_x, label)
-    adv_img = recreate_image(adv_img_x, dataset)
-    return adv_img
+    
+    _, label = model(adv_img_x).max(1)
+    adv_img = transforms.ToPILImage()(adv_img_x.squeeze().cpu().detach())
+    return adv_img, label
 
 def targeted_attack(dataset, method, model, data_loader, targeted_label, device, params, mean, std):
     adv_x = []
     ben_x = []
     ben_y = []
     attack = get_attack(dataset, method, model, params)
-    attack.set_normalization_used(mean=mean, std=std)
-    attack.set_mode_targeted_by_function(target_map_function=lambda x, y: torch.full(y.size(),targeted_label).to(y.device))
+    # attack.set_normalization_used(mean=mean, std=std)
+    # attack.set_mode_targeted_by_function(target_map_function=lambda x, y: torch.full(y.size(),targeted_label).to(y.device))
     print("当前执行{:s}对抗方法生成对抗样本...".format(method))
     for step, (x, y) in enumerate(data_loader):
         x = x.to(device)
@@ -125,7 +159,6 @@ def get_adv_loader(model, dataloader, method, param, batchsize, logging):
     device = param["device"]
     root = param["root"]
     
-    model.eval().to(device)
     with open(osp.join(root, "function/ex_methods/cache/adv_params.json")) as fp:
         def_params = json.load(fp)
     
@@ -146,6 +179,9 @@ def get_adv_loader(model, dataloader, method, param, batchsize, logging):
                             method, model_name, dataset, steps, eps))
 
     mean, std = get_normalize_para(dataset)
+    normalize_layer = Normalize(mean,std)
+    model = Sequential(normalize_layer, model)
+    model.eval().to(device)
 
     if not osp.exists(path):
         logging.info("[加载数据集]：未检测到缓存的{:s}对抗样本，将重新执行攻击算法并缓存".format(method))

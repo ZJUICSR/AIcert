@@ -1,17 +1,23 @@
-import os, base64
+import os
 import os.path as osp
 import torch
 import torchvision
 import time
-from function.ex_methods.module.func import get_loader, Logger, get_batchsize,load_image, predict, get_class_list
+from function.ex_methods.module.func import get_loader, get_batchsize,load_image, predict, get_class_list, get_normalize_para
 from function.ex_methods.module.generate_adv import get_adv_loader, sample_untargeted_attack
 from function.ex_methods.module.load_model import load_model, load_torch_model
 from function.ex_methods import attribution_maps, layer_explain, dim_reduciton_visualize
-from function.ex_methods.module.model_Lenet import lenet
 from function.ex_methods.lime import lime_image_ex
 from PIL import Image
 from IOtool import IOtool, Callback
 ROOT = osp.dirname(osp.abspath(__file__))
+
+"""
+因为3.2.4版本的torchattack会在每个对抗攻击函数的最后将图片归一化到（0,1）之间，
+这意味着torchattack默认的输入图片是不经过Normalization的，
+但该版本也没有设置过内部的normalization过程，因此需要在模型的开头加入一个自定义的Normal layer（继承Module类）
+所以在构造对抗样本时输入的图片是没有经过Normalization的，否则图片会失真
+"""
 
 def run_dim_reduct(tid, stid, datasetparam, modelparam, vis_methods, adv_methods):
     """降维可视化
@@ -232,7 +238,6 @@ def run_adversarial_analysis(tid, stid, datasetparam, modelparam, ex_methods, vi
     IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
 
-
 def run_lime(tid, stid, datasetparam, modelparam, adv_methods, mode):
     """多模态解释
     :params tid:主任务ID
@@ -250,7 +255,7 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, mode):
     params = {
         "dataset": datasetparam,
         "model": modelparam,
-        "out_path": osp.join(ROOT,"output", tid),
+        "out_path": osp.join(ROOT,"output", tid, stid),
         "device": torch.device(device),
         "adv_methods":{"methods":adv_methods},
         "mode":mode,
@@ -258,65 +263,65 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, mode):
         "stid":stid
     }
 
-    logging = Logger(filename=osp.join(ROOT,"output", tid, stid +"_log.txt"))
     root = ROOT
     dataset = datasetparam["name"]
+    model_name = modelparam["name"]
+    model = modelparam["ckpt"]
 
     if mode == "image":
         logging.info("[数据集获取]：目前数据模态为图片类型")
-        image = datasetparam['data']
-        img_dir=os.path.join(os.getcwd(),"web/static/img/tmp_imgs")
-        if not os.path.exists(img_dir):
-            os.mkdir(img_dir)
-        pic_path=os.path.join(img_dir,tid,stid+'.png')
-        try:
-            os.mkdir(os.path.join(img_dir,tid))
-        except:
-            pass
-        if "image/jpeg;" in image:
-            with open( pic_path, 'wb') as f:
-                f.write(base64.b64decode(image.replace('data:image/jpeg;base64,','')))
-                f.close()
-        else:
-            with open( pic_path, 'wb') as f:
-                f.write(base64.b64decode(image.replace('data:image/png;base64,','')))
-                f.close()
-        img = Image.open(pic_path).convert('RGB')
-    else:
-        logging.info("[数据集获取]：目前数据模态为文本类型")
-
-
-    logging.info("[数据集获取]：获取{:s}数据集正常样本已完成.".format(dataset))
     
-    model_name = modelparam["name"]
-    if modelparam["ckpt"] != "None":
-        model = torch.load(modelparam["ckpt"])
-    else:
-        modelparam["ckpt"] = None
-        model = modelparam["ckpt"]
-    logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
-    net = load_torch_model(model_name)
-    net = net.eval().to(device)
-    img_x = load_image(device, img, dataset)
-    label, _ = predict(net, img_x)
-    logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
-    
-    adv_loader = {}
-    res = {}
-    class_list = get_class_list(dataset, root)
-    # class_name = 
+        save_dir = os.path.join('./dataset/data/ckpt/upload_lime.jpg')
+        if os.path.exists(save_dir):
+            image = Image.open(save_dir) 
 
-    for adv_method in adv_methods:
-        logging.info("[数据集获取]：获取图像{:s}对抗样本".format(adv_method))
-        adv_img = sample_untargeted_attack(dataset, adv_method, net, img_x, label, device, root)
-        logging.info("[数据集获取]：获取图像{:s}对抗样本已完成".format(adv_method))
+            if dataset == "mnist":
+                img = image.convert("L")
+            img = image.convert('RGB')
+        logging.info("[数据集获取]：获取{:s}数据样本已完成.".format(dataset))
+
+        logging.info("[加载被解释模型]：准备加载被解释模型{:s}".format(model_name))
+        net = load_torch_model(model_name)
+        net = net.eval().to(device)
+
+        img_x = load_image(device, img, dataset)
+        label, _ = predict(net, img_x)
+        logging.info("[加载被解释模型]：被解释模型{:s}已加载完成".format(model_name))
+
+        # 将图片tensor去标准化，之后再输入torchattack中
+        mean, std = get_normalize_para(dataset)
+        re_trans = torchvision.transforms.Normalize(
+                mean=tuple(-m / s for m, s in zip(mean, std)),
+                std=tuple(1.0 / s for s in std),
+            )
+        img_x = re_trans(img_x)
+
+        res = {}
+        class_list = get_class_list(dataset, root)
+        class_name = class_list[label.item()]
 
         save_path = params["out_path"]
-        result = lime_image_ex(img, net, model_name, dataset, device, root, save_path)
-        
-        res[adv_method]=result
-        
-        print(result)
+        logging.info("[LIME图像解释]：正在对正常图片数据进行解释")
+        img_url, img_lime_url = lime_image_ex(img, net, model_name, dataset, device, save_path)
+        res["nor"] = {"image":img_url,"ex_image":img_lime_url,"class_name":class_name}
+        logging.info("[LIME图像解释]：正常图片数据解释已完成")
+        for adv_method in adv_methods:
+            logging.info("[数据集获取]：正在生成图像{:s}对抗样本".format(adv_method))
+            adv_img, adv_label = sample_untargeted_attack(dataset, adv_method, net, img_x, label, device, root)
+            logging.info("[数据集获取]：图像{:s}对抗样本已生成".format(adv_method))
+            class_name = class_list[adv_label.item()]
+            save_path = params["out_path"]
+            logging.info("[LIME图像解释]：正在对{:s}图片数据进行解释".format(adv_method))
+            img_url, img_lime_url = lime_image_ex(adv_img, net, model_name, dataset, device, save_path, imagetype=adv_method)
+            res[adv_method] = {"image":img_url, "ex_image":img_lime_url,"class_name":class_name}
+            logging.info("[LIME图像解释]：{:s}图片数据解释已完成".format(adv_method))
+        logging.info("[LIME图像解释]：LIME解释已全部完成")
+    else:
+        logging.info("[数据集获取]：目前数据模态为文本类型")
+        text = datasetparam['data']
+        logging.info("[数据集获取]：获取{:s}数据样本已完成.".format(dataset))
+
+
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json")) 
     taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
     taskinfo[tid]["function"][stid]["state"] = 2

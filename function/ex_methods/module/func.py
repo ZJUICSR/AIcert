@@ -10,6 +10,7 @@ from PIL import Image
 
 import torch
 from torch.utils.data import DataLoader, TensorDataset
+from torchvision.transforms import transforms
 
 def predict(net, x):
     activation_output = net.forward(x)
@@ -106,6 +107,7 @@ def get_normalize_para(dataset):
         raise NotImplementedError("not support for other data set!")
     return mean, std
 
+
 '''加载样本数据'''
 def get_loader(data, batchsize=8):
     """
@@ -183,7 +185,7 @@ def recreate_image(im_as_var, dataset="imagenet"):
     elif dataset == "imagenet":
         reverse_mean = [-0.485, -0.456, -0.406]
         reverse_std = [1 / 0.229, 1 / 0.224, 1 / 0.225]
-    recreated_im = copy.copy(im_as_var.data.cpu().numpy())
+    recreated_im = copy.copy(im_as_var.squeeze().data.cpu().detach().numpy())
     for c in range(3):
         recreated_im[c] /= reverse_std[c]
         recreated_im[c] -= reverse_mean[c]
@@ -192,6 +194,7 @@ def recreate_image(im_as_var, dataset="imagenet"):
     recreated_im = np.round(recreated_im * 255)
     recreated_im = np.uint8(recreated_im).transpose(1, 2, 0)
     return recreated_im
+
 
 # 测试存储json文件
 def save_process_result(root, results, filename):
@@ -202,44 +205,14 @@ def save_process_result(root, results, filename):
         fp.close()
 
 
-# def recreate_image(im_as_var, dataset):
-#     """
-#         Recreates images from a torch variable, sort of reverse preprocessing
-#     Args:
-#         im_as_var (torch variable): Image to recreate
-#     returns:
-#         recreated_im (numpy arr): Recreated image in array
-#     """
-#     reverse_mean = []
-#     reverse_std = []
-#     if dataset == "cifar10":
-#         reverse_mean = [-0.43768206, -0.44376972, -0.47280434]
-#         reverse_std = [1 / 0.19803014, 1 / 0.20101564, 1 / 0.19703615]
-#     elif dataset == "mnist":
-#         reverse_mean = [(-0.1307)]
-#         reverse_std = [(1 / 0.3081)]
-#     elif dataset == "imagenet":
-#         reverse_mean = [-0.485, -0.456, -0.406]
-#         reverse_std = [1 / 0.2023, 1 / 0.1994, 1 / 0.2010]
-#     recreated_im = copy.copy(im_as_var.data.cpu().numpy())
-#     for c in range(3):
-#         recreated_im[c] /= reverse_std[c]
-#         recreated_im[c] -= reverse_mean[c]
-#     recreated_im[recreated_im > 1] = 1
-#     recreated_im[recreated_im < 0] = 0
-#     recreated_im = np.round(recreated_im * 255)
-
-#     recreated_im = np.uint8(recreated_im).transpose(1, 2, 0)
-#     return recreated_im
-
 def preprocess_transform(image, dataset):
     if dataset == "imagenet":
-        data_mean = np.array([0.485, 0.456, 0.406])
-        data_std = np.array([0.229, 0.224, 0.225])
+        data_mean = [0.485, 0.456, 0.406]
+        data_std = [0.229, 0.224, 0.225]
         img_size = 224
     elif dataset == "cifar10":
-        data_mean = np.array([0.43768206, 0.44376972, 0.47280434])
-        data_std = np.array([0.19803014, 0.20101564, 0.19703615])
+        data_mean = [0.43768206, 0.44376972, 0.47280434]
+        data_std = [0.19803014, 0.20101564, 0.19703615]
         img_size = 32
     else:
         data_mean = 0.1307
@@ -248,14 +221,14 @@ def preprocess_transform(image, dataset):
 
     normalize = torchvision.transforms.Normalize(mean=data_mean, std=data_std)
     transf = torchvision.transforms.Compose([
-        torchvision.transforms.ToTensor(),
         torchvision.transforms.Resize(img_size),
         # torchvision.transforms.CenterCrop(img_size),
+        torchvision.transforms.ToTensor(),
         normalize
     ])
     return transf(image)
 
-
+'''将Image数据转成tensor，并做normalization处理，并加入device中'''
 def load_image(device, image, dataset):
     x = preprocess_transform(image, dataset)
     x = x.unsqueeze(0).to(device)
@@ -274,14 +247,7 @@ def loader2imagelist(dataloader, dataset, size):
     image_list = []
     for i in range(size):
         img, label = dataloader.dataset[i]
-        if dataset == "cifar10":
-            img_numpy = recreate_image(img)
-            img_x = Image.fromarray(img_numpy)
-            image_list.append(img_x)
-        elif dataset == "imagenet":
-            img_x = torchvision.transforms.ToPILImage()(img)
-            image_list.append(img_x)
-        elif dataset == "mnist":
+        if dataset in ["cifar10","imagenet","mnist" ]:
             img_x = torchvision.transforms.ToPILImage()(img)
             image_list.append(img_x)
         else:

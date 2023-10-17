@@ -23,7 +23,7 @@ def batch_predict(images, model, device, dataset):
     """
     if dataset == "mnist":
         images = rgb2gray(images)
-    batch = torch.stack(tuple(preprocess_transform(i, dataset)
+    batch = torch.stack(tuple(preprocess_transform(Image.fromarray(i), dataset)
                         for i in images), dim=0)
     batch = batch.to(device).type(dtype=torch.float32)
     probs = model.forward(batch)
@@ -48,19 +48,16 @@ def explain_lime_image(img, net, device, dataset):
     return img_boundry
 
 
-def lime_image_ex(img, model, model_name, dataset, device, root, save_path):
-    
-    if dataset == "mnist":
-        img = img.convert("L")
-    x = load_image(device, img, dataset)
-    prediction, _ = predict(model, x)
-    class_name = class_list[prediction.item()]
+def lime_image_ex(img, model, model_name, dataset, device, save_path, imagetype='nor'):
     img_lime = explain_lime_image(img, model, device, dataset)
     path = osp.join(save_path, "lime_result")
     if not os.path.exists(path):
         os.makedirs(path)
-    save_path = osp.join(path, f"{model_name}_lime.png") 
-    img_lime.save(save_path)
-    return class_name, img_lime
+    img_lime.save(osp.join(path, f"{model_name}_lime_{imagetype}.png"))
+    img.save(osp.join(path, f"{model_name}_{imagetype}.png"))
+    img_lime_url = "lime_result/" + f"{model_name}_lime_{imagetype}.png"
+    img_url = "lime_result/" + f"{model_name}_{imagetype}.png"
+    return img_url, img_lime_url
 
-
+# 把算法函数的接口写在这里，参考lime_image_ex()
+# def lime_text_ex():
