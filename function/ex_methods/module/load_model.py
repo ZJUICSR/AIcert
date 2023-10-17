@@ -79,15 +79,15 @@ def load_model(model_name, dataset, device, root, reference_model, logging, pret
         save_root = osp.join(root,f"model/ckpt")
         path = osp.join(save_root, "{:s}_{:s}.pt".format(dataset, model_name))
         if not osp.exists(path):
-            logging.info("找不到缓存区中的{:s}数据集上训练的{:s}模型，重新进行训练".format(dataset, model_name))
+            # logging.info("找不到缓存区中的{:s}数据集上训练的{:s}模型，重新进行训练".format(dataset, model_name))
+            print("si")
             acc, model = Train(model_name, model, dataset, device)
-            logging.info("{:s}模型训练完成，在{:s}数据集上的准确率为{:.2f}".format(model_name, dataset, acc*100))
+            # logging.info("{:s}模型训练完成，在{:s}数据集上的准确率为{:.2f}".format(model_name, dataset, acc*100))
             model.to(device="cpu")
             torch.save(model.state_dict(), path)
         else:
             logging.info("加载到缓存区中的{:s}数据集上训练的{:s}模型".format(dataset, model_name))
             model.load_state_dict(torch.load(path))
-
     return model
 
 def load_torch_model(model_name):

@@ -1,20 +1,14 @@
 import os.path as osp
 import os
 import numpy as np
-import torch
 import torchvision
 from PIL import Image
 
-from .module.load_model import load_model
 from .module.func import grad_visualize, lrp_visualize, target_layer, load_image
 from .module.layer_activation_with_guided_backprop import layer_analysis
 from .module.func import get_class_list, get_target_num, grad_visualize, convert_to_grayscale, \
-    loader2imagelist, save_ex_img, save_process_result, get_normalize_para, preprocess_transform, predict
+    loader2imagelist, save_ex_img, get_normalize_para, predict
 from scipy.stats import kendalltau
-
-from .lime import lime_image
-from skimage.color import rgb2gray
-from skimage.segmentation import mark_boundaries
 
 
 '''获取基于梯度/反向传播的解释方法'''
@@ -114,7 +108,6 @@ def attribution_maps(net, nor_loader, adv_dataloader, ex_methods, params, img_nu
     """
     dataset = params["dataset"]["name"].lower()
     model_name = params["model"]["name"].lower()
-    # model_name = "resnet34"
 
     save_path = params["out_path"]
     root = params["root"]
@@ -177,6 +170,7 @@ def attribution_maps(net, nor_loader, adv_dataloader, ex_methods, params, img_nu
             adv_img_list = loader2imagelist(adv_loader, dataset, img_num)
             lrp_result_list, gradcam_result_list, ig_result_list, class_name_list = [], [], [], []
             for imgs_x, label in adv_loader:
+                imgs_x = trans(imgs_x)
                 imgs_x = imgs_x.to(device)
                 label = label.to(device)
                 lrp_list, gradcam_list, ig_list, class_name = get_gradbase_explain(

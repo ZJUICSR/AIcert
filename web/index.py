@@ -339,7 +339,7 @@ def UploadPic():
         file = request.files.get('avatar')
         basePath = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)
         print(basePath)
-        save_dir = os.path.join(basePath[0], 'dataset/data/ckpt',"upload.jpg")
+        save_dir = os.path.join(basePath[0], 'dataset/data/ckpt',"upload_lime.jpg")
         file.save(save_dir)
         return jsonify({'save_dir': save_dir})
 
@@ -670,7 +670,6 @@ def AttackLime():
     global LiRPA_LOGS
     if (request.method == "POST"):
         inputParam = json.loads(request.data)
-        print(request.data)
         tid = inputParam["Taskid"]
         datasetparam = inputParam["DatasetParam"]
         modelparam = inputParam["ModelParam"]
@@ -678,8 +677,7 @@ def AttackLime():
         data_mode = inputParam["mode"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
-        taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-        taskinfo[tid]["function"].update({stid:{
+        value =  {
             "type":"attack_lime",
             "state":0,
             "name":["adv_attack"],
@@ -687,16 +685,18 @@ def AttackLime():
             "method":adv_methods,
             "model":modelparam["name"],
             "mode":data_mode
-        }})
-        taskinfo[tid]["dataset"] = datasetparam["name"]
-        taskinfo[tid]["model"] = modelparam["name"]
-        IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", datasetparam["name"])
+        IOtool.change_task_info(tid, "model", modelparam["name"])
+
         # 执行任务
         datasetparam["name"] = datasetparam["name"].lower()
         modelparam["name"] = modelparam["name"].lower()
-        t2 = threading.Thread(target=interface.run_lime,args=(tid, stid, datasetparam, modelparam, adv_methods, data_mode))
-        t2.setDaemon(True)
-        t2.start()
+
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_lime, tid, stid, datasetparam, modelparam, adv_methods, data_mode)
+        IOtool.add_task_queue(tid, stid, t2,  400*len(adv_methods))
         res = {
             "code":1,
             "msg":"success",
