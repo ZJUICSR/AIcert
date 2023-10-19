@@ -53,7 +53,7 @@ class NewtonFool(EvasionAttack):
     def __init__(
         self,
         classifier: "CLASSIFIER_CLASS_LOSS_GRADIENTS_TYPE",
-        max_iter: int = 100,
+        max_iter: int = 10,
         eta: float = 0.01,
         batch_size: int = 1,
         verbose: bool = True,

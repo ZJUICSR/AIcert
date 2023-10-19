@@ -3,18 +3,11 @@ from function.attack.estimators import *
 from function.attack import attack_api, train_network
 from model.model_net.resnet_attack import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
 from function.attack.attack_api import EvasionAttacker, BackdoorAttacker
-import torch, os
+import torch, os, time
 import os.path as osp
 
-def run_adversarial(model, modelpath, dataname, method, attackparam, device, sample_num=128):
-    if dataname.lower() == "mnist":
-        channel = 1
-    else:
-        channel = 3
-    print("modelpath:",modelpath)
-    a = EvasionAttacker(modelnet=eval(model)(channel), modelpath=modelpath, dataset=dataname.lower(), device=device, datanormalize=False, sample_num=sample_num)
-        
-    # 对应关系list
+def get_method(method, attackparam):
+     # 对应关系list
     methoddict={
         "FGSM":"FastGradientMethod",
         "BIM":"BasicIterativeMethod",
@@ -68,7 +61,6 @@ def run_adversarial(model, modelpath, dataname, method, attackparam, device, sam
         "Auto-CGL1":"AutoConjugateGradient",
         "Auto-CGL2":"AutoConjugateGradient",
         "Auto-CGLinf":"AutoConjugateGradient",
-        "BoundaryAttack":"BoundaryAttack",
         "ElasticNetL1":"ElasticNet",
         "ElasticNetL2":"ElasticNet",
         "ElasticNet-EN":"ElasticNet",
@@ -97,7 +89,19 @@ def run_adversarial(model, modelpath, dataname, method, attackparam, device, sam
     if method == "AdversarialPatch":
         attackparam["patch_shape"] = tuple(attackparam["patch_shape"])
         print("attackparam:",attackparam)
-    adv, real_lables, piclist = a.generate(methoddict[method], **attackparam)
+    return methoddict[method], attackparam
+
+def run_adversarial(model, modelpath, dataname, method, attackparam, device, sample_num=128):
+    if dataname.lower() == "mnist":
+        channel = 1
+    else:
+        channel = 3
+
+    a = EvasionAttacker(modelnet=eval(model)(channel), modelpath=modelpath, dataset=dataname.lower(), device=device, datanormalize=False, sample_num=sample_num)
+    
+    method_in_alg, attackparam = get_method(method, attackparam)
+   
+    adv, real_lables, piclist = a.generate(method_in_alg, **attackparam)
     data = {
         "x":adv,
         "y":real_lables
@@ -118,10 +122,27 @@ def run_adversarial(model, modelpath, dataname, method, attackparam, device, sam
     save_root = "dataset/adv_data"
     if not osp.exists(save_root):
         os.makedirs(save_root)
-    path = osp.join(save_root, "adv_attack_{:s}_{:s}_{:s}_{:04d}_{:.5f}.pt".format(
-                            method, model_name, dataname, steps, eps))
+    path = osp.join(save_root, "adv_attack_{:s}_{:s}_{:s}_s{:04d}_{:.5f}.pt".format(
+                            method, model_name, dataname, sample_num, eps))
     torch.save(data, path)
+    del data
+
     return a.print_res(), piclist, path, len(real_lables)
+
+def run_get_adv_data(dataset_name, model, dataloader, device='cuda', method='FGSM', attackparam={}):
+    print("dataset_name.lower():",dataset_name.lower())
+    AttackObj = EvasionAttacker(dataset=dataset_name.lower(), device=device, datanormalize=False, sample_num=10,model=model)
+    method_in_alg, attackparam = get_method(method, attackparam)
+    attack_info = AttackObj.get_adv_data(dataloader=dataloader, method=method_in_alg, **attackparam)
+    del AttackObj
+    return attack_info
+
+def run_get_adv_attack(dataset_name, model, dataloader, device='cuda', method='FGSM', attackparam={}):
+    AttackObj = EvasionAttacker(dataset=dataset_name.lower(), device=device, datanormalize=False, sample_num=10,model=model)
+    method_in_alg, attackparam = get_method(method, attackparam)
+    attack = AttackObj.get_attack(method=method_in_alg, **attackparam)
+    del AttackObj
+    return attack
 
 def run_backdoor(model, modelpath, dataname, method, pp_poison, save_num, test_sample_num, target, trigger, device, nb_classes=10, method_param=None):
     datasetpath="./datasets/"
