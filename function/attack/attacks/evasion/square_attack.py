@@ -35,7 +35,7 @@ class SquareAttack(EvasionAttack):
         self,
         estimator: "CLASSIFIER_TYPE",
         norm='inf',
-        n_queries=5000,
+        n_queries=5,
         eps=8/255,
         p_init=0.05,
         loss_type='margin', # "ce"

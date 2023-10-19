@@ -74,7 +74,7 @@ class ElasticNet(EvasionAttack):
         targeted: bool = False,
         learning_rate: float = 1e-2,
         binary_search_steps: int = 9,
-        max_iter: int = 100,
+        max_iter: int = 10,
         beta: float = 1e-3,
         initial_const: float = 1e-3,
         batch_size: int = 1,

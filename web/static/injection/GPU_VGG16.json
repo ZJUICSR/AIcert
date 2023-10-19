@@ -1,5 +1,4 @@
-
-  {
+{
 	"name":"VGG16",
   "hard":"NVIDIA TITAN-V GPU",
 	"dataset":"CIFAR10",

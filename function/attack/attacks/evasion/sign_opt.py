@@ -93,7 +93,7 @@ class SignOPTAttack(EvasionAttack):
         targeted: bool = False,
         epsilon: float = 0.001,
         num_trial: int = 100,
-        max_iter: int = 1000,
+        max_iter: int = 10,
         query_limit: int = 20000,
         k: int = 200,
         alpha: float = 0.2,
