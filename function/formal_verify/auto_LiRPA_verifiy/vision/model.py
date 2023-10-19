@@ -1,6 +1,6 @@
-from auto_LiRPA_verifiy.vision.cnn import mnist_model, mnist_model_with_different_activate_function
-from auto_LiRPA_verifiy.vision.resnet import resnet18
-from auto_LiRPA_verifiy.vision.densenet import Densenet_cifar_32
+from function.formal_verify.auto_LiRPA_verifiy.vision.cnn import mnist_model, mnist_model_with_different_activate_function
+from function.formal_verify.auto_LiRPA_verifiy.vision.resnet import resnet18
+from function.formal_verify.auto_LiRPA_verifiy.vision.densenet import Densenet_cifar_32
 import torch
 import os
 
