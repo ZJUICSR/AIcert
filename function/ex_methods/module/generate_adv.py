@@ -7,6 +7,7 @@ from torch.utils.data import TensorDataset
 import torchattacks as attacks
 from function.ex_methods.module.func import get_loader, get_normalize_para
 import os.path as osp
+from tqdm import tqdm
 import os
 import json
 
@@ -100,7 +101,8 @@ def untargeted_attack(dataset, method, model, data_loader, device, params, mean,
     attack = get_attack(dataset, method, model, params)
     # attack.set_normalization_used(mean=mean, std=std)
     logging.info("[生成对抗样本]：当前执行{:s}对抗方法生成对抗样本...".format(method))
-    for step, (x, y) in enumerate(data_loader):
+    loop = tqdm(data_loader, total=len(data_loader), leave=True,  ncols=100)
+    for x, y in loop:
         x = x.to(device)
         y = y.to(device)
         z = attack(x, y)
