@@ -114,7 +114,9 @@ def plot_apfd(data_path, outputdir, use_adv, metrics_arr=None, idx=0,
     plt.savefig(res_path, bbox_inches='tight')
     plt.close()
 
-    with open("{}{}.data".format(outputdir, idx),'w') as f:
+    # with open("{}{}.data".format(outputdir, idx),'w') as f:
+    #     json.dump(jsondata,f)
+    with open("{}{}.json".format(outputdir, idx),'w') as f:
         json.dump(jsondata,f)
 
 
@@ -123,7 +125,7 @@ def show(dataset, modelname, out_path,apfd, logging=None):
     params = [
         {
             "use_adv": True,  # 是否使用adv
-            "metrics_arr": ["deeplogic"],  # 选择绘制的图线
+            "metrics_arr": ["deeplogic","deepgini","dsc","entropy","mcp","nac","nbc","random"],  # 选择绘制的图线
             "cover": "cam",  # 选择覆盖的方法
             "idx": 1,  # 图片编号
         },
@@ -148,13 +150,16 @@ def show(dataset, modelname, out_path,apfd, logging=None):
     json_data = {}
     if modelname=='vgg16':
         json_data['vgg16']=out_path+'/fig/cifar/vgg16/1.png'
-        json_data['data'] = out_path + '/fig/cifar/vgg16/1.data'
+        # json_data['data'] = out_path + '/fig/cifar/vgg16/1.data'
+        json_data['data'] = out_path + '/fig/cifar/vgg16/1.json'
     elif modelname=='resnet34':
         json_data['resnet34']=out_path+'/fig/cifar/resnet34/1.png'
-        json_data['data'] = out_path + '/fig/cifar/resnet34/1.data'
+        # json_data['data'] = out_path + '/fig/cifar/resnet34/1.data'
+        json_data['data'] = out_path + '/fig/cifar/resnet34/1.json'
     else:
         json_data['resnet18']=out_path+'/fig/fashionminist/resnet18/1.png'
-        json_data['data'] = out_path + '/fig/fashionminist/resnet18/1.data'
+        # json_data['data'] = out_path + '/fig/fashionminist/resnet18/1.data'
+        json_data['data'] = out_path + '/fig/fashionminist/resnet18/1.json'
     json_data['apfd']=apfd
     print(apfd)
     return json_data
