@@ -1770,7 +1770,6 @@ def LLM_attack():
         }
         return jsonify(res)
 def app_run(args):
-    
     web_config={'host':args.host,'port':args.port,'debug':args.debug}
     app.run(**web_config)
     
