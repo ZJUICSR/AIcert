@@ -192,25 +192,25 @@ class Logic(object):
     def get_unit_of_class(self,vlabel):
         if self.model_name=='vgg16':
             #classname = class_label[str(vlabel)][1]
-            oline = linecache.getline('./dataset/data/ckpt/vgg16_unit.txt', vlabel + 1)
+            oline = linecache.getline('dataset/data/repository/vgg16/unit.txt', vlabel + 1)
             osplit=oline.replace('\n','').split(':')[2]
             result=osplit.split(',')
             return list(map(int, result))
         elif self.model_name=='resnet34':
             #classname = class_label[str(vlabel)][1]
-            oline = linecache.getline('./dataset/data/ckpt/resnet34_unit.txt', vlabel + 1)
+            oline = linecache.getline('dataset/data/repository/resnet34/unit.txt', vlabel + 1)
             osplit=oline.replace('\n','').split(':')[2]
             result=osplit.split(',')
             return list(map(int, result))
         elif self.model_name=='resnet18':
             #classname = class_label[str(vlabel)][1]
-            oline = linecache.getline('./dataset/data/ckpt/resnet18_unit.txt', vlabel + 1)
+            oline = linecache.getline('dataset/data/repository/resnet18/unit.txt', vlabel + 1)
             osplit=oline.replace('\n','').split(':')[2]
             result=osplit.split(',')
             return list(map(int, result))
         elif self.model_name=='smallcnn':
             #classname = class_label[str(vlabel)][1]
-            oline = linecache.getline('./dataset/data/ckpt/smallcnn_unit.txt', vlabel + 1)
+            oline = linecache.getline('dataset/data/repository/smallcnn/unit.txt', vlabel + 1)
             osplit=oline.replace('\n','').split(':')[2]
             result=osplit.split(',')
             return list(map(int, result))
@@ -218,13 +218,13 @@ class Logic(object):
     #计算当前样本逻辑神经元与所属类逻辑神经元相似度--逻辑度大小
     def get_logic_similarity(self,sample_logic_units,vlabel):
         if self.model_name=='vgg16':
-            global_class_units_file='./dataset/data/ckpt/vgg16_unit.txt'
+            global_class_units_file='dataset/data/repository/vgg16/unit.txt'
         elif self.model_name=='resnet34':
-            global_class_units_file='./dataset/data/ckpt/resnet34_unit.txt'
+            global_class_units_file='dataset/data/repository/resnet34/unit.txt'
         elif self.model_name=='resnet18':
-            global_class_units_file='./dataset/data/ckpt/resnet18_unit.txt'
+            global_class_units_file='dataset/data/repository/resnet18/unit.txt'
         elif self.model_name=='smallcnn':
-            global_class_units_file='./dataset/data/ckpt/smallcnn_unit.txt'
+            global_class_units_file='dataset/data/repository/smallcnn/unit.txt'
         #当前样本对应类的相似性
         oline = linecache.getline(global_class_units_file, vlabel + 1)
         osplit=oline.replace('\n','').split(':')[2]
