@@ -608,3 +608,54 @@ class Callback:
             logging.info("[模型训练阶段] 正在进行第{:d}轮训练, 训练准确率：{:.3f}%，测试准确率：{:.3f}%".format(epoch_result["epoch"],
                                                                                        epoch_result["test"][0],
                                                                                        epoch_result["train"][0]))
+            
+            
+# class Task:
+#     def __init__(tid, modelparam, datasetparam):
+#         self.tid = tid
+#         self.modelparam = modelparam
+#         self.datasetparam = datasetparam
+#         if datasetparam['upload'] == 1:
+#             # 上传数据集的处理方式
+#             pass
+#         elif datasetparam['name'].lower() == "mnist":
+#             transform = transforms.Compose([transforms.Resize(28), transforms.ToTensor(), transforms.Normalize([0.1307], [0.3081])])
+#             train_dataset = mnist.MNIST('./dataset/data/MNIST', train=True, transform=transform, download=True)
+#             test_dataset = mnist.MNIST('./dataset/data/MNIST', train=False, transform=transform, download=False)
+#             channel = 1
+#         elif datasetparam['name'].lower() == "cifar10":
+#             print("cifar10")
+#             transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms.RandomHorizontalFlip(),transforms.ToTensor(),transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])])
+#             # mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225]
+#             train_dataset = CIFAR10('./dataset/data/CIFAR10', train=True, transform=transform, download=True)
+#             test_dataset = CIFAR10('./dataset/data/CIFAR10', train=False, transform=transform, download=False)
+#             channel = 3
+#         self.train_loader = DataLoader(train_dataset, batch_size=train_batchsize, shuffle=True,num_workers=2)
+#         self.test_loader = DataLoader(test_dataset, batch_size=test_batchsize,shuffle=False)
+#         # 上传的模型
+#         self.model = eval(self.modelparam[name])(channel)
+#         if self.modelparam['upload'] == 1:
+#             if not osp.exsits(self.modelparam['upload_path']):
+#                 error = "{} is not exist".format(upload_path)
+#                 raise ValueError(error)
+#             checkpoint = torch.load(self.modelparam['upload_path'])
+#             try:
+#                 self.model.load_state_dict(checkpoint)
+#             except:
+#                 self.model.load_state_dict(checkpoint['net'])
+#         elif self.modelparam['train'] == False 
+#             modelpath = osp.join("./model/ckpt", dataname.upper() + "_" + model.lower()+".pth")
+#             if (not osp.exists(modelpath)):
+#                 print("[模型获取]:服务器上模型不存在")
+#                 if dataname.upper() == "CIFAR10":
+#                     print("[模型训练]:开始训练模型")
+#                     train_resnet_cifar10(model, modelpath, logging, device)
+#                     print("[模型训练]:模型训练结束")
+#                 elif dataname.upper() == "MNIST":
+#                     print("[模型训练]:开始训练模型")
+#                     train_resnet_mnist(model, modelpath, logging, device)
+#                     print("[模型训练]:模型训练结束")
+#                 else:
+#                     error = f"[模型训练]:不支持该数据集{dataname.upper()}"
+#                     raise 
+        

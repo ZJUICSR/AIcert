@@ -1,7 +1,18 @@
 {
     "attack_methods": [
         "fgsm",
-        "ffgsm"
+        "ffgsm",
+        "bim",
+        "rfgsm",
+        "c&w",
+        "pgd",
+        "tpgd",
+        "mi-fgsm",
+        "autopgd",
+        "fab",
+        "square",
+        "deepfool",
+        "difgsm"
     ],
     "attack_param": {
         "fgsm": {

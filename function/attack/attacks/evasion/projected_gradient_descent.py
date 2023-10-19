@@ -688,7 +688,7 @@ class ProjectedGradientDescent(EvasionAttack):
         max_iter: int = 20,
         targeted: bool = False,
         num_random_init: int = 0,
-        batch_size: int = 4096,
+        batch_size: int = 2048,
         random_eps: bool = False,
         summary_writer: Union[str, bool, SummaryWriter] = False,
         verbose: bool = True,

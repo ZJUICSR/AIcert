@@ -646,8 +646,9 @@ def AdvAttack():
         # 执行任务
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_adv_attack, tid, stid, dataname, model, adv_method, inputParam, sample_num)
+        print(inputParam)
         IOtool.add_task_queue(tid, stid, t2, 72000*len(adv_method))
-        interface.run_adv_attack(tid, stid, dataname, model, adv_method, inputParam)
+        # interface.run_adv_attack(tid, stid, dataname, model, adv_method, inputParam)
         res = {
             "tid":tid,
             "stid":stid
@@ -1483,12 +1484,11 @@ def ModularDevelopParamSet():
         IOtool.change_task_info(tid, "model", model)
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_modulardevelop, tid, AAtid, dataset, model, tuner, init, epoch, iternum)
-        IOtool.add_task_queue(tid, AAtid, t2, 30000)
+        IOtool.add_task_queue(tid, AAtid, t2, 3000)
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
         abort(403)
-        
 # ----------------- 课题3 侧信道分析 -----------------
 @app.route('/SideAnalysis', methods=["POST"])
 def SideAnalysis():
@@ -1511,7 +1511,7 @@ def SideAnalysis():
         IOtool.change_task_info(tid, "dataset", trs_file)
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_side_api, trs_file, methods, tid, stid)
-        IOtool.add_task_queue(tid, stid, t2, 3000)
+        IOtool.add_task_queue(tid, stid, t2, 300)
         # interface.run_side_api(trs_file, methods, tid, stid)
         # t2 = threading.Thread(target=interface.run_side_api,args=(trs_file, methods, tid, stid))
         # t2.setDaemon(True)
@@ -1560,7 +1560,7 @@ def FormalVerification():
         pool = IOtool.get_pool(tid)
         # t2 = pool.submit(interface.run_modulardevelop, tid, stid, param)
         t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
-        
+        # t2 = pool.submit(interface.run_verify, tid, stid, param)
         IOtool.add_task_queue(tid, stid, t2, 30000)
         interface.run_verify(tid, stid, param)
         # t2 = threading.Thread(target=interface.run_verify, args=(tid, stid, param))
@@ -1575,7 +1575,7 @@ def FormalVerification():
 @app.route('/Defense/Ensemble', methods=['POST'])
 def ensemble():
     """
-    对抗图像归因解释
+    群智化防御
     输入：tid：主任务ID
     Dataset：数据集名称
     Model：模型名称
@@ -1605,16 +1605,69 @@ def ensemble():
         IOtool.change_task_info(tid, "dataset", datasetparam["name"])
         IOtool.change_task_info(tid, "model", modelparam["name"])
         # 执行任务
-        datasetparam["name"] = datasetparam["name"].lower()
-        modelparam["name"] = modelparam["name"].lower()
+        datasetparam["name"] = datasetparam["name"]
+        modelparam["name"] = modelparam["name"]
         adv_param = {}
         for temp in adv_methods:
             adv_param.update({temp:inputParam[temp]})
         pool = IOtool.get_pool(tid)
         # t2 = pool.submit(interface.run_ensemble_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
-        t2 = pool.submit(interface.submitAandB, tid, stid, 10, 20)
+        t2 = pool.submit(interface.run_group_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
+        # t2 = pool.submit(interface.submitAandB, tid, stid, 10, 20)
         IOtool.add_task_queue(tid, stid, t2, 72000*len(adv_methods))
-        interface.run_ensemble_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
+        # interface.run_group_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
+        res = {
+            "code":1,
+            "msg":"success",
+            "tid":tid,
+            "stid":stid
+        }
+        return jsonify(res)
+    else:
+        abort(403)
+
+@app.route('/GraphKnowledge', methods=['POST'])
+def graph_knowledge():
+    """
+    知识图谱
+    输入：tid：主任务ID
+    Dataset：数据集名称
+    Model：模型名称
+    AdvMethods:list 对抗攻击算法名称
+    ExMethods:攻击机理解释方法名称
+    """
+    global LiRPA_LOGS
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        tid = inputParam["Taskid"]
+        datasetparam = inputParam["DatasetParam"]
+        modelparam = inputParam["ModelParam"]
+        attack_mode = inputParam["attack_mode"]
+        attack_type = inputParam["attack_type"]
+        data_type = inputParam['data_type']
+        defend_algorithm = inputParam['defend_algorithm']
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        value = {
+            "type":"Graph_Knowledge",
+            "state":0,
+            "name":["Graph_Knowledge"],
+            "dataset":datasetparam["name"],
+            "method":attack_mode,
+            "model":modelparam["name"],
+            "def_method":defend_algorithm
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", datasetparam["name"])
+        IOtool.change_task_info(tid, "model", modelparam["name"])
+        # 执行任务
+        datasetparam["name"] = datasetparam["name"]
+        modelparam["name"] = modelparam["name"]
+        pool = IOtool.get_pool(tid)
+        # t2 = pool.submit(interface.run_group_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
+        t2 = pool.submit(interface.submitAandB, tid, stid, 10, 20)
+        IOtool.add_task_queue(tid, stid, t2, 72000)
+        interface.run_graph_knowledge(tid, stid, datasetparam, modelparam, attack_mode, attack_type, data_type, defend_algorithm)
         res = {
             "code":1,
             "msg":"success",
@@ -1705,9 +1758,10 @@ def LLM_attack():
         print(target)
         IOtool.add_subtask_info(tid, stid, value)
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+        # t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+        t2 = pool.submit(interface.llm_attack, tid, stid, goal, target)
         IOtool.add_task_queue(tid, stid, t2, 30000)
-        interface.llm_attack(tid, stid, goal, target)
+        # interface.llm_attack(tid, stid, goal, target)
         res = {
             "code":1,
             "msg":"success",

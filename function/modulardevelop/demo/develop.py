@@ -20,6 +20,9 @@ gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
 
+sys.path.append("..")
+
+
 
 def save_data(x_train,x_test,y_train,y_test,save_path):
     dataset={}
@@ -154,13 +157,14 @@ def model_generate(
     os.makedirs(tmp_dir)
     os.makedirs('./tmp')
     log_path=os.path.join(root_path,'log.pkl')
-    
+
     if data=='mnist':
         (x_train, y_train), (x_test, y_test) = mnist_load_data()
     elif data=='cifar10':
         (x_train, y_train), (x_test, y_test) = cifar10_load_data()
     else:
         (x_train, y_train), (x_test, y_test)=data #TODO: 如果是处理过的数据，需要给出数据路径或者读取方法
+
 
     # DEMO:1
     if search:
@@ -212,8 +216,6 @@ def model_generate(
                 model.save(model_path)
         else:
             #yzx+ deepalchemy
-            # sys.path.append("./Deepalchemy")
-            # import deepalchemy as da
             from Deepalchemy import deepalchemy as da
             if len(x_train.shape) == 3:
                 x_train = np.expand_dims(x_train,-1)
@@ -224,6 +226,10 @@ def model_generate(
             np.save('./tmp/ytr.npy',y_train)
             np.save('./tmp/xte.npy',x_test)
             np.save('./tmp/yte.npy',y_test)
+            # np.save(x_train, '../xtr.npy')
+            # np.save(y_train, '../ytr.npy')
+            # np.save(x_test, '../xte.npy')
+            # np.save(y_test, '../yte.npy')
             trainfunc, nmax = da.gen_train_function(False, gpu, block_type, epoch, [x_train, y_train, x_test, y_test])
             wmin, wmax, dmin, dmax = da.NM_search_min(block_type, trainfunc, nmax, init, iter_num)
 
@@ -236,7 +242,7 @@ def model_generate(
             shutil.rmtree('./data')
             shutil.rmtree('./tmp')
             os.remove('./best.h5')
-            # os.remove('./best.h5')
+            # shutil.copyfile("../best_param.pkl", os.path.join(root_path, 'best_param.pkl'))
 
     else:
         # DEMO 2
@@ -253,7 +259,7 @@ def model_generate(
         
         model.save(os.path.join(root_path,'best_model.h5'))
         # model.save(os.path.join(root_path,'best_model'))
-        
+
 
     print('finish')
 
@@ -313,10 +319,9 @@ def summarize_result(json_path,save_dir):
     # with open(log_path, 'rb') as f:
     #     log_dict = pickle.load(f)
     # key_list=list(log_dict.keys())
-    if os.path.exists('../history_da.pkl'):
-        with open('../history_da.pkl', 'rb') as f:
+    if os.path.exists('../history.pkl'):
+        with open('../history.pkl', 'rb') as f:
             best_history = pickle.load(f)
-        os.remove('../history_da.pkl')
     else:
         for i in range(len(dir_name_list)):
             dir_name=dir_name_list[i]
@@ -325,7 +330,6 @@ def summarize_result(json_path,save_dir):
                 history = pickle.load(f)
             result['trial_history'][dir_name.split('-')[0]]=history
             best_history=update_best_history(best_history,history)
-            
     result['best_history']=best_history
     
     with open(json_path, 'w') as fw:
@@ -411,12 +415,15 @@ def torch_convert(model_path,save_dir,dataset):
     new_model,normalize_model=extract_main_layers(model_path,save_dir)
     data_save_path=os.path.join(save_dir,'normalized_data.pkl')
     print('========Saving Dataset...===========')
-    if dataset=='mnist':
-        _,_=mnist_load_data(normalize_model,new_model.input_shape,data_save_path)
-    elif dataset=='cifar10':
-        _,_=cifar10_load_data(normalize_model,new_model.input_shape,data_save_path)
-    else:
-        print('not support dataset')
+    try:
+        if dataset=='mnist':
+            _,_=mnist_load_data(normalize_model,new_model.input_shape,data_save_path)
+        elif dataset=='cifar10':
+            _,_=cifar10_load_data(normalize_model,new_model.input_shape,data_save_path)
+        else:
+            print('not support dataset')
+    except:
+        print('not normalize data and model now!!!')
     
     print('========Converting ONNX Model...===========')
     onnx_path=onnx_convert(new_model,save_dir)
@@ -438,7 +445,7 @@ def paddle_convert(model_path,save_dir):
     print('========Converting ONNX Model...===========')
     onnx_path=onnx_convert(model_path,save_dir)
     paddle_model_dir=os.path.join(save_dir,'paddle_model')
-    params_command='source activate test; x2paddle --framework=onnx --model={} --save_dir={}'
+    params_command='source activate modulardevelop; x2paddle --framework=onnx --model={} --save_dir={}'
     print('==========Converting PaddlePaddle Model...============')
     import subprocess
     out_path=os.path.join(save_dir,'out')
