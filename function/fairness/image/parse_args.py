@@ -7,7 +7,8 @@ from metrics import *
 
 def collect_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--experiment', 
+    parser.add_argument('--experiment',
+                        default='cifar-s_baseline',
                         choices=[
                                  'cifar_color', # train on color images
                                  'cifar_gray', # train on gray images
@@ -57,6 +58,8 @@ def collect_args():
     parser.add_argument('--experiment_name', type=str, default='test')
     parser.add_argument('--no_cuda', dest='cuda', action='store_false')
     parser.add_argument('--random_seed', type=int, default=0)
+    parser.add_argument("--save_folder", type=str, default='')
+    parser.add_argument("--mdoel_path", type=str, default='')
     parser.set_defaults(cuda=True)
 
     opt = vars(parser.parse_args())
@@ -72,8 +75,11 @@ def create_exerpiment_setting(opt):
         opt['print_freq'] = 50
         opt['batch_size'] = 128
         opt['total_epochs'] = 200
-        opt['save_folder'] = os.path.join('record/'+opt['experiment'], 
-                                          opt['experiment_name'])
+        # opt['save_folder'] = os.path.join('record/'+opt['experiment'], 
+        #                                   opt['experiment_name'])
+        if opt['save_folder'] == '' :
+            opt['save_folder'] = os.path.join('record/'+opt['experiment'], 
+                                              opt['experiment_name'])
         utils.creat_folder(opt['save_folder'])
     
         optimizer_setting = {
@@ -91,8 +97,11 @@ def create_exerpiment_setting(opt):
         opt['print_freq'] = 50
         opt['batch_size'] = 32
         opt['total_epochs'] = 50
-        opt['save_folder'] = os.path.join('record/'+opt['experiment'], 
-                                          opt['experiment_name'])
+        # opt['save_folder'] = os.path.join('record/'+opt['experiment'], 
+        #                                   opt['experiment_name'])
+        if opt['save_folder'] == '' :
+            opt['save_folder'] = os.path.join('record/'+opt['experiment'], 
+                                              opt['experiment_name'])
         utils.creat_folder(opt['save_folder'])
         opt['output_dim'] = 39
         
