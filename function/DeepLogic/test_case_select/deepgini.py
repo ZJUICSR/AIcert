@@ -11,9 +11,9 @@ import torchvision
 from torch.autograd import Variable
 import torch.optim as optim
 from torchvision import datasets, transforms
-from models.resnet import *
-from models.vggnet import *
-from models.mynet import *
+from model.model_net.resnet import *
+from model.model_net.vggnet import *
+from model.model_net.mynet import *
 import numpy as np
 from tqdm import tqdm
 import time
@@ -126,9 +126,9 @@ def deepgini_test(model, device,model_name,dataset_name,data,true_test):
     df['error_level']=error_level(pred_test_prob,true_test)
     
     if dataset_name=='cifar':
-        df.to_csv('./all_output/output_cifar/{}/{}_deepgini_0.csv'.format(model_name,dataset_name))
+        df.to_csv('output/cache/test_case_select/all_output/output_cifar/{}/{}_deepgini_0.csv'.format(model_name,dataset_name))
     if dataset_name=='fashionminist':
-        df.to_csv('./all_output/output_fashionminist/{}/{}_deepgini_0.csv'.format(model_name,dataset_name))
+        df.to_csv('output/cache/test_case_select/all_output/output_fashionminist/{}/{}_deepgini_0.csv'.format(model_name,dataset_name))
 
 if __name__=='__main__':
 
