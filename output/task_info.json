@@ -1,0 +1,19 @@
+{
+    "20231019_1820_a73d8ad": {
+        "state": 3,
+        "createtime": "202310191820",
+        "dataset": "CIFAR10",
+        "model": "VGG",
+        "function": {
+            "S20231019_1820_05fa378": {
+                "type": "ModularDevelop",
+                "state": 3,
+                "name": [
+                    "ModularDevelop"
+                ],
+                "dataset": "CIFAR10",
+                "model": "VGG"
+            }
+        }
+    }
+}

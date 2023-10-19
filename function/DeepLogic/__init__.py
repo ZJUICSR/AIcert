@@ -1,4 +1,4 @@
-from .deeplogic import *
+from .test_case_select.deeplogic import *
 import os.path as osp
 CURR = osp.dirname(osp.abspath(__file__))
 
@@ -10,11 +10,9 @@ def run_deeplogic(dataset, modelname, out_path, logging=None):
     out_path: 输出路径
     logging: 日志
     """
-    if not osp.exists(out_path):
-        os.mkdir(out_path)
     logging.info("Start running.......")
-    # default_out_path=CURR.rsplit('/',2)[0]+'/test_case_select/result'
-    res=evaluate_deeplogic(dataset, modelname, out_path=out_path, logging=None)
+    default_out_path=CURR.rsplit('/',2)[0]+'/output/cache/test_case_select/result'
+    res=evaluate_deeplogic(dataset, modelname, out_path=default_out_path, logging=None)
     logging.info("Finishing.......")
     return res
 
