@@ -117,14 +117,14 @@ def robust_train(model, train_loader, test_loader, adv_loader, device, epochs=40
     :param kwargs:
     :return:
     """
+    # 训练超参数
+    lr = 0.1  # 学习率
+    momentum = 0.9  # 动量参数，用于优化算法
+
     assert "atk_method" in kwargs.keys()
     assert "def_method" in kwargs.keys()
     train_res = {}
-    train_batchsize = 128  # 训练批大小
-    test_batchsize = 128  # 测试批大小
-    num_epoches = 0  # 训练轮次
-    lr = 0.1  # 学习率
-    momentum = 0.9  # 动量参数，用于优化算法
+
     import torchattacks as attacks
     copy_model1 = copy.deepcopy(model)
     
@@ -143,7 +143,7 @@ def robust_train(model, train_loader, test_loader, adv_loader, device, epochs=40
     _eps = copy.deepcopy(adv_param['eps'])
     from IOtool import IOtool
     for epoch in range(1, epochs + 1):
-        print("-> For epoch:{:d} adv training on device: {:s}".format(epoch, str(device)))
+        print("-> Method{:s} for epoch:{:d} adv training on device: {:s}".format(method, epoch, str(device)))
         model.train()
         model = model.to(device)
         num_step = len(train_loader)
@@ -176,7 +176,9 @@ def robust_train(model, train_loader, test_loader, adv_loader, device, epochs=40
             _, pred = out.max(1)
             # sum_correct = (pred == y).sum().item()
             sum_correct += pred.eq(y.view_as(pred)).sum().item()
-            info = "[Train] Attack:{:s}_{:.4f} Defense:{:s} Loss: {:.6f} Acc:{:.3f}%".format(
+            info = "[Train] Epoch:{:d}/{:d} Attack:{:s}_{:.4f} Defense:{:s} Loss: {:.6f} Acc:{:.3f}%".format(
+                epoch,
+                epochs + 1,
                 kwargs["atk_method"],
                 adv_param['eps'],
                 kwargs["def_method"],
