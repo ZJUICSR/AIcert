@@ -180,9 +180,9 @@ def mcp_test(model, device,model_name,dataset_name,data,true_test):
     df['error_level']=error_level(pred_test_prob,true_test)
     
     if dataset_name=='cifar':
-        df.to_csv('./all_output/output_cifar/{}/{}_mcp_0.csv'.format(model_name,dataset_name))
+        df.to_csv('output/cache/test_case_select/all_output/output_cifar/{}/{}_mcp_0.csv'.format(model_name,dataset_name))
     if dataset_name=='fashionminist':
-        df.to_csv('./all_output/output_fashionminist/{}/{}_mcp_0.csv'.format(model_name,dataset_name))
+        df.to_csv('output/cache/test_case_select/all_output/output_fashionminist/{}/{}_mcp_0.csv'.format(model_name,dataset_name))
 
 if __name__=='__main__':
 
