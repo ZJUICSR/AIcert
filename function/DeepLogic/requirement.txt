@@ -1,0 +1,6 @@
+pytorch
+pandas
+matplotlib
+scipy
+foolbox
+tqdm

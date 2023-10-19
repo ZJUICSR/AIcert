@@ -15,7 +15,8 @@ from model.model_net.lenet import Lenet
 
 from function.attack import run_adversarial, run_backdoor
 from function.fairness import run_dataset_debias, run_model_debias, run_image_model_debias, run_model_evaluate, run_image_model_evaluate
-from function import concolic, env_test, coverage, deepsst, deep_logic, dataclean, framework_test, modelmeasure, modulardevelop
+from function import concolic, env_test, coverage, deepsst, dataclean, framework_test, modelmeasure, modulardevelop
+
 from function.ex_methods import *
 import matplotlib.pyplot as plt
 from function.defense import *
@@ -292,7 +293,8 @@ def run_deeplogic(tid,AAtid,dataset,modelname):
     IOtool.change_task_state(tid, 1)
     IOtool.set_task_starttime(tid, AAtid, time.time())
     logging = IOtool.get_logger(AAtid)
-    res = deep_logic.run_deeplogic(dataset.lower(), modelname.lower(), osp.join(ROOT,"output", tid, AAtid), logging)  
+    from function import DeepLogic
+    res = DeepLogic.run_deeplogic(dataset.lower(), modelname.lower(), osp.join(ROOT,"output", tid, AAtid), logging)  
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     IOtool.change_subtask_state(tid, AAtid, 2)
