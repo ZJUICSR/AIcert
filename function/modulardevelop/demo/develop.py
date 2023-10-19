@@ -16,9 +16,8 @@ import tensorflow.keras as keras
 import sys
 import json
 sys.path.append(os.path.dirname(__file__).rsplit('/',1)[0])
-gpus = tf.config.experimental.list_physical_devices('GPU')
-for gpu in gpus:
-    tf.config.experimental.set_memory_growth(gpu, True)
+sys.path.append("..")
+
 
 sys.path.append("..")
 
@@ -221,7 +220,7 @@ def model_generate(
                 x_train = np.expand_dims(x_train,-1)
             if len(x_test.shape) == 3:
                 x_test = np.expand_dims(x_test,-1)
-
+                
             np.save('./tmp/xtr.npy',x_train)
             np.save('./tmp/ytr.npy',y_train)
             np.save('./tmp/xte.npy',x_test)
@@ -237,13 +236,7 @@ def model_generate(
             model_path = os.path.join(root_path, 'best_model.h5')
             valloss = trainfunc(dmin, dmax, wmin, wmax)
             shutil.copyfile("./best.h5",model_path)
-            shutil.copyfile("./tmp/best_param.pkl", os.path.join(root_path, 'best_param.pkl'))
-            shutil.rmtree('./models')
-            shutil.rmtree('./data')
-            shutil.rmtree('./tmp')
-            os.remove('./best.h5')
-            # shutil.copyfile("../best_param.pkl", os.path.join(root_path, 'best_param.pkl'))
-
+            shutil.copyfile("./tmp/best_param.pkl", os.path.join(root_path, 'best_param.pkl'))           
     else:
         # DEMO 2
         with open('./hypermodel.pkl', 'rb') as f:
@@ -316,10 +309,11 @@ def summarize_result(json_path,save_dir):
     best_history['val_loss']=[]
     best_history['val_accuracy']=[]
     
-    # with open(log_path, 'rb') as f:
-    #     log_dict = pickle.load(f)
-    # key_list=list(log_dict.keys())
-    if os.path.exists('../history.pkl'):
+    if os.path.exists('../history_da.pkl'):
+        with open('../history_da.pkl', 'rb') as f:
+            best_history = pickle.load(f)
+        os.remove('../history_da.pkl')
+    elif os.path.exists('../history.pkl'):
         with open('../history.pkl', 'rb') as f:
             best_history = pickle.load(f)
     else:
@@ -445,7 +439,7 @@ def paddle_convert(model_path,save_dir):
     print('========Converting ONNX Model...===========')
     onnx_path=onnx_convert(model_path,save_dir)
     paddle_model_dir=os.path.join(save_dir,'paddle_model')
-    params_command='source activate modulardevelop; x2paddle --framework=onnx --model={} --save_dir={}'
+    params_command='source activate autotrain; x2paddle --framework=onnx --model={} --save_dir={}'
     print('==========Converting PaddlePaddle Model...============')
     import subprocess
     out_path=os.path.join(save_dir,'out')

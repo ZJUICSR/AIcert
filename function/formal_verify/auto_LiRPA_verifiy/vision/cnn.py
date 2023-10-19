@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from tqdm import tqdm
-from auto_LiRPA_verifiy.vision.data import get_mnist_data
+from function.formal_verify.auto_LiRPA_verifiy.vision.data import get_mnist_data
 import os
 
 
