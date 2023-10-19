@@ -197,10 +197,10 @@ class CelebaGradProjAdv(CelebaModel):
     def test(self):
         # Test and save the result
         state_dict = None
-        if os.path.exists(os.path.join(self.save_path, 'best.pth')):
-            state_dict = torch.load(os.path.join(self.save_path, 'best.pth'))
-        elif os.path.exists(os.path.join(self.save_path, 'ckpt.pth')):
-            state_dict = torch.load(os.path.join(self.save_path, 'ckpt.pth'))
+        if os.path.exists(os.path.join(self.model_path, 'best.pth')):
+            state_dict = torch.load(os.path.join(self.model_path, 'best.pth'))
+        elif os.path.exists(os.path.join(self.model_path, 'ckpt.pth')):
+            state_dict = torch.load(os.path.join(self.model_path, 'ckpt.pth'))
         else:
             raise FileNotFoundError("no checkpoints available for testing")
 
