@@ -472,6 +472,7 @@ def select_action(candidate_dict_path,beam_size=3):
 def write_algw(root_dir):
     import subprocess
     command="/root/anaconda3/envs/modulardevelop/bin/python ./utils/get_write_algw.py -d {}" #TODO:need to set your your python interpreter path
+    # command="/home/Wenjie/anaconda3/envs/autotrain/bin/python ./utils/get_write_algw.py -d {}" #TODO:need to set your your python interpreter path
 
     out_path=os.path.join(root_dir,'algw_out')
     out_file = open(out_path, 'w')

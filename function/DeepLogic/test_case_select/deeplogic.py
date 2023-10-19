@@ -1,8 +1,8 @@
 #coding:utf-8
 from __future__ import print_function
-import sys
-import os.path as osp
-sys.path.append(osp.dirname(osp.abspath(__file__)))
+import os,sys
+sys.path.append(os.path.dirname(__file__).rsplit('/',1)[0])
+import os
 import argparse
 import torch
 import torch.nn as nn
@@ -11,11 +11,13 @@ import torchvision
 from torch.autograd import Variable
 import torch.optim as optim
 from torchvision import datasets, transforms
-
+# from models.resnet import *
+# from models.vggnet import *
+# from models.mynet import *
 from model.model_net.resnet import *
 from model.model_net.vggnet import *
 from model.model_net.mynet import *
-from .logic_unitsV2 import Logic
+from logic_unitsV2 import *
 import numpy as np
 from tqdm import tqdm
 import time
@@ -26,14 +28,43 @@ import csv
 import random
 import pandas as pd
 
+
+parser = argparse.ArgumentParser(description='PyTorch dnn test')
+parser.add_argument('--test-batch-size', type=int, default=200, metavar='N',
+                    help='input batch size for testing (default: 200)')
+parser.add_argument('--dataset', default='cifar10', help='use what dataset')
+parser.add_argument('--no-cuda', action='store_true', default=False,
+                    help='disables CUDA training')
+parser.add_argument('--epsilon', default=0.031,
+                    help='perturbation')
+parser.add_argument('--num-steps', default=20,
+                    help='perturb number of steps')
+parser.add_argument('--step-size', default=0.003,
+                    help='perturb step size')
+parser.add_argument('--random',
+                    default=True,
+                    help='random initialization for PGD')
+parser.add_argument('--model',
+                    default='resnet18',
+                    help='model name for evaluation')
+parser.add_argument('--model-path',
+                    default='./model-cifar-vggNet/model-wideres-epoch58.pt',
+                    help='model for white-box attack evaluation')
+parser.add_argument('--white-box-attack', default=True,
+                    help='whether perform white-box attack')
+
+args = parser.parse_args()
+
 # settings
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+use_cuda = not args.no_cuda and torch.cuda.is_available()
+device = torch.device("cuda" if use_cuda else "cpu")
+kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+
 
 ## deeplogic
 def deep_logic(logic_distance):
     rank_lst = np.argsort(logic_distance)  # 按照值从小到大排序,因此序号越小代表值越小代表越好
     return rank_lst
-
 def error_level(pred_test_prob,true_test):#新增评价指标：严重性指标     
     error_level=[]
     pred_test_sort=np.argsort(-pred_test_prob, axis=1)
@@ -47,11 +78,10 @@ def error_level(pred_test_prob,true_test):#新增评价指标：严重性指标
         else:
             error_level.append(100)
     return error_level
-
-def deeplogic_test(model, device,model_name,dataset_name,data,true_test, out_path):
+def deeplogic_test(model, device,model_name,dataset_name,data,true_test):
     if dataset_name == 'cifar':
         unit_topk=50
-    if dataset_name == 'fashionmnist':
+    if dataset_name == 'fashionminist':
         unit_topk=10
     model.eval()
     
@@ -105,40 +135,54 @@ def deeplogic_test(model, device,model_name,dataset_name,data,true_test, out_pat
     
     df['error_level']=error_level(pred_test_prob,true_test)
 
-    df.to_csv("{}/{}_{}_deeplogic_0.csv".format(out_path, model_name, dataset_name))
-    # if dataset_name=='cifar':
-    #     df.to_csv('test_case_select/all_output/output_cifar/{}/{}_deeplogic_0.csv'.format(model_name,dataset_name))
-    # if dataset_name=='fashionminist':
-    #     df.to_csv('test_case_select/all_output/output_fashionminist/{}/{}_deeplogic_0.csv'.format(model_name,dataset_name))
+    df.to_csv('output/cache/test_case_select/all_output/output_cifar/{}/{}_deeplogic_0.csv'.format(model_name,dataset_name))
 
-from show_result import *
+from test_case_select.show_result import *
 def evaluate_deeplogic(dataset, modelname, out_path='./', logging=None):
-    # white-box attack
-    if dataset == 'cifar10':
-        # 加载测试用例集
-        if modelname == 'resnet34':
-            images = torch.load('./dataset/data/ckpt/images_of_TestCaseSet_resnet34_cifar10.pt')
-            labels = torch.load('./dataset/data/ckpt/labels_of_TestCaseSet_resnet34_cifar10.pt')
-            model = ResNet34().to(device)
-            model_path = './model/ckpt/Standard-cifar10-model-resnet34-epoch300.pt'
-        elif modelname == 'vgg16':
-            images = torch.load('./dataset/data/ckpt/images_of_TestCaseSet_vgg16_cifar10.pt')
-            labels = torch.load('./dataset/data/ckpt/labels_of_TestCaseSet_vgg16_cifar10.pt')
+        # white-box attack
+        if dataset == 'cifar10':
+            # 加载测试用例集
+            if modelname == 'resnet34':
+                images = torch.load('dataset/data/ckpt/images_of_TestCaseSet_resnet34_cifar10.pt')
+                labels = torch.load('dataset/data/ckpt/labels_of_TestCaseSet_resnet34_cifar10.pt')
+            elif modelname == 'vgg16':
+                images = torch.load('dataset/data/ckpt/images_of_TestCaseSet_vgg16_cifar10.pt')
+                labels = torch.load('dataset/data/ckpt/labels_of_TestCaseSet_vgg16_cifar10.pt')
+            data = images
+            true_test = labels
+        if dataset == 'fashionminist':
+            if modelname == 'resnet18':
+                images = torch.load('dataset/data/ckpt/images_of_TestCaseSet_resnet18_fashionminist.pt')
+                labels = torch.load('dataset/data/ckpt/labels_of_TestCaseSet_resnet18_fashionminist.pt')
+            elif modelname == 'smallcnn':
+                images = torch.load('dataset/data/ckpt/images_of_TestCaseSet_smallcnn_fashionminist.pt')
+                labels = torch.load('dataset/data/ckpt/labels_of_TestCaseSet_smallcnn_fashionminist.pt')
+            data = images
+            true_test = labels
+
+        if modelname=='vgg16':
             model = vgg16_bn().to(device)
-            model_path='./model/ckpt/Standard-cifar10-model-vgg16-epoch300.pt'
-    if dataset == 'fashionmnist':
-        images = torch.load('./dataset/data/ckpt/images_of_TestCaseSet_resnet18_fashionminist.pt')
-        labels = torch.load('./dataset/data/ckpt/labels_of_TestCaseSet_resnet18_fashionminist.pt')
-        model = ResNet18().to(device)
-        model_path = './model/ckpt/Standard-fashionminist-model-resnet18-epoch300.pt'
-    model.load_state_dict(torch.load(model_path))
+            model_name='vgg16'
+            dataset_name='cifar'
+            model_path='model/ckpt/Standard-cifar10-model-vgg16-epoch300.pt'
+        elif modelname=='resnet34':
+            model = ResNet34().to(device)
+            model_name='resnet34'
+            dataset_name='cifar'
+            model_path = 'model/ckpt/Standard-cifar10-model-resnet34-epoch300.pt'
+        elif modelname=='resnet18':
+            model = ResNet18().to(device)
+            model_name='resnet18'
+            dataset_name='fashionminist'
+            model_path = 'model/ckpt/Standard-fashionminist-model-resnet18-epoch300.pt'
+        model.load_state_dict(torch.load(model_path))
 
-    deeplogic_test(model, device, modelname, dataset, images, labels, out_path)
-    apfd=statistic_apfd(modelname)
-    res=show(dataset, modelname, ".tmp/result", apfd)
-    # res=show(dataset, modelname, out_path, apfd)
+        deeplogic_test(model, device,model_name,dataset_name,data,true_test)
+        apfd=statistic_apfd(model_name)
 
-    return res
+        res=show(dataset_name,model_name,out_path,apfd)
+
+        return res
 
 
 df = pd.DataFrame(columns=['metrics', 'model', 'time','apfd','rda'])
@@ -379,8 +423,8 @@ def compute(csvname, abspath, model_name,target_modelname,outputdir="", to_csv=F
 
 
 def statistic_apfd(target_modelname):
-    input_base_path = ".tmp/all_output"
-    output_base_path = ".tmp/result/apfd_figure_csv"
+    input_base_path = "output/cache/test_case_select/all_output"
+    output_base_path = "output/cache/test_case_select/result/apfd_figure_csv"
     dir_list = ["output_cifar","output_fashionminist","output_imagenet"]
     for path_dir in dir_list:
         dataset_name = os.path.basename(path_dir)[7:]
@@ -401,7 +445,7 @@ def statistic_apfd(target_modelname):
                     #print("")
     #print(df)
     df.sort_values("metrics",inplace=True)
-    df.to_csv('table.csv')
+    df.to_csv('output/cache/test_case_select/table.csv')
     return logic_apfd
 
         
