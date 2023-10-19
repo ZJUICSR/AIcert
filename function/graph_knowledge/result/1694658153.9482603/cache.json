@@ -1,0 +1,1 @@
+{"recom_algorithm": ["MI-FGSM", "PGD", "FAB", "RFGSM", "DeepFool", "TPGD", "AutoPGD", "BPDA", "ATN", "Adversarial Patch", "L-BFGS", "BIM", "JSMA", "DIFGSM"], "acc": {"ori": 0.8542, "MI-FGSM": 0.0381, "PGD": 0.0388, "DIFGSM": 0.0433, "RFGSM": 0.0382, "AutoPGD": 0.0349, "BIM": 0.3962, "TPGD": 0.1261, "FAB": 0.8542}}
