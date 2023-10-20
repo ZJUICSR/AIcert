@@ -4,19 +4,12 @@ import sys
 import os
 ROOT_PATH = dirname(dirname(dirname(dirname(dirname(dirname(os.path.abspath(__file__)))))))
 sys.path.append(ROOT_PATH)
-
-from function.ensemble_defense import run
-from dataset import ArgpLoader
-from models import ModelLoader
-
 import torch
 import json
 from tqdm import tqdm
 from torchattacks import *
 
 
-
-args = Helper.get_args()
 RESULT_FILE = os.path.join(dirname(os.path.abspath(__file__)), 'result.json')
 MODEL_SAVE_PATH = dirname(os.path.abspath(__file__))
 
@@ -147,14 +140,7 @@ def test(model_file_list=list(), dataset='CIFAR10', n_class=10, device='cuda'):
 
 
 if __name__ == '__main__':
-    model_cache_path = os.path.join(ROOT_PATH, 'argp', 'models', 'ckpt')
-    file_list = ['CIFAR10_resnet50_FGSM_0.12549.pt',
-                 'CIFAR10_resnet50_FGSM_0.15686.pt',
-                 'CIFAR10_resnet50_FGSM_0.18824.pt',
-                 'CIFAR10_resnet50_FFGSM_0.02510.pt',
-                 'CIFAR10_resnet50_FFGSM_0.03137.pt',
-                 'CIFAR10_resnet50_FFGSM_0.03765.pt']
-    model_file_list = [os.path.join(model_cache_path, f) for f in file_list]
-    test(model_file_list=model_file_list, device='cuda')
+    methods = ['fgsm', 'mifgsm']
+
 
 

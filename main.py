@@ -42,7 +42,7 @@ class RegexConverter(BaseConverter):
 def main_index():
     parser = argparse.ArgumentParser()
     parser.add_argument('--host',type=str,default='0.0.0.0',help='ip')
-    parser.add_argument('--port',type=int,default='14580',help='port')
+    parser.add_argument('--port',type=int,default='24108',help='port')
     parser.add_argument('--debug',type=bool,default=True,help='debugifopen')
     args = parser.parse_args()
     from web.index import app_run
