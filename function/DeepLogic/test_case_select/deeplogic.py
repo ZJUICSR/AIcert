@@ -150,7 +150,7 @@ def evaluate_deeplogic(dataset, modelname, out_path='./', logging=None):
                 labels = torch.load('dataset/data/ckpt/labels_of_TestCaseSet_vgg16_cifar10.pt')
             data = images
             true_test = labels
-        if dataset == 'fashionminist':
+        if dataset == 'fashionmnist':
             if modelname == 'resnet18':
                 images = torch.load('dataset/data/ckpt/images_of_TestCaseSet_resnet18_fashionminist.pt')
                 labels = torch.load('dataset/data/ckpt/labels_of_TestCaseSet_resnet18_fashionminist.pt')
@@ -181,7 +181,10 @@ def evaluate_deeplogic(dataset, modelname, out_path='./', logging=None):
         apfd=statistic_apfd(model_name)
 
         res=show(dataset_name,model_name,out_path,apfd)
-
+        with open(res["data"], 'r') as f:
+            result = json.load(f)
+            # print(result)
+        res["result"] = result
         return res
 
 
