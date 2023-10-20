@@ -66,4 +66,5 @@ def run(model, test_loader, adv_dataloader, params, param_hash=str(time.time()),
         log_func=log_func,
         channel=channel
     )
+    print("__init__ paca:",result)
     return result

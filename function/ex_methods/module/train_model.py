@@ -10,9 +10,9 @@ import torch.nn.functional as F
 def adjust_learning_rate(optimizer, epoch, lr_):
     """decrease the learning rate"""
     lr = lr_
-    if epoch >= 60:
+    if epoch >= 40:
         lr = lr * 0.1
-    if epoch >= 100:
+    if epoch >= 60:
         lr = lr * 0.01
 
     for param_group in optimizer.param_groups:
@@ -36,7 +36,7 @@ def Train(model_name, model, dataset, device):
         transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms.RandomHorizontalFlip(),transforms.ToTensor(),transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])])
         train_dataset = CIFAR10('./dataset/data/CIFAR10', train=True, transform=transform, download=True)
         test_dataset = CIFAR10('./dataset/data/CIFAR10', train=False, transform=transform, download=False)
-        num_epoches = 150
+        num_epoches = 80
 
     #datalodar用于加载训练数据
     train_loader = DataLoader(train_dataset, batch_size=train_batchsize, shuffle=True,num_workers=2)
@@ -117,14 +117,14 @@ def robust_train(model, train_loader, test_loader, adv_loader, device, epochs=40
     :param kwargs:
     :return:
     """
+    # 训练超参数
+    lr = 0.1  # 学习率
+    momentum = 0.9  # 动量参数，用于优化算法
+
     assert "atk_method" in kwargs.keys()
     assert "def_method" in kwargs.keys()
     train_res = {}
-    train_batchsize = 128  # 训练批大小
-    test_batchsize = 128  # 测试批大小
-    num_epoches = 0  # 训练轮次
-    lr = 0.1  # 学习率
-    momentum = 0.9  # 动量参数，用于优化算法
+
     import torchattacks as attacks
     copy_model1 = copy.deepcopy(model)
     
@@ -143,7 +143,7 @@ def robust_train(model, train_loader, test_loader, adv_loader, device, epochs=40
     _eps = copy.deepcopy(adv_param['eps'])
     from IOtool import IOtool
     for epoch in range(1, epochs + 1):
-        print("-> For epoch:{:d} adv training on device: {:s}".format(epoch, str(device)))
+        print("-> Method{:s} for epoch:{:d} adv training on device: {:s}".format(method, epoch, str(device)))
         model.train()
         model = model.to(device)
         num_step = len(train_loader)
@@ -176,7 +176,9 @@ def robust_train(model, train_loader, test_loader, adv_loader, device, epochs=40
             _, pred = out.max(1)
             # sum_correct = (pred == y).sum().item()
             sum_correct += pred.eq(y.view_as(pred)).sum().item()
-            info = "[Train] Attack:{:s}_{:.4f} Defense:{:s} Loss: {:.6f} Acc:{:.3f}%".format(
+            info = "[Train] Epoch:{:d}/{:d} Attack:{:s}_{:.4f} Defense:{:s} Loss: {:.6f} Acc:{:.3f}%".format(
+                epoch,
+                epochs + 1,
                 kwargs["atk_method"],
                 adv_param['eps'],
                 kwargs["def_method"],

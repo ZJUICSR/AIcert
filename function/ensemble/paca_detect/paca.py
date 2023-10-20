@@ -87,7 +87,7 @@ def train_adv_detect_model(attack,
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-    detect_model = TwoStraeamSrncovet(channel=channel)
+    detect_model = TwoStraeamSrncovet(in_channel=channel)
     detect_model.to(device)
 
     criterion = nn.CrossEntropyLoss()
@@ -269,7 +269,7 @@ def paca_detect(ori_model,
             os.mkdir(cache_path)
         # print(f'param_hash={param_hash}, 保存缓存结果')
         save_json_info(os.path.join(cache_path, cache_file), result)
-
+    print("paca:", result)
     return result
 
 def demo():

@@ -1,4 +1,23 @@
 output/*
+web/output/
+function/GroupDefense_bak/
+function/GroupDefense/
+function/ensemble/models/
+function/ensemble/datasets/
+function/formal_verify/auto_LiRPA_0.31/*
+function/formal_verify/auto_LiRPA_0.31
+function/formal_verify/auto_LiRPA/*
+function/formal_verify/auto_LiRPA_new/
+function/ensemble/ensemble_defense/test.log
+function/ensemble/ensemble_defense/test/ensemble_param.bak.json
+test.log
+function/ex_methods/cache/adv_params copy.json
+function/formal_verify/auto_LiRPA_bakold/*
+function/formal_verify/auto_LiRPA_kt1/*
+function/side/CMake_Research3/libresreach3.so_bak
+spec-list1.txt
+function/formal_verify/auto_LiRPA/*
+function/GroupDefense/*
 function/ensemble/paca_detect/detect_models/*
 record
 web/static/imgs/tmp_imgs/*
