@@ -12,7 +12,7 @@ from .attacks.torchattack import *
 from .attacks.poisoning import PoisoningAttackBackdoor, PoisoningAttackCleanLabelBackdoor, FeatureCollisionAttack, PoisoningAttackAdversarialEmbedding
 # 工具函数
 from function.attack.estimators.classification import PyTorchClassifier
-from .attacks.utils import load_mnist, load_cifar10
+from .attacks.utils import load_mnist, load_cifar10, to_categorical
 # from models.model_net.resnet import ResNet18
 from .attacks.utils import compute_predict_accuracy, compute_attack_success, compute_accuracy, compute_success
 import random
@@ -27,36 +27,54 @@ from tqdm import tqdm
 # norm [1,2,"inf",np.inf]
 
 class EvasionAttacker():
+    # def __init__(self, model, 
+    # dataset="mnist", datasetpath="./datasets/", nb_classes=10, datanormalize: bool = False, 
+    # device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"), sample_num=128) -> None:
     def __init__(self, modelnet=None, modelpath: str="ckpt-resnet18-mnist_epoch3_acc0.9898.pth", 
     dataset="mnist", datasetpath="./datasets/", nb_classes=10, datanormalize: bool = False, 
-    device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"), sample_num=0) -> None:
+    device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"), sample_num=128, model=None,) -> None:
         self.modelnet = modelnet
         self.modelpath = modelpath
+        self.model = model
+        self.device = device
+        # 模型加载
+        if self.model == None:
+            self.model = self.modelnet.to(self.device)
+            checkpoint = torch.load(self.modelpath)
+            
+            try:
+                self.model.load_state_dict(checkpoint)
+            except:
+                self.model.load_state_dict(checkpoint['net'])
         self.dataset = dataset
         self.datasetpath = datasetpath
-        self.device = device
+        
         self.nb_classes = nb_classes
         self.datanormalize = datanormalize
         self.norm_param = ""
         if dataset == "cifar10":
             self.loaddataset = load_cifar10
+            self.input_shape = (3, 32, 32)
         elif dataset == "mnist":
             self.loaddataset = load_mnist
+            self.input_shape = (1, 28, 28)
         else:
             raise ValueError("Dataset not supported")
         if sample_num > 0:
             self.input_shape, (self.x_select, self.y_select), _, _, self.min_pixel_value, self.max_pixel_value = self.loaddataset(self.datasetpath, sample_num, normalize=self.datanormalize)
-
+            criterion = nn.CrossEntropyLoss()
+            optimizer = optim.Adam(self.model.parameters(), lr=0.006)
+            self.classifier = PyTorchClassifier (
+                model=self.model,
+                clip_values=(self.min_pixel_value, self.max_pixel_value),
+                loss=criterion,
+                optimizer=optimizer,
+                input_shape=self.input_shape,
+                nb_classes=self.nb_classes,
+                device=self.device
+            )
+            
     def generate(self, method: str="FastGradientMethod", save_num: int = 1, **kwargs) -> None:
-        # 模型加载
-        self.model = self.modelnet.to(self.device)
-        checkpoint = torch.load(self.modelpath)
-        
-        try:
-            self.model.load_state_dict(checkpoint)
-        except:
-            self.model.load_state_dict(checkpoint['net'])
-        
         cln_examples = self.x_select.astype(MY_NUMPY_DTYPE)
         # print(len(self.cln_examples))
         real_lables = self.y_select
@@ -115,10 +133,94 @@ class EvasionAttacker():
         self.psrb= compute_predict_accuracy(clean_predictions, real_lables)
         adv_predictions = self.classifier.predict(adv_examples)
         self.psra= compute_predict_accuracy(adv_predictions, real_lables)
+        print("**********self.psra:",self.psra)
         # 计算真正的攻击成功率，将本来分类错误的样本排除在外
         self.coverrate, self.asr  = compute_attack_success(real_lables, clean_predictions, adv_predictions)
         piclist = self.save_examples(save_num, real_lables, cln_examples, clean_predictions, adv_examples, adv_predictions, kwargs["save_path"])
         return adv_examples, real_lables, piclist
+    
+    def get_adv_data(self, dataloader, method: str="FastGradientMethod",  **kwargs) -> None:
+        x_select,y_select = None, None
+        for step,(x, y) in enumerate(dataloader):
+            if x_select is None:
+                x_select = x.detach().to('cpu')
+                y_select = y.detach().to('cpu')
+                continue
+            x_select = torch.cat((x_select, x.detach().to('cpu')), dim=0)
+            y_select = torch.cat((y_select, y.detach().to('cpu')), dim=0)
+        x_select = x_select.numpy()
+        
+        y_test = y_select.numpy()
+        y_select = to_categorical(y_test, 10)
+        cln_examples = x_select.astype(MY_NUMPY_DTYPE)
+        # print(len(self.cln_examples))
+        real_lables = y_select
+        min_value = np.amin(cln_examples) if np.amin(cln_examples) < self.min_pixel_value else self.min_pixel_value
+        max_value = np.amax(cln_examples) if np.amax(cln_examples) > self.max_pixel_value else self.max_pixel_value
+        criterion = nn.CrossEntropyLoss()
+        optimizer = optim.Adam(self.model.parameters(), lr=0.006)
+        print("self.input_shape:",self.input_shape)
+        classifier = PyTorchClassifier (
+            model=self.model,
+            clip_values=(min_value, max_value),
+            loss=criterion,
+            optimizer=optimizer,
+            input_shape=self.input_shape,
+            nb_classes=self.nb_classes,
+            device=self.device
+        )
+        self.method = method
+        self.attack = eval(self.method)(classifier)
+
+        # 设置攻击参数
+        print(self.method)
+        for key, value in kwargs.items():
+            if key not in self.attack.attack_params:
+                if key != "save_path":
+                    error = "{} is not the parameter of {}".format(key, method)
+                    raise ValueError(error)
+            else:
+                if key == "norm":
+                    self.norm_param = str(value)
+                setattr(self.attack, key, value)
+        for key in self.attack.attack_params:
+            try:
+                print(key, str(getattr(self.attack, key)))
+            except:
+                pass
+        # 第一次计算干净样本上的分类准确率
+        print("first accurate:{}".format(compute_predict_accuracy(classifier.predict(cln_examples), real_lables)))
+        # adv_examples  = self.attack.generate(cln_examples, real_lables)
+        adv_examples  = self.attack.generate(cln_examples, real_lables)
+        # 性能评估
+
+        adv_predictions = classifier.predict(adv_examples)
+        self.psra= compute_predict_accuracy(adv_predictions, real_lables)
+        print("self.psra:",self.psra)
+        return adv_examples, cln_examples, y_test, y_test, self.psra
+    
+    def get_attack(self, method: str="FastGradientMethod", **kwargs) -> None:
+        
+        self.method = method
+        self.attack = eval(self.method)(self.classifier)
+
+        # 设置攻击参数
+        print(self.method)
+        for key, value in kwargs.items():
+            if key not in self.attack.attack_params:
+                if key != "save_path":
+                    error = "{} is not the parameter of {}".format(key, method)
+                    raise ValueError(error)
+            else:
+                if key == "norm":
+                    self.norm_param = str(value)
+                setattr(self.attack, key, value)
+        for key in self.attack.attack_params:
+            try:
+                print(key, str(getattr(self.attack, key)))
+            except:
+                pass
+        return self.attack.generate
     
     def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, clean_prediction: np.ndarray, adv_example: np.ndarray, adv_prediction: np.ndarray, path:str="output/cache/results/"):
         
@@ -150,7 +252,8 @@ class EvasionAttacker():
                 cleanname = os.path.join(path, "index{}_clean_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]]))
                 clean.save(cleanname)
                 adv = Image.fromarray(np.uint8(255*tmpa))
-                advname = os.path.join(path, "index{}_adv_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]]))
+                advname = os.path.join(path, "index{}_adv_l{}_t{}.jpeg".format(i, l[random_index[i]], d[random_index[i]] ))
+                # advname = os.path.join(path, "index{}_adv_l{}_t{}_{}.jpeg".format(i, l[random_index[i]], d[random_index[i]], time.time()))
                 adv.save(advname)
                 per = np.uint8(255*tmpc) - np.uint8(255*tmpa)
                 per = per + np.abs(np.min(per))
@@ -218,7 +321,7 @@ class BackdoorAttacker():
             # 总样本上的准确率
             self.accuracy, _ = compute_accuracy(self.classifier.predict(xs, batch_size=batch_size), ys)
             # 干净样本上的准确率
-            self.accuracyonbm, _ = compute_accuracy(self.classifier.predict(x_clean, batch_size=batch_size), y_clean)
+            self.accuracyonb, _ = compute_accuracy(self.classifier.predict(x_clean, batch_size=batch_size), y_clean)
             # 攻击成功率
             # 对于冲突碰撞攻击，当一个样本的真实标签为原标签且预测标签为目标标签的时候认为攻击成功
             self.attack_success_rate = np.sum(np.logical_and(np.argmax(ys, axis=1) == np.argmax(self.source, axis=0), np.argmax(self.classifier.predict(xs, batch_size=batch_size), axis=1) == np.argmax(self.target, axis=0)))/ np.sum(np.argmax(ys, axis=1) == np.argmax(self.source, axis=0))
