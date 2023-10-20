@@ -27,27 +27,27 @@ window.onload = function() {
 // 轮播图功能按钮
 function goto_adv_attack() {
     // 预留界面跳转
-    window.open('/index_params_1', '_self');
+    window.open('/index_function_introduction#/advAttack', '_self');
 };
 
 function goto_robust_enhance() {
     // 预留界面跳转
-    window.open('/ModelRobust', '_self');
+    window.open('/index_function_introduction#/crowdDefense', '_self');
 };
 
 function goto_fairness() {
     // 预留界面跳转
-    window.open('/Fairness', '_self');
+    window.open('/index_function_introduction#/dataFairnessEva', '_self');
 };
 
 function goto_formal_verification() {
     // 预留界面跳转
-    window.open('/FormalVerification', '_self');
+    window.open('/index_function_introduction#/formalVerfy', '_self');
 };
 
 function goto_bkd_attack() {
     // 预留界面跳转
-    window.open('/index_params_1', '_self');
+    window.open('/index_function_introduction#/backdoor', '_self');
 };
 
 function goto_old_version() {
