@@ -1369,12 +1369,19 @@ def DeepLogicParamSet():
         dataset = request.form.get("dataset")
         modelname = request.form.get("model")
         tid = request.form.get("tid")
+        try:
+            inputdata = json.loads(request.data)
+            dataset = inputdata["dataset"]
+            modelname = inputdata["model"]
+            tid = inputdata["tid"]
+        except:
+            pass
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
         value = {
-            "type":"DeepSst",
+            "type":"DeepLogic",
             "state":0,
-            "name":["DeepSst"],
+            "name":["DeepLogic"],
             "dataset": dataset,
             "model": modelname,
         }
