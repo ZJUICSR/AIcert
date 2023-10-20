@@ -12,14 +12,16 @@ from function.formal_verify import *
 from function.formal_verify.knowledge_consistency import Model_zoo as zoomodels
 from PIL import Image
 from model.model_net.lenet import Lenet
-from model.model_net.resnet import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
+
 from function.attack import run_adversarial, run_backdoor
 from function.fairness import run_dataset_debias, run_model_debias, run_image_model_debias, run_model_evaluate, run_image_model_evaluate
-from function import concolic, env_test, coverage, deepsst, dataclean, framework_test, modelmeasure, modulardevelop, DeepLogic
+from function import concolic, env_test, coverage, deepsst, dataclean, framework_test, modelmeasure, modulardevelop
+
 from function.ex_methods import *
 import matplotlib.pyplot as plt
 from function.defense import *
 from torchvision.models import vgg16
+from torchvision.datasets import CIFAR10, mnist
 from function.side import *
 
 ROOT = osp.dirname(osp.abspath(__file__))
@@ -291,6 +293,7 @@ def run_deeplogic(tid,AAtid,dataset,modelname):
     IOtool.change_task_state(tid, 1)
     IOtool.set_task_starttime(tid, AAtid, time.time())
     logging = IOtool.get_logger(AAtid)
+    from function import DeepLogic
     res = DeepLogic.run_deeplogic(dataset.lower(), modelname.lower(), osp.join(ROOT,"output", tid, AAtid), logging)  
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
@@ -330,6 +333,7 @@ def run_modelmeasure(tid,AAtid,dataset, modelname, naturemethod, natureargs, adv
     """
     IOtool.change_subtask_state(tid, AAtid, 1)
     IOtool.change_task_state(tid, 1)
+    time.sleep(10)
     IOtool.set_task_starttime(tid, AAtid, time.time())
     logging = IOtool.get_logger(AAtid)
     res = modelmeasure.run_modelmeasure(dataset.upper(), modelname.lower(), naturemethod, float(natureargs), advmethod.lower(), float(advargs), measuremethod, osp.join(ROOT,"output", tid, AAtid), logging)  
@@ -362,7 +366,7 @@ def run_modulardevelop(tid,AAtid, dataset, modelname, tuner, init, epoch, iternu
     IOtool.change_subtask_state(tid, AAtid, 2)
     IOtool.change_task_success_v2(tid=tid)
 
-from train_network import train_resnet_mnist, train_resnet_cifar10
+from train_network import train_resnet_mnist, train_resnet_cifar10, eval_test, test_batch, robust_train
 
 def run_adv_attack(tid, stid, dataname, model, methods, inputParam, sample_num=128):
     """对抗攻击评估
@@ -403,19 +407,35 @@ def run_adv_attack(tid, stid, dataname, model, methods, inputParam, sample_num=1
     if not osp.exists(osp.join(ROOT,"output", tid, stid)):
         os.mkdir(osp.join(ROOT,"output", tid, stid))
     resultlist={}
+    all_num = 0
     for method in methods:
         logging.info("[执行对抗攻击]:正在执行{:s}对抗攻击".format(method))
         attackparam = inputParam[method]
         attackparam["save_path"] = osp.join(ROOT,"output", tid, stid)
         if "norm" in attackparam.keys() and attackparam["norm"]=="np.inf":
             attackparam["norm"]=np.inf
-        resultlist[method] ,resultlist[method]["pic"], resultlist[method]["path"], resultlist[method]["num"]= run_adversarial(model, modelpath, dataname, method, attackparam, device, sample_num)
+        resultlist[method] ,resultlist[method]["pic"], resultlist[method]["path"], resultlist[method]["num"] = run_adversarial(model, modelpath, dataname, method, attackparam, device, sample_num)
         logging.info("[执行对抗攻击中]:{:s}对抗攻击结束，攻击成功率为{}%".format(method,resultlist[method]["asr"]))
-    logging.info("[执行对抗攻击]:对抗攻击执行完成，数据保存中")
+    # 统计缓存攻击用例
+    # save_root = "dataset/adv_data"
+    # num_all = 0
+    # for dirpath,dirnames,filenames in os.walk(save_root):
+    #     for filepath in filenames:
+    #         if "adv_attack_" in filepath:
+    #             datacatch = torch.load(osp.join(dirpath,filepath))
+    #             num_all += len(datacatch['x'])
+    #             del datacatch
+    # logging.info('**************************')
+    # logging.info(f'平台攻击用例总数：{num_all}')
+    # logging.info('**************************')
+    # logging.info("[执行对抗攻击]:对抗攻击执行完成，数据保存中")
+    # resultlist["num_all"] = num_all
     resultlist["stop"] = 1
     IOtool.write_json(resultlist,osp.join(ROOT,"output", tid, stid+"_result.json"))
     IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
+
+
 
 def run_backdoor_attack(tid, stid, dataname, model, methods, inputParam):
     """后门攻击评估
@@ -658,18 +678,8 @@ def verify_img(tid, stid, net, dataset, eps, pic_path):
     logging = IOtool.get_logger(stid)
     b1=[]
     b2=[]
-    model=''
-    if net=='cnn_7layer_bn':
-        model='cnn_7layer_bn'
-    elif net=='Densenet' and dataset=='CIFAR':
-        model='Densenet_cifar_32'
-    elif net=='Resnet' and dataset=='MNIST':
-        model='resnet'
-    elif net=='Resnet' and dataset=='CIFAR':
-        model='ResNeXt_cifar'
-    elif net=='Wide Resnet' and dataset=='CIFAR':
-        model='wide_resnet_cifar_bn_wo_pooling'
-    print(model,net)
+    print(net, dataset)
+
     lb1,ub1,lb2,ub2,predicted,score_IBP,score_CROWN=auto_verify_img(net, dataset, eps, pic_path)
     categories=[]
     for i in range(len(lb1)):
@@ -790,7 +800,7 @@ def run_detect(tid, stid, defense_methods, adv_dataset, adv_model, adv_method, a
     return response_data
 
 def detect(adv_dataset, adv_model, adv_method, adv_nums, defense_methods, adv_examples=None, logging=None):
-    
+    from model.model_net.resnet import ResNet18 
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     # device = IOtool.get_device()
@@ -955,7 +965,7 @@ def run_side_api(trs_file, method, tid, stid):
         pass
     if method in ["cpa","dpa"]:
         logging.info("分析方法{:s}执行结束，运行100次耗时{:s}s".format(method,str(round(use_time,1))))
-        logging.info("系统平均耗时{:s}s".format(method,str(round(use_time,1)/100)))
+        logging.info("系统平均耗时{:s}s".format(method,str(round(use_time/100,1))))
         res[method]["runTime"] = use_time/100
     else:
         logging.info("分析方法{:s}执行结束，耗时{:s}s".format(method,str(round(use_time,1))))
@@ -1067,8 +1077,392 @@ def knowledge_consistency(tid, stid, arch,dataset,img_path,layer):
 from function.ensemble import ensemble_defense
 
 from dataset import ArgpLoader
-from function.ex_methods.module.train_model import eval_test, test_batch, robust_train
+# from function.ex_methods.module.train_model import
 from function.ensemble import paca_detect
+def load_dataset(dataset, batchsize):
+    if dataset.lower() == "mnist":
+        transform = transforms.Compose([transforms.Resize(28), transforms.ToTensor(), transforms.Normalize([0.1307], [0.3081])])
+        train_dataset = mnist.MNIST('./dataset/data/MNIST', train=True, transform=transform, download=True)
+        test_dataset = mnist.MNIST('./dataset/data/MNIST', train=False, transform=transform, download=False)
+        channel = 1
+    elif dataset.lower() == "cifar10":
+        print("cifar10")
+        transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms.RandomHorizontalFlip(),transforms.ToTensor(),transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])])
+        # mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225]
+        train_dataset = CIFAR10('./dataset/data/CIFAR10', train=True, transform=transform, download=True)
+        test_dataset = CIFAR10('./dataset/data/CIFAR10', train=False, transform=transform, download=False)
+        channel = 3
+    train_loader = DataLoader(train_dataset, batch_size=batchsize, shuffle=True,num_workers=2)
+    test_loader = DataLoader(test_dataset, batch_size=batchsize,shuffle=False)
+    return train_loader, test_loader, channel
+
+def load_model_net(modelname, dataset, upload={'flag':0, 'upload_path':None}, channel=3, logging=None):
+    from model.model_net.resnet_attack import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
+    if upload['flag'] == 1:
+        channel = upload['channel']
+        if not osp.exsits(upload['upload_path']):
+            error = "{} is not exist".format(upload_path)
+            raise ValueError(error)
+        modelpath = upload['upload_path']
+    else: 
+        modelpath = osp.join("./model/ckpt", dataset.upper() + "_" + modelname.lower()+".pth")
+        if (not osp.exists(modelpath)):
+            logging.info("[模型获取]:服务器上模型不存在")
+            if dataset.upper() == "CIFAR10":
+                logging.info("[模型训练]:开始训练模型")
+                train_resnet_cifar10(modelname, modelpath, logging, device)
+                logging.info("[模型训练]:模型训练结束")
+                channel = 3
+            elif dataset.upper() == "MNIST":
+                logging.info("[模型训练]:开始训练模型")
+                train_resnet_mnist(modelname, modelpath, logging, device)
+                logging.info("[模型训练]:模型训练结束")
+                channel = 1
+            else:
+                logging.info(f"[模型训练]:不支持该数据集{dataset.upper()}")
+                error = f"{dataset.upper()} is not support"
+                raise ValueError(error)
+    model = eval(modelname)(channel)
+    logging.info("[模型获取]:加载模型")
+    checkpoint = torch.load(modelpath)
+    try:
+        model.load_state_dict(checkpoint)
+    except:
+        model.load_state_dict(checkpoint['net'])
+    return model
+from function.ex_methods.module.func import get_loader
+from function.attack import run_get_adv_data, run_get_adv_attack
+def get_load_adv_data(datasetparam, modelparam, adv_methods, adv_param, model, test_loader, device, batchsize, logging=None):
+    adv_save_root = "dataset/adv_data"
+    adv_loader = {}
+    if not osp.exists(adv_save_root):
+        os.makedirs(adv_save_root)
+    
+    for i, adv_method in enumerate(adv_methods):
+        logging.info("[模型测试阶段] 正在运行对抗样本攻击:{:s}...[{:d}/{:d}]".format(adv_method, i + 1, len(adv_methods)))
+        if 'eps' in adv_param[adv_method]:
+            eps = adv_param[adv_method]['eps']
+        else:
+            eps = 1
+        if 'step' in adv_param[adv_method]:
+            steps = adv_param[adv_method]['step']
+        else:
+            steps = 1
+        path = osp.join(adv_save_root, "adv_{:s}_{:s}_{:s}_{:04d}_{:.5f}.pt".format(
+                            adv_method, modelparam['name'], datasetparam['name'], steps, eps))
+        if osp.exists(path):
+            logging.info("[加载数据集]：检测到缓存{:s}对抗样本，直接加载缓存文件".format(adv_method))
+            data = torch.load(path)
+        else:
+            logging.info("[加载数据集]：未检测到缓存的{:s}对抗样本，将重新执行攻击算法并缓存".format(adv_method))
+            attack_info = run_get_adv_data(dataset_name = datasetparam['name'], model = model, dataloader = test_loader, device = device, method= adv_method, attackparam=adv_param[adv_method])
+            data = {
+                'x':torch.tensor(attack_info[0]),
+                'y':torch.tensor(attack_info[2])
+            }
+            torch.save(data, path)
+
+        data_temp = {
+            'x':[torch.tensor(data['x'])],
+            'y':[torch.tensor(data['y'])]
+        }
+        adv_loader[adv_method] = get_loader(data_temp, batchsize)
+    return adv_loader
+
+def run_group_defense(tid,stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods):
+    """群智化防御，包含PACA、博弈、集成、群智、CAFD等
+    :params tid:主任务ID
+    :params stid:子任务id
+    :params datasetparam:数据集参数
+    :params modelparam:模型参数
+    :params adv_methods:list，对抗攻击方法
+    :params adv_param:dict,对抗攻击参数
+    :params defense_methods:list，集成防御方法
+    """
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    device = IOtool.get_device()
+    logging = IOtool.get_logger(stid)
+    batchsize = 128
+    result={
+        "AdvAttack":{
+            "atk_acc":{},
+            "atk_asr":{},
+            },
+        "AdvTrain":{
+            "def_acc":{},
+            "def_asr":{},
+            "rbst_model_path":{}
+        },
+        "sys":{}
+    }
+    # 加载数据
+    train_loader, test_loader, channel = load_dataset(datasetparam['name'], batchsize=batchsize)
+    # 加载模型
+    model = load_model_net(modelparam['name'], datasetparam['name'], channel=channel, logging=logging)
+    # 记载对抗样本
+    adv_loader = get_load_adv_data(datasetparam, modelparam, adv_methods, adv_param, model, test_loader, device, batchsize, logging=logging)
+    # 计算对抗攻击成功率
+    for i, adv_method in enumerate(adv_methods):
+        result["AdvAttack"]["atk_acc"][adv_method] = eval_test(model.eval().to(device), adv_loader[adv_method], device=device)
+        result["AdvAttack"]["atk_asr"][adv_method] = 100 - result["AdvAttack"]["atk_acc"][adv_method]
+        logging.info("[模型测试阶段] {:s}对抗样本测试准确率：{:.3f}% ".format(adv_method, result["AdvAttack"]["atk_acc"][adv_method]))
+    copy_model1 = copy.deepcopy(model)
+    if "PACA" in defense_methods:
+        result.update({"PACA":{}})
+        logging.info("[模型测试阶段] 即将运行【自动化攻击监测、算法加固】算法：paca_detect")
+        params = {
+            "out_path": osp.join(ROOT,"output", tid, stid),
+            "device": torch.device(device),
+        }
+        result["PACA"]=paca_detect.run(model=copy_model1, test_loader=test_loader, adv_dataloader=adv_loader, params=params,
+                        log_func=logging.info, channel=channel)
+        logging.info("[模型测试阶段]【自动化攻击监测、算法加固】方法：paca_detect运行结束")
+        logging.info('[软硬件协同安全攻防测试] 测试任务编号：{:s}'.format(tid))
+        if len(defense_methods)==1:
+            result['stop'] = 1
+            IOtool.write_json(result, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+            IOtool.change_subtask_state(tid, stid, 2)
+            IOtool.change_task_success_v2(tid)
+            return
+        else:
+            defense_methods.remove("PACA")
+    if "CAFD" in defense_methods:
+        result.update({"CAFD":{
+            "CAFD_acc":{},
+            "CAFD_asr":{},
+        }})
+        logging.info("[模型测试阶段] 即将运行【基于类激活图的扰动过滤】算法：CAFD")
+        from function.ensemble.CAFD.train_or_test_denoiser import cafd
+        temp = {}
+        for method in adv_methods:
+            data_size = 28 if channel == 1 else 32
+            itr = 10 if channel == 1 else 30
+            temp = cafd(target_model=copy_model1, dataloader=test_loader, method=method, adv_param=adv_param[method], channel=channel, data_size=data_size, weight_adv=5e-3,
+            weight_act=1e3, weight_weight=1e-3, lr=0.001, itr=itr,
+            batch_size=batchsize, weight_decay=2e-4, print_freq=10, save_freq=2, device=device, dataset=datasetparam['name'])
+            result["CAFD"]['CAFD_acc'][method] = temp['prec']*100
+            result["CAFD"]['CAFD_asr'][method] = 100 - result["CAFD"]['CAFD_acc'][method]
+        logging.info("[模型测试阶段] 【基于类激活图的扰动过滤】算法：CAFD运行结束")
+        if len(defense_methods)==1:
+            result['stop'] = 1
+            IOtool.write_json(result, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+            IOtool.change_subtask_state(tid, stid, 2)
+            IOtool.change_task_success_v2(tid)
+            return
+        else:
+            defense_methods.remove("CAFD")
+    # 对抗训练 & 攻防博弈
+    logging.info('[攻防推演阶段]即将执行【自动化攻防测试】算法')
+    logging.info('[攻防推演阶段]即将进行攻防推演，选择预设的{:d}种模型，调整参数并开始攻防推演'.format(len(adv_methods)))
+    arch = modelparam['name']
+    task = datasetparam['name']
+    robust_models={}
+    for i, method in enumerate(adv_methods):
+        logging.info('[软硬件协同安全攻防测试] 测试任务编号：{:s}'.format(tid))
+        logging.info('[攻防推演阶段]使用对抗样本算法{:s}生成的样本作为鲁棒训练数据，训练鲁棒性强的模型'.format(method))
+        """专门针对上传的对抗样本设计，仅做测试不做鲁棒训练"""
+        if "eps" not in adv_param[method].keys():
+            adv_param[method]["eps"] = 1
+        _eps = adv_param[method]["eps"]
+        result["AdvAttack"][method] = {}
+        for rate in [0.9, 1.0, 1.1]:
+            adv_param[method]["eps"] = _eps * rate
+            copy_model = copy.deepcopy(model)
+            logging.info('[攻防推演阶段]使用对抗样本算法{:s}生成的样本作为鲁棒训练数据，eps参数为：{:.3f}'.format(method, float(
+                adv_param[method]["eps"])))
+            def_method = "{:s}_{:.5f}".format(method, adv_param[method]["eps"])
+            cahce_weights = IOtool.load(arch=arch, task=task, tag=def_method)
+            if cahce_weights is None:
+                logging.info('[攻防推演阶段]缓存模型不存在，开始模型鲁棒训练（这步骤耗时较长）')
+                logging.info('[软硬件协同安全攻防测试] 测试任务编号：{:s}'.format(tid))
+                attack = run_get_adv_attack(dataset_name = datasetparam['name'], model = model, dataloader = test_loader, device = device, method= method, attackparam=adv_param[method])
+                rst_model = robust_train(copy_model, train_loader, test_loader,
+                                                     adv_loader=adv_loader[method], attack=attack, device=device,  epochs=10, method=method, adv_param=adv_param[method],
+                                                     atk_method=method, def_method=def_method
+                                                     )
+                IOtool.save(model=rst_model, arch=arch, task=task, tag=def_method)
+            else:
+                logging.info('[攻防推演阶段]从默认文件夹载入缓存模型')
+                temp_model = copy.deepcopy(copy_model)
+                temp_model.load_state_dict(cahce_weights)
+                rst_model = copy.deepcopy(temp_model).cpu()
+            try:
+                robust_models[def_method] = copy.deepcopy(rst_model).cpu()
+            except RuntimeError as e:
+                temp_model = copy.deepcopy(copy_model1)
+                temp_model.load_state_dict(IOtool.load(arch=arch, task=task, tag=def_method))
+                robust_models[def_method] = copy.deepcopy(temp_model).cpu()
+            ben_prob, _, _ = test_batch(copy_model, test_loader, device)
+            normal_adv_prob, _, _ = test_batch(copy_model, adv_loader[method], device)
+            robust_adv_prob, _, _ = test_batch(rst_model, adv_loader[method], device)
+            normal_prob = IOtool.prob_scatter(ben_prob, normal_adv_prob)
+            robust_prob = IOtool.prob_scatter(ben_prob, robust_adv_prob)
+            result["AdvAttack"][method]['normal_scatter'] = normal_prob.tolist() 
+            result["AdvAttack"][method]['robust_scatter'] = robust_prob.tolist() 
+            test_acc = eval_test(rst_model, test_loader=test_loader, device=device)
+            adv_test_acc = eval_test(rst_model, test_loader=adv_loader[method], device=device)
+            logging.info(
+                "[攻防推演阶段]鲁棒训练方法'{:s}'结束，模型准确率为：{:.3f}%，模型鲁棒性为：{:.3f}%".format(def_method, test_acc,
+                                                                                     adv_test_acc))
+            if (rate == 1.0):
+                result["AdvTrain"]["def_acc"][str(method)] = adv_test_acc
+                result["AdvTrain"]["def_asr"][str(method)] = 100.0 - adv_test_acc
+                result["AdvAttack"][method]["def_asr"] = 100.0 - adv_test_acc
+            tmp_path = osp.join(f"/model/ckpt/{task}_{arch}_{def_method}.pt")
+            result["AdvTrain"]["rbst_model_path"][def_method] = tmp_path
+            del copy_model
+        adv_param[method]["eps"] = _eps
+    logging.info("[模型测试阶段]【自动化攻防测试】算法运行结束")
+    
+    if "ENS" in defense_methods:
+        result.update({"EnsembleDefense":{
+            "ens_acc":{},
+            "ens_asr":{},
+        }})
+        # 群智防御
+        logging.info('[攻防推演阶段]即将执行【群智防御方法】算法，利用多智能体（每个鲁棒训练即是一种智能体）集成输出')
+        ens_dataloader = adv_loader.copy()
+        ens_model_list = list(robust_models.values())
+
+        ens_model = ensemble_defense.run(model_list=ens_model_list)
+        for method, ens_adv_loader in ens_dataloader.items():
+            test_acc = eval_test(ens_model, test_loader=ens_adv_loader, device=device)
+            result["EnsembleDefense"]["ens_acc"][method] = float(test_acc)
+            result["EnsembleDefense"]["ens_asr"][method] = 100.0 - float(test_acc)
+        logging.info("[模型测试阶段]【群智防御方法】算法运行结束")
+    if 'Inte' in defense_methods:
+        result.update({"InteDefense":{
+            "Inte_acc":{},
+            "Inte_asr":{},
+        }})
+        # 集成防御
+        from function.ensemble.Integrated_defense.integrate import integrated_defense
+        logging.info('[攻防推演阶段]即将执行【集成防御方法】算法，算法：Integrated Defense')
+        data_size = 28 if channel == 1 else 32
+        itr = 10 if channel == 1 else 30
+        defend_info = integrated_defense(model = model, dataloader = test_loader, 
+                                         attack_methods = adv_methods, adv_param = adv_param, 
+                                         train_epoch = itr, in_channel=channel, 
+                                         data_size=data_size, device=device, dataset=datasetparam['name'])
+        print(defend_info)
+        result['InteDefense']['ori'] = defend_info['ori_acc']
+        for method in adv_methods:
+            result['InteDefense']['Inte_acc'][method] = defend_info[method]['defend_attack_acc']*100
+            result['InteDefense']['Inte_asr'][method] = 100-defend_info[method]['defend_rate']*100
+        logging.info("[模型测试阶段]【集成防御方法】算法运行结束")
+    if 'Nash' in defense_methods:
+        result.update({"game":{}})
+        logging.info('[攻防推演阶段]训练完成共计{:d}个模型，开始攻防推演测试'.format(len(robust_models)))
+        num_atk = len(adv_methods)
+        robust_acc = np.zeros([num_atk, num_atk * 3])
+        normal_acc = np.zeros([num_atk, num_atk * 3])
+        logging.info('[攻防推演阶段]即将进行【攻防推演】算法，推演算法为纳什博弈算法')
+        for i, atk_method in enumerate(adv_methods):
+            adv_test_loader = adv_loader[atk_method]
+            logging.info('[攻防推演阶段]使用对抗样本攻击算法{:s}生成的测试样本测试模型鲁棒性'.format(atk_method))
+            for j, def_method in enumerate(robust_models.keys()):
+                logging.info('[攻防推演阶段]测试模型鲁棒性：攻击算法为：{:s}，鲁棒性训练算法为：{:s}'.format(atk_method, def_method))
+                _acc1 = eval_test(robust_models[def_method], test_loader=test_loader, device=device)
+                _acc2 = eval_test(robust_models[def_method], test_loader=adv_test_loader, device=device)
+                normal_acc[i, j] = _acc1
+                robust_acc[i, j] = _acc2
+                logging.info(
+                    '[攻防推演阶段]测试模型鲁棒性，攻击算法为：{:s}，鲁棒性算法为：{:s}，正常准确率:{:.3f}，鲁棒性训练准确率为：{:.3f}'.format(
+                        atk_method, def_method,
+                        float(normal_acc[i, j]),
+                        float(robust_acc[i, j])
+                    )
+                )
+
+        result["game"]["methods"] = "nash"
+        result["game"] = {
+            "nash": {
+                "atk_methods": list(adv_loader.keys()),
+                "def_methods": list(robust_models.keys()),
+                "normal_acc": normal_acc.tolist(),
+                "robust_acc": robust_acc.tolist(),
+                "def_profit": np.zeros([num_atk, 11]).tolist(),
+                "def_strategy": {},
+                "after_attack_acc": np.max(robust_acc, axis=1).tolist(),
+                "defense_acc": []
+            }
+        }
+        for m in adv_loader.keys():
+            def_acc = round(100.0 - result["AdvAttack"]["atk_asr"][m], 2)
+            result["game"]["nash"]["defense_acc"].append(def_acc)
+
+        # nash game best choice, p = [0., 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1. ]
+        logging.info('[攻防推演阶段]即将求解纳什博弈最优解，使用profit=p*acc+(1-p)*robust_acc计算最优情况')
+        def_strategy = {}
+        def_profit = np.zeros([num_atk, 11])
+        atk_name = list(adv_loader.keys())
+        def_name = list(robust_models.keys())
+        for atk_idx in range(num_atk):
+            best_profit = 0.0
+            best_strategy = ""
+            def_strategy[atk_name[atk_idx]] = []
+            logging.info('[攻防推演阶段]正在进行纳什博弈推演，攻击者策略为：{:s}，计算防御者最优策略'.format(str(atk_name[atk_idx])))
+            for idx, p in enumerate(np.arange(0, 1.1, 0.1)):
+                for def_idx in range(3 * num_atk):
+                    profit = p * normal_acc[atk_idx, def_idx] + (1.0 - p) * robust_acc[atk_idx, def_idx]
+                    if profit > best_profit:
+                        best_profit = profit
+                        best_strategy = def_name[def_idx]
+                def_profit[atk_idx, idx] = best_profit
+                def_strategy[atk_name[atk_idx]].append(best_strategy)
+            logging.info('[攻防推演阶段]完成攻击为{:s}的攻防推演，防御者最优策略分别为：{:s}'.format(str(atk_name[atk_idx]),
+                                                                                str(def_strategy[atk_name[atk_idx]])))
+        result["game"]["nash"]["def_strategy"] = def_strategy
+        result["game"]["nash"]["def_profit"] = def_profit.tolist()
+        logging.info('[攻防推演阶段]完成纳什博弈最优解求解，获得纳什博弈最优解')
+        result["sys"]["report"] = {
+            "robust": round(float(np.mean(robust_acc)), 2),
+            "accuray": round(float(np.mean(normal_acc)), 2),
+            "game": round(float(np.mean(def_profit)), 2),
+            "speed": round(float(100.0), 2)
+        }
+
+        logging.info("[模型测试阶段]【攻防对抗推演】纳什博弈算法运行结束")
+        logging.info('[攻防推演阶段] 完成攻防推演')
+    
+    result["stop"] = 1
+    IOtool.write_json(result, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_task_success_v2(tid)
+        
+def run_graph_knowledge(tid, stid, datasetparam, modelparam, attack_mode, attack_type, data_type, defend_algorithm):
+    IOtool.change_subtask_state(tid, stid, 1)
+    IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, stid, time.time())
+    device = IOtool.get_device()
+    logging = IOtool.get_logger(stid)
+    params = {
+        "out_path":osp.join("output",tid,stid),
+        "device":device,
+        "graph_knowledge":{
+            "attack_mode": attack_mode,
+            "attack_type": attack_type,
+            "data_type": data_type,
+            "defend_algorithm": defend_algorithm
+        },
+        'classes':10
+    }
+    batchsize = 128
+    from function import graph_knowledge
+    # 加载数据
+    train_loader, test_loader, channel = load_dataset(datasetparam['name'], batchsize=batchsize)
+    # 加载模型
+    model = load_model_net(modelparam['name'], datasetparam['name'], channel=channel, logging=logging)
+    
+    graph_knowledge.run(model, test_loader, params = params, param_hash=str(time.time()),
+                        log_func=logging.info)
+    result["stop"] = 1
+    IOtool.write_json(result, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+    IOtool.change_subtask_state(tid, stid, 2)
+    IOtool.change_task_success_v2(tid)
+
 def run_ensemble_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods):
     """群智化防御，包含PACA、博弈、集成等
     :params tid:主任务ID
@@ -1107,10 +1501,23 @@ def run_ensemble_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_p
     }
     robust_models = {}
     # 加载数据
-    dataloader = ArgpLoader(data_root='./dataset', dataset=datasetparam['name'].upper(), **params["dataset"])
-    train_loader, test_loader = dataloader.get_loader()
-    params["dataset"] = dataloader.__config__(dataset=datasetparam['name'].upper())
-    num_classes = train_loader.num_classes
+    train_batchsize = 128  # 训练批大小
+    test_batchsize = 128  # 测试批大小
+    
+    if datasetparam['name'].lower() == "mnist":
+        transform = transforms.Compose([transforms.Resize(32), transforms.ToTensor(), transforms.Normalize([0.1307], [0.3081])])
+        train_dataset = mnist.MNIST('./dataset/data/MNIST', train=True, transform=transform, download=True)
+        test_dataset = mnist.MNIST('./dataset/data/MNIST', train=False, transform=transform, download=False)
+    elif datasetparam['name'].lower() == "cifar10":
+        print("cifar10")
+        transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms.RandomHorizontalFlip(),transforms.ToTensor(),transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])])
+        # mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225]
+        train_dataset = CIFAR10('./dataset/data/CIFAR10', train=True, transform=transform, download=True)
+        test_dataset = CIFAR10('./dataset/data/CIFAR10', train=False, transform=transform, download=False)
+    train_loader = DataLoader(train_dataset, batch_size=train_batchsize, shuffle=True,num_workers=2)
+    test_loader = DataLoader(test_dataset, batch_size=test_batchsize,shuffle=False)
+    # params["dataset"] = dataloader.__config__(dataset=datasetparam['name'].upper())
+    # num_classes = train_loader.num_classes
     logging.info( "[数据集获取]：获取{:s}对抗样本已完成".format(datasetparam['name']))
     channel = 1 if datasetparam['name'].upper() == "MNIST" else 3
     # 加载模型
@@ -1124,10 +1531,10 @@ def run_ensemble_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_p
     # net = net.eval().to(device)
     # 获取对抗样本
     adv_loader = {}
-    batchsize = get_batchsize(modelparam['name'], datasetparam['name'])
+    # batchsize = get_batchsize(modelparam['name'], datasetparam['name'])
     for i, adv_method in enumerate(adv_methods):
         logging.info("[模型测试阶段] 正在运行对抗样本攻击:{:s}...[{:d}/{:d}]".format(adv_method, i + 1, len(adv_methods)))
-        adv_loader[adv_method] = get_adv_loader(net.eval().to(device), test_loader, adv_method, params, batchsize=batchsize, logging=logging)
+        adv_loader[adv_method] = get_adv_loader(net.eval().to(device), test_loader, adv_method, params, batchsize=test_batchsize, logging=logging)
         result["AdvAttack"]["atk_acc"][adv_method] = eval_test(net.eval().to(device), adv_loader[adv_method], device=device)
         result["AdvAttack"]["atk_asr"][adv_method] = 100 - result["AdvAttack"]["atk_acc"][adv_method]
         logging.info("[模型测试阶段] {:s}对抗样本攻击运行结束，对抗样本测试准确率：{:.3f}% ".format(adv_method, result["AdvAttack"]["atk_acc"][adv_method]))
@@ -1148,6 +1555,31 @@ def run_ensemble_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_p
             IOtool.change_subtask_state(tid, stid, 2)
             IOtool.change_task_success_v2(tid)
             return
+        else:
+            defense_methods.remove("PACA")
+    if "CAFD" in defense_methods:
+        result.update({"CAFD":{
+            "CAFD_acc":{},
+            "CAFD_asr":{},
+        }})
+        from function.GroupDefense.CAFD.train_or_test_denoiser import cafd
+        methods = ['fgsm', 'bim', 'rfgsm', 'cw', 'pgd', 'tpgd', 'mifgsm', 'autopgd', 'square', 'deepfool', 'difgsm']
+        for method in adv_methods:
+            method1 = method.lower()
+            if method1 in methods:
+                result["CAFD"]['CAFD_acc'][method] = cafd(target_model=copy_model1, dataloader=test_loader, method=method1, eps=1, channel=1, data_size=28, weight_adv=5e-3,
+                weight_act=1e3, weight_weight=1e-3, lr=0.001, itr=10,
+                batch_size=128, weight_decay=2e-4, print_freq=10, save_freq=2, device='cuda')
+        if len(defense_methods)==1:
+            result['stop'] = 1
+            IOtool.write_json(result, osp.join(ROOT,"output", tid, stid+"_result.json")) 
+            IOtool.change_subtask_state(tid, stid, 2)
+            IOtool.change_task_success_v2(tid)
+            return
+        else:
+            defense_methods.remove("CAFD")
+    # if "Inte" in defense_methods:
+    #     from function.GroupDefense.CAFD.train_or_test_denoiser import cafd
     # 对抗训练 & 攻防博弈
     logging.info('[攻防推演阶段]即将执行【自动化攻防测试】算法')
     logging.info('[攻防推演阶段]即将进行攻防推演，选择预设的{:d}种模型，调整参数并开始攻防推演'.format(len(adv_methods)))
@@ -1172,7 +1604,7 @@ def run_ensemble_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_p
             if cahce_weights is None:
                 logging.info('[攻防推演阶段]缓存模型不存在，开始模型鲁棒训练（这步骤耗时较长）')
                 logging.info('[软硬件协同安全攻防测试] 测试任务编号：{:s}'.format(tid))
-                rst_model = robust_train(copy_model, train_loader, test_loader=test_loader,
+                rst_model = robust_train(copy_model, train_loader, test_loader,
                                                      adv_loader=adv_loader[method], device=device,  epochs=10, method=method, adv_param=adv_param[method],
                                                      atk_method=method, def_method=def_method
                                                      )

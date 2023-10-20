@@ -13,7 +13,7 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
-from auto_LiRPA_verifiy.vision.data import get_cifar_data
+from function.formal_verify.auto_LiRPA_verifiy.vision.data import get_cifar_data
 
 
 class Bottleneck(nn.Module):
