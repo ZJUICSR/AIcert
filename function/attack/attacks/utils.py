@@ -929,7 +929,6 @@ def load_cifar10 (
     y_train = np.zeros((num_train_samples,), dtype=np.uint8)
     for i in range(1, 6):
         fpath = os.path.join(path, "data_batch_" + str(i))
-        # print(fpath)
         data, labels = load_batch(fpath)
         x_train[(i - 1) * 10000 : i * 10000, :, :, :] = data
         y_train[(i - 1) * 10000 : i * 10000] = labels

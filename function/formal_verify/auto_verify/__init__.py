@@ -34,7 +34,7 @@ def auto_verify_img(net,data,eps,input_file='./test.jpg',device='cuda'):
     auto_LiRPA_pretrain=os.path.join(base,'verify_checkpoints')
     if net=='cnn_7layer_bn':
         model='cnn_7layer_bn'
-    elif net=='Densenet' and data=='CIFAR':
+    elif net=='Densenet':
         model='Densenet_cifar_32'
     elif net=='Resnet' and data=='MNIST':
         model='resnet'
@@ -42,27 +42,35 @@ def auto_verify_img(net,data,eps,input_file='./test.jpg',device='cuda'):
         model='ResNeXt_cifar' 
     elif net=='Wide Resnet' and data=='CIFAR':
         model='wide_resnet_cifar_bn_wo_pooling'
+    else:
+        raise ValueError(f"不支持{net}和{data}的组合")
 
     if model=='cnn_7layer_bn' and data=='CIFAR':
         load=f'{auto_LiRPA_pretrain}/cnn_7layer_bn_cifar'
     elif model=='cnn_7layer_bn' and data=='MNIST':
         load=f'{auto_LiRPA_pretrain}/natural_cnn_7layer_bn_mnist'
     elif model=='Densenet_cifar_32':
-        load=f'{auto_LiRPA_pretrain}/Densenet_cifar'
+        if data=='CIFAR':
+            load=f'{auto_LiRPA_pretrain}/Densenet_cifar'
+        else:
+            load=f'{auto_LiRPA_pretrain}/densenet_mnist'
     elif model=='resnet':
-        load=f'{auto_LiRPA_pretrain}/ResNet_mnist'
+        load=f'{auto_LiRPA_pretrain}/resNet_mnist'
     elif model=='ResNeXt_cifar':
         load=f'{auto_LiRPA_pretrain}/ResNeXt_cifar'
     elif model=='wide_resnet_cifar_bn_wo_pooling':
         load=f'{auto_LiRPA_pretrain}/wide_resnet_cifar_bn_wo_pooling_dropout'
     if data == 'MNIST':
-        model_ori = Models[model](in_ch=1, in_dim=28)
+        if model=='Densenet_cifar_32':
+            model_ori = Models[model](in_ch=3, in_dim=32)
+        else:
+            model_ori = Models[model](in_ch=1, in_dim=28)
     else:
         print(model)
         model_ori = Models[model](in_ch=3, in_dim=32)
-    print("net,data,model",net,data,model)
+    print(load)
     checkpoint = torch.load(load)
-    epoch, state_dict = checkpoint['epoch'], checkpoint['state_dict']
+    state_dict = checkpoint['state_dict']
     opt_state = None
     try:
         opt_state = checkpoint['optimizer']
@@ -74,7 +82,10 @@ def auto_verify_img(net,data,eps,input_file='./test.jpg',device='cuda'):
     # utils.logger.info('Checkpoint loaded: {}'.format(load))
     if data == 'MNIST':
         dummy_input = torch.randn(1, 1, 28, 28)
-        transform=transforms.ToTensor()
+        if model=='Densenet_cifar_32':
+            transform = transforms.Compose([transforms.ToTensor(),transforms.Resize([32,32]),transforms.Lambda(lambda x: x.repeat(3,1,1))])
+        else:
+            transform=transforms.ToTensor()
     elif data == 'CIFAR':
         dummy_input = torch.randn(1, 3, 32, 32)
         normalize = transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])
@@ -84,22 +95,28 @@ def auto_verify_img(net,data,eps,input_file='./test.jpg',device='cuda'):
                     #transforms.RandomCrop(32, 4, padding_mode='edge'),
                     transforms.ToTensor(),
                     normalize])
+        # transform=transforms.Compose([transforms.ToTensor(), normalize])
     
-
-    image = Image.open(input_file).convert('RGB')
+    if data == 'MNIST':
+        image = Image.open(input_file).convert('L')
+    else:
+        image = Image.open(input_file).convert('RGB')
+        # image = cv2.imread(input_file)
     print(input_file)
-    
     
     image= transform(image)
     image=image.view(1,image.shape[0],image.shape[1],image.shape[2]).cuda()
     model_ori=model_ori.cuda()
+
+    print(image.shape)
 
     model = BoundedModule(model_ori, torch.zeros_like(image), bound_opts={'relu':bound_opts}, device=device)
 
     model.eval()
     
     
-    _, predicted = torch.max(model(image), 1) 
+    _, predicted = torch.max(model_ori(image), 1) 
+    print('Model ori prediction:', predicted)
     norm = np.inf
     ptb = PerturbationLpNorm(norm = norm, eps = eps)
     bounded_image = BoundedTensor(image, ptb)
@@ -135,4 +152,3 @@ def auto_verify_img(net,data,eps,input_file='./test.jpg',device='cuda'):
 
 
     return lb1.cpu().numpy()[0].tolist(),ub1.cpu().numpy()[0].tolist(),lb2.cpu().numpy()[0].tolist(),ub2.cpu().numpy()[0].tolist(),predicted.cpu().numpy().tolist()[0],score_IBP,score_CROWN
-# verify_img('ResNeXt_cifar','CIFAR',0.1)

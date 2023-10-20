@@ -402,9 +402,12 @@ inline void selectParentheses(char* str, char* disStr){
     }
 }
 
+
 inline void selectParenthesesNum(char* str, int* num){//printf("done1\n");
     char disStr[SIZE] = "\0";
     selectParentheses(str, disStr);
+
+    printf("%s \n", disStr);
 
     #if 0
     prints(disStr);
@@ -413,29 +416,72 @@ inline void selectParenthesesNum(char* str, int* num){//printf("done1\n");
     #endif
 
     char tem[SIZE]="\0";
+    // char clear[SIZE]="\0";
     int temlen = 0;
     int disStrlen = 0;
     int numlen = 0;
     while(disStr[disStrlen]!='\0'){
 
         if(disStr[disStrlen]!='.'){
-            tem[temlen]=disStr[disStrlen];
-            temlen++;
+                    tem[temlen]=disStr[disStrlen];
+                    temlen++;
         }else{
             // printf("\n");
             // prints(tem);
+            printf("%s ", tem);
             num[numlen]=BaseTools::charToNumD(tem);
+            printf("%d \n", num[numlen]);
             numlen++;
-            strcpy(tem, "\0");
+            // strcpy(tem, "\0");
+            int i = 0;
+            while(tem[i] != '\0'){
+                    tem[i] = '\0';
+                    i++;
+            }
             temlen = 0;
-            
+                    
         }
 
         disStrlen++;
     }
     tem[temlen]=disStr[disStrlen];
     num[numlen]=BaseTools::charToNumD(tem);
+          
 }
+// inline void selectParenthesesNum(char* str, int* num){//printf("done1\n");
+//     char disStr[SIZE] = "\0";
+//     selectParentheses(str, disStr);
+
+//     #if 0
+//     prints(disStr);
+    
+
+//     #endif
+
+//     char tem[SIZE]="\0";
+//     int temlen = 0;
+//     int disStrlen = 0;
+//     int numlen = 0;
+//     while(disStr[disStrlen]!='\0'){
+
+//         if(disStr[disStrlen]!='.'){
+//             tem[temlen]=disStr[disStrlen];
+//             temlen++;
+//         }else{
+//             // printf("\n");
+//             // prints(tem);
+//             num[numlen]=BaseTools::charToNumD(tem);
+//             numlen++;
+//             strcpy(tem, "\0");
+//             temlen = 0;
+            
+//         }
+
+//         disStrlen++;
+//     }
+//     tem[temlen]=disStr[disStrlen];
+//     num[numlen]=BaseTools::charToNumD(tem);
+// }
 
 inline void fmapInitial(Parameters* param, int8_t* fm){
 
