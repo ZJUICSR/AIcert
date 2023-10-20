@@ -51,7 +51,7 @@ class TIFGSM(EvasionAttack):
         self.kernel_name = kernel_name
         self.len_kernel = len_kernel
         self.nsig = nsig
-        self.stacked_kernel = torch.from_numpy(self.kernel_generation())
+        self.stacked_kernel = torch.from_numpy(self.kernel_generation(2))
         self.classifier = classifier
         self.device = classifier.device
 
@@ -95,8 +95,17 @@ class TIFGSM(EvasionAttack):
             grad = torch.autograd.grad(cost, adv_images,
                                        retain_graph=False, create_graph=False)[0]
             # depth wise conv2d
-            grad = F.conv2d(grad, stacked_kernel, stride=1,
+            try:
+                self.stacked_kernel = torch.from_numpy(self.kernel_generation(1))
+                stacked_kernel = self.stacked_kernel.to(self.device)
+                grad = F.conv2d(grad, stacked_kernel, stride=1,
+                            padding='same', groups=1)
+            except RuntimeError as e:
+                self.stacked_kernel = torch.from_numpy(self.kernel_generation(2))
+                stacked_kernel = self.stacked_kernel.to(self.device)
+                grad = F.conv2d(grad, stacked_kernel, stride=1,
                             padding='same', groups=3)
+            # print('grad shape', grad.shape)
             grad = grad / torch.mean(torch.abs(grad),
                                      dim=(1, 2, 3), keepdim=True)
             grad = grad + momentum*self.decay
@@ -110,7 +119,7 @@ class TIFGSM(EvasionAttack):
         adv_images = adv_images.cpu().numpy()
         return adv_images
 
-    def kernel_generation(self):
+    def kernel_generation(self,num):
         if self.kernel_name == 'gaussian':
             kernel = self.gkern(self.len_kernel, self.nsig).astype(np.float32)
         elif self.kernel_name == 'linear':
@@ -119,8 +128,10 @@ class TIFGSM(EvasionAttack):
             kernel = self.ukern(self.len_kernel).astype(np.float32)
         else:
             raise NotImplementedError
-
-        stack_kernel = np.stack([kernel, kernel, kernel])
+        if num == 2:
+            stack_kernel = np.stack([kernel, kernel, kernel])
+        else:
+            stack_kernel = np.stack([kernel])
         stack_kernel = np.expand_dims(stack_kernel, 1)
         return stack_kernel
 
