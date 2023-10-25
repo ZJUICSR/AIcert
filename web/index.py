@@ -1310,7 +1310,7 @@ def CoverageImportanceParamSet():
         IOtool.change_task_info(tid, "dataset", dataset)
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_coverage_importance, tid, AAtid, dataset, model, n_imp, clus)
-        IOtool.add_task_queue(tid, AAtid, t2, 300)
+        IOtool.add_task_queue(tid, AAtid, t2, 3000)
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
@@ -1351,7 +1351,7 @@ def DeepSstParamSet():
         IOtool.change_task_info(tid, "model", modelname)
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_deepsst, tid, AAtid, dataset, modelname, pertube, m_dir)
-        IOtool.add_task_queue(tid, AAtid, t2, 300)
+        IOtool.add_task_queue(tid, AAtid, t2, 3000)
 
         # t2 = threading.Thread(target=interface.run_deepsst,args=(tid, AAtid, dataset, modelname, pertube, m_dir))
         # t2.setDaemon(True)
@@ -1681,6 +1681,67 @@ def graph_knowledge():
             "tid":tid,
             "stid":stid
         }
+        return jsonify(res)
+    else:
+        abort(403)
+
+@app.route('/Defense/AdvTraining_GNN', methods=['POST'])
+def AdvTraining_GNN():
+    """
+    图神经网络鲁棒训练 
+    输入：tid：主任务ID
+    dataset：数据集名称
+    batch_size：批处理大小
+    train_size：训练集比例
+    test_size：测试集比例
+    val_size：验证集比例
+    n_iters：训练迭代的次数
+    train_Q：全局扰动数量
+    margin_iters：
+    q_ratio：属性扰动数量
+    burn_in:未优化鲁棒损失的迭代次数
+    random_state=123,  # 随机数生成器使用的种子
+    """
+    global LiRPA_LOGS
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        tid = inputParam["tid"]
+        dataset = inputParam["dataset"]
+        batch_size = inputParam["batch_size"]
+        train_size = inputParam["train_size"]
+        test_size = inputParam["test_size"]
+        val_size = inputParam["val_size"]
+        n_iters = inputParam["n_iters"]
+        train_Q = inputParam["train_Q"]
+        margin_iters = inputParam["margin_iters"]
+        q_ratio = inputParam["q_ratio"]
+        burn_in = inputParam["burn_in"]
+        random_state = inputParam["random_state"]
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        value = {
+            "type":"AdvTraining_GNN",
+            "state":0,
+            "name":["AdvTraining_GNN"],
+            "dataset":dataset,
+            "batch_size":batch_size,
+            "train_size":train_size,
+            "test_size":test_size,
+            "val_size":val_size,
+            "n_iters":n_iters,
+            "train_Q":train_Q,
+            "margin_iters":margin_iters,
+            "q_ratio":q_ratio,
+            "burn_in":burn_in,
+            "random_state":random_state
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", inputParam["dataset"])
+        # 执行任务
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_advtraining_gnn, tid, stid, dataset, batch_size, train_size, test_size, val_size, n_iters, train_Q, margin_iters, q_ratio, burn_in, random_state)
+        IOtool.add_task_queue(tid, stid, t2, 3000)
+        res = {"code":1,"msg":"success","Taskid":tid,"stid":stid}
         return jsonify(res)
     else:
         abort(403)
