@@ -15,7 +15,7 @@ from model.model_net.lenet import Lenet
 
 from function.attack import run_adversarial, run_backdoor
 from function.fairness import run_dataset_debias, run_model_debias, run_image_model_debias, run_model_evaluate, run_image_model_evaluate
-from function import concolic, env_test, coverage, deepsst, dataclean, framework_test, modelmeasure, modulardevelop
+from function import concolic, env_test, coverage, deepsst, dataclean, framework_test, modelmeasure, modulardevelop, robust_gnn
 
 from function.ex_methods import *
 import matplotlib.pyplot as plt
@@ -1737,6 +1737,47 @@ def run_ensemble_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_p
     IOtool.write_json(result, osp.join(ROOT,"output", tid, stid+"_result.json")) 
     IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
+
+def run_advtraining_gnn(tid,AAtid, dataset, batch_size, train_size, test_size, val_size, n_iters, train_Q, margin_iters, q_ratio, burn_in, random_state):
+    """图神经网络鲁棒训练
+    :params tid:主任务ID
+    :params AAtid:子任务id
+    :params dataset: 数据集名称
+    :params batch_size: 批处理大小
+    :params train_size：训练集比例
+    :params test_size：测试集比例
+    :params val_size：验证集比例
+    :params n_iters：训练迭代的次数
+    :params train_Q：全局扰动数量
+    :params margin_iters：
+    :params q_ratio：属性扰动数量
+    :params burn_in:未优化鲁棒损失的迭代次数
+    :params random_state：随机数生成器使用的种子
+    :output res:需保存到子任务json中的返回结果/路径
+    """
+    IOtool.change_subtask_state(tid, AAtid, 1)
+    IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, AAtid, time.time())
+    # devive = IOtool.get_device()
+    logging = IOtool.get_logger(AAtid)
+    res = robust_gnn.run_robust_gcn(
+        dataset_name=dataset.lower(),  # 数据集
+        train_Q=train_Q,  # 全局允许扰动的数量。
+        batch_size=batch_size,  # 一次训练所选取的样本数
+        q_ratio=q_ratio,  # 属性扰动数量
+        train_size=train_size,  # 分割中包含的数据集的比例
+        val_size=val_size,  # 验证分割中包含的数据集的比例。
+        test_size=test_size,  # 测试分割中包含的数据集的比例
+        random_state=123,  # 随机数生成器使用的种子
+        n_iters=n_iters,  # 训练迭代的次数。
+        burn_in=burn_in,  # 开始时未优化鲁棒损失的迭代次数。
+        margin_iters=margin_iters, path=osp.join(ROOT,"output", tid, AAtid), logger_func=logging.info)  
+    res["stop"] = 1
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+    IOtool.change_subtask_state(tid, AAtid, 2)
+    IOtool.change_task_success_v2(tid=tid)
+
+
     
 import csv
 def llm_attack(tid, stid, goal, target):
