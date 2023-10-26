@@ -39,7 +39,7 @@ def seat(args_dict):
     transform_test = transforms.Compose([
         transforms.ToTensor(),
     ])
-
+    global train_loader, test_loader, adjust_learning_rate
     trainset = torchvision.datasets.CIFAR10(root='/data/user/WZT/Datasets/SEAT_data/train', train=True, download=True,
                                             transform=transform_train)
     train_loader = torch.utils.data.DataLoader(trainset, batch_size=128, shuffle=True, num_workers=2)
