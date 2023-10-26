@@ -231,7 +231,7 @@ class GermanDataset(FairnessDataset):
             'other_debtors', 'residence_since', 'property', 'age',
             'installment_plans', 'housing', 'number_of_credits',
             'skill_level', 'people_liable_for', 'telephone',
-            'foreign_worker', 'credit'] # include all features
+            'foreign_worker', 'credit', 'sex'] # include all features
     features_to_drop=['personal_status']
     categotical_features = ['status', 'credit_history', 'purpose',
                      'savings', 'employment', 'other_debtors', 'property',
