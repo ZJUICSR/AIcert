@@ -225,7 +225,8 @@ def dataset_debias(dataset_name, algorithm_name, sensattrs=[], targetattrs=[], l
         dataset = dataset_cls(favorable=target)
         metrics = DatasetMetrics(dataset=dataset)
         # debiasing
-        new_dataset = algorithm_cls(dataset).fit().transform()
+        #mid_dataset = algorithm_cls(dataset,[],1).fit().transform() 
+        new_dataset = Reweighing(dataset,[],0).test()
         logger.info(f'calcuating fairness metrics for original and debiased dataset: \'{dataset_name}\'.')
         new_metrics = DatasetMetrics(new_dataset)
         fd, nfd = metrics.favorable_diff(), new_metrics.favorable_diff()
@@ -235,30 +236,32 @@ def dataset_debias(dataset_name, algorithm_name, sensattrs=[], targetattrs=[], l
         if result['Consistency'] is None:
             result['Consistency'] = [metrics.consistency(), new_metrics.consistency()]
         
-        # proportion of goups
-        logger.info(f'calculating proportion of groups in dataset: \'{dataset_name}\'.')
-        dataset = dataset_cls()
-        prop = dataset.proportion()
-        for attr in sensattrs:
-            result['Proportion'][attr] = {
-                SENSITIVE_GROUPS[dataset_name][attr][0]: prop[attr],
-                SENSITIVE_GROUPS[dataset_name][attr][1]: 1 - prop[attr],
-            }
+    # proportion of goups
+    logger.info(f'calculating proportion of groups in dataset: \'{dataset_name}\'.')
+    dataset = dataset_cls()
+    #mid_dataset = Reweighing(dataset,[],1).fit().transform() 
+    new_dataset = Reweighing(dataset,[],0).test()
+    prop = new_dataset.proportion()
+    for attr in sensattrs:
+        result['Proportion'][attr] = {
+            SENSITIVE_GROUPS[dataset_name][attr][0]: prop[attr],
+            SENSITIVE_GROUPS[dataset_name][attr][1]: 1 - prop[attr],
+        }
             
-        # overall fairness
-        logger.info(f'calculating overall fairness for dataset: \'{dataset_name}\'.')
-        result1, result2 = split_result(result)
-        result1 = dataset_overall_fairness(result=result1)
-        result2 = dataset_overall_fairness(result=result2)
-        result['Overall group fairness'] = [result1[0], result2[0]]
-        result['Overall individual fairness'] = [result1[1], result2[1]]
-        result['Overall fairness'] = [result1[2], result2[2]]
+    # overall fairness
+    logger.info(f'calculating overall fairness for dataset: \'{dataset_name}\'.')
+    result1, result2 = split_result(result)
+    result1 = dataset_overall_fairness(result=result1)
+    result2 = dataset_overall_fairness(result=result2)
+    result['Overall group fairness'] = [result1[0], result2[0]]
+    result['Overall individual fairness'] = [result1[1], result2[1]]
+    result['Overall fairness'] = [result1[2], result2[2]]
 
-        logger.info(f'data debiasing done.')
-        return result
+    logger.info(f'data debiasing done.')
+    return result
 
 # evaluate model fairness
-def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, generalized=False, logger=None):
+def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, generalized=False, logger=None, model_path=''):
     """Evaluate fairness of model trained on built in dataset
 
     Args:
@@ -304,6 +307,10 @@ def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', '
         sensattrs = list(dataset_cls.privileged.keys())
 
     dataset = dataset_cls(favorable=targetattr)
+    #new_dataset = Reweighing(dataset,[],0).fit().transform() 
+    #mid_dataset = Reweighing(dataset,[],1).fit().transform() 
+    #new_dataset = Reweighing(mid_dataset,[],0).fit().transform() 
+    #new_dataset = Reweighing(dataset,[],0).test()
 
     if model_name == '3 Hidden-layer FCN':
         model_cls = Classifier
@@ -314,7 +321,12 @@ def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', '
     # training model
     logger.info(f'training model: \'{model_name}\' on dataset: \'{dataset_name}\'.')
     model = model_cls(input_shape=dataset.num_features, device='cuda')
-    model.train(dataset=dataset, epochs=2000)
+
+    if model_path == '':
+        model.train(dataset=dataset, epochs=2000, save_folder=model_path)
+    else:
+        print(f"loading model from path: {model_path}")
+        model.load_state_dict(torch.load(model_path)["model"])
 
     # evaluating model
     logger.info(f'calculating fairness metrics for model: \'{model_name}\' on dataset: \'{dataset_name}\'.')
@@ -332,6 +344,10 @@ def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', '
     # proportion of groups given favorable prediction
     logger.info(f'calculating proportion of groups given favorable prediction for model: \'{model_name}\' on dataset: \'{dataset_name}\'.')
     dataset = dataset_cls(favorable=targetattr)
+    #new_dataset = Reweighing(dataset,[],0).fit().transform()
+    #mid_dataset = Reweighing(dataset,[],1).fit().transform() 
+    #new_dataset = Reweighing(mid_dataset,[],0).fit().transform()
+    #new_dataset = Reweighing(dataset,[],0).test()
     prop = dataset.proportion(favorable=True)
     for attr in sensattrs:
         result['Proportion'][attr] = {
@@ -351,7 +367,7 @@ def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', '
 
 
 # model debiasing
-def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, generalized=False, logger=None):
+def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, generalized=False, logger=None, save_folder=''):
     """Debias model trained on built-in dataset
 
     Args:
@@ -423,6 +439,12 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
     model = model_cls(input_shape=dataset.num_features, device='cuda')
     model.train(dataset=dataset, epochs=2000)
 
+    if save_folder=='':
+        save_folder = os.path.join('record/'+dataset_name, 'test')
+    if not os.path.exists(save_folder):
+        os.makedirs(save_folder)
+    torch.save(model.state_dict(), os.path.join(save_folder, 'ckpt.pth'))
+
     # evaluating model
     logger.info(f'calcuating fairness metrics for original model: \'{model_name}\' on dataset: \'{dataset_name}\'.')
     pred_dataset = model.predicted_dataset(dataset=dataset)
@@ -447,6 +469,8 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
         algorithm.fit(dataset=dataset, dataset_pred=pred_dataset)
         new_pred_dataset = algorithm.transform(pred_dataset)
     new_metrics = ModelMetrics(dataset=dataset, classified_dataset=new_pred_dataset)
+    
+    torch.save(model.state_dict(), os.path.join(save_folder, f'ckpt_{algorithm_name}.pth'))
 
     logger.info(f'calcuating fairness metrics for debiased model: \'{model_name}\' on dataset: \'{dataset_name}\'.')
     for metric in metrics:
@@ -555,11 +579,8 @@ def dataset_analysis(dataset_name, attrs=[], targetattrs=[], prptn_thd=0.1, logg
     
     # overall analysis
     logger.info('calculating overall analysis of dataset')
-    try:
-        result['Overall Correlation'] = calculate_overall_correlation(result['Correlation coefficients'])
-        result['Overall uniformity'] = calculate_distribution_uniformity(result['Proportion'])
-    except:
-        pass
+    result['Overall Correlation'] = calculate_overall_correlation(result['Correlation coefficients'])
+    result['Overall uniformity'] = calculate_distribution_uniformity(result['Proportion'])
 
     return result
 
@@ -574,7 +595,7 @@ def test1():
     for dataset in ['Compas']: # go through all data sets
         print('======dataset evaluation: {}======'.format(dataset))
         print(dataset_evaluate(dataset_name=dataset))
-        for dataset_algorithm in ['LFR', 'Reweighing']: # go through all data set debias algorithms
+        for dataset_algorithm in ['Reweighing']: # go through all data set debias algorithms
         # for dataset_algorithm in ['LFR']: # go through all data set debias algorithms
             print('====dataset debiasing: {}, {}===='.format(dataset, dataset_algorithm))
             print(dataset_debias(dataset_name=dataset, algorithm_name=dataset_algorithm))
@@ -601,7 +622,7 @@ def test2():
 
     # exit()
     # for dataset in ['Compas', 'Adult', 'German']:
-    for dataset in ['Adult']: # go through all data sets
+    for dataset in ['Compas', 'Adult', 'German']: # go through all data sets
         # print('======dataset evaluation: {}======'.format(dataset))
         # print(dataset_evaluate(dataset_name=dataset))
         # print(dataset_analysis(dataset_name=dataset))
@@ -616,10 +637,11 @@ def test2():
         for model in ['3 Hidden-layer FCN']: # go through all models
             for target_attr in TARGET_ATTR[dataset]:
                 print('====model evaluation: {}-{}, {}===='.format(dataset, target_attr, model))
-                result = model_evaluate(dataset_name=dataset, model_name=model, targetattr=target_attr)
+                result = model_evaluate(dataset_name=dataset, model_name=model, targetattr=target_attr,metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd','FPn', 'TNn'])
                 print(result)
                 # print("transformed result: ", split_result(result=result))
                 # for model_algorithm in ['Reject Option-SPd', 'Reject Option-AOd', 'Reject Option-EOd']: # go through all model debias algorithms
+                continue
                 for model_algorithm in ['Domain Independent', 'Adersarial Debiasing', 'Calibrated EOD-fnr', 'Calibrated EOD-fpr', 'Calibrated EOD-weighted', 'Reject Option-SPd', 'Reject Option-AOd', 'Reject Option-EOd']: # go through all model debias algorithms
                     print('====model debiasing: {}-{}, {}, {}===='.format(dataset,target_attr, model, model_algorithm))
                     result = model_debias(dataset_name=dataset, model_name=model, algorithm_name=model_algorithm,generalized=True, targetattr=target_attr)
@@ -628,5 +650,46 @@ def test2():
         
     # print(result) 
 
+def analyze_data(data, row):
+    if isinstance(data, dict):
+        for k, v in data.items():
+            analyze_data(v, row)
+    elif isinstance(data, (list, tuple)):
+        for i in range(len(data)):
+            analyze_data(data[i], row)
+    else:
+        row.append(data)
+
+def create_data(data, mean):
+    for key, value in data.items():
+        if isinstance(value, dict):
+            create_data(value, mean)
+        elif isinstance(value, (list, tuple)):
+            for i in range(len(value)):
+                create_data(value[i], mean)
+        else:
+            data[key] = mean.pop(0)
+
+def test3():
+    dataset = 'Compas'
+    row1 = [[] for i in range(3)]
+    for i in range(3):
+        print('====model evaluation: {}, {}===='.format(dataset, '3 Hidden-layer FCN'))
+        result = model_evaluate(dataset_name=dataset, model_name='3 Hidden-layer FCN')
+        if i == 0:
+            result_new = result
+        analyze_data(result, row1[i])
+    result_mean = np.array(row1).mean(axis=0)
+    create_data(result_new, result_mean.tolist())
+    print(result_mean)
+    print(result_new)
+    
+def test_model_loading():
+    dataset = "Compas"
+    alg = "Adersarial Debiasing"
+    # result = model_evaluate(dataset_name=dataset, model_name='3 Hidden-layer FCN', model_path="./ckpt.pth")
+    result = model_debias(dataset_name=dataset, model_name='3 Hidden-layer FCN', algorithm_name=alg, save_folder="./test")
+    print(result)
+
 if __name__ == '__main__':
-    test2()
+    test_model_loading()
