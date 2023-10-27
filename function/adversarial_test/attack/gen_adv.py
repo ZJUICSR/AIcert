@@ -3,10 +3,7 @@
 # @File    : gen_adv.py
 
 # -*- coding: utf-8 -*-
-import os, sys
-# sys.path.append("..")
-sys.path.append("../../..")
-from function.attack import run_get_adv_data
+import os
 from torch.utils.data import DataLoader, Dataset
 import torch
 from torch.utils.data import ConcatDataset
@@ -15,6 +12,7 @@ from tqdm import tqdm
 import json
 import numpy as np
 from .DeepFool_My import DeepFoolMy
+from .tifgsm_my import TIFGSM as TIFGSM1
 
 seed = 12395
 
@@ -31,34 +29,77 @@ def write_json(info, file_name=''):
         json.dump(info, f, indent=4, ensure_ascii=False)
     return
 
+def attacks_dict(model, eps):
+    attacks = {
+        'fgsm': FGSM(model=model, eps=eps),
+        'bim': BIM(model=model, eps=eps, alpha=2 / 255, steps=10),
+        'rfgsm': RFGSM(model, eps=eps, alpha=2 / 255, steps=10),
+        'ffgsm': FFGSM(model=model, eps=eps, alpha=2 / 255),
+        'tifgsm': TIFGSM1(model=model, eps=eps, alpha=2 / 255, steps=10, decay=0.0, kernel_name='gaussian',
+                         len_kernel=15, nsig=3, resize_rate=0.9, diversity_prob=0.5),
+        # 'nifgsm': NIFGSM(model=model, eps=eps, alpha=2 / 255, steps=10, decay=1.0),
+        # 'sinfgsm': SINIFGSM(model=model, eps=eps, alpha=2 / 255, steps=10, decay=1.0, m=5),
+        # 'vmifgsm': VMIFGSM(model=model, eps=eps, alpha=2 / 255, steps=10, decay=1.0, N=5, beta=3 / 2),
+        # 'vnifgsm': VNIFGSM(model=model, eps=eps, alpha=2 / 255, steps=10, decay=1.0, N=5, beta=3 / 2),
+        'mifgsm': MIFGSM(model, eps=eps, alpha=2 / 255, steps=10, decay=0.1),
+        'difgsm': DIFGSM(model=model, eps=eps, alpha=2 / 255, steps=10, diversity_prob=0.5, resize_rate=0.9),
+        # 'spsa': SPSA(model=model, eps=eps, delta=0.01, lr=0.01, nb_iter=1, nb_sample=128, max_batch_size=64),
+        'cw': CW(model=model, c=1, lr=0.01, steps=20, kappa=0),
+        'upgd': UPGD(model=model, eps=eps, alpha=2 / 255, steps=10),
+        'pgd': PGD(model=model, eps=eps, alpha=2 / 225, steps=10, random_start=True),
+        'tpgd': TPGD(model=model, eps=eps, alpha=2 / 255, steps=10),
+        'pgdl2': PGDL2(model=model, eps=eps, alpha=0.2, steps=10),
+        # 'pgdrsl2': PGDRSL2(model=model, eps=eps, alpha=0.2, steps=10),
+        'sparsefool': SparseFool(model=model, steps=10, lam=3, overshoot=0.02),
+        'autopgd': APGD(model=model, eps=eps, steps=10, eot_iter=1, n_restarts=1, loss='ce'),
+        'onepixel': OnePixel(model=model, pixels=1, steps=10, popsize=10, inf_batch=128),
+        'square': Square(model=model, eps=eps, n_queries=10, n_restarts=1, loss='ce'),
+        # 'pixle': Pixle(model=model, x_dimensions=(2, 10), y_dimensions=(2, 10), pixel_mapping='random', restarts=20,
+        #                max_iterations=10),
+        'deepfool': DeepFoolMy(model=model, steps=10),
+        'fab': FAB(model=model, norm='Linf', eps=eps, steps=10, n_restarts=1, alpha_max=0.1, eta=1.05, beta=0.9,
+                   verbose=False, seed=0, n_classes=10),
+        'jitter': Jitter(model=model, eps=eps, alpha=2/255, steps=10, scale=10, std=0.1, random_start=True)
+    }
+    return attacks
+
+def attacks_rules_dict(model, eps):
+    attacks = {
+        'fgsm': FGSM(model=model, eps=eps),
+        'bim': BIM(model=model, eps=eps, alpha=2/255, steps=20),
+        'rfgsm': RFGSM(model, eps=eps, alpha=2/255, steps=20),
+        'ffgsm': FFGSM(model=model, eps=eps, alpha=2/255),
+        'tifgsm': TIFGSM1(model=model, eps=eps, alpha=2/255, steps=20, decay=0.0, kernel_name='gaussian',
+                         len_kernel=7, nsig=3, resize_rate=0.9, diversity_prob=0.5),
+        # 'nifgsm': NIFGSM(model=model, eps=eps, alpha=2/255, steps=10, decay=1.0),
+        # 'sinfgsm': SINIFGSM(model=model, eps=eps, alpha=2/255, steps=10, decay=1.0, m=5),
+        # 'vmifgsm': VMIFGSM(model=model, eps=eps, alpha=2/255, steps=10, decay=1.0, N=5, beta=3/2),
+        # 'vnifgsm': VNIFGSM(model=model, eps=eps, alpha=2/255, steps=10, decay=1.0, N=5, beta=3/2),
+        'mifgsm': MIFGSM(model, eps=eps, alpha=2/255, steps=10, decay=0.1),
+        'difgsm': DIFGSM(model=model, eps=eps, alpha=2/255, steps=10, diversity_prob=0.5, resize_rate=0.9),
+        # 'spsa': SPSA(model=model, eps=eps, delta=0.01, lr=0.01, nb_iter=1, nb_sample=128, max_batch_size=64),
+        'cw': CW(model=model, c=1, lr=0.01, steps=20, kappa=0),
+        'upgd': UPGD(model=model, eps=eps, alpha=2/255, steps=20),
+        'pgd': PGD(model=model, eps=eps, alpha=2/225, steps=20, random_start=True),
+        'tpgd': TPGD(model=model, eps=eps, alpha=2/255, steps=20),
+        'pgdl2': PGDL2(model=model, eps=eps, alpha=0.2, steps=20),
+        # 'pgdrsl2': PGDRSL2(model=model, eps=eps, alpha=0.2, steps=20),
+        'sparsefool': SparseFool(model=model, steps=20, lam=3, overshoot=0.02),
+        'autopgd': APGD(model=model, eps=eps, steps=20, eot_iter=1, n_restarts=1, loss='ce'),
+        'onepixel': OnePixel(model=model, pixels=1, steps=15, popsize=10, inf_batch=128),
+        'square': Square(model=model, eps=eps, n_queries=15, n_restarts=1, loss='ce'),
+        # 'pixle': Pixle(model=model, x_dimensions=(2, 10), y_dimensions=(2, 10), pixel_mapping='random', restarts=20,
+        #                max_iterations=10, ),
+        'deepfool': DeepFoolMy(model=model, steps=15),
+        'fab': FAB(model=model, norm='Linf', eps=eps, steps=15, n_restarts=1, alpha_max=0.1, eta=1.05, beta=0.9,
+                   verbose=False, seed=0, n_classes=10),
+        'jitter': Jitter(model=model, eps=eps, alpha=2/255, steps=15, scale=10, std=0.1, random_start=True)
+    }
+    return attacks
+
 def get_attack(method, model, eps):
     eps = eps / 255
-    attacks = {
-                'fgsm': FGSM(model=model, eps=eps),
-                'bim': BIM(model=model, eps=eps, alpha=2/255, steps=10),
-                'rfgsm': RFGSM(model, eps=eps, alpha=2/255, steps=10),
-                'ffgsm': FFGSM(model=model, eps=eps, alpha=2/255),
-                'tifgsm': TIFGSM(model=model, eps=eps, alpha=2/255, steps=10, decay=0.0, kernel_name='gaussian', len_kernel=15, nsig=3, resize_rate=0.9, diversity_prob=0.5),
-                'nifgsm': NIFGSM(model=model, eps=eps, alpha=2/255, steps=10, decay=1.0),
-                'sinfgsm': SINIFGSM(model=model, eps=eps, alpha=2/255, steps=10, decay=1.0, m=5),
-                'vmifgsm': VMIFGSM(model=model, eps=eps, alpha=2/255, steps=10, decay=1.0, N=5, beta=3/2),
-                'vnifgsm': VNIFGSM(model=model, eps=8/255, alpha=2/255, steps=10, decay=1.0, N=5, beta=3/2),
-                'mifgsm': MIFGSM(model, eps=eps, alpha=2 / 255, steps=10, decay=0.1),
-                'difgsm': DIFGSM(model=model, eps=eps, alpha=2/255, steps=10, diversity_prob=0.5, resize_rate=0.9),
-                'spsa': SPSA(model=model, eps=eps, delta=0.01, lr=0.01, nb_iter=1, nb_sample=128, max_batch_size=64),
-                'cw': CW(model=model, c=1, lr=0.01, steps=20, kappa=0),
-                'upgd': UPGD(model=model, eps=eps, alpha=2/255, steps=10),
-                'pgd': PGD(model=model, eps=eps, alpha=2/225, steps=10, random_start=True),
-                'tpgd': TPGD(model=model, eps=eps, alpha=2/255, steps=10),
-                'pgdl2': PGDL2(model=model, eps=eps, alpha=0.2, steps=10),
-                'pgdrsl2': PGDRSL2(model=model, eps=eps, alpha=0.2, steps=10),
-                'sparsefool': SparseFool(model=model, steps=10, lam=3, overshoot=0.02),
-                'autopgd': APGD(model=model, eps=eps, steps=10, eot_iter=1, n_restarts=1, loss='ce'),
-                'onepixel': OnePixel(model=model, pixels=1, steps=10, popsize=10, inf_batch=128),
-                'square': Square(model=model, eps=eps, n_queries=10, n_restarts=1, loss='ce'),
-                'pixle': Pixle(model=model, x_dimensions=(2, 10), y_dimensions=(2, 10), pixel_mapping='random', restarts=20, max_iterations=10,),
-                'deepfool': DeepFoolMy(model=model, steps=10)
-                }
+    attacks = attacks_dict(model=model, eps=eps)
     if method.lower() not in attacks:
         return None
     return attacks[method.lower()]
@@ -136,7 +177,7 @@ def get_adv_data(model, attack, dataloader, device='cuda', desc=''):
     loop = tqdm(dataloader, total=len(dataloader), leave=True, desc=desc, ncols=100)
     acc_list = list()
     model.eval()
-    num = 0
+
     for data, label in loop:
         data, label = data.to(device), label.to(device)
         adv = attack(data, label)
@@ -185,14 +226,10 @@ def generate_paca_dataloader(attack_info, batch_size):
     adv_test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=True)
     return adv_train_loader, adv_test_loader
 
-def get_adv_dataloader(method='fgsm', model=None, dataloader=None, attackparam = {'eps':1}, device='cuda', batch_size=128):
+def get_adv_dataloader(method='fgsm', model=None, dataloader=None, eps=1, device='cuda', batch_size=128):
     torch.manual_seed(seed)
-    attack_info = run_get_adv_data(dataset_name='mnist', model = model, dataloader=dataloader, device=device, method=method, attackparam=attackparam)
-    # AttackObj = EvasionAttacker(dataset="mnist", device=device, datanormalize=False, sample_num=2000,model=model)
-    # attack_info = AttackObj.get_adv_data(dataloader=dataloader, method=method, eps=eps)
-    # del AttackObj
-    # attack = get_attack(method=method, model=model, eps=eps)
-    # attack_info = get_adv_data(model=model, attack=attack, dataloader=dataloader, device=device, desc=f'生成{method}对抗样本，eps={eps}')
+    attack = get_attack(method=method, model=model, eps=eps)
+    attack_info = get_adv_data(model=model, attack=attack, dataloader=dataloader, device=device, desc=f'生成{method}对抗样本，eps={eps}')
 
     return generate_paca_dataloader(attack_info, batch_size)
 
@@ -210,14 +247,10 @@ def generate_at_dataloader(attack_info, batch_size):
     adv_test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=True)
     return adv_train_loader, adv_test_loader, attack_info[-1]
 
-def get_at_dataloader(method='fgsm', model=None, dataloader=None, attackparam = {'eps':1}, device='cuda', batch_size=128, dataset='mnist'):
+def get_at_dataloader(method='fgsm', model=None, dataloader=None, eps=1, device='cuda', batch_size=128):
     torch.manual_seed(seed)
-    attack_info = run_get_adv_data(dataset_name=dataset, model = model, dataloader=dataloader, device=device, method=method, attackparam=attackparam)
-    # AttackObj = EvasionAttacker(dataset="mnist", device=device, datanormalize=False, sample_num=2000,model=model)
-    # attack_info = AttackObj.get_adv_data(dataloader=dataloader, method=method, eps=eps)
-    # del AttackObj
-    # attack = get_attack(method=method, model=model, eps=eps)
-    # attack_info = get_adv_data(model=model, attack=attack, dataloader=dataloader, device=device, desc=f'生成{method}对抗样本，eps={eps}')
+    attack = get_attack(method=method, model=model, eps=eps)
+    attack_info = get_adv_data(model=model, attack=attack, dataloader=dataloader, device=device, desc=f'生成{method}对抗样本，eps={eps}')
 
     return generate_at_dataloader(attack_info, batch_size)
 
@@ -232,14 +265,11 @@ def generate_cafd_dataloader(attack_info, batch_size):
     adv_test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=True)
     return adv_train_loader, adv_test_loader
 
-def get_cafd_adv_dataloader(method='fgsm', model=None, dataloader=None, attackparam = {'eps':1}, device='cuda', batch_size=128, dataset='mnist'):
+
+def get_cafd_adv_dataloader(method='fgsm', model=None, dataloader=None, eps=1, device='cuda', batch_size=128):
     torch.manual_seed(seed)
-    attack_info = run_get_adv_data(dataset_name=dataset, model = model, dataloader=dataloader, device=device, method=method, attackparam=attackparam)
-    # AttackObj = EvasionAttacker(dataset="mnist", device=device, datanormalize=False, sample_num=2000,model=model)
-    # attack_info = AttackObj.get_adv_data(dataloader=dataloader, method=method, eps=eps)
-    # del AttackObj
-    # attack = get_attack(method=method, model=model, eps=eps)
-    # attack_info = get_adv_data(model=model, attack=attack, dataloader=dataloader, device=device, desc=f'生成{method}对抗样本，eps={eps}')
+    attack = get_attack(method=method, model=model, eps=eps)
+    attack_info = get_adv_data(model=model, attack=attack, dataloader=dataloader, device=device, desc=f'生成{method}对抗样本，eps={eps}')
     return generate_cafd_dataloader(attack_info, batch_size)
 
 
@@ -256,25 +286,17 @@ def calc_acc(model,  dataloader, device='cuda', desc=''):
     return acc
 
 
-def attack_model(model, dataloader, method, attackparam = {'eps':1}, device='cuda', dataset='mnist'):
+def attack_model(model, dataloader, method, eps, device='cuda'):
     torch.manual_seed(seed)
-    attack_info = run_get_adv_data(dataset_name=dataset, model = model, dataloader=dataloader, device=device, method=method, attackparam=attackparam)
-    # AttackObj = EvasionAttacker(dataset="mnist", device=device, datanormalize=False, sample_num=2000,model=model)
-    # attack_info = AttackObj.get_adv_data(dataloader=dataloader, method=method, eps=eps)
-    # del AttackObj
-    # attack_method = get_attack(method=method, model=model, eps=eps)
-    # attack_info = get_adv_data(model=model, attack=attack_method, dataloader=dataloader, device=device)
+    attack_method = get_attack(method=method, model=model, eps=eps)
+    attack_info = get_adv_data(model=model, attack=attack_method, dataloader=dataloader, device=device)
     return attack_info
 
 
-def get_integrate_dataloader(method='fgsm', model=None, dataloader=None, attackparam = {'eps':1}, device='cuda', batch_size=128, dataset='mnist'):
+def get_integrate_dataloader(method='fgsm', model=None, dataloader=None, eps=1, device='cuda', batch_size=128):
     torch.manual_seed(seed)
-    attack_info = run_get_adv_data(dataset_name=dataset, model = model, dataloader=dataloader, device=device, method=method, attackparam=attackparam)
-    # AttackObj = EvasionAttacker(dataset="mnist", device=device, datanormalize=False, sample_num=2000,model=model)
-    # attack_info = AttackObj.get_adv_data(dataloader=dataloader, method=method, eps=eps)
-    # del AttackObj
-    # attack = get_attack(method=method, model=model, eps=eps)
-    # attack_info = get_adv_data(model=model, attack=attack, dataloader=dataloader, device=device, desc=f'生成{method}对抗样本，eps={eps}')
+    attack = get_attack(method=method, model=model, eps=eps)
+    attack_info = get_adv_data(model=model, attack=attack, dataloader=dataloader, device=device, desc=f'生成{method}对抗样本，eps={eps}')
     data_info = dict()
     data_info['paca'] = generate_paca_dataloader(attack_info, batch_size)
     data_info['cafd'] = generate_cafd_dataloader(attack_info, batch_size)
@@ -284,8 +306,8 @@ def get_integrate_dataloader(method='fgsm', model=None, dataloader=None, attackp
 
 
 if __name__ == '__main__':
-    # from GroupDefense.models.load_model import load_model
-    # from GroupDefense.datasets.mnist import mnist_dataloader
+    from GroupDefense.models.load_model import load_model
+    from GroupDefense.datasets.mnist import mnist_dataloader
 
     model = load_model()
     device = 'cuda'

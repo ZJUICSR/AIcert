@@ -1,10 +1,7 @@
-import sys
-sys.path.append("..")
-sys.path.append("../..")
-from GroupDefense.ensemble_defense.at import AdversarialTraining
+from function.ensemble.ensemble_defense.at import AdversarialTraining
 from copy import deepcopy
-from GroupDefense.ensemble_defense import EnsembleModel
-from GroupDefense.attack.gen_adv import get_attack, get_adv_data
+from function.ensemble.ensemble_defense import EnsembleModel
+from function.ensemble.attack.gen_adv import get_attack, get_adv_data
 
 def ens_defense(model, dataloader, methods=[], eps=1, train_epoch=10, at_epoch=5, device='cuda'):
     model_list = list()
@@ -32,8 +29,8 @@ def ens_defense(model, dataloader, methods=[], eps=1, train_epoch=10, at_epoch=5
 
 
 if __name__ == '__main__':
-    from GroupDefense.datasets.mnist import mnist_dataloader
-    from GroupDefense.models.load_model import load_model
+    # from GroupDefense.datasets.mnist import mnist_dataloader
+    # from GroupDefense.models.load_model import load_model
     # methods = ['fgsm', 'mifgsm']
     methods = ['mifgsm', 'fgsm', 'bim', 'rfgsm', 'cw', 'pgd', 'tpgd', 'autopgd', 'square', 'difgsm']
     device = 'cuda'

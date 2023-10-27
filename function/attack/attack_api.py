@@ -34,11 +34,12 @@ class EvasionAttacker():
     dataset="mnist", datasetpath="./datasets/", nb_classes=10, datanormalize: bool = False, 
     device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"), sample_num=128, model=None,) -> None:
         self.modelnet = modelnet
-        self.modelpath = modelpath
+        
         self.model = model
         self.device = device
         # 模型加载
         if self.model == None:
+            self.modelpath = modelpath
             self.model = self.modelnet.to(self.device)
             checkpoint = torch.load(self.modelpath)
             
@@ -133,10 +134,12 @@ class EvasionAttacker():
         self.psrb= compute_predict_accuracy(clean_predictions, real_lables)
         adv_predictions = self.classifier.predict(adv_examples)
         self.psra= compute_predict_accuracy(adv_predictions, real_lables)
-        print("**********self.psra:",self.psra)
         # 计算真正的攻击成功率，将本来分类错误的样本排除在外
         self.coverrate, self.asr  = compute_attack_success(real_lables, clean_predictions, adv_predictions)
-        piclist = self.save_examples(save_num, real_lables, cln_examples, clean_predictions, adv_examples, adv_predictions, kwargs["save_path"])
+        if 'save_path' in kwargs:
+            piclist = self.save_examples(save_num, real_lables, cln_examples, clean_predictions, adv_examples, adv_predictions, kwargs["save_path"])
+        else:
+            piclist=None
         return adv_examples, real_lables, piclist
     
     def get_adv_data(self, dataloader, method: str="FastGradientMethod",  **kwargs) -> None:
@@ -269,7 +272,7 @@ class EvasionAttacker():
         print("After {} attack, the accuracy on adversarial test examples: {}%".format(self.method, self.psra*100))
         print("The final {} attack success rate: {}%, coverrate: {}%".format(self.method, (self.asr)*100, (self.coverrate)*100))
         print("Time spent per sample: {}s".format(self.timespend))
-        return {"before_acc":self.psrb* 100,"after_acc":self.psra*100, "asr":(self.asr)*100, "coverrate":(self.coverrate)*100, "time":self.timespend}
+        return {"before_acc":round(self.psrb, 4) * 100,"after_acc":round(self.psra, 4) * 100, "asr":round(self.asr, 4) * 100, "coverrate":round(self.coverrate, 4) * 100, "time":round(self.timespend, 4)}
 
 class BackdoorAttacker():
     def __init__(
