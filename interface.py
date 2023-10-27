@@ -1432,32 +1432,47 @@ def run_group_defense(tid,stid, datasetparam, modelparam, adv_methods, adv_param
     IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
         
-def run_graph_knowledge(tid, stid, datasetparam, modelparam, attack_mode, attack_type, data_type, defend_algorithm):
+def run_graph_knowledge(tid, stid, datasetparam, modelparam, auto_method, inputparam):
     IOtool.change_subtask_state(tid, stid, 1)
     IOtool.change_task_state(tid, 1)
     IOtool.set_task_starttime(tid, stid, time.time())
     device = IOtool.get_device()
     logging = IOtool.get_logger(stid)
-    params = {
-        "out_path":osp.join("output",tid,stid),
-        "device":device,
-        "graph_knowledge":{
-            "attack_mode": attack_mode,
-            "attack_type": attack_type,
-            "data_type": data_type,
-            "defend_algorithm": defend_algorithm
-        },
-        'classes':10
-    }
     batchsize = 128
-    from function import graph_knowledge
     # 加载数据
     train_loader, test_loader, channel = load_dataset(datasetparam['name'], batchsize=batchsize)
     # 加载模型
     model = load_model_net(modelparam['name'], datasetparam['name'], channel=channel, logging=logging)
-    
-    graph_knowledge.run(model, test_loader, params = params, param_hash=str(time.time()),
-                        log_func=logging.info)
+    import hashlib
+    param_hash = hashlib.md5(str(inputparam).encode('utf8')).hexdigest()
+    outpath = osp.join("output",tid,stid)
+    result = {}
+    if not osp.exists(outpath):
+        os.mkdir(outpath)
+    from function import adversarial_test
+    if auto_method == "flow":
+        # 加载
+        adv_methods = inputparam["AdvMethods"]
+        adv_param = {}
+        for temp in adv_methods:
+            adv_param.update({temp:inputparam[temp]})
+        adv_loader = get_load_adv_data(datasetparam, modelparam, adv_methods, adv_param, model, test_loader, device, batchsize, logging=logging)
+        temp = adversarial_test.run_adv_test(model,auto_method,dataloader=test_loader, attack_methods=adv_methods, param_hash=param_hash,
+                              save_path=outpath, log_func=logging.info, device=device, adv_loader=adv_loader, )
+        result[auto_method] = temp['result']
+    elif auto_method in ["rule", "flow_rule"]:
+        adv_methods = inputparam["AdvMethods"]
+        temp = adversarial_test.run_adv_test(model, auto_method,dataloader=test_loader, attack_methods=adv_methods, param_hash=param_hash,
+                              save_path=outpath, log_func=logging.info, device=device )
+        result[auto_method] = temp['result']
+    elif auto_method in ["graph", "graph_rule"]:
+        temp = adversarial_test.run_adv_test(model, auto_method,dataloader=test_loader, param_hash=param_hash,
+                              save_path=outpath, log_func=logging.info, device=device, attack_mode=inputparam['attack_mode'],
+                              attack_type=inputparam['attack_type'],data_type=inputparam['data_type'],
+                              defend_algorithm=inputparam['defend_algorithm'], dataset=datasetparam['name'].lower())
+        result[auto_method] = temp
+    # result = adversarial_test.run(model, test_loader, params = params, param_hash=str(time.time()),
+    #                     log_func=logging.info)
     result["stop"] = 1
     IOtool.write_json(result, osp.join(ROOT,"output", tid, stid+"_result.json")) 
     IOtool.change_subtask_state(tid, stid, 2)
