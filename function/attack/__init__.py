@@ -91,43 +91,65 @@ def get_method(method, attackparam):
         print("attackparam:",attackparam)
     return methoddict[method], attackparam
 
-def run_adversarial(model, modelpath, dataname, method, attackparam, device, sample_num=128):
+def run_adversarial(model, modelpath='./model/ckpt/mnist_resnet18.pth', dataname='mnist', method='FGSM', attackparam={}, device='cuda', sample_num=128):
     if dataname.lower() == "mnist":
         channel = 1
     else:
         channel = 3
-
-    a = EvasionAttacker(modelnet=eval(model)(channel), modelpath=modelpath, dataset=dataname.lower(), device=device, datanormalize=False, sample_num=sample_num)
-    
+    if modelpath:
+        a = EvasionAttacker(modelnet=eval(model)(channel), modelpath=modelpath, dataset=dataname.lower(), device=device, datanormalize=False, sample_num=sample_num)
+    else:
+        a = EvasionAttacker(dataset=dataname.lower(), device=device, datanormalize=False, sample_num=sample_num, model=model)
     method_in_alg, attackparam = get_method(method, attackparam)
    
     adv, real_lables, piclist = a.generate(method_in_alg, **attackparam)
-    data = {
-        "x":adv,
-        "y":real_lables
-    }
-    if "eps" not in attackparam.keys():
-        eps = 0.1
-    else:
-        eps = attackparam["eps"]
+    if modelpath:
+        data = {
+            "x":adv,
+            "y":real_lables
+        }
+        if "eps" not in attackparam.keys():
+            eps = 0.1
+        else:
+            eps = attackparam["eps"]
 
-    if "steps" not in attackparam.keys():
-        steps = 1
+        if "steps" not in attackparam.keys():
+            steps = 1
+        else:
+            steps = attackparam["steps"]
+        try:
+            model_name = modelpath.split("_")[-1].split('.')[0]
+        except:
+            model_name = modelpath.split("/")[-1].split('.')[0]
+        save_root = "dataset/adv_data"
+        if not osp.exists(save_root):
+            os.makedirs(save_root)
+        path = osp.join(save_root, "adv_attack_{:s}_{:s}_{:s}_s{:04d}_{:.5f}.pt".format(
+                                method, model_name, dataname, sample_num, eps))
+        torch.save(data, path)
+        del data
     else:
-        steps = attackparam["steps"]
-    try:
-        model_name = modelpath.split("_")[-1].split('.')[0]
-    except:
-        model_name = modelpath.split("/")[-1].split('.')[0]
-    save_root = "dataset/adv_data"
-    if not osp.exists(save_root):
-        os.makedirs(save_root)
-    path = osp.join(save_root, "adv_attack_{:s}_{:s}_{:s}_s{:04d}_{:.5f}.pt".format(
-                            method, model_name, dataname, sample_num, eps))
-    torch.save(data, path)
-    del data
+        path=None
 
     return a.print_res(), piclist, path, len(real_lables)
+
+
+def run_adversarial_graph(model, dataname='mnist', methods=['FGSM'], attackparam={}, device='cuda', sample_num=128,log_func=None):
+    if dataname.lower() == "mnist":
+        channel = 1
+    else:
+        channel = 3
+    a = EvasionAttacker(dataset=dataname.lower(), device=device, datanormalize=False, sample_num=sample_num, model=model)
+    result = {}
+    for method in methods:
+        if log_func:
+            log_func('[模型测试阶段] 选择算法：{:s}进行测试'.format(str(method)))
+        method_in_alg, attackparam1 = get_method(method, attackparam[method])
+        adv, real_lables, piclist = a.generate(method_in_alg, **attackparam1)
+        result[method] = a.print_res()
+        if log_func:
+            log_func('[模型测试阶段] {:s}攻击后的准确率为{:.4f}'.format(str(method),result[method]['after_acc']))
+    return result
 
 def run_get_adv_data(dataset_name, model, dataloader, device='cuda', method='FGSM', attackparam={}):
     print("dataset_name.lower():",dataset_name.lower())

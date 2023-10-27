@@ -1,5 +1,5 @@
 from .graph_info import AttackKnowledge
-from .attack import ArtAttack, SUPPORT_METHODS
+from .attack import GraphRulesAttack, SUPPORT_METHODS
 import os
 import json
 import warnings
@@ -9,7 +9,7 @@ import os.path as osp
 warnings.filterwarnings("ignore")
 
 
-RESULT_PATH = os.path.join(os.path.dirname(__file__), 'result')
+RESULT_PATH = os.path.join(os.path.dirname(__file__), 'results')
 if not os.path.exists(RESULT_PATH):
     os.mkdir(RESULT_PATH)
 
@@ -72,7 +72,7 @@ def test(model,
     data_type = key_map[data_type]
 
     cache_file = 'cache.json'
-    result_file = 'keti4.json'
+    result_file = 'result.json'
     cache_path = os.path.join(RESULT_PATH, param_hash)
     if os.path.exists(os.path.join(cache_path, cache_file)):  # 直接读取缓存结果
         print('param_hash, 读取缓存结果', param_hash)
@@ -102,15 +102,15 @@ def test(model,
     if log_func is not None:
         log_func('[模型测试阶段] 选择算法：{:s}进行测试'.format(str(attack_methods)))
 
-    attack = ArtAttack(model=model,
-                       dataloarder=dataloader,
-                       n_class=n_classes,
-                       device=device,
-                       eps=eps,
-                       min_pixel_value=min_pixel_value,
-                       max_pixel_value=max_pixel_value,
-                       save_path=save_path,
-                       log_func=log_func)
+    attack = GraphRulesAttack(model=model,
+                              dataloarder=dataloader,
+                              n_class=n_classes,
+                              device=device,
+                              eps=eps,
+                              min_pixel_value=min_pixel_value,
+                              max_pixel_value=max_pixel_value,
+                              save_path=save_path,
+                              log_func=log_func)
     result['acc'] = attack.run(attack_methods)
     result['acc'].update(get_acc)
 
@@ -123,26 +123,46 @@ def test(model,
     if not os.path.exists(cache_path):
         os.mkdir(cache_path)
     save_json_info(os.path.join(cache_path, cache_file), result)
+    return result
 
 
 import torch
-def run(model, test_loader, test_acc={}, params={}, param_hash="", log_func=None):
-    _params = params["graph_knowledge"]
-    save_path = osp.join(params["out_path"], "keti4")
-    test(model, dataloader=test_loader, eps=0.1,
-         n_classes=params['classes'],
-         attack_mode=_params["attack_mode"],
-         attack_type=_params["attack_type"],
-         data_type=_params["data_type"],
-         defend_algorithm=_params["defend_algorithm"],
+def run(model, test_loader, num_classes, test_acc, params, param_hash="", log_func=None):
+
+    save_path = params["out_path"]
+    result = test(model, dataloader=test_loader, eps=0.1,
+         n_classes=num_classes,
+         attack_mode=params["attack_mode"],
+         attack_type=params["attack_type"],
+         data_type=params["data_type"],
+         defend_algorithm=params["defend_algorithm"],
          device=torch.device(params["device"]),
          acc_value=test_acc,
          save_path=save_path,
          param_hash=param_hash,
          log_func=log_func
     )
+    return result
 
 
 if __name__ == '__main__':
-    pass
+    from GroupDefense.datasets.mnist import mnist_dataloader
+    from GroupDefense.models.load_model import load_model
+
+    device = 'cuda'
+    eps = 16
+    model = load_model()
+    model.to(device)
+    _, dataloader = mnist_dataloader()
+    params = {'attack_mode': 'white_box',
+              'attack_type': 'evasion_attack',
+              'data_type': 'image',
+              'defend_algorithm': 'Adversarial-Training',
+              'device': 'cuda',
+              'out_path': 'results'}
+    if not os.path.exists(params['out_path']):
+        os.mkdir(params['out_path'])
+
+    defend_info = run(model, dataloader, num_classes=10, test_acc={}, param_hash='123', params=params)
+    print(defend_info)
 
