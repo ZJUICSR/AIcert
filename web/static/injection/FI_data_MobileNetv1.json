@@ -857,61 +857,61 @@
               "clock-cycles": 10,
               "faulted-acc": [ 17.56, 19.65, 17.37, 18.61, 19.29, 19.80, 17.52, 18.97, 17.83, 19.52, 19.02, 18.07, 17.89, 18.33, 18.48, 19.68, 19.54, 18.75, 16.93, 18.72 ], 
               "average-acc": 18.78,
-              "heatmap": "MobileNetv1/mobilenetv1-14-fclk10.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv14-fclk10.txt"
             },
             {
               "clock-cycles": 30,
               "faulted-acc": [ 26.11, 28.52, 26.21, 27.92, 28.80, 28.32, 26.75, 26.41, 25.90, 27.92, 28.10, 26.13, 28.79, 27.43, 26.08, 28.06, 25.74, 28.11, 28.83, 28.57 ], 
               "average-acc": 27.28,
-              "heatmap": "MobileNetv1/mobilenetv1-14-fclk30.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv14-fclk30.txt"
             },
             {
               "clock-cycles": 50,
               "faulted-acc": [ 35.10, 34.89, 35.40, 35.12, 35.82, 34.53, 34.54, 35.37, 34.80, 34.64, 34.64, 35.50, 35.65, 34.39, 34.90, 32.94, 33.11, 35.56, 32.97, 33.08 ], 
               "average-acc": 34.88,
-              "heatmap": "MobileNetv1/mobilenetv1-14-fclk50.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv14-fclk50.txt"
             },
             {
               "clock-cycles": 100,
               "faulted-acc": [ 38.23, 40.02, 38.86, 40.57, 40.77, 40.55, 39.19, 40.67, 39.60, 39.28, 39.58, 38.93, 38.22, 40.67, 37.92, 40.74, 40.52, 40.28, 38.94, 39.74 ], 
               "average-acc": 39.47,
-              "heatmap": "MobileNetv1/mobilenetv1-14-fclk100.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv14-fclk100.txt"
             },
             {
               "clock-cycles": 300,
               "faulted-acc": [ 44.47, 42.27, 44.79, 43.83, 44.71, 42.47, 42.76, 42.44, 44.75, 44.77, 42.61, 43.11, 42.97, 44.41, 43.68, 42.01, 43.59, 42.94, 43.40, 42.58 ], 
               "average-acc": 43.29,
-              "heatmap": "MobileNetv1/mobilenetv1-14-fclk300.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv14-fclk300.txt"
             },
             {
               "clock-cycles": 500,
               "faulted-acc": [ 48.32, 50.24, 49.80, 50.71, 49.54, 49.18, 49.75, 47.99, 49.23, 50.33, 48.84, 47.84, 50.08, 50.36, 49.80, 48.93, 48.50, 48.48, 48.86, 49.12 ], 
               "average-acc": 49.16,
-              "heatmap": "MobileNetv1/mobilenetv1-14-fclk500.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv14-fclk500.txt"
             },
             {
               "clock-cycles": 1000,
               "faulted-acc": [ 55.12, 55.38, 55.59, 53.95, 55.45, 53.13, 52.95, 54.30, 53.72, 54.20, 53.90, 55.80, 53.10, 52.86, 54.77, 54.63, 54.14, 52.92, 52.96, 53.37 ], 
               "average-acc": 54.20,
-              "heatmap": "MobileNetv1/mobilenetv1-14-fclk1000.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv14-fclk1000.txt"
             },
             {
               "clock-cycles": 3000,
               "faulted-acc": [ 57.36, 57.07, 56.14, 55.18, 56.95, 56.41, 55.03, 57.34, 56.67, 56.25, 55.52, 56.16, 55.79, 54.83, 57.81, 56.39, 56.14, 57.21, 56.94, 54.87 ], 
               "average-acc": 56.14,
-              "heatmap": "MobileNetv1/mobilenetv1-14-fclk3000.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv14-fclk3000.txt"
             },
             {
               "clock-cycles": 5000,
               "faulted-acc": [ 58.61, 60.49, 60.31, 59.63, 60.68, 59.36, 58.89, 58.74, 59.92, 58.49, 59.57, 60.68, 60.74, 58.56, 60.33, 58.37, 60.53, 59.00, 59.53, 58.20 ], 
               "average-acc": 59.40,
-              "heatmap": "MobileNetv1/mobilenetv1-14-fclk5000.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv14-fclk5000.txt"
             },
             {
               "clock-cycles": 10000,
               "faulted-acc": [ 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70 ],
               "average-acc": 64.70,
-              "heatmap": "MobileNetv1/mobilenetv1-14-fclk10000.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv14-fclk10000.txt"
             }
           ]
 					},
@@ -922,61 +922,61 @@
               "clock-cycles": 10,
               "faulted-acc": [ 39.76, 39.57, 38.57, 39.52, 39.34, 40.78, 40.38, 38.90, 39.30, 37.88, 38.42, 38.16, 40.75, 39.44, 38.87, 40.06, 37.77, 40.82, 39.27, 40.34 ], 
               "average-acc": 39.68,
-              "heatmap": "MobileNetv1/mobilenetv1-15-fclk10.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv15-fclk10.txt"
             },
             {
               "clock-cycles": 30,
               "faulted-acc": [ 43.50, 44.02, 42.04, 42.56, 43.02, 41.98, 43.40, 43.02, 43.76, 43.63, 43.65, 41.79, 43.33, 44.71, 43.92, 42.79, 44.78, 42.10, 43.64, 44.03 ], 
               "average-acc": 43.17,
-              "heatmap": "MobileNetv1/mobilenetv1-15-fclk30.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv15-fclk30.txt"
             },
             {
               "clock-cycles": 50,
               "faulted-acc": [ 44.07, 44.53, 46.53, 46.36, 46.19, 46.00, 44.87, 46.44, 44.35, 44.86, 44.89, 44.75, 46.06, 45.20, 45.39, 44.60, 45.44, 44.95, 45.28, 46.13 ], 
               "average-acc": 45.50,
-              "heatmap": "MobileNetv1/mobilenetv1-15-fclk50.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv15-fclk50.txt"
             },
             {
               "clock-cycles": 100,
               "faulted-acc": [ 47.59, 46.38, 47.97, 46.68, 48.19, 46.50, 47.79, 46.98, 47.27, 48.51, 46.02, 46.06, 47.09, 48.68, 48.21, 47.25, 48.76, 47.07, 46.84, 48.68 ], 
               "average-acc": 47.42,
-              "heatmap": "MobileNetv1/mobilenetv1-15-fclk100.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv15-fclk100.txt"
             },
             {
               "clock-cycles": 300,
               "faulted-acc": [ 49.69, 50.87, 50.75, 49.09, 50.93, 48.79, 50.55, 49.59, 49.93, 49.90, 49.84, 50.18, 48.87, 51.54, 48.99, 49.35, 50.68, 49.19, 51.43, 50.22 ], 
               "average-acc": 50.21,
-              "heatmap": "MobileNetv1/mobilenetv1-15-fclk300.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv15-fclk300.txt"
             },
             {
               "clock-cycles": 500,
               "faulted-acc": [ 51.94, 52.60, 50.91, 51.28, 50.10, 50.66, 51.25, 51.24, 50.70, 52.69, 51.42, 51.98, 52.52, 52.17, 50.15, 50.31, 51.99, 51.49, 52.09, 50.95 ], 
               "average-acc": 51.57,
-              "heatmap": "MobileNetv1/mobilenetv1-15-fclk500.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv15-fclk500.txt"
             },
             {
               "clock-cycles": 1000,
               "faulted-acc": [ 56.37, 57.38, 55.62, 57.44, 55.77, 56.10, 56.95, 55.47, 57.14, 57.65, 55.49, 56.68, 56.83, 55.53, 56.30, 55.69, 56.67, 55.65, 57.80, 57.73 ], 
               "average-acc": 56.64,
-              "heatmap": "MobileNetv1/mobilenetv1-15-fclk1000.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv15-fclk1000.txt"
             },
             {
               "clock-cycles": 3000,
               "faulted-acc": [ 59.22, 60.83, 59.34, 58.67, 58.89, 58.94, 58.95, 58.53, 59.14, 60.12, 60.02, 59.25, 59.56, 58.99, 57.80, 60.53, 59.81, 57.76, 58.68, 59.63 ], 
               "average-acc": 59.17,
-              "heatmap": "MobileNetv1/mobilenetv1-15-fclk3000.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv15-fclk3000.txt"
             },
             {
               "clock-cycles": 5000,
               "faulted-acc": [ 61.48, 61.99, 61.76, 62.68, 61.75, 61.50, 61.88, 60.01, 61.54, 60.62, 62.84, 60.54, 61.72, 62.13, 60.26, 60.20, 61.19, 60.48, 61.63, 60.15 ], 
               "average-acc": 61.59,
-              "heatmap": "MobileNetv1/mobilenetv1-15-fclk5000.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv15-fclk5000.txt"
             },
             {
               "clock-cycles": 10000,
               "faulted-acc": [ 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70, 64.70 ],
               "average-acc": 64.70,
-              "heatmap": "MobileNetv1/mobilenetv1-15-fclk10000.txt"
+              "heatmap": "MobileNetv1/mobilenetv1-conv15-fclk10000.txt"
             }
           ]
 					},
