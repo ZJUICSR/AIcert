@@ -1626,8 +1626,8 @@ def ensemble():
     else:
         abort(403)
 
-@app.route('/GraphKnowledge', methods=['POST'])
-def graph_knowledge():
+@app.route('/AutoAttack', methods=['POST'])
+def auto_attack():
     """
     知识图谱
     输入：tid：主任务ID
@@ -1636,26 +1636,21 @@ def graph_knowledge():
     AdvMethods:list 对抗攻击算法名称
     ExMethods:攻击机理解释方法名称
     """
-    global LiRPA_LOGS
     if (request.method == "POST"):
         inputParam = json.loads(request.data)
         tid = inputParam["Taskid"]
         datasetparam = inputParam["DatasetParam"]
         modelparam = inputParam["ModelParam"]
-        attack_mode = inputParam["attack_mode"]
-        attack_type = inputParam["attack_type"]
-        data_type = inputParam['data_type']
-        defend_algorithm = inputParam['defend_algorithm']
+        auto_method = inputParam["AutoMethod"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
         value = {
-            "type":"Graph_Knowledge",
+            "type":"Auto_Attack",
             "state":0,
-            "name":["Graph_Knowledge"],
+            "name":["Auto_Attack"],
             "dataset":datasetparam["name"],
-            "method":attack_mode,
+            "method":auto_method,
             "model":modelparam["name"],
-            "def_method":defend_algorithm
         }
         IOtool.add_subtask_info(tid, stid, value)
         IOtool.change_task_info(tid, "dataset", datasetparam["name"])
@@ -1667,7 +1662,7 @@ def graph_knowledge():
         # t2 = pool.submit(interface.run_group_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
         t2 = pool.submit(interface.submitAandB, tid, stid, 10, 20)
         IOtool.add_task_queue(tid, stid, t2, 72000)
-        interface.run_graph_knowledge(tid, stid, datasetparam, modelparam, attack_mode, attack_type, data_type, defend_algorithm)
+        interface.run_graph_knowledge(tid, stid, datasetparam, modelparam, auto_method, inputParam)
         res = {
             "code":1,
             "msg":"success",
