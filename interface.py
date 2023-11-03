@@ -15,7 +15,7 @@ from model.model_net.lenet import Lenet
 
 from function.attack import run_adversarial, run_backdoor
 from function.fairness import run_dataset_debias, run_model_debias, run_image_model_debias, run_model_evaluate, run_image_model_evaluate
-from function import concolic, env_test, coverage, deepsst, dataclean, framework_test, modelmeasure, modulardevelop, robust_gnn
+from function import concolic, env_test, coverage, deepsst, dataclean, framework_test, modelmeasure, modulardevelop, robust_gnn, adv_traind
 
 from function.ex_methods import *
 import matplotlib.pyplot as plt
@@ -1777,7 +1777,66 @@ def run_advtraining_gnn(tid,AAtid, dataset, batch_size, train_size, test_size, v
     IOtool.change_subtask_state(tid, AAtid, 2)
     IOtool.change_task_success_v2(tid=tid)
 
+def run_featurescatter(tid,AAtid, dataset, modelname, lr, batch_size, max_epoch, decay_epoch, decay_rate, weight_decay):
+    """特征散射鲁棒训练
+    :params tid:主任务ID
+    :params AAtid:子任务id
+    :params dataset: 数据集名称
+    :params modelname：模型类型
+    :params lr：学习率
+    :params batch_size: 批处理大小
+    :params max_epoch：最大训练轮数
+    :params decay_epoch：学习率衰减的轮数
+    :params decay_rate：学习率衰减的速率
+    :params weight_decay：权重衰减
+    :output res:需保存到子任务json中的返回结果/路径
+    """
+    IOtool.change_subtask_state(tid, AAtid, 1)
+    IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, AAtid, time.time())
+    # devive = IOtool.get_device()
+    logging = IOtool.get_logger(AAtid)
+    res = adv_traind.run_featurescatter(
+        dataset=dataset.lower(),  # 数据集
+        modelname=modelname.lower(),  # 模型类型
+        lr = lr, # 学习率
+        batch_size=batch_size,  # 批处理大小
+        max_epoch=max_epoch,  # 最大训练轮数
+        decay_epoch=decay_epoch,  # 学习率衰减的轮数
+        decay_rate=decay_rate,  # 学习率衰减的速率
+        weight_decay=weight_decay,  # 权重衰减
+        out_path=osp.join(ROOT,"output", tid, AAtid), logging=logging)  
+    res["stop"] = 1
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+    IOtool.change_subtask_state(tid, AAtid, 2)
+    IOtool.change_task_success_v2(tid=tid)
 
+def run_seat(tid,AAtid, dataset, modelname, lr, n_class, max_epoch):
+    """特征散射鲁棒训练
+    :params tid:主任务ID
+    :params AAtid:子任务id
+    :params dataset: 数据集名称
+    :params modelname：模型类型
+    :params lr：学习率
+    :params n_class: 分类类别数
+    :params max_epoch：最大训练轮数
+    :output res:需保存到子任务json中的返回结果/路径
+    """
+    IOtool.change_subtask_state(tid, AAtid, 1)
+    IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, AAtid, time.time())
+    # devive = IOtool.get_device()
+    logging = IOtool.get_logger(AAtid)
+    res = adv_traind.run_seat(
+        modelname=modelname.lower(),  
+        lr = lr, 
+        n_class=n_class,  
+        max_epoch = max_epoch,
+        out_path=osp.join(ROOT,"output", tid, AAtid), logging=logging)  
+    res["stop"] = 1
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+    IOtool.change_subtask_state(tid, AAtid, 2)
+    IOtool.change_task_success_v2(tid=tid)
     
 import csv
 def llm_attack(tid, stid, goal, target):
