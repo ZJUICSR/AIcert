@@ -3,15 +3,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from models import *
+from .models import *
 from torch.autograd.gradcheck import zero_gradients
 from torch.autograd import Variable
-import utils
 import math
 
-from utils import softCrossEntropy
-from utils import one_hot_tensor, label_smoothing
-import ot
+from .utils import softCrossEntropy
+from .utils import one_hot_tensor, label_smoothing
+from .ot import sinkhorn_loss_joint_IPOT
 import pickle
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -31,7 +30,7 @@ class Attack_None(nn.Module):
         else:
             self.basic_net.eval()
         outputs, _ = self.basic_net(inputs)
-        return outputs, None
+        return outputs, _
 
 
 class Attack_PGD(nn.Module):
@@ -191,7 +190,7 @@ class Attack_FeaScatter(nn.Module):
 
             logits_pred, fea = aux_net(x)
 
-            ot_loss = ot.sinkhorn_loss_joint_IPOT(1, 0.00, logits_pred_nat,
+            ot_loss = sinkhorn_loss_joint_IPOT(1, 0.00, logits_pred_nat,
                                                   logits_pred, None, None,
                                                   0.01, m, n)
 
@@ -207,7 +206,7 @@ class Attack_FeaScatter(nn.Module):
             logits_pred, fea = self.basic_net(x)
             self.basic_net.zero_grad()
 
-            y_sm = utils.label_smoothing(y_gt, y_gt.size(1), self.ls_factor)
+            y_sm = label_smoothing(y_gt, y_gt.size(1), self.ls_factor)
 
             adv_loss = loss_ce(logits_pred, y_sm.detach())
 
