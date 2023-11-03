@@ -1702,7 +1702,6 @@ def AdvTraining_GNN():
     burn_in:未优化鲁棒损失的迭代次数
     random_state=123,  # 随机数生成器使用的种子
     """
-    global LiRPA_LOGS
     if (request.method == "POST"):
         inputParam = json.loads(request.data)
         tid = inputParam["tid"]
@@ -1745,6 +1744,99 @@ def AdvTraining_GNN():
         return jsonify(res)
     else:
         abort(403)
+        
+@app.route('/Defense/AdvTraining_FeatureScatter', methods=['POST'])
+def FeatureScatter():
+    """
+    特征散射鲁棒训练 
+    输入：tid：主任务ID
+    dataset：数据集名称
+    modelname：模型类型
+    lr：学习率
+    batch_size：批处理大小
+    max_epoch：最大训练轮数
+    decay_epoch：学习率衰减的轮数
+    decay_rate：学习率衰减的速率
+    weight_decay：权重衰减
+    """
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        tid = inputParam["tid"]
+        dataset = inputParam["dataset"]
+        modelname = inputParam["modelname"]
+        lr = inputParam["lr"]
+        batch_size = inputParam["batch_size"]
+        max_epoch = inputParam["max_epoch"]
+        decay_epoch = inputParam["decay_epoch"]
+        decay_rate = inputParam["decay_rate"]
+        weight_decay = inputParam["weight_decay"]
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        value = {
+            "type":"FeatureScatter",
+            "state":0,
+            "name":["FeatureScatter"],
+            "dataset":dataset,
+            "modelname":modelname,
+            "lr":lr,
+            "batch_size":batch_size,
+            "max_epoch":max_epoch,
+            "decay_epoch":decay_epoch,
+            "decay_rate":decay_rate,
+            "weight_decay":weight_decay,
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", inputParam["dataset"])
+        # 执行任务
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_featurescatter, tid, stid, dataset, modelname, lr, batch_size, max_epoch, decay_epoch, decay_rate, weight_decay)
+        IOtool.add_task_queue(tid, stid, t2, 3000)
+        res = {"code":1,"msg":"success","Taskid":tid,"stid":stid}
+        return jsonify(res)
+    else:
+        abort(403)
+        
+@app.route('/Defense/AdvTraining_SEAT', methods=['POST'])
+def SEAT():
+    """
+    异常感知鲁棒训练 
+    输入：tid：主任务ID
+    dataset：数据集名称
+    modelname：模型类型
+    lr：学习率
+    max_epoch：训练轮数
+    n_class：分类类别数
+    """
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        tid = inputParam["tid"]
+        dataset = inputParam["dataset"]
+        modelname = inputParam["modelname"]
+        lr = inputParam["lr"]
+        n_class = inputParam["n_class"]
+        max_epoch = inputParam["max_epoch"]
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        value = {
+            "type":"SEAT",
+            "state":0,
+            "name":["SEAT"],
+            "dataset":dataset,
+            "modelname":modelname,
+            "lr":lr,
+            "n_class":n_class,
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", inputParam["dataset"])
+        # 执行任务
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_seat, tid, stid, dataset, modelname, lr, n_class, max_epoch)
+        IOtool.add_task_queue(tid, stid, t2, 300000)
+        res = {"code":1,"msg":"success","Taskid":tid,"stid":stid}
+        return jsonify(res)
+    else:
+        abort(403)        
+        
 
 @app.route('/Task/UploadData', methods=['POST'])
 def UploadData():
