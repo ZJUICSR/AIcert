@@ -2,13 +2,15 @@ import os
 import torchvision
 import torch.optim as optim
 from torchvision import transforms
-from models import *
+# from models import *
+from .models import *
 from tqdm import tqdm
 import numpy as np
 import copy
-
-from utils import Logger, save_checkpoint, torch_accuracy, AverageMeter
-from attacks import *
+from .utils import Logger, save_checkpoint, torch_accuracy, AverageMeter
+from .attacks import *
+# from utils import Logger, save_checkpoint, torch_accuracy, AverageMeter
+# from attacks import *
 
 train_loader = 0
 test_loader = 0
@@ -40,12 +42,19 @@ def seat(args_dict):
         transforms.ToTensor(),
     ])
 
-    trainset = torchvision.datasets.CIFAR10(root='/data/user/WZT/Datasets/SEAT_data/train', train=True, download=True,
+    global train_loader, test_loader, adjust_learning_rate
+
+    trainset = torchvision.datasets.CIFAR10(root='dataset/CIFAR10', train=True, download=True,
                                             transform=transform_train)
     train_loader = torch.utils.data.DataLoader(trainset, batch_size=128, shuffle=True, num_workers=2)
-    testset = torchvision.datasets.CIFAR10(root='/data/user/WZT/Datasets/SEAT_data/test', train=False, download=True,
+    testset = torchvision.datasets.CIFAR10(root='dataset/CIFAR10', train=False, download=True,
                                            transform=transform_test)
-    test_loader = torch.utils.data.DataLoader(testset, batch_size=128, shuffle=False, num_workers=2)
+    # 控制执行速度，采样执行
+    sample_num = 128
+    sample_size =len(testset) - sample_num
+    _, test_dataset_sample = torch.utils.data.random_split(testset, [sample_size, sample_num])
+    test_loader = torch.utils.data.DataLoader(test_dataset_sample, batch_size=128, shuffle=False, num_workers=2)
+    # test_loader = torch.utils.data.DataLoader(testset, batch_size=128, shuffle=False, num_workers=2)
 
     if args_dict['arch'] == 'resnet18':
         adjust_learning_rate = lambda epoch: \
@@ -69,11 +78,12 @@ def seat(args_dict):
     if args_dict['arch'] == "WRN":
         model = Wide_ResNet_Madry(depth=32, num_classes=args_dict['num_classes'], widen_factor=10, dropRate=0.0)
 
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    # device = torch.device("cuda")
+    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+    # device = torch.device("cuda:0")
     model = torch.nn.DataParallel(model)
-    teacher_model = EMA(model)
     model = model.to(device)
+    teacher_model = EMA(model)
+    
     Attackers = AttackerPolymer(args_dict['epsilon'], args_dict['num_steps'], args_dict['step_size'],
                                 args_dict['num_classes'], device)
 
