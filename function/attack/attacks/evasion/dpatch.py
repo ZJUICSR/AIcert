@@ -62,7 +62,7 @@ class DPatch(EvasionAttack):
         patch_shape: Tuple[int, int, int] = (40, 40, 3),
         learning_rate: float = 5.0,
         max_iter: int = 500,
-        batch_size: int = 16,
+        batch_size: int = 128,
         verbose: bool = True,
     ):
         """

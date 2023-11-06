@@ -77,7 +77,7 @@ class ElasticNet(EvasionAttack):
         max_iter: int = 10,
         beta: float = 1e-3,
         initial_const: float = 1e-3,
-        batch_size: int = 1,
+        batch_size: int = 128,
         decision_rule: str = "EN",
         verbose: bool = True,
     ) -> None:

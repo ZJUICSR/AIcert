@@ -34,7 +34,7 @@ class GDUAP(EvasionAttack):
         estimator: "CLASSIFIER_LOSS_GRADIENTS_TYPE",
         eps: float = 20/255,
         max_iter: int = 10000,
-        batch_size: int = 32,
+        batch_size: int = 128,
         sat_min = 0.35,
         sat_threshold = 0.00001,
         patience_interval = 10,
