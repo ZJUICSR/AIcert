@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import json
+# import fs_eval
 import time
 import torch
 import torch.nn as nn
@@ -10,9 +11,13 @@ import torch.backends.cudnn as cudnn
 import torchvision
 import torchvision.transforms as transforms
 import os
+import argparse
 import sys
 import datetime
 from tqdm import tqdm
+from models.resnet import ResNet
+from models.vggnet import VGG
+from models.lenet import LeNet
 from models import *
 import utils
 from attack_methods import Attack_None, Attack_PGD
@@ -20,21 +25,7 @@ from utils import softCrossEntropy, CWLoss
 global criterion
 
 
-args_dict = {
-    'attack': True,
-    'attack_method': 'pgd',
-    'attack_method_list': "pgd",
-    'batch_size_test': 100,
-    'dataset': 'cifar10',
-    'image_size': 32,
-    'init_model_pass': 'latest',
-    'log_step': 7,
-    'model_dir': "/data/user/WZT/models/feature_scatter_cifar10/resnet",
-    'num_classes': 10,
-    'resume': False
-}
-
-def test(epoch, net, testloader, device, args_dict):
+def test(epoch, net, args, testloader, device):
     net.eval()
     test_loss = 0
     correct = 0
@@ -62,7 +53,7 @@ def test(epoch, net, testloader, device, args_dict):
         iterator.set_description(
             str(predicted.eq(targets).sum().item() / targets.size(0)))
 
-        if batch_idx % args_dict['log_step'] == 0:
+        if batch_idx % args.log_step == 0:
             print(
                 "step %d, duration %.2f, test  acc %.2f, avg-acc %.2f, loss %.2f"
                 % (batch_idx, duration, 100. * correct_num / batch_size,
@@ -73,13 +64,12 @@ def test(epoch, net, testloader, device, args_dict):
     return acc
 
 
-def RobustTest(model, args_dict):
-    """
-    输入模型文件和数据路径，调用攻击接口
-    @param model:模型
-    @param args_dict:攻击参数
-    @return:对抗攻击后的模型在数据集上的准确率
-    """
+def RobustTest(args_dict):
+    parser = argparse.ArgumentParser(description='Feature Scattering Adversarial Training')
+    parser.register('type', 'bool', utils.str2bool)
+    parser.add_argument('--resume', '-r', default=False, action='store_true', help='resume from checkpoint')
+    parser.add_argument('--log_step', default=7, type=int, help='log_step')
+    args = parser.parse_args()
     if args_dict['dataset'] == 'cifar10':
         print('------------cifar10---------')
         args_dict['num_classes'] = 10
@@ -116,34 +106,34 @@ def RobustTest(model, args_dict):
         ])
 
     if args_dict['dataset'] == 'cifar10':
-        testset = torchvision.datasets.CIFAR10(root='/data/user/WZT/FeaSca/',
+        testset = torchvision.datasets.CIFAR10(root='/data/user/WZT/Datasets/cifar10/',
                                                train=False,
-                                               download=True,
+                                               download=False,
                                                transform=transform_test)
     elif args_dict['dataset'] == 'cifar100':
-        testset = torchvision.datasets.CIFAR100(root='/data/user/WZT/FeaSca/',
+        testset = torchvision.datasets.CIFAR100(root='/data/user/WZT/Datasets/cifar100/',
                                                 train=False,
-                                                download=True,
+                                                download=False,
                                                 transform=transform_test)
 
     elif args_dict['dataset'] == 'svhn':
-        testset = torchvision.datasets.SVHN(root='/data/user/WZT/FeaSca/',
+        testset = torchvision.datasets.SVHN(root='/data/user/WZT/Datasets/svhn/',
                                             split='test',
-                                            download=True,
+                                            download=False,
                                             transform=transform_test)
-    #加载测试数据
+    # 加载测试数据
     testloader = torch.utils.data.DataLoader(testset,
-                                             batch_size=args.batch_size_test,
+                                             batch_size=args_dict['batch_size_test'],
                                              shuffle=False,
                                              num_workers=2)
 
     print('==> Building model..')
     if args_dict['dataset'] == 'cifar10' or args_dict['dataset'] == 'cifar100' or args_dict['dataset'] == 'svhn':
-        print('---Reading model-----', model)
+        print('---Reading model-----', args_dict['model2'])
         # basic_net = WideResNet(depth=28,
-        #                        num_classes=args_dict['num_classes'],
+        #                        num_classes=args.num_classes,
         #                        widen_factor=10)
-        basic_net = model
+        basic_net = args_dict['model2']
     basic_net = basic_net.to(device)
     # configs
     config_natural = {'train': False}
@@ -177,7 +167,7 @@ def RobustTest(model, args_dict):
         'loss_func': CWLoss(args_dict['num_classes'])
     }
 
-    attack_list = args_dict['num_classes'].split('-')
+    attack_list = args_dict['attack_method_list'].split('-')
     attack_num = len(attack_list)
 
     for attack_idx in range(attack_num):
@@ -206,11 +196,11 @@ def RobustTest(model, args_dict):
             net = torch.nn.DataParallel(net)
             cudnn.benchmark = True
 
-        if args_dict['resume'] and args_dict['init_model_pass'] != '-1':
+        if args.resume and args_dict['init_model_pass'] != '-1':
             # Load checkpoint.
             print('==> Resuming from checkpoint..')
             f_path_latest = os.path.join(args_dict['model_dir'], 'latest')
-            f_path = os.path.join(args_dict['model_dir'],('checkpoint-%s' % args_dict['init_model_pass']))
+            f_path = os.path.join(args_dict['model_dir'], ('checkpoint-%s' % args_dict['init_model_pass']))
             if not os.path.isdir(args_dict['model_dir']):
                 print('train from scratch: no checkpoint directory or file found')
             elif args_dict['init_model_pass'] == 'latest' and os.path.isfile(f_path_latest):
@@ -229,25 +219,22 @@ def RobustTest(model, args_dict):
         global criterion
         criterion = nn.CrossEntropyLoss()
 
-        acc = test(0, net, args_dict, testloader, device)
+        acc = test(0, net, args, testloader, device)
         return acc
 
 
+if __name__ == "__main__":
+    args_dict = {
+        'attack': True,
+        'model2': LeNet(10),  # 输入要进行鲁棒增强的网路架构，ResNet(50, 10), LeNet(10), VGG(16, 10), WideResNet(depth=28, num_classes=10, widen_factor=10)
+        'model_dir': '/data/user/WZT/models/feasca_cifar10_letnet/',  # 模型路径
+        'init_model_pass': 'latest',  # 加载文件名latest,路径为model_dir，
+        'attack_method': 'pgd',  # adv_mode : natural, pdg or cw
+        'attack_method_list': 'natural-fgsm-pgd-cw',  
+        'dataset': 'cifar10',  # 数据集cifar10, cifar100,svhn
+        'image_size': 32,  # cifar10, cifar100,svhn, = 32; minist = 28
+        'num_classes': 10, # 图片种类
+        'batch_size_test': 100  # 每次测试的样本数
+    }
 
-
-# if __name__ == "__main__":
-#     model = ResNet(50, 10)
-#     args_dict2 = {'resume': False,
-#                   'attack': True,
-#                   'model_dir': "/data/user/WZT/models/feature_scatter_cifar10/resnet",
-#                   'init_model_pass': 'latest',
-#                   'dataset': 'cifar10',
-#                   'attack_method': 'pgd',
-#                   'attack_method_list': 'pgd',
-#                   'log_step': 7,
-#                   'num_classes': 10,
-#                   'batch_size_test': 100,
-#                   'image_size': 32
-#                   }
-#     RobustTest(model, args_dict2)
-
+    RobustTest(args_dict)
