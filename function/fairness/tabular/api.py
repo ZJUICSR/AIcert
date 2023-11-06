@@ -367,7 +367,7 @@ def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', '
 
 
 # model debiasing
-def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, generalized=False, logger=None, save_folder=''):
+def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, generalized=False, logger=None, model_path='', save_folder=''):
     """Debias model trained on built-in dataset
 
     Args:
@@ -437,7 +437,11 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
     # training model
     logger.info(f'training model: \'{model_name}\' on dataset: \'{dataset_name}\'.')
     model = model_cls(input_shape=dataset.num_features, device='cuda')
-    model.train(dataset=dataset, epochs=2000)
+    if model_path == '':
+        model.train(dataset=dataset, epochs=2000, save_folder=model_path)
+    else:
+        print(f"loading model from path: {model_path}")
+        model.load_state_dict(torch.load(model_path)["model"])
 
     if save_folder=='':
         save_folder = os.path.join('record/'+dataset_name, 'test')
