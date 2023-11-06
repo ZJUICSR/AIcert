@@ -166,7 +166,7 @@ def RobustTest(args_dict):
 
         args_dict['attack_method'] = attack_list[attack_idx]
 
-        if args_dict['attack_method'] == 'natural':
+        if args_dict['attack_method'] == 'Natural':
             print('-----natural non-adv mode -----')
             # config is only dummy, not actually used
             net = Attack_None(basic_net, config_natural)
