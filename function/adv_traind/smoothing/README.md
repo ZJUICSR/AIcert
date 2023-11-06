@@ -1,18 +1,21 @@
+
+
 # via Randomized Smoothing Adversarial Robustness
 
-## train
+## train2.py
 
-使用数据增强技术，包括在输入数据中添加高斯噪声，从而提高模型的鲁棒性
+使用数据增强技术，包括在输入数据中添加高斯噪声，从而提高模型的鲁棒性。
 从数据集中加载数据，并使用SGD优化器和StepLR学习率调度器进行训练。
 在训练过程中，使用数据增强技术，在输入数据中添加高斯噪声，提高模型的鲁棒性。
 训练过程中，每个epoch会保存一个checkpoint，包括模型的状态、优化器的状态和当前epoch数。
-同时，训练过程中会记录训练和测试的loss和accuracy，并将其写入一个日志文件中。
+同时，训练过程中会记录训练和测试的loss和accuracy，并写入一个日志文件中。
 具体实现细节可以参考train.py文件中的代码。
-### 参数含义
+
+### 训练参数含义
 
 ```
 --dataset：指定数据集的名称，可选值为cifar10、cifar100和imagenet。
---arch：指定网络架构的名称，可选值为resnet20、resnet32、resnet44、resnet56、resnet110和wrn28_10。
+--arch：指定网络架构的名称，可选值为resnet20、resnet32、resnet44、resnet50、resnet110和wrn28_10。
 --outdir：指定保存模型和训练日志的文件夹路径。
 --workers：指定用于数据加载的进程数。
 --epochs：指定训练的总epoch数。
@@ -27,29 +30,43 @@
 --print-freq：指定训练过程中日志输出的频率。
 ```
 
-## certify
+具体使用train2.mian()接口参数。含义：将在 σ=0.50 的高斯数据增强下在cifar10 上训练 ResNet-50
+
+### 接口使用参数
+
+```python
+args_dict = {
+	'dataset': 'cifar10',#数据集
+	'arch': 'resnet50',#模型原型
+	'outdir': '/data/user/WZT/models/smoothing/cifar10/resnet110/noise_0',#训练模型输出路径
+	'batch': 400, #训练批次大小
+	'noise': 0.50 # 用于数据增强的高斯噪声的标准差0.0 0.25 0.5 1.0
+}
+```
+
+## certify2.py
+
 对数据集上的样本进行平滑分类器的评估。
 代码加载一个已经训练好的基分类器，并使用该分类器创建一个平滑分类器。
 代码迭代遍历数据集中的每个样本，对每个样本进行平滑分类器的预测，并将结果写入输出文件中。
 代码使用Smooth类中的certify方法来计算预测的半径和置信度，并将结果写入输出文件中。
 
+certify2.py证明*g*对大量输入的稳健性
 
-### 参数含义
-```
---dataset：数据集名称。
---base_classifier：基分类器的路径。
---sigma：噪声超参数。
---outfile：输出文件路径。
---batch：批量大小。
---skip：跳过的样本数。
---max：最大样本数。
---split：数据集划分，可选值为“train”或“test”。
---N0：用于计算置信度的初始样本数。
---N：用于计算置信度的总样本数。
---alpha：置信度的失败概率。
+### 接口使用参数
+
+```python
+args_dict = {
+    'dataset': 'cifar10',  # 数据集
+    'base_classifier': '/data/user/WZT/models/smoothing/cifar10/resnet110/noise_0.00/checkpoint.pth.tar',  # 模型文件
+    'sigma': 0.50,  # 噪声水平
+    'outfile': '/data/user/WZT/models/smoothing/certification_output/result',  # 输出g对一堆输入进行预测的结果文件
+    'batch': 400,  # 训练批次大小
+    'skip': 100,  # 每隔一百个图像
+}
 ```
 
-## predict
+## predict2.py
 
 在给定数据集上运行基础分类器并进行预测的脚本。
 
@@ -59,35 +76,38 @@
 对于每个样本，将其输入到平滑分类器中进行预测，并记录预测结果、是否正确以及所用时间。
 将这些信息写入输出文件中。
 
+predict2.py含义：*g*对一堆输入进行预测
 
 
-### 参数含义
+
+### 接口使用参数
+
+```python
+args_dict = {
+    'dataset': 'cifar10',  # 数据集
+    'base_classifier': '/data/user/WZT/models/smoothing/cifar10/resnet110/noise_0.00/checkpoint.pth.tar',  # 模型文件
+    'sigma': 0.50,  # 噪声水平
+    'outfile': '/data/user/WZT/models/smoothing/prediction_outupt/result',  # 输出g对一堆输入进行预测结果
+    'batch': 400,  # 训练批次大小
+    'skip': 100,  # 每隔一百个图像
+    'alpha': 0.001,  #
+    'N': 100000
+}
 ```
---dataset：数据集名称。
---base_classifier：基础分类器的路径。
---sigma：噪声超参数。
---outfile：输出文件名。
---batch：批量大小。
---skip：每隔多少个样本进行认证。
---max：最多认证多少个样本。
---split：使用训练集还是测试集。
---N：用于计算置信区间的样本数。
---alpha：失败概率。
-```
+
+code为接口代码文件 train2.py，certify2.py, predict2.py
+
+data为数据集路径包含cifar10数据集
+
+model为模型文件保存路径
+
+certification_output为certify2.py输出路径
+
+prediction_outupt为predict2.py输出路径
 
 
-## visualize
-可视化噪声图像
-使用 get_dataset 函数从给定的数据集名称和拆分中获取数据集，然后从该数据集中获取给定索引的图像。
-使用 torch.randn_like 函数生成与图像相同形状的噪声张量。
-对于每个给定的噪声标准差，使用 torch.clamp 函数将噪声应用于图像，并将结果保存为 PNG 文件。
-保存的文件名包括图像索引和噪声标准差的整数值。
 
-### 参数含义
-```
---dataset：数据集名称，必须是 DATASETS 中的一个。
---outdir：输出目录的路径。
---idx：要可视化的图像在数据集中的索引。
---noise_sds：要应用于图像的噪声标准差的列表。
---split：可选参数，指定要使用的数据集拆分，可以是 "train" 或 "test"。默认为 "test"。
-```
+
+
+
+
