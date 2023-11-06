@@ -41,7 +41,7 @@ class SquareAttack(EvasionAttack):
         loss_type='margin', # "ce"
         n_restarts=1,
         targeted=False,
-        batch_size=1,
+        batch_size=128,
     ):
 
         super().__init__(estimator=estimator)

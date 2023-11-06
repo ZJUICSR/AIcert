@@ -104,7 +104,7 @@ class ImperceptibleASRPyTorch(EvasionAttack):
         win_length: int = 2048,
         hop_length: int = 512,
         n_fft: int = 2048,
-        batch_size: int = 32,
+        batch_size: int = 128,
         use_amp: bool = False,
         opt_level: str = "O1",
     ):
