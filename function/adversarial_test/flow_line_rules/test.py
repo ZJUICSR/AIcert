@@ -8,7 +8,7 @@ from function.adversarial_test.attack.gen_adv import attacks_dict
 warnings.filterwarnings("ignore")
 
 
-RESULT_PATH = os.path.join(os.path.dirname(__file__), 'result')
+RESULT_PATH = os.path.join(os.path.dirname(__file__), 'results')
 if not os.path.exists(RESULT_PATH):
     os.mkdir(RESULT_PATH)
 
@@ -49,7 +49,8 @@ def run(model,
          device='cuda'):
 
     global RESULT_PATH
-
+    if not os.path.exists(RESULT_PATH):
+        os.mkdir(RESULT_PATH)
     cache_file = 'cache.json'
     result_file = 'flow_line_rules_results.json'
     cache_path = os.path.join(RESULT_PATH, param_hash)

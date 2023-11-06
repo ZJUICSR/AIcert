@@ -70,7 +70,7 @@ def get_method(method, attackparam):
         "TargetedUniversalPerturbationL2":"TargetedUniversalPerturbation",
         "TargetedUniversalPerturbationLinf":"TargetedUniversalPerturbation",
         "VirtualAdversarialMethod":"VirtualAdversarialMethod",
-        "SignOPTAttack":"SignOPTAttack"
+        "SignOPTAttack":"SignOPTAttack",
     }
     if methoddict[method] == "ElasticNet":
         if "L1" in method :
@@ -166,13 +166,27 @@ def run_get_adv_attack(dataset_name, model, dataloader, device='cuda', method='F
     del AttackObj
     return attack
 
+class Attack_Obj(object):
+    def __init__(self, dataset_name, model, dataloader, device='cuda', method='FGSM', attackparam={}):
+        self.AttackObj=EvasionAttacker(dataset=dataset_name.lower(), device=device, datanormalize=False, sample_num=10,model=model)
+        self.method_in_alg, self.attackparam = get_method(method, attackparam)
+        self.dataloader = dataloader
+    
+    def attack(self, x, **kwargs):
+        for key, value in kwargs.items():
+            self.attackparam[key] = value
+        attack = self.AttackObj.get_attack(method=self.method_in_alg, **self.attackparam)
+        return attack(x)
+    
+    def get_adv_attack(self):
+        attack_info = self.AttackObj.get_adv_data(dataloader=self.dataloader, method=self.method_in_alg, **self.attackparam)
+        return attack_info
+    
+
+
 def run_backdoor(model, modelpath, dataname, method, pp_poison, save_num, test_sample_num, target, trigger, device, nb_classes=10, method_param=None):
     datasetpath="./datasets/"
     channel = 1 if dataname.lower() == "mnist" else 3
-    # if dataname.lower() == "mnist":
-    #     channel = 1
-    # else:
-    #     channel = 3
     b = BackdoorAttacker(modelnet=eval(model)(channel), modelpath=modelpath, dataset=dataname.lower(), datasetpath=datasetpath, nb_classes=nb_classes, datanormalize=False, device=torch.device(device))
     # 对应关系list
     methoddict={
