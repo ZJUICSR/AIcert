@@ -1,3 +1,8 @@
+# this file is based on code publicly available at
+#   https://github.com/bearpaw/pytorch-classification
+# written by Wei Yang.
+
+import argparse
 import os
 import torch
 from torch.nn import CrossEntropyLoss
@@ -10,10 +15,39 @@ import time
 import datetime
 from train_utils import AverageMeter, accuracy, init_logfile, log
 
+parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
+# parser.add_argument('dataset', type=str, choices=DATASETS)
+# parser.add_argument('arch', type=str, choices=ARCHITECTURES)
+# parser.add_argument('outdir', type=str, default='/data/user/WZT/models/smoothing/cifar10/resnet110/noise_0',
+#                     help='folder to save model and training log)')
+parser.add_argument('--workers', default=4, type=int, metavar='N',
+                    help='number of data loading workers (default: 4)')
+parser.add_argument('--epochs', default=90, type=int, metavar='N',
+                    help='number of total epochs to run')
+# parser.add_argument('--batch', default=1, type=int, metavar='N',
+#                     help='batchsize (default: 256)')
+parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
+                    help='initial learning rate', dest='lr')
+parser.add_argument('--lr_step_size', type=int, default=30,
+                    help='How often to decrease learning by gamma.')
+parser.add_argument('--gamma', type=float, default=0.1,
+                    help='LR is multiplied by gamma on schedule.')
+parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
+                    help='momentum')
+parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
+                    metavar='W', help='weight decay (default: 1e-4)')
+# parser.add_argument('--noise_sd', default=0.0, type=float,
+#                     help="standard deviation of Gaussian noise for data augmentation")
+parser.add_argument('--gpu', default=None, type=str,
+                    help='id(s) for CUDA_VISIBLE_DEVICES')
+parser.add_argument('--print-freq', default=10, type=int,
+                    metavar='N', help='print frequency (default: 10)')
+args = parser.parse_args()
+
 
 def main(args_dict):
-    if args_dict['gpu']:
-        os.environ['CUDA_VISIBLE_DEVICES'] = args_dict['gpu']
+    if args.gpu:
+        os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
     if not os.path.exists(args_dict['outdir']):
         os.mkdir(args_dict['outdir'])
@@ -22,9 +56,9 @@ def main(args_dict):
     test_dataset = get_dataset(args_dict['dataset'], 'test')
     pin_memory = (args_dict['dataset'] == "imagenet")
     train_loader = DataLoader(train_dataset, shuffle=True, batch_size=args_dict['batch'],
-                              num_workers=args_dict['workers'], pin_memory=pin_memory)
+                              num_workers=args.workers, pin_memory=pin_memory)
     test_loader = DataLoader(test_dataset, shuffle=False, batch_size=args_dict['batch'],
-                             num_workers=args_dict['workers'], pin_memory=pin_memory)
+                             num_workers=args.workers, pin_memory=pin_memory)
 
     model = get_architecture(args_dict['arch'], args_dict['dataset'])
 
@@ -32,15 +66,14 @@ def main(args_dict):
     init_logfile(logfilename, "epoch\ttime\tlr\ttrain loss\ttrain acc\ttestloss\ttest acc")
 
     criterion = CrossEntropyLoss().cuda()
-    optimizer = SGD(model.parameters(), lr=args_dict['lr'], momentum=args_dict['momentum'],
-                    weight_decay=args_dict['weight_decay'])
-    scheduler = StepLR(optimizer, step_size=args_dict['lr_step_size'], gamma=args_dict['gamma'])
+    optimizer = SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
+    scheduler = StepLR(optimizer, step_size=args.lr_step_size, gamma=args.gamma)
 
-    for epoch in range(args_dict['epochs']):
+    for epoch in range(args.epochs):
         scheduler.step(epoch)
         before = time.time()
-        train_loss, train_acc = train(train_loader, model, criterion, optimizer, epoch, args_dict['noise_sd'])
-        test_loss, test_acc = test(test_loader, model, criterion, args_dict['noise_sd'])
+        train_loss, train_acc = train(train_loader, model, criterion, optimizer, epoch, args_dict['noise'])
+        test_loss, test_acc = test(test_loader, model, criterion, args_dict['noise'])
         after = time.time()
 
         log(logfilename, "{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}".format(
@@ -53,7 +86,6 @@ def main(args_dict):
             'state_dict': model.state_dict(),
             'optimizer': optimizer.state_dict(),
         }, os.path.join(args_dict['outdir'], 'checkpoint.pth.tar'))
-        return train_acc, test_acc
 
 
 def train(loader: DataLoader, model: torch.nn.Module, criterion, optimizer: Optimizer, epoch: int, noise_sd: float):
@@ -96,7 +128,7 @@ def train(loader: DataLoader, model: torch.nn.Module, criterion, optimizer: Opti
         batch_time.update(time.time() - end)
         end = time.time()
 
-        if i % args_dict['print_freq'] == 0:
+        if i % args.print_freq == 0:
             print('Epoch: [{0}][{1}/{2}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
@@ -106,7 +138,7 @@ def train(loader: DataLoader, model: torch.nn.Module, criterion, optimizer: Opti
                 epoch, i, len(loader), batch_time=batch_time,
                 data_time=data_time, loss=losses, top1=top1, top5=top5))
 
-    return losses.avg, top1.avg
+    return (losses.avg, top1.avg)
 
 
 def test(loader: DataLoader, model: torch.nn.Module, criterion, noise_sd: float):
@@ -145,7 +177,7 @@ def test(loader: DataLoader, model: torch.nn.Module, criterion, noise_sd: float)
             batch_time.update(time.time() - end)
             end = time.time()
 
-            if i % args_dict['print_freq'] == 0:
+            if i % args.print_freq == 0:
                 print('Test: [{0}/{1}]\t'
                       'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                       'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
@@ -155,24 +187,16 @@ def test(loader: DataLoader, model: torch.nn.Module, criterion, noise_sd: float)
                     i, len(loader), batch_time=batch_time,
                     data_time=data_time, loss=losses, top1=top1, top5=top5))
 
-        return acc1, acc5
+        return (losses.avg, top1.avg)
 
 
-if __name__ == "__main__":
-    args_dict = {
-        'dataset': 'cifar10',
-        'arch': 'cifar_resnet110',
-        'outdir': "/data/user/WZT/models/smoothing/cifar10/resnet110/noise_0.25",
-        'workers': 4,
-        'epochs': 90,
-        'batch': 256,
-        'lr': 0.1,
-        'lr_step_size': 30,
-        'gamma': 0.1,
-        'momentum': 0.9,
-        'weight_decay': 1e-4,
-        'noise_sd': 0.25,
-        'gpu': 0,
-        'print_freq': 10
-    }
-    main(args_dict)
+# if __name__ == "__main__":
+#     args_dict = {
+#         'dataset': 'cifar10',#数据集
+#         'arch': 'resnet50',#模型原型
+#         'outdir': '/data/user/WZT/models/smoothing/cifar10/resnet110/noise_0',#训练模型输出路径
+#         'batch': 400, #训练批次大小
+#         'noise': 0.50 # 用于数据增强的高斯噪声的标准差0.0 0.25 0.5 1.0
+#     }
+#
+#     main(args_dict)
