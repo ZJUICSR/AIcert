@@ -758,5 +758,5 @@ def run(train_loader, test_loader, params, log_func=None):
 """异常数据检测"""
 def run_image(dataset, train_loader, test_loader, out_path, log_func=None):
     batch_size = test_loader.batch_size
-    output_dict = run_cleanlab(train_loader, test_loader, root=out_path, dataset=dataset, batch_size=batch_size, PERT_NUM=64, MAX_IMAGES=32, log_func=log_func, gpu_id="cuda:0")
+    output_dict = run_cleanlab(train_loader, test_loader, root=out_path, dataset=dataset, batch_size=batch_size, PERT_NUM=32, MAX_IMAGES=32, log_func=log_func, gpu_id="cuda:0")
     return output_dict
