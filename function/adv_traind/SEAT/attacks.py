@@ -10,8 +10,8 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 import numpy as np
 
-from utils import torch_accuracy
-
+# from utils import torch_accuracy
+from .utils import torch_accuracy
 
 class AttackerPolymer:
 
