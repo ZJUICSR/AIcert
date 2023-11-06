@@ -627,7 +627,7 @@ def run_predictions(
     estimator: "CLASSIFIER_NEURALNETWORK_TYPE",
     imgs: List[np.ndarray],
     target: int,
-    batch_size: int,
+    batch_size: int = 128,
     err_rate: bool = True,
 ) -> float:
     """

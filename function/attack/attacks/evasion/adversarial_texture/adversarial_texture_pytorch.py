@@ -67,7 +67,7 @@ class AdversarialTexturePyTorch(EvasionAttack):
         y_min: int = 0,
         step_size: float = 1.0 / 255.0,
         max_iter: int = 500,
-        batch_size: int = 16,
+        batch_size: int = 128,
         summary_writer: Union[str, bool, SummaryWriter] = False,
         verbose: bool = True,
     ):
