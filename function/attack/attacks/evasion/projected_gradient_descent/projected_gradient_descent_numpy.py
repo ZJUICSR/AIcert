@@ -61,7 +61,7 @@ class ProjectedGradientDescentCommon():
         max_iter: int = 100,
         targeted: bool = False,
         num_random_init: int = 0,
-        batch_size: int = 32,
+        batch_size: int = 128,
         random_eps: bool = False,
         verbose: bool = True,
     ) -> None:

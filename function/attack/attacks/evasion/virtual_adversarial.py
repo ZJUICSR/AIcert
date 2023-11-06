@@ -62,7 +62,7 @@ class VirtualAdversarialMethod(EvasionAttack):
         max_iter: int = 10,
         finite_diff: float = 1e-6,
         eps: float = 0.1,
-        batch_size: int = 64,
+        batch_size: int = 128,
         verbose: bool = True,
     ) -> None:
         """

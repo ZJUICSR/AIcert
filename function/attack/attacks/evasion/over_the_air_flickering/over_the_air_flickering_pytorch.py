@@ -77,7 +77,7 @@ class OverTheAirFlickeringPyTorch(EvasionAttack):
         beta_1: float = 0.5,
         beta_2: float = 0.5,
         loss_margin: float = 0.05,
-        batch_size: int = 1,
+        batch_size: int = 128,
         start_frame_index: int = 0,
         num_frames: Optional[int] = None,
         round_samples: float = 0.0,

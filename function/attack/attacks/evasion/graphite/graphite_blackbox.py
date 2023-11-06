@@ -130,7 +130,7 @@ class GRAPHITEBlackbox(EvasionAttack):
         off_x_range: Tuple[float, float] = (-0.03125, 0.03125),
         off_y_range: Tuple[float, float] = (-0.03125, 0.03125),
         blur_kernels: Union[Tuple[int, int], List[int]] = (0, 3),
-        batch_size: int = 64,
+        batch_size: int = 128,
     ) -> None:
         """
         Create a GRAPHITEBlackbox attack instance.
