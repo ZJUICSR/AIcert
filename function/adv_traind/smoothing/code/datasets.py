@@ -12,7 +12,7 @@ IMAGENET_LOC_ENV = "IMAGENET_DIR"
 # list of all datasets
 DATASETS = ["imagenet", "cifar10"]
 
-# 返回指定数据集的PyTorch数据集对象
+
 def get_dataset(dataset: str, split: str) -> Dataset:
     """Return the dataset as a PyTorch Dataset object"""
     if dataset == "imagenet":
@@ -20,7 +20,7 @@ def get_dataset(dataset: str, split: str) -> Dataset:
     elif dataset == "cifar10":
         return _cifar10(split)
 
-# 返回指定数据集的类别数
+
 def get_num_classes(dataset: str):
     """Return the number of classes in the dataset. """
     if dataset == "imagenet":
@@ -28,7 +28,7 @@ def get_num_classes(dataset: str):
     elif dataset == "cifar10":
         return 10
 
-# 返回指定数据集的标准化层
+
 def get_normalize_layer(dataset: str) -> torch.nn.Module:
     """Return the dataset's normalization layer"""
     if dataset == "imagenet":
@@ -46,18 +46,18 @@ _CIFAR10_STDDEV = [0.2023, 0.1994, 0.2010]
 
 def _cifar10(split: str) -> Dataset:
     if split == "train":
-        return datasets.CIFAR10("/data/user/WZT/Datasets/smoothing/", train=True, download=True, transform=transforms.Compose([
+        return datasets.CIFAR10("/data/user/WZT/Datasets/cifar10/", train=True, download=True, transform=transforms.Compose([
             transforms.RandomCrop(32, padding=4),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor()
         ]))
     elif split == "test":
-        return datasets.CIFAR10("/data/user/WZT/Datasets/smoothing/", train=False, download=True, transform=transforms.ToTensor())
+        return datasets.CIFAR10("/data/user/WZT/Datasets/cifar10/", train=False, download=True, transform=transforms.ToTensor())
 
 
 def _imagenet(split: str) -> Dataset:
     if not IMAGENET_LOC_ENV in os.environ:
-        raise RuntimeError("未设置 ImageNet 目录的环境变量")
+        raise RuntimeError("environment variable for ImageNet directory not set")
 
     dir = os.environ[IMAGENET_LOC_ENV]
     if split == "train":
@@ -76,7 +76,7 @@ def _imagenet(split: str) -> Dataset:
         ])
     return datasets.ImageFolder(subdir, transform)
 
-# 定义了一个标准化层，用于标准化图像的通道。
+
 class NormalizeLayer(torch.nn.Module):
     """Standardize the channels of a batch of images by subtracting the dataset mean
       and dividing by the dataset standard deviation.
