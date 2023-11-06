@@ -4,20 +4,22 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 import torch.nn.init as init
 
+
 def conv_init(m):
     classname = m.__class__.__name__
     if classname.find('Conv') != -1:
         init.xavier_uniform(m.weight, gain=np.sqrt(2))
         init.constant(m.bias, 0)
 
+
 class LeNet(nn.Module):
     def __init__(self, num_classes):
         super(LeNet, self).__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1   = nn.Linear(16*5*5, 120)
-        self.fc2   = nn.Linear(120, 84)
-        self.fc3   = nn.Linear(84, num_classes)
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, num_classes)
 
     def forward(self, x):
         out = F.relu(self.conv1(x))
@@ -30,6 +32,7 @@ class LeNet(nn.Module):
         out = self.fc3(out)
 
         return out, out.view(out.size(0), -1)
+
 
 if __name__ == '__main__':
     net = LeNet(10)

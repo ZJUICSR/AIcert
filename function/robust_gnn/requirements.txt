@@ -1,0 +1,6 @@
+torch==1.8.1+cu111
+tqdm==4.50.2
+networks=2.6.3
+numpy==1.22.2
+scipy==1.8.0
+scikit-learns==1.0.2
