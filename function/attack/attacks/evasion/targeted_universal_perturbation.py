@@ -100,7 +100,6 @@ class TargetedUniversalPerturbation(EvasionAttack):
             np.random.shuffle(tmp_x)
             y = self.estimator.predict(tmp_x)
             # raise ValueError("Labels `y` cannot be None.")
-
         if self.estimator.nb_classes == 2 and y.shape[1] == 1:
             raise ValueError(
                 "This attack has not yet been tested for binary classification with a single output classifier."
