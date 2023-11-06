@@ -1,7 +1,4 @@
 from __future__ import print_function
-
-import json
-# import fs_eval
 import time
 import torch
 import torch.nn as nn
@@ -12,16 +9,11 @@ import torchvision
 import torchvision.transforms as transforms
 import os
 import argparse
-import sys
-import datetime
+
 from tqdm import tqdm
-from models.resnet import ResNet
-from models.vggnet import VGG
-from models.lenet import LeNet
-from models import *
-import utils
-from attack_methods import Attack_None, Attack_PGD
-from utils import softCrossEntropy, CWLoss
+from .attack_methods import Attack_None, Attack_PGD
+from .utils import softCrossEntropy, CWLoss, str2bool
+
 global criterion
 
 
@@ -66,8 +58,8 @@ def test(epoch, net, args, testloader, device):
 
 def RobustTest(args_dict):
     parser = argparse.ArgumentParser(description='Feature Scattering Adversarial Training')
-    parser.register('type', 'bool', utils.str2bool)
-    parser.add_argument('--resume', '-r', default=False, action='store_true', help='resume from checkpoint')
+    parser.register('type', 'bool', str2bool)
+    parser.add_argument('--resume', '-r', default=True, action='store_true', help='resume from checkpoint')
     parser.add_argument('--log_step', default=7, type=int, help='log_step')
     args = parser.parse_args()
     if args_dict['dataset'] == 'cifar10':
@@ -106,20 +98,20 @@ def RobustTest(args_dict):
         ])
 
     if args_dict['dataset'] == 'cifar10':
-        testset = torchvision.datasets.CIFAR10(root='/data/user/WZT/Datasets/cifar10/',
+        testset = torchvision.datasets.CIFAR10(root='/home/Wenjie/AI-Platform/dataset/CIFAR10',
                                                train=False,
-                                               download=False,
+                                               download=True,
                                                transform=transform_test)
     elif args_dict['dataset'] == 'cifar100':
-        testset = torchvision.datasets.CIFAR100(root='/data/user/WZT/Datasets/cifar100/',
+        testset = torchvision.datasets.CIFAR100(root='/home/Wenjie/AI-Platform/dataset/CIFAR100',
                                                 train=False,
-                                                download=False,
+                                                download=True,
                                                 transform=transform_test)
 
     elif args_dict['dataset'] == 'svhn':
-        testset = torchvision.datasets.SVHN(root='/data/user/WZT/Datasets/svhn/',
+        testset = torchvision.datasets.SVHN(root='/home/Wenjie/AI-Platform/dataset/SVHN',
                                             split='test',
-                                            download=False,
+                                            download=True,
                                             transform=transform_test)
     # 加载测试数据
     testloader = torch.utils.data.DataLoader(testset,
@@ -129,7 +121,7 @@ def RobustTest(args_dict):
 
     print('==> Building model..')
     if args_dict['dataset'] == 'cifar10' or args_dict['dataset'] == 'cifar100' or args_dict['dataset'] == 'svhn':
-        print('---Reading model-----', args_dict['model2'])
+        # print('---Reading model-----', args_dict['model2'])
         # basic_net = WideResNet(depth=28,
         #                        num_classes=args.num_classes,
         #                        widen_factor=10)
@@ -169,12 +161,12 @@ def RobustTest(args_dict):
 
     attack_list = args_dict['attack_method_list'].split('-')
     attack_num = len(attack_list)
-
+    acc_list = {}
     for attack_idx in range(attack_num):
 
         args_dict['attack_method'] = attack_list[attack_idx]
 
-        if args_dict['attack_method'] == 'natural':
+        if args_dict['attack_method'] == 'Natural':
             print('-----natural non-adv mode -----')
             # config is only dummy, not actually used
             net = Attack_None(basic_net, config_natural)
@@ -200,7 +192,8 @@ def RobustTest(args_dict):
             # Load checkpoint.
             print('==> Resuming from checkpoint..')
             f_path_latest = os.path.join(args_dict['model_dir'], 'latest')
-            f_path = os.path.join(args_dict['model_dir'], ('checkpoint-%s' % args_dict['init_model_pass']))
+            # f_path = os.path.join(args_dict['model_dir'], ('checkpoint-%s' % args_dict['init_model_pass']))
+            f_path = os.path.join(args_dict['model_dir'], args_dict['init_model_pass'])
             if not os.path.isdir(args_dict['model_dir']):
                 print('train from scratch: no checkpoint directory or file found')
             elif args_dict['init_model_pass'] == 'latest' and os.path.isfile(f_path_latest):
@@ -220,21 +213,24 @@ def RobustTest(args_dict):
         criterion = nn.CrossEntropyLoss()
 
         acc = test(0, net, args, testloader, device)
-        return acc
+        acc_list[args_dict['attack_method']] = acc
+    return acc_list
 
 
-if __name__ == "__main__":
-    args_dict = {
-        'attack': True,
-        'model2': LeNet(10),  # 输入要进行鲁棒增强的网路架构，ResNet(50, 10), LeNet(10), VGG(16, 10), WideResNet(depth=28, num_classes=10, widen_factor=10)
-        'model_dir': '/data/user/WZT/models/feasca_cifar10_letnet/',  # 模型路径
-        'init_model_pass': 'latest',  # 加载文件名latest,路径为model_dir，
-        'attack_method': 'pgd',  # adv_mode : natural, pdg or cw
-        'attack_method_list': 'natural-fgsm-pgd-cw',  
-        'dataset': 'cifar10',  # 数据集cifar10, cifar100,svhn
-        'image_size': 32,  # cifar10, cifar100,svhn, = 32; minist = 28
-        'num_classes': 10, # 图片种类
-        'batch_size_test': 100  # 每次测试的样本数
-    }
+# if __name__ == "__main__":
+#     args_dict = {
+#         'attack': True,
+#         'model2': LeNet(10),
+#         # 输入要进行鲁棒增强的网路架构，ResNet(50, 10), LeNet(10), VGG(16, 10), WideResNet(depth=28, num_classes=10, widen_factor=10)
+#         'model_dir': 'feasca_cifar10_lenet_result',  # 模型路径
+#         'init_model_pass': 'latest',  # 加载文件名latest,路径为model_dir，
+#         'attack_method': 'pgd',  # adv_mode : natural, PGD or CW
+#         'attack_method_list': 'natural-PGD-CW-fgsm',# 无任何攻击下的acc和三种攻击下的acc
+#         'dataset': 'cifar10',  # 数据集cifar10, cifar100,svhn
+#         'image_size': 32,  # cifar10, cifar100,svhn, = 32; minist = 28
+#         'num_classes': 10,  # 图片种类
+#         'batch_size_test': 100  # 每次测试的样本数
 
-    RobustTest(args_dict)
+#     }
+
+#     RobustTest(args_dict)
