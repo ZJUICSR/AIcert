@@ -1,12 +1,12 @@
-from image.parse_args import create_exerpiment_setting
-from image import utils
+from function.fairness.image.parse_args import create_exerpiment_setting
+from function.fairness.image import utils
 import torch
 import numpy as np
-from metrics import METRICS_FULL_NAME
-from models.cifar_core import CifarModel
-from models.cifar_gradproj_adv import CifarGradProjAdv
+from function.fairness.image.metrics import METRICS_FULL_NAME
+from function.fairness.image.models.cifar_core import CifarModel
+from function.fairness.image.models.cifar_gradproj_adv import CifarGradProjAdv
 import os
-from models import *
+from function.fairness.image.models import *
 
 def collect_args(model_path, dataset_name='celeba', algorithm_name='baseline', experiment_name='e1'):
     assert dataset_name in ['cifar_color', 'cifar_gray', 'cifar-s', 'cifar-i', 'cifar-c_28', 'cifar-d_16', 'cifar-d_8', 'celeba'], "Invalid dataset_name"
