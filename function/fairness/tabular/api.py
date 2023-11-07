@@ -1,5 +1,5 @@
 import torch
-from .fairness_datasets import CompasDataset, AdultDataset, GermanDataset
+from .fairness_datasets import CompasDataset, AdultDataset, GermanDataset, SENSITIVE_GROUPS
 from .metrics.dataset_metric import DatasetMetrics
 from .debias.preprocess import *
 # from models.models import LR, Net
