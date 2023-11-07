@@ -119,149 +119,149 @@ class Classifier:
                 print(f"Epoch: {i}, Loss: {dev_loss:.6f}, acc: {dev_acc:.2f}%",)
 
         # 指定模型为计算模式（测试）
-        state_dict = None
-        if os.path.exists(os.path.join(save_folder, 'best.pth')):
-            state_dict = torch.load(os.path.join(save_folder, 'best.pth'))
-        elif os.path.exists(os.path.join(save_folder, 'ckpt.pth')):
-            state_dict = torch.load(os.path.join(save_folder, 'ckpt.pth'))
-        else:
-            raise FileNotFoundError("no checkpoints available for testing")
+        # state_dict = None
+        # if os.path.exists(os.path.join(save_folder, 'best.pth')):
+        #     state_dict = torch.load(os.path.join(save_folder, 'best.pth'))
+        # elif os.path.exists(os.path.join(save_folder, 'ckpt.pth')):
+        #     state_dict = torch.load(os.path.join(save_folder, 'ckpt.pth'))
+        # else:
+        #     raise FileNotFoundError("no checkpoints available for testing")
 
-        self.model.load_state_dict(state_dict['model'])
+        # self.model.load_state_dict(state_dict['model'])
         
-        self.model.eval()
-        x = X_test.float().to(self.device)
-        y = Y_test.float().to(self.device)
-        z = Z_test.float().to(self.device)
-        loss = None
-        y_hat = None
-        with torch.no_grad():
-            loss, y_hat = self.loss(x, y, z, None) # test samples should not be weighted
-            loss = loss.mean().item()
-        pred = (y_hat > thresh).float() if self.num_classes == 1 else torch.argmax(y_hat, 1)
-        acc = (pred == y).float().mean() * 100
+        # self.model.eval()
+        # x = X_test.float().to(self.device)
+        # y = Y_test.float().to(self.device)
+        # z = Z_test.float().to(self.device)
+        # loss = None
+        # y_hat = None
+        # with torch.no_grad():
+        #     loss, y_hat = self.loss(x, y, z, None) # test samples should not be weighted
+        #     loss = loss.mean().item()
+        # pred = (y_hat > thresh).float() if self.num_classes == 1 else torch.argmax(y_hat, 1)
+        # acc = (pred == y).float().mean() * 100
 
-        dim0, dim1 = x.shape
-        flag1 = 0
-        flag2 = 0
-        flag3 = 0
-        flag4 = 0
-        for i in range(dim0):
-            if x[i][sens1] == 0 and x[i][sens2] == 0:
-                if flag1 == 0:
-                    x1 = x[i].unsqueeze(0)
-                    y1 = y[i].unsqueeze(0)
-                    z1 = z[i].unsqueeze(0)
-                    flag1 = 1
-                else:
-                    tempx = x[i].unsqueeze(0)
-                    tempy = y[i].unsqueeze(0)
-                    tempz = z[i].unsqueeze(0)
-                    x1 = torch.cat([x1,tempx], dim=0)
-                    y1 = torch.cat([y1,tempy], dim=0)
-                    z1 = torch.cat([z1,tempz], dim=-1)
-            if x[i][sens1] == 0 and x[i][sens2] == 1:
-                if flag2 == 0:
-                    x2 = x[i].unsqueeze(0)
-                    y2 = y[i].unsqueeze(0)
-                    z2 = z[i].unsqueeze(0)
-                    flag2 = 1
-                else:
-                    tempx = x[i].unsqueeze(0)
-                    tempy = y[i].unsqueeze(0)
-                    tempz = z[i].unsqueeze(0)
-                    x2 = torch.cat([x2,tempx], dim=0)
-                    y2 = torch.cat([y2,tempy], dim=0)
-                    z2 = torch.cat([z2,tempz], dim=-1)
-            if x[i][sens1] == 1 and x[i][sens2] == 1:
-                if flag3 == 0:
-                    x3 = x[i].unsqueeze(0)
-                    y3 = y[i].unsqueeze(0)
-                    z3 = z[i].unsqueeze(0)
-                    flag3 = 1
-                else:
-                    tempx = x[i].unsqueeze(0)
-                    tempy = y[i].unsqueeze(0)
-                    tempz = z[i].unsqueeze(0)
-                    x3 = torch.cat([x3,tempx], dim=0)
-                    y3 = torch.cat([y3,tempy], dim=0)
-                    z3 = torch.cat([z3,tempz], dim=-1)
-            if x[i][sens1] == 1 and x[i][sens2] == 0:
-                if flag4 == 0:
-                    x4 = x[i].unsqueeze(0)
-                    y4 = y[i].unsqueeze(0)
-                    z4 = z[i].unsqueeze(0)
-                    flag4 = 1
-                else:
-                    tempx = x[i].unsqueeze(0)
-                    tempy = y[i].unsqueeze(0)
-                    tempz = z[i].unsqueeze(0)
-                    x4 = torch.cat([x4,tempx], dim=0)
-                    y4 = torch.cat([y4,tempy], dim=0)
-                    z4 = torch.cat([z4,tempz], dim=-1)
+        # dim0, dim1 = x.shape
+        # flag1 = 0
+        # flag2 = 0
+        # flag3 = 0
+        # flag4 = 0
+        # for i in range(dim0):
+        #     if x[i][sens1] == 0 and x[i][sens2] == 0:
+        #         if flag1 == 0:
+        #             x1 = x[i].unsqueeze(0)
+        #             y1 = y[i].unsqueeze(0)
+        #             z1 = z[i].unsqueeze(0)
+        #             flag1 = 1
+        #         else:
+        #             tempx = x[i].unsqueeze(0)
+        #             tempy = y[i].unsqueeze(0)
+        #             tempz = z[i].unsqueeze(0)
+        #             x1 = torch.cat([x1,tempx], dim=0)
+        #             y1 = torch.cat([y1,tempy], dim=0)
+        #             z1 = torch.cat([z1,tempz], dim=-1)
+        #     if x[i][sens1] == 0 and x[i][sens2] == 1:
+        #         if flag2 == 0:
+        #             x2 = x[i].unsqueeze(0)
+        #             y2 = y[i].unsqueeze(0)
+        #             z2 = z[i].unsqueeze(0)
+        #             flag2 = 1
+        #         else:
+        #             tempx = x[i].unsqueeze(0)
+        #             tempy = y[i].unsqueeze(0)
+        #             tempz = z[i].unsqueeze(0)
+        #             x2 = torch.cat([x2,tempx], dim=0)
+        #             y2 = torch.cat([y2,tempy], dim=0)
+        #             z2 = torch.cat([z2,tempz], dim=-1)
+        #     if x[i][sens1] == 1 and x[i][sens2] == 1:
+        #         if flag3 == 0:
+        #             x3 = x[i].unsqueeze(0)
+        #             y3 = y[i].unsqueeze(0)
+        #             z3 = z[i].unsqueeze(0)
+        #             flag3 = 1
+        #         else:
+        #             tempx = x[i].unsqueeze(0)
+        #             tempy = y[i].unsqueeze(0)
+        #             tempz = z[i].unsqueeze(0)
+        #             x3 = torch.cat([x3,tempx], dim=0)
+        #             y3 = torch.cat([y3,tempy], dim=0)
+        #             z3 = torch.cat([z3,tempz], dim=-1)
+        #     if x[i][sens1] == 1 and x[i][sens2] == 0:
+        #         if flag4 == 0:
+        #             x4 = x[i].unsqueeze(0)
+        #             y4 = y[i].unsqueeze(0)
+        #             z4 = z[i].unsqueeze(0)
+        #             flag4 = 1
+        #         else:
+        #             tempx = x[i].unsqueeze(0)
+        #             tempy = y[i].unsqueeze(0)
+        #             tempz = z[i].unsqueeze(0)
+        #             x4 = torch.cat([x4,tempx], dim=0)
+        #             y4 = torch.cat([y4,tempy], dim=0)
+        #             z4 = torch.cat([z4,tempz], dim=-1)
 
-        with torch.no_grad():
-            loss1, y1_hat = self.loss(x1, y1, z1, None)
-            loss2, y2_hat = self.loss(x2, y2, z2, None)
-            loss3, y3_hat = self.loss(x3, y3, z3, None)
-            loss4, y4_hat = self.loss(x4, y4, z4, None)
+        # with torch.no_grad():
+        #     loss1, y1_hat = self.loss(x1, y1, z1, None)
+        #     loss2, y2_hat = self.loss(x2, y2, z2, None)
+        #     loss3, y3_hat = self.loss(x3, y3, z3, None)
+        #     loss4, y4_hat = self.loss(x4, y4, z4, None)
 
-        pred1 = (y1_hat > thresh).float() if self.num_classes == 1 else torch.argmax(y1_hat, 1)
-        pred2 = (y2_hat > thresh).float() if self.num_classes == 1 else torch.argmax(y2_hat, 1)
-        pred3 = (y3_hat > thresh).float() if self.num_classes == 1 else torch.argmax(y3_hat, 1)
-        pred4 = (y4_hat > thresh).float() if self.num_classes == 1 else torch.argmax(y4_hat, 1)
+        # pred1 = (y1_hat > thresh).float() if self.num_classes == 1 else torch.argmax(y1_hat, 1)
+        # pred2 = (y2_hat > thresh).float() if self.num_classes == 1 else torch.argmax(y2_hat, 1)
+        # pred3 = (y3_hat > thresh).float() if self.num_classes == 1 else torch.argmax(y3_hat, 1)
+        # pred4 = (y4_hat > thresh).float() if self.num_classes == 1 else torch.argmax(y4_hat, 1)
 
-        acc1 = ((pred1 == y1).float().mean() * 100).cpu().numpy().astype(np.float64)
-        acc2 = ((pred2 == y2).float().mean() * 100).cpu().numpy().astype(np.float64)
-        acc3 = ((pred3 == y3).float().mean() * 100).cpu().numpy().astype(np.float64)
-        acc4 = ((pred4 == y4).float().mean() * 100).cpu().numpy().astype(np.float64)
+        # acc1 = ((pred1 == y1).float().mean() * 100).cpu().numpy().astype(np.float64)
+        # acc2 = ((pred2 == y2).float().mean() * 100).cpu().numpy().astype(np.float64)
+        # acc3 = ((pred3 == y3).float().mean() * 100).cpu().numpy().astype(np.float64)
+        # acc4 = ((pred4 == y4).float().mean() * 100).cpu().numpy().astype(np.float64)
 
-        y1_cpu = y1.cpu()
-        pred1_cpu = pred1.cpu()
-        y2_cpu = y2.cpu()
-        pred2_cpu = pred2.cpu()
-        y3_cpu = y3.cpu()
-        pred3_cpu = pred3.cpu()
-        y4_cpu = y4.cpu()
-        pred4_cpu = pred4.cpu()
-        y1_true = y1_cpu.numpy()
-        y1_pred = pred1_cpu.numpy()
-        y2_true = y2_cpu.numpy()
-        y2_pred = pred2_cpu.numpy()
-        y3_true = y3_cpu.numpy()
-        y3_pred = pred3_cpu.numpy()
-        y4_true = y4_cpu.numpy()
-        y4_pred = pred4_cpu.numpy()
-        conf_matrix1 = confusion_matrix(y1_true, y1_pred)
-        conf_matrix2 = confusion_matrix(y2_true, y2_pred)
-        conf_matrix3 = confusion_matrix(y3_true, y3_pred)
-        conf_matrix4 = confusion_matrix(y4_true, y4_pred)
-        tn1,fp1,fn1,tp1 = conf_matrix1.ravel()
-        tn2,fp2,fn2,tp2 = conf_matrix2.ravel()
-        tn3,fp3,fn3,tp3 = conf_matrix3.ravel()
-        tn4,fp4,fn4,tp4 = conf_matrix4.ravel()
-        fpr1 = fp1 / (fp1 + tn1) * 100
-        fnr1 = fn1 / (fn1 + tp1) * 100
-        tpr1 = tp1 / (tp1 + fn1) * 100
-        tnr1 = tn1 / (tn1 + fp1) * 100
-        fpr2 = fp2 / (fp2 + tn2) * 100
-        fnr2 = fn2 / (fn2 + tp2) * 100
-        tpr2 = tp2 / (tp2 + fn2) * 100
-        tnr2 = tn2 / (tn2 + fp2) * 100
-        fpr3 = fp3 / (fp3 + tn3) * 100
-        fnr3 = fn3 / (fn3 + tp3) * 100
-        tpr3 = tp3 / (tp3 + fn3) * 100
-        tnr3 = tn3 / (tn3 + fp3) * 100
-        fpr4 = fp4 / (fp4 + tn4) * 100
-        fnr4 = fn4 / (fn4 + tp4) * 100
-        tpr4 = tp4 / (tp4 + fn4) * 100
-        tnr4 = tn4 / (tn4 + fp4) * 100
+        # y1_cpu = y1.cpu()
+        # pred1_cpu = pred1.cpu()
+        # y2_cpu = y2.cpu()
+        # pred2_cpu = pred2.cpu()
+        # y3_cpu = y3.cpu()
+        # pred3_cpu = pred3.cpu()
+        # y4_cpu = y4.cpu()
+        # pred4_cpu = pred4.cpu()
+        # y1_true = y1_cpu.numpy()
+        # y1_pred = pred1_cpu.numpy()
+        # y2_true = y2_cpu.numpy()
+        # y2_pred = pred2_cpu.numpy()
+        # y3_true = y3_cpu.numpy()
+        # y3_pred = pred3_cpu.numpy()
+        # y4_true = y4_cpu.numpy()
+        # y4_pred = pred4_cpu.numpy()
+        # conf_matrix1 = confusion_matrix(y1_true, y1_pred)
+        # conf_matrix2 = confusion_matrix(y2_true, y2_pred)
+        # conf_matrix3 = confusion_matrix(y3_true, y3_pred)
+        # conf_matrix4 = confusion_matrix(y4_true, y4_pred)
+        # tn1,fp1,fn1,tp1 = conf_matrix1.ravel()
+        # tn2,fp2,fn2,tp2 = conf_matrix2.ravel()
+        # tn3,fp3,fn3,tp3 = conf_matrix3.ravel()
+        # tn4,fp4,fn4,tp4 = conf_matrix4.ravel()
+        # fpr1 = fp1 / (fp1 + tn1) * 100
+        # fnr1 = fn1 / (fn1 + tp1) * 100
+        # tpr1 = tp1 / (tp1 + fn1) * 100
+        # tnr1 = tn1 / (tn1 + fp1) * 100
+        # fpr2 = fp2 / (fp2 + tn2) * 100
+        # fnr2 = fn2 / (fn2 + tp2) * 100
+        # tpr2 = tp2 / (tp2 + fn2) * 100
+        # tnr2 = tn2 / (tn2 + fp2) * 100
+        # fpr3 = fp3 / (fp3 + tn3) * 100
+        # fnr3 = fn3 / (fn3 + tp3) * 100
+        # tpr3 = tp3 / (tp3 + fn3) * 100
+        # tnr3 = tn3 / (tn3 + fp3) * 100
+        # fpr4 = fp4 / (fp4 + tn4) * 100
+        # fnr4 = fn4 / (fn4 + tp4) * 100
+        # tpr4 = tp4 / (tp4 + fn4) * 100
+        # tnr4 = tn4 / (tn4 + fp4) * 100
 
-        print(f"Loss: {loss:.6f}, acc: {acc:.2f}%",)
-        print(f"acc1: {acc1:.2f}%, fpr1: {fpr1:.2f}%, fnr1: {fnr1:.2f}%, tpr1: {tpr1:.2f}%, tnr1: {tnr1:.2f}%", )
-        print(f"acc2: {acc2:.2f}%, fpr2: {fpr2:.2f}%, fnr2: {fnr2:.2f}%, tpr2: {tpr2:.2f}%, tnr2: {tnr2:.2f}%", )
-        print(f"acc3: {acc3:.2f}%, fpr3: {fpr3:.2f}%, fnr3: {fnr3:.2f}%, tpr3: {tpr3:.2f}%, tnr3: {tnr3:.2f}%", )
-        print(f"acc4: {acc4:.2f}%, fpr4: {fpr4:.2f}%, fnr4: {fnr4:.2f}%, tpr4: {tpr4:.2f}%, tnr4: {tnr4:.2f}%", )
+        # print(f"Loss: {loss:.6f}, acc: {acc:.2f}%",)
+        # print(f"acc1: {acc1:.2f}%, fpr1: {fpr1:.2f}%, fnr1: {fnr1:.2f}%, tpr1: {tpr1:.2f}%, tnr1: {tnr1:.2f}%", )
+        # print(f"acc2: {acc2:.2f}%, fpr2: {fpr2:.2f}%, fnr2: {fnr2:.2f}%, tpr2: {tpr2:.2f}%, tnr2: {tnr2:.2f}%", )
+        # print(f"acc3: {acc3:.2f}%, fpr3: {fpr3:.2f}%, fnr3: {fnr3:.2f}%, tpr3: {tpr3:.2f}%, tnr3: {tnr3:.2f}%", )
+        # print(f"acc4: {acc4:.2f}%, fpr4: {fpr4:.2f}%, fnr4: {fnr4:.2f}%, tpr4: {tpr4:.2f}%, tnr4: {tnr4:.2f}%", )
 
     def predict(self, x, z):
         self.model.eval()
