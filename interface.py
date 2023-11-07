@@ -57,15 +57,10 @@ def run_model_eva_api(tid, stid, dataname, model_path='', modelname='', metrics 
     :params modelname:模型名称
     :params algorithmname:优化算法名称
     """
-    print("run_model_eva_api3")
     IOtool.change_subtask_state(tid, stid, 1)
-    print("run_model_eva_api4")
     IOtool.change_task_state(tid, 1)
-    print("run_model_eva_api5")
     IOtool.set_task_starttime(tid, stid, time.time())
-    print("run_model_eva_api6")
     logging = IOtool.get_logger(stid)
-    print("run_model_eva_api")
     if dataname in ["Compas", "Adult", "German"]:
         res = run_model_evaluate(dataname, model_path, modelname, metrics, senAttrList, tarAttrList, staAttrList, logging=logging)
     else:

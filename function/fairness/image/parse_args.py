@@ -2,9 +2,9 @@ import os
 import argparse
 import torch
 
-from image import models
-from image import utils
-from image.metrics import *
+from function.fairness.image import models
+from function.fairness.image import utils
+from function.fairness.image.metrics import *
 from IOtool import IOtool
 
 def collect_args():
