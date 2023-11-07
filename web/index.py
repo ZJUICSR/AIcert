@@ -247,7 +247,7 @@ def ModelFairnessEvaluate():
                 tarAttrList=inputParam["tarAttrList"]
                 staAttrList=inputParam["staAttrList"]
                 
-            t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname, modelname, metrics = metrics, senAttrList = senAttrList, tarAttrList = tarAttrList, staAttrList = staAttrList)
+            t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname,  model_path='', modelname=modelname, metrics = metrics, senAttrList = senAttrList, tarAttrList = tarAttrList, staAttrList = staAttrList)
         else:
             dataname = dataname.lower()
             if dataname == "cifar10-s":
@@ -260,7 +260,7 @@ def ModelFairnessEvaluate():
                 metrics = inputParam["metrics"]
             print(metrics)
             test_mode = inputParam["test_mode"]
-            t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname, modelname, metrics = metrics, test_mode = test_mode)
+            t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname,  model_path='', modelname=modelname, metrics = metrics, test_mode = test_mode)
             
         IOtool.add_task_queue(tid, stid, t2, 300)
         # interface.run_model_eva_api( tid, stid, dataname, modelname, metrics = metrics, test_mode = test_mode)
@@ -304,7 +304,7 @@ def ModelFairnessDebias():
         IOtool.change_task_info(tid, "dataset", dataname)
         IOtool.change_task_info(tid, "model", modelname)
         pool = IOtool.get_pool(tid)
-        
+        save_folder = osp.join(ROOT,"output", "cache", "fairness")
         if dataname in ["Compas", "Adult", "German"]:
             try:
                 metrics = json.loads(inputParam["metrics"])
@@ -316,7 +316,8 @@ def ModelFairnessDebias():
                 senAttrList=inputParam["senAttrList"]
                 tarAttrList=inputParam["tarAttrList"]
                 staAttrList=inputParam["staAttrList"]
-            t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, sensattrs = senAttrList, targetattr = tarAttrList, staAttrList = staAttrList)
+            t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, sensattrs = senAttrList, 
+                             targetattr = tarAttrList, staAttrList = staAttrList,, save_folder=save_folder)
         else:
             dataname = dataname.lower()
             # time.sleep(20)
@@ -328,7 +329,8 @@ def ModelFairnessDebias():
             except:
                 metrics = inputParam["metrics"]
             test_mode = inputParam["test_mode"]
-            t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, test_mode = test_mode)
+            t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, 
+                             test_mode = test_mode, save_folder=save_folder)
             # time.sleep(20)
             
         IOtool.add_task_queue(tid, AAtid, t2, 300)
