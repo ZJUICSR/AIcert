@@ -235,6 +235,8 @@ def ModelFairnessEvaluate():
         IOtool.change_task_info(tid, "model", modelname)
         
         pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+        IOtool.add_task_queue(tid, stid, t2, 300)
         if dataname in ["Compas", "Adult", "German"]:
             try:
                 metrics = json.loads(inputParam["metrics"])
@@ -246,8 +248,10 @@ def ModelFairnessEvaluate():
                 senAttrList=inputParam["senAttrList"]
                 tarAttrList=inputParam["tarAttrList"]
                 staAttrList=inputParam["staAttrList"]
-                
-            t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname,  model_path='', modelname=modelname, metrics = metrics, senAttrList = senAttrList, tarAttrList = tarAttrList, staAttrList = staAttrList)
+            print("run_model_eva_api1") 
+            # t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname,  model_path='', modelname=modelname, metrics = metrics, senAttrList = senAttrList, tarAttrList = tarAttrList, staAttrList = staAttrList)
+            interface.run_model_eva_api(tid, stid, dataname,  model_path='', modelname=modelname, metrics = metrics, senAttrList = senAttrList, tarAttrList = tarAttrList, staAttrList = staAttrList)
+            print("run_model_eva_api2") 
         else:
             dataname = dataname.lower()
             if dataname == "cifar10-s":
@@ -260,9 +264,10 @@ def ModelFairnessEvaluate():
                 metrics = inputParam["metrics"]
             print(metrics)
             test_mode = inputParam["test_mode"]
-            t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname,  model_path='', modelname=modelname, metrics = metrics, test_mode = test_mode)
-            
-        IOtool.add_task_queue(tid, stid, t2, 300)
+            # t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname,  model_path='', modelname=modelname, metrics = metrics, test_mode = test_mode)
+            interface.run_model_eva_api(tid, stid, dataname,  model_path='', modelname=modelname, metrics = metrics, test_mode = test_mode)
+        
+        # IOtool.add_task_queue(tid, stid, t2, 300)
         # interface.run_model_eva_api( tid, stid, dataname, modelname, metrics = metrics, test_mode = test_mode)
         res = {
             "tid":tid,
@@ -304,7 +309,10 @@ def ModelFairnessDebias():
         IOtool.change_task_info(tid, "dataset", dataname)
         IOtool.change_task_info(tid, "model", modelname)
         pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.submitAandB, tid, AAtid, 1, 2)
+        IOtool.add_task_queue(tid, AAtid, t2, 300)
         save_folder = osp.join(ROOT,"output", "cache", "fairness")
+        model_path = ''
         if dataname in ["Compas", "Adult", "German"]:
             try:
                 metrics = json.loads(inputParam["metrics"])
@@ -316,8 +324,10 @@ def ModelFairnessDebias():
                 senAttrList=inputParam["senAttrList"]
                 tarAttrList=inputParam["tarAttrList"]
                 staAttrList=inputParam["staAttrList"]
-            t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, sensattrs = senAttrList, 
-                             targetattr = tarAttrList, staAttrList = staAttrList,, save_folder=save_folder)
+            # t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, sensattrs = senAttrList, 
+            #                  targetattr = tarAttrList, staAttrList = staAttrList, model_path=model_path, save_folder=save_folder)
+            interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, sensattrs = senAttrList, 
+                             targetattr = tarAttrList, staAttrList = staAttrList, model_path=model_path, save_folder=save_folder)
         else:
             dataname = dataname.lower()
             # time.sleep(20)
@@ -329,11 +339,13 @@ def ModelFairnessDebias():
             except:
                 metrics = inputParam["metrics"]
             test_mode = inputParam["test_mode"]
-            t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, 
-                             test_mode = test_mode, save_folder=save_folder)
+            # t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, 
+            #                  test_mode = test_mode, model_path=model_path, save_folder=save_folder)
+            interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, 
+                             test_mode = test_mode, model_path=model_path, save_folder=save_folder)
             # time.sleep(20)
             
-        IOtool.add_task_queue(tid, AAtid, t2, 300)
+        # IOtool.add_task_queue(tid, AAtid, t2, 300)
         # interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, test_mode = test_mode)
         # interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, senAttrList, tarAttrList, staAttrList)
         
@@ -502,7 +514,7 @@ def query_log():
         filenamelist = os.listdir(path)
         filenames = sorted(filenamelist,key=lambda x : os.path.getmtime(osp.join(path, x)))
         for filename in filenames:
-            if stid in filename and osp.isfile(osp.join(path, filename)):
+            if stid in filename and osp.isfile(osp.join(path, filename)) and "_log" in filename :
                 with open(osp.join(path, filename), "r") as fp:
                     Log[stid] += fp.readlines()
     if len(stid_list)==0:
@@ -1586,11 +1598,10 @@ def FormalVerification():
         IOtool.change_task_info(tid, "dataset", inputParam["dataset"])
         IOtool.change_task_info(tid, "model", inputParam["model"])
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.run_modulardevelop, tid, stid, param)
-        t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
-        # t2 = pool.submit(interface.run_verify, tid, stid, param)
+        # t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+        t2 = pool.submit(interface.run_verify, tid, stid, param)
         IOtool.add_task_queue(tid, stid, t2, 30000)
-        interface.run_verify(tid, stid, param)
+        # interface.run_verify(tid, stid, param)
         # t2 = threading.Thread(target=interface.run_verify, args=(tid, stid, param))
         # t2.setDaemon(True)
         # t2.start()

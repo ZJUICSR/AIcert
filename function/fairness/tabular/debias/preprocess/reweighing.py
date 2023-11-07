@@ -1,4 +1,4 @@
-from fairness_datasets import *
+from function.fairness.tabular.fairness_datasets import *
 import copy
 from . import Preprocess
 

@@ -1,7 +1,7 @@
-from fairness_datasets import *
+from function.fairness.tabular.fairness_datasets import *
 from . import Preprocess
-from debias.inprocess.influence_classifier import IFClassifier
-from debias.preprocess.influence_util import *
+from function.fairness.tabular.debias.inprocess.influence_classifier import IFClassifier
+from function.fairness.tabular.debias.preprocess.influence_util import *
 # from models.models import 
     
 class InfluenceReweighing(Preprocess):

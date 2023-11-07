@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
-from fairness_datasets import FairnessDataset
-from models.models import Net, Net2
+from function.fairness.tabular.fairness_datasets import FairnessDataset
+from function.fairness.tabular.models.models import Net
 import numpy as np
-from debias.inprocess.classifier import Classifier
+from function.fairness.tabular.debias.inprocess.classifier import Classifier
 from numpy.random import beta
 
 class FMClassifier(Classifier):

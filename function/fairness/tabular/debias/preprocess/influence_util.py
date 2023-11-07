@@ -3,7 +3,7 @@
 from typing import Sequence
 import numpy as np
 # import gurobipy as gp
-from debias.inprocess.influence_classifier import IFClassifier
+from function.fairness.tabular.debias.inprocess.influence_classifier import IFClassifier
 
 def lp(fair_infl: Sequence, util_infl: Sequence, fair_loss: float, alpha: float, beta: float,
        gamma: float) -> np.ndarray:
