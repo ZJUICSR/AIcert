@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from function.fairness.tabular.fairness_datasets import FairnessDataset
-from function.fairness.tabular.models.models import Net
+from function.fairness.tabular.models.models import Net, Net2
 import math
 import numpy as np
 import copy

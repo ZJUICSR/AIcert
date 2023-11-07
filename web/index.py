@@ -45,7 +45,21 @@ def ExUploadModel():
         "msg":"success"
     }
     return jsonify(res)
-    # 
+
+@app.route('/fairness/uploadModel', methods=['POST'])
+def FairnessUploadModel():
+    fileinfo = request.files.get("ckpt")
+    filepath = "output/cache/fairness/ckpt.pth"
+    if osp.exists(filepath):
+        os.remove(filepath)
+    fileinfo.save(filepath)
+    res={
+        "code":10000,
+        "msg":"success",
+        'filepath':filepath
+    }
+    return jsonify(res)
+
 @app.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST' and request.form.get('username') and request.form.get('password'):
@@ -193,8 +207,11 @@ def DataFairnessDebias():
             staAttrList=inputParam["staAttrList"]
         # 执行任务
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.run_data_debias_api, tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList)
+        # t2 = pool.submit(interface.run_data_debias_api, tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList)
+        t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+        
         IOtool.add_task_queue(tid, stid, t2, 300)
+        interface.run_data_debias_api(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList)
         # t2 = threading.Thread(target=interface.run_data_debias_api,args=(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList))
         # t2.setDaemon(True)
         # t2.start()
@@ -248,10 +265,8 @@ def ModelFairnessEvaluate():
                 senAttrList=inputParam["senAttrList"]
                 tarAttrList=inputParam["tarAttrList"]
                 staAttrList=inputParam["staAttrList"]
-            print("run_model_eva_api1") 
             # t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname,  model_path='', modelname=modelname, metrics = metrics, senAttrList = senAttrList, tarAttrList = tarAttrList, staAttrList = staAttrList)
             interface.run_model_eva_api(tid, stid, dataname,  model_path='', modelname=modelname, metrics = metrics, senAttrList = senAttrList, tarAttrList = tarAttrList, staAttrList = staAttrList)
-            print("run_model_eva_api2") 
         else:
             dataname = dataname.lower()
             if dataname == "cifar10-s":
@@ -597,7 +612,8 @@ def get_result():
                 result['param'][stid] = IOtool.load_json(osp.join(ROOT,"output",tid,stid+"_param.json"))
         stopflag = 1
         for temp in  result.keys():
-            # print("result[temp]:", temp,result)
+            if temp == 'param':
+                continue
             if "stop" not in result[temp].keys():
                 stopflag = 0
             elif  result[temp]["stop"] == 0:
@@ -606,6 +622,7 @@ def get_result():
                 stopflag = 2
         # print(result)
         # print("stopflag", stopflag)
+        result['tid'] = tid
         return jsonify({"code":1,"msg":"success","result":result,"stop":stopflag})
 
 # ----------------- 课题1 对抗攻击评估 -----------------
