@@ -28,8 +28,8 @@ def run_dataset_debias(dataset_name, algorithm_name, sensattrs=[], targetattrs=[
     res['Overall uniformity'] = calculate_distribution_uniformity(res['Proportion'])
     return res
 
-def run_model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, staAttrList=[], generalized=False, logging=None):
-    res = model_evaluate(dataset_name, model_name, metrics, sensattrs, targetattr, generalized, logger=logging)
+def run_model_evaluate(dataset_name, model_path='', model_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, staAttrList=[], generalized=False, logging=None):
+    res = model_evaluate(dataset_name, model_name, metrics, sensattrs, targetattr, generalized, logger=logging, model_path=model_path)
     res1 = dataset_analysis(dataset_name, attrs=staAttrList, targetattrs=staAttrList, logger=logging)
     res['Corelation coefficients'] = res1['Correlation coefficients']
     res['Overall Correlation'] = res1['Overall Correlation']
@@ -39,8 +39,8 @@ def run_model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD
     res['Overall uniformity'] = calculate_distribution_uniformity(res['Proportion'])
     return res
 
-def run_model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, staAttrList=[], generalized=False, logging=None):
-    res = model_debias(dataset_name, model_name, algorithm_name, metrics, sensattrs, targetattr, generalized, logger=logging)
+def run_model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, staAttrList=[], generalized=False, logging=None, save_folder=''):
+    res = model_debias(dataset_name, model_name, algorithm_name, metrics, sensattrs, targetattr, generalized, logger=logging, save_folder=save_folder)
     res1 = dataset_analysis(dataset_name, attrs=staAttrList, targetattrs=staAttrList, logger=logging)
     res['Corelation coefficients'] = res1['Correlation coefficients']
     res['Overall Correlation'] = res1['Overall Correlation']
@@ -51,8 +51,8 @@ def run_model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'D
     return res
 
 
-def run_image_model_evaluate(dataset_name, model_name="Resnet50", metrics=['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTPR', 'mAcc', 'mF1', 'mBA'], test_mode=True, logging=None):
-    res = image_model_evaluate(dataset_name, model_name, metrics, test_mode, logger=logging)
+def run_image_model_evaluate(dataset_name, model_path='', model_name="Resnet50", metrics=['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTPR', 'mAcc', 'mF1', 'mBA'], test_mode=True, logging=None):
+    res = image_model_evaluate(dataset_name, model_path, model_name, metrics, test_mode, logger=logging)
     # res1 = dataset_analysis(dataset_name, attrs=staAttrList, targetattrs=staAttrList, logger=logging)
     # res['Corelation coefficients'] = res1['Correlation coefficients']
     # res['Overall Correlation'] = res1['Overall Correlation']
@@ -62,8 +62,8 @@ def run_image_model_evaluate(dataset_name, model_name="Resnet50", metrics=['mPre
     # res['Overall uniformity'] = calculate_distribution_uniformity(res['Proportion'])
     return res
 
-def run_image_model_debias(dataset_name, model_name="Resnet50", algorithm_name='', metrics=['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTPR', 'mAcc', 'mF1', 'mBA'], test_mode=True, logging=None):
-    res = image_model_debias(dataset_name, model_name, algorithm_name, metrics, test_mode, logger=logging)
+def run_image_model_debias(dataset_name, model_name="Resnet50", algorithm_name='', metrics=['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTPR', 'mAcc', 'mF1', 'mBA'], test_mode=True, logging=None, , save_folder=''):
+    res = image_model_debias(dataset_name, model_path, model_name, algorithm_name, metrics, test_mode, logger=logging, save_folder=save_folder)
     # res1 = dataset_analysis(dataset_name, attrs=staAttrList, targetattrs=staAttrList, logger=logging)
     # res['Corelation coefficients'] = res1['Correlation coefficients']
     # res['Overall Correlation'] = res1['Overall Correlation']
