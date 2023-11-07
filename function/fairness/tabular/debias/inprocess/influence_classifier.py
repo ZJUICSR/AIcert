@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
-from fairness_datasets import FairnessDataset
-from models.models import Net, Net2
+from function.fairness.tabular.fairness_datasets import FairnessDataset
+from function.fairness.tabular.models.models import Net
 import math
 import numpy as np
 import copy
-from debias.inprocess.classifier import Classifier
+from function.fairness.tabular.debias.inprocess.classifier import Classifier
 from tqdm import tqdm
 from typing import Sequence, Tuple
 from numpy import linalg as la

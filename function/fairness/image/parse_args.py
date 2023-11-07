@@ -55,7 +55,7 @@ def collect_args():
                                  'celeba_uniconf_adv',
                                  'celeba_gradproj_adv',    
                                 ],
-                        default='celeba_baseline')
+                        )
     
     parser.add_argument('--experiment_name', type=str, default='test')
     parser.add_argument('--no_cuda', dest='cuda', action='store_false')
@@ -102,16 +102,11 @@ def create_exerpiment_setting(opt):
         opt['print_freq'] = 50
         opt['batch_size'] = 64
         opt['total_epochs'] = 50
-<<<<<<< HEAD
-        opt['save_folder'] = os.path.join('output/cache/record/'+opt['experiment'], 
-                                          opt['experiment_name'])
-=======
         # opt['save_folder'] = os.path.join('record/'+opt['experiment'], 
         #                                   opt['experiment_name'])
         if opt['save_folder'] == '' :
-            opt['save_folder'] = os.path.join('record/'+opt['experiment'], 
-                                              opt['experiment_name'])
->>>>>>> fedbd9ecac36bd38fb8c846108275693ffae0417
+            opt['save_folder'] = os.path.join('output/cache/record/'+opt['experiment'], 
+                                          opt['experiment_name'])
         utils.creat_folder(opt['save_folder'])
         opt['output_dim'] = 39
         

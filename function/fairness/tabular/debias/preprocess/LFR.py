@@ -1,5 +1,5 @@
-from fairness_datasets import *
-from debias.preprocess.lfr_helpers import LFR_optim_objective, get_xhat_y_hat
+from function.fairness.tabular.fairness_datasets import *
+from function.fairness.tabular.debias.preprocess.lfr_helpers import LFR_optim_objective, get_xhat_y_hat
 import scipy.optimize as optim
 import copy
 from . import Preprocess
