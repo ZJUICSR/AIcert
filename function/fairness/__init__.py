@@ -11,10 +11,14 @@ def run_dataset_evaluate(dataset_name, sensattrs=[], targetattrs=[], staAttrList
     res1 = dataset_analysis(dataset_name, attrs=staAttrList, targetattrs=staAttrList, logger=logging)
     res['Corelation coefficients'] = res1['Correlation coefficients']
     res['Overall Correlation'] = res1['Overall Correlation']
-    for key in res1['Proportion'].keys():
-        if key not in res['Proportion'].keys():
-            res['Proportion'][key] = res1['Proportion'][key]
-    res['Overall uniformity'] = calculate_distribution_uniformity(res['Proportion'])
+    res['Proportion'] = res1['Proportion']
+    res['Overall uniformity'] = res1['Overall uniformity']
+    # print("*******", res1)
+    # for key in res1['Proportion'].keys():
+    #     if key not in res['Proportion'].keys():
+    #         res['Proportion'][key] = res1['Proportion'][key]
+    # print("res['Proportion']:",res['Proportion'])
+    # res['Overall uniformity'] = calculate_distribution_uniformity(res['Proportion'])
     return res
 
 def run_dataset_debias(dataset_name, algorithm_name, sensattrs=[], targetattrs=[], staAttrList=[], logging=None):
@@ -28,7 +32,8 @@ def run_dataset_debias(dataset_name, algorithm_name, sensattrs=[], targetattrs=[
     res['Overall uniformity'] = calculate_distribution_uniformity(res['Proportion'])
     return res
 
-def run_model_evaluate(dataset_name, model_path='', model_name='', metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], targetattr=None, staAttrList=[], generalized=False, logging=None):
+def run_model_evaluate(dataset_name, model_path='', model_name='', metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], 
+                       targetattr=None, staAttrList=[], generalized=False, logging=None):
     res = model_evaluate(dataset_name, model_name, metrics, sensattrs, targetattr, generalized, logger=logging, model_path=model_path)
     res1 = dataset_analysis(dataset_name, attrs=staAttrList, targetattrs=staAttrList, logger=logging)
     res['Corelation coefficients'] = res1['Correlation coefficients']

@@ -6,9 +6,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 from tensorboardX import SummaryWriter
-from image.models import basenet
-from image.models import dataloader
-from image import utils
+from function.fairness.image.models import basenet
+from function.fairness.image.models import dataloader
+from function.fairness.image import utils
 
 class CifarModel():
     def __init__(self, opt):
