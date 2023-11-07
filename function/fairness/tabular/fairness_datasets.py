@@ -23,17 +23,20 @@ SENSITIVE_GROUPS = {
 }
 
 class FairnessDataset():
-    def __init__(self, path, favorable=None, privileged=None, features_to_keep=None, features_to_drop=None):
+    def __init__(self, path, favorable=None, privileged=None, features_to_keep=None, features_to_drop=None, ratio=0.8):
 
         self.privileged = privileged
         self.features_to_drop = features_to_drop
         self.features_to_keep = features_to_keep # labels with be automatically removed from training features
         self.favorable = favorable
         self.path = path
+        self.train_ratio = ratio
 
         self.load_data()
         self.custom_preprocess()
         self.preprocess()
+        
+        self.train_idx, self.test_idx, self.dev_idx = self.split(ratio)
 
     def load_data(self):
         self.df = pd.read_csv(self.path)
@@ -103,13 +106,48 @@ class FairnessDataset():
         return result
 
     def split(self, train_ratio):
-        return map(np.array, train_test_split(self.X, self.Y, self.Z, train_size=train_ratio, random_state=seed))
+        self.train_ratio = train_ratio
+        indcies = np.arange(len(self))
+        train_dev_idx, self.test_idx = map(np.array, train_test_split(indcies, train_size=train_ratio,random_state=seed))
+        self.train_idx, self.dev_idx = map(np.array, train_test_split(indcies, train_size=0.7,random_state=seed))
+        return self.train_idx, self.test_idx, self.dev_idx
+        
 
     def __len__(self):
         return self.X.shape[0]
 
     def copy(self, deepcopy=True):
         return copy.deepcopy(self) if deepcopy else self
+
+    def subset(self, idxs, deepcopy=True):
+        sub = self.copy(deepcopy=deepcopy)
+        sub.df = sub.df.iloc[idxs]
+        sub.X = sub.X.iloc[idxs]
+        sub.Y = sub.Y.iloc[idxs]
+        sub.Z = sub.Z.iloc[idxs]
+        sub.train_idx, sub.test_idx = sub.split(self.train_ratio)
+        return sub
+    
+    def __getitem__(self, n):
+        v, s = n # unpack variable and split
+        if v == 'x':
+            v = self.X
+        elif v == 'y':
+            v = self.Y
+        elif v == 'z':
+            v = self.Z
+        elif v == 'w':
+            v = self.weights
+        v = np.array(v)
+        
+        # TODO: extend to train, valid, test
+        if s == 'train':
+            return v[self.train_idx]
+        elif s == 'test':
+            return v[self.test_idx]
+        else:
+            raise ValueError(f"split \'{s}\' does not exist.")
+
 
 
 def intersection(lst1, lst2):
@@ -137,7 +175,7 @@ class CompasDataset(FairnessDataset):
     categotical_features = ['age_cat', 'c_charge_degree', 'c_charge_desc']
     # categotical_features = ['age_cat', 'c_charge_degree', 'c_charge_desc']
 
-    def __init__(self, path=osp.join(ROOT,r'datasets/Compas/compas-scores-two-years.csv'), favorable=None, privileged=None, features_to_keep=None, features_to_drop=None): # TODO: use key word argues
+    def __init__(self, path=r'datasets/Compas/compas-scores-two-years.csv', favorable=None, privileged=None, features_to_keep=None, features_to_drop=None): # TODO: use key word argues
 
         privileged = privileged if privileged else CompasDataset.privileged
         features_to_drop = features_to_drop if features_to_drop else CompasDataset.features_to_drop
@@ -148,6 +186,8 @@ class CompasDataset(FairnessDataset):
                 favorable = {favorable: CompasDataset.favorable[favorable]}
             else:
                 raise ValueError('target label \'{}\' ')
+        if isinstance(privileged, list): # or pass list of sensitive strings
+            privileged = {k:__class__.privileged[k] for k in privileged}
     
         super().__init__(path, favorable, privileged, features_to_keep, features_to_drop) #num of feature 401
         # self.feature_select()
@@ -190,8 +230,8 @@ class AdultDataset(FairnessDataset):
         if isinstance(favorable, str) and favorable in AdultDataset.favorable.keys():
             favorable = {favorable: AdultDataset.favorable[favorable]}
 
-        self.train_path = osp.join(ROOT,train_path)
-        self.test_path = osp.join(ROOT,test_path)
+        self.train_path = train_path
+        self.test_path = test_path
         super().__init__('', favorable, privileged, features_to_keep, features_to_drop) #num of feature 401
         # self.feature_select()
     
@@ -200,17 +240,17 @@ class AdultDataset(FairnessDataset):
             'education-num', 'marital-status', 'occupation', 'relationship',
             'race', 'sex', 'capital-gain', 'capital-loss', 'hours-per-week',
             'native-country', 'income-per-year']
-        # # read train and test file
-        # train = pd.read_csv(self.train_path, header=None, names=column_names,
-        #         skipinitialspace=True)
-        # test = pd.read_csv(self.test_path, header=None, names=column_names,
-        #         skipinitialspace=True)
-        # # merge train and test file
-        # self.df = pd.concat([test, train], ignore_index=True)
+        # read train and test file
+        train = pd.read_csv(self.train_path, header=None, names=column_names,
+                skipinitialspace=True)
+        test = pd.read_csv(self.test_path, header=None, names=column_names,
+                skipinitialspace=True)
+        # merge train and test file
+        self.df = pd.concat([test, train], ignore_index=True)
         # too many samples, take first 2000 samples from test set
-        self.df = pd.read_csv(self.test_path, header=None, names=column_names, skipinitialspace=True)
+        # self.df = pd.read_csv(self.test_path, header=None, names=column_names, skipinitialspace=True)
         self.df = self.df.iloc[:2000]
-        return
+        # return
 
 class GermanDataset(FairnessDataset):
 
@@ -239,7 +279,8 @@ class GermanDataset(FairnessDataset):
                      'foreign_worker', 'personal_status']
     # categotical_features = ['age_cat', 'c_charge_degree', 'c_charge_desc']
 
-    def __init__(self, path=osp.join(ROOT,r'datasets/German/german.data'), favorable=None, privileged=None, features_to_keep=None, features_to_drop=None): # TODO: use key word argues
+    def __init__(self, path=r'datasets/German/german.data', favorable=None, privileged=None, features_to_keep=None, features_to_drop=None): # TODO: use key word argues
+
         privileged = privileged if privileged else GermanDataset.privileged
         features_to_drop = features_to_drop if features_to_drop else GermanDataset.features_to_drop
         features_to_keep = features_to_keep if features_to_keep else GermanDataset.features_to_keep
