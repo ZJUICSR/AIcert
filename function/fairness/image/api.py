@@ -2,9 +2,13 @@ from image.parse_args import create_exerpiment_setting
 from image import utils
 import torch
 import numpy as np
-from image.metrics import METRICS_FULL_NAME
+from metrics import METRICS_FULL_NAME
+from models.cifar_core import CifarModel
+from models.cifar_gradproj_adv import CifarGradProjAdv
+import os
+from models import *
 
-def collect_args(dataset_name='celeba', algorithm_name='baseline', experiment_name='test'):
+def collect_args(model_path, dataset_name='celeba', algorithm_name='baseline', experiment_name='e1'):
     assert dataset_name in ['cifar_color', 'cifar_gray', 'cifar-s', 'cifar-i', 'cifar-c_28', 'cifar-d_16', 'cifar-d_8', 'celeba'], "Invalid dataset_name"
     assert algorithm_name in ['baseline', 'sampling', 'domain_discriminative', 'domain_independent', 'uniconf_adv', 'gradproj_adv'], "Invalid algorithm_name"
 
@@ -15,7 +19,9 @@ def collect_args(dataset_name='celeba', algorithm_name='baseline', experiment_na
         'experiment': experiment,
         'experiment_name': experiment_name,
         'cuda': cuda,
-        'random_seed': 0
+        'random_seed': 0,
+        'save_folder': 'record/cifar-s_baseline/e1',
+        'model_path': model_path
     }
     
     model, opt = create_exerpiment_setting(opt)
@@ -30,9 +36,11 @@ def model_overall_fairness(result, metrics=['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTP
     overall_group_fairness = 1 - np.mean(values)
     return overall_group_fairness
 
-def model_evaluate(dataset_name, model_name="Resnet50", metrics=['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTPR', 'mAcc', 'mF1', 'mBA'], test_mode=True, logger=None):
+def model_evaluate(dataset_name, model_path = '', model_name="Resnet50", metrics=['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTPR', 'mAcc', 'mF1', 'mBA'], test_mode=True, logger=None):
     logger.info(f"start evaluating fairness of model: \'{model_name}\' on dataset: \'{dataset_name}\'.")
-    model, opt = collect_args(dataset_name)
+    model, opt = collect_args(model_path, dataset_name)
+    if model_path == '':
+       model.model_path = os.path.join('output/cache' + opt['experiment'] + '/', opt['experiment_name'])
     opt['test_mode'] = test_mode
     utils.set_random_seed(opt["random_seed"])
     if not opt['test_mode']:
@@ -56,7 +64,8 @@ def model_evaluate(dataset_name, model_name="Resnet50", metrics=['mPre', 'mFPR',
     logger.info(f'model evaluation done.')
     return result
 
-def model_debias(dataset_name,  model_name="Resnet50", algorithm_name="sampling", metrics=['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTPR', 'mAcc', 'mF1', 'mBA'], test_mode=True, logger=None):
+def model_debias(dataset_name,  model_name="Resnet50", algorithm_name="sampling", metrics=['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTPR', 'mAcc', 'mF1', 'mBA'], 
+                 test_mode=True, logger=None, save_folder=''):
     logger.info(f"start improving fairness of model: \'{model_name}\' on dataset: \'{dataset_name}\'.")
     model, opt = collect_args(dataset_name, algorithm_name=algorithm_name)
     opt['test_mode'] = test_mode
@@ -82,7 +91,7 @@ def model_debias(dataset_name,  model_name="Resnet50", algorithm_name="sampling"
     return result
 
 if __name__ == "__main__":
-    result = model_evaluate("cifar-s", test_mode=True)
+    result = model_evaluate("cifar-s", 'record/cifar-s_baseline/e1/ckpt.pth',  test_mode=True)
     print(result)
-    result = model_debias("cifar-s", test_mode=True)
+    result = model_debias("cifar-s",   test_mode=True)
     print(result)
