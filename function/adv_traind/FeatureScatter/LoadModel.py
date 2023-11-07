@@ -8,7 +8,6 @@ import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 import torchvision
 import torchvision.transforms as transforms
-from torch.autograd.gradcheck import zero_gradients
 from torch.autograd import Variable
 import os
 import argparse
@@ -16,6 +15,15 @@ from tqdm import tqdm
 from .utils import softCrossEntropy, str2bool
 from .attack_methods import Attack_FeaScatter
 from .attack_methods import Attack_None
+
+def zero_gradients(x):
+    if isinstance(x, torch.Tensor):
+        if x.grad is not None:
+            x.grad.detach_()
+            x.grad.zero_()
+    elif isinstance(x, collections.abc.Iterable):
+        for elem in x:
+            zero_gradients(elem)
 
 def print_para(net):
     for name, param in net.named_parameters():

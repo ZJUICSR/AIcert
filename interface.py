@@ -25,7 +25,8 @@ from torchvision.datasets import CIFAR10, mnist
 from function.side import *
 
 ROOT = osp.dirname(osp.abspath(__file__))
-def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics = [], sensattrs = [], targetattr=None, staAttrList= [], test_mode = True, save_folder=''):
+def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics = [], sensattrs = [], targetattr=None, staAttrList= [], 
+                         test_mode = True, model_path='', save_folder=''):
     """模型公平性提升
     :params tid:主任务ID
     :params stid:子任务id
@@ -38,7 +39,7 @@ def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics 
     IOtool.set_task_starttime(tid, stid, time.time())
     logging = IOtool.get_logger(stid)
     if dataname in ["Compas", "Adult", "German"]:
-        res = run_model_debias(dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList, logging=logging, save_folder=save_folder)
+        res = run_model_debias(dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList, logging=logging, model_path=model_path, save_folder=save_folder)
     else:
         res = run_image_model_debias(dataname, modelname, algorithmname, metrics, test_mode, logging=logging, save_folder=save_folder)
     res["stop"] = 1
@@ -48,7 +49,7 @@ def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics 
     IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid=tid)
 
-def run_model_eva_api(tid, stid, dataname, model_path='', modelname, metrics = [], senAttrList = [], tarAttrList = [], staAttrList= [], test_mode = True):
+def run_model_eva_api(tid, stid, dataname, model_path='', modelname='', metrics = [], senAttrList = [], tarAttrList = [], staAttrList= [], test_mode = True):
     """模型公平性提升
     :params tid:主任务ID
     :params stid:子任务id
@@ -56,11 +57,15 @@ def run_model_eva_api(tid, stid, dataname, model_path='', modelname, metrics = [
     :params modelname:模型名称
     :params algorithmname:优化算法名称
     """
+    print("run_model_eva_api3")
     IOtool.change_subtask_state(tid, stid, 1)
+    print("run_model_eva_api4")
     IOtool.change_task_state(tid, 1)
+    print("run_model_eva_api5")
     IOtool.set_task_starttime(tid, stid, time.time())
+    print("run_model_eva_api6")
     logging = IOtool.get_logger(stid)
-    
+    print("run_model_eva_api")
     if dataname in ["Compas", "Adult", "German"]:
         res = run_model_evaluate(dataname, model_path, modelname, metrics, senAttrList, tarAttrList, staAttrList, logging=logging)
     else:
