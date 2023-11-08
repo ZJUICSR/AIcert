@@ -82,7 +82,7 @@ def create_exerpiment_setting(opt):
         # opt['save_folder'] = os.path.join('record/'+opt['experiment'], 
         #                                   opt['experiment_name'])
         if opt['save_folder'] == '' :
-            opt['save_folder'] = os.path.join('output/cache/fairness'+opt['experiment'], 
+            opt['save_folder'] = os.path.join('output/cache/fairness/'+opt['experiment'], 
                                               opt['experiment_name'])
         utils.creat_folder(opt['save_folder'])
     
@@ -101,11 +101,12 @@ def create_exerpiment_setting(opt):
         opt['device'] = IOtool.get_device()
         opt['print_freq'] = 50
         opt['batch_size'] = 64
-        opt['total_epochs'] = 50
+        # opt['total_epochs'] = 50
+        opt['total_epochs'] = 2
         # opt['save_folder'] = os.path.join('record/'+opt['experiment'], 
         #                                   opt['experiment_name'])
         if opt['save_folder'] == '' :
-            opt['save_folder'] = os.path.join('output/cache/record/'+opt['experiment'], 
+            opt['save_folder'] = os.path.join('output/cache/fairness/'+opt['experiment'], 
                                           opt['experiment_name'])
         utils.creat_folder(opt['save_folder'])
         opt['output_dim'] = 39
@@ -216,7 +217,8 @@ def create_exerpiment_setting(opt):
         
     elif opt['experiment'] == 'cifar-s_uniconf_adv':
         opt['output_dim'] = 10
-        opt['total_epochs'] = 500
+        # opt['total_epochs'] = 500
+        opt['total_epochs'] = 2
         opt['training_ratio'] = 3
         opt['alpha'] = 1.
         
@@ -242,7 +244,8 @@ def create_exerpiment_setting(opt):
         
     elif opt['experiment'] == 'cifar-s_gradproj_adv':
         opt['output_dim'] = 10
-        opt['total_epochs'] = 500
+        # opt['total_epochs'] = 500
+        opt['total_epochs'] = 2
         opt['training_ratio'] = 3
         opt['alpha'] = 1.
         
