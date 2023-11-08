@@ -26,10 +26,12 @@ def run_dataset_debias(dataset_name, algorithm_name, sensattrs=[], targetattrs=[
     res1 = dataset_analysis(dataset_name, attrs=staAttrList, targetattrs=staAttrList, logger=logging)
     res['Corelation coefficients'] = res1['Correlation coefficients']
     res['Overall Correlation'] = res1['Overall Correlation']
-    for key in res1['Proportion'].keys():
-        if key not in res['Proportion'].keys():
-            res['Proportion'][key] = res1['Proportion'][key]
-    res['Overall uniformity'] = calculate_distribution_uniformity(res['Proportion'])
+    res['Proportion'] = res1['Proportion']
+    res['Overall uniformity'] = res1['Overall uniformity']
+    # for key in res1['Proportion'].keys():
+    #     if key not in res['Proportion'].keys():
+    #         res['Proportion'][key] = res1['Proportion'][key]
+    # res['Overall uniformity'] = calculate_distribution_uniformity(res['Proportion'])
     return res
 
 def run_model_evaluate(dataset_name, model_path='', model_name='', metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], sensattrs=[], 
@@ -38,22 +40,27 @@ def run_model_evaluate(dataset_name, model_path='', model_name='', metrics=['DI'
     res1 = dataset_analysis(dataset_name, attrs=staAttrList, targetattrs=staAttrList, logger=logging)
     res['Corelation coefficients'] = res1['Correlation coefficients']
     res['Overall Correlation'] = res1['Overall Correlation']
-    for key in res1['Proportion'].keys():
-        if key not in res['Proportion'].keys():
-            res['Proportion'][key] = res1['Proportion'][key]
-    res['Overall uniformity'] = calculate_distribution_uniformity(res['Proportion'])
+    res['Proportion'] = res1['Proportion']
+    res['Overall uniformity'] = res1['Overall uniformity']
+    # for key in res1['Proportion'].keys():
+    #     if key not in res['Proportion'].keys():
+    #         res['Proportion'][key] = res1['Proportion'][key]
+    # res['Overall uniformity'] = calculate_distribution_uniformity(res['Proportion'])
     return res
 
 def run_model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 'PE', 'EOD', 'PP', 'OMd', 'FOd', 'FNd'], 
                      sensattrs=[], targetattr=None, staAttrList=[], generalized=False, logging=None, model_path='', save_folder=''):
+    print("run_model_debias:",model_path)
     res = model_debias(dataset_name, model_name, algorithm_name, metrics, sensattrs, targetattr, generalized, logger=logging, model_path=model_path, save_folder=save_folder)
     res1 = dataset_analysis(dataset_name, attrs=staAttrList, targetattrs=staAttrList, logger=logging)
     res['Corelation coefficients'] = res1['Correlation coefficients']
     res['Overall Correlation'] = res1['Overall Correlation']
-    for key in res1['Proportion'].keys():
-        if key not in res['Proportion'].keys():
-            res['Proportion'][key] = res1['Proportion'][key]
-    res['Overall uniformity'] = calculate_distribution_uniformity(res['Proportion'])
+    res['Proportion'] = res1['Proportion']
+    res['Overall uniformity'] = res1['Overall uniformity']
+    # for key in res1['Proportion'].keys():
+    #     if key not in res['Proportion'].keys():
+    #         res['Proportion'][key] = res1['Proportion'][key]
+    # res['Overall uniformity'] = calculate_distribution_uniformity(res['Proportion'])
     return res
 
 
@@ -68,9 +75,11 @@ def run_image_model_evaluate(dataset_name, model_path='', model_name="Resnet50",
     # res['Overall uniformity'] = calculate_distribution_uniformity(res['Proportion'])
     return res
 
-def run_image_model_debias(dataset_name, model_name="Resnet50", algorithm_name='', metrics=['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTPR', 'mAcc', 'mF1', 'mBA'], 
+def run_image_model_debias(dataset_name, model_path='', model_name="Resnet50", algorithm_name='', metrics=['mPre', 'mFPR', 'mFNR', 'mTNR', 'mTPR', 'mAcc', 'mF1', 'mBA'], 
                            test_mode=True, logging=None, save_folder=''):
-    res = image_model_debias(dataset_name, model_name, algorithm_name, metrics, test_mode, logger=logging, save_folder=save_folder)
+    res = image_model_debias(dataset_name=dataset_name,model_path=model_path, model_name=model_name,
+                             algorithm_name=algorithm_name, metrics=metrics, test_mode=test_mode, 
+                             logger=logging, save_folder=save_folder)
     # res1 = dataset_analysis(dataset_name, attrs=staAttrList, targetattrs=staAttrList, logger=logging)
     # res['Corelation coefficients'] = res1['Correlation coefficients']
     # res['Overall Correlation'] = res1['Overall Correlation']
