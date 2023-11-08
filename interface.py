@@ -41,7 +41,9 @@ def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics 
     if dataname in ["Compas", "Adult", "German"]:
         res = run_model_debias(dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList, logging=logging, model_path=model_path, save_folder=save_folder)
     else:
-        res = run_image_model_debias(dataname, modelname, algorithmname, metrics, test_mode, logging=logging, save_folder=save_folder)
+        res = run_image_model_debias(dataset_name=dataname,model_path=model_path, 
+                                     model_name=modelname, algorithm_name=algorithmname, 
+                                     metrics=metrics, test_mode=test_mode, logging=logging, save_folder=save_folder)
     res["stop"] = 1
     
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))

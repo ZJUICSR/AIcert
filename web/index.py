@@ -50,13 +50,15 @@ def ExUploadModel():
 def FairnessUploadModel():
     fileinfo = request.files.get("ckpt")
     filepath = "output/cache/fairness/ckpt.pth"
+    modelpath, modelname = os.path.split(filepath)
     if osp.exists(filepath):
         os.remove(filepath)
     fileinfo.save(filepath)
     res={
         "code":10000,
         "msg":"success",
-        'filepath':filepath
+        'filepath':modelpath,
+        'filename':modelname
     }
     return jsonify(res)
 
@@ -237,6 +239,7 @@ def ModelFairnessEvaluate():
         dataname = inputParam["dataname"]
         tid = inputParam["tid"]
         modelname = inputParam["modelname"]
+        model_path = inputParam["modelpath"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
         IOtool.write_json(inputParam, osp.join(ROOT,"output", tid, stid + "_param.json"))
@@ -266,21 +269,18 @@ def ModelFairnessEvaluate():
                 tarAttrList=inputParam["tarAttrList"]
                 staAttrList=inputParam["staAttrList"]
             # t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname,  model_path='', modelname=modelname, metrics = metrics, senAttrList = senAttrList, tarAttrList = tarAttrList, staAttrList = staAttrList)
-            interface.run_model_eva_api(tid, stid, dataname,  model_path='', modelname=modelname, metrics = metrics, senAttrList = senAttrList, tarAttrList = tarAttrList, staAttrList = staAttrList)
+            interface.run_model_eva_api(tid, stid, dataname,  model_path=model_path, modelname=modelname, metrics = metrics, senAttrList = senAttrList, tarAttrList = tarAttrList, staAttrList = staAttrList)
         else:
             dataname = dataname.lower()
             if dataname == "cifar10-s":
                 dataname = "cifar-s" 
             try:
                 metrics = json.loads(inputParam["metrics"])
-                
-                print(1,type(metrics))
             except:
                 metrics = inputParam["metrics"]
-            print(metrics)
             test_mode = inputParam["test_mode"]
             # t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname,  model_path='', modelname=modelname, metrics = metrics, test_mode = test_mode)
-            interface.run_model_eva_api(tid, stid, dataname,  model_path='', modelname=modelname, metrics = metrics, test_mode = test_mode)
+            interface.run_model_eva_api(tid, stid, dataname,  model_path=model_path, modelname=modelname, metrics = metrics, test_mode = test_mode)
         
         # IOtool.add_task_queue(tid, stid, t2, 300)
         # interface.run_model_eva_api( tid, stid, dataname, modelname, metrics = metrics, test_mode = test_mode)
@@ -327,7 +327,7 @@ def ModelFairnessDebias():
         t2 = pool.submit(interface.submitAandB, tid, AAtid, 1, 2)
         IOtool.add_task_queue(tid, AAtid, t2, 300)
         save_folder = osp.join(ROOT,"output", "cache", "fairness")
-        model_path = ''
+        model_path = inputParam["modelpath"]
         if dataname in ["Compas", "Adult", "German"]:
             try:
                 metrics = json.loads(inputParam["metrics"])
@@ -598,6 +598,7 @@ def get_result():
             stidlist = request.args.get("stid")
         result = {}
         result['param'] = {}
+        result['stidlist'] = {}
         for stid in stidlist:
             attack_type = taskinfo[tid]["function"][stid]["type"]
             # 如果子任务状态不是执行成功，则返回子任务结果为空
@@ -609,10 +610,11 @@ def get_result():
             else:
                 result[attack_type] = (IOtool.load_json(osp.join(ROOT,"output",tid,stid+"_result.json")))
             if osp.exists(osp.join(ROOT,"output", tid, stid+"_param.json")):
-                result['param'][stid] = IOtool.load_json(osp.join(ROOT,"output",tid,stid+"_param.json"))
+                result['param'][attack_type] = IOtool.load_json(osp.join(ROOT,"output",tid,stid+"_param.json"))
+            result['stidlist'][attack_type] = stid
         stopflag = 1
         for temp in  result.keys():
-            if temp == 'param':
+            if temp in ['param','stidlist']:
                 continue
             if "stop" not in result[temp].keys():
                 stopflag = 0
@@ -1900,6 +1902,7 @@ def UploadData():
 def DownloadData():
      if request.method == "POST":
             download_path = request.form.get('file')
+            print(download_path)
             input_path,input_name=os.path.split(download_path)
             if os.path.isdir(download_path): 
                 print("it's a directory")
@@ -1923,7 +1926,7 @@ def DownloadData():
                 print(down_path)
                 print(down_name)
                 time.sleep(1)
-                return send_from_directory(down_path,
+                return send_from_directory(input_path,
                                     input_name, as_attachment=True)
             else:
                 return jsonify(bool=False, msg='No such file, please check file path')
