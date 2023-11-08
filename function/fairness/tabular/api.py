@@ -449,7 +449,7 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
         model.load_state_dict(torch.load(model_path)["model"])
 
     if save_folder=='':
-        save_folder = os.path.join('output/cache/fairness'+dataset_name, 'test')
+        save_folder = os.path.join('output/cache/fairness', dataset_name, 'test')
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
     torch.save(model.state_dict(), os.path.join(save_folder, 'ckpt.pth'))
@@ -514,6 +514,7 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
     result['Overall group fairness'] = [result1[0], result2[0]]
     result['Overall individual fairness'] = [result1[1], result2[1]]
     result['Overall fairness'] = [result1[2], result2[2]]
+    result['Overall model path'] = os.path.join(save_folder, f'ckpt_{algorithm_name}.pth')
 
     logger.info(f'model debiasing done.')
     return result

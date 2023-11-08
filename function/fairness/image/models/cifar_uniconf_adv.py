@@ -248,6 +248,8 @@ class CifarUniConfAdv(CifarModel):
             state_dict = torch.load(os.path.join(self.save_path, 'best.pth'))
         elif os.path.exists(os.path.join(self.save_path, 'ckpt.pth')):
             state_dict = torch.load(os.path.join(self.save_path, 'ckpt.pth'))
+        # elif os.path.exists(self.model_path):
+        #     state_dict = torch.load(self.model_path)
         else:
             raise FileNotFoundError("no checkpoints available for testing")
         self.load_state_dict(state_dict)
