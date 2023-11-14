@@ -1,13 +1,13 @@
 import torch
 import torch.nn as nn
-from fairness_datasets import FairnessDataset
-from models.models import CFairNet, CONFIGS
+from function.fairness.tabular.fairness_datasets import FairnessDataset
+from function.fairness.tabular.models.models import CFairNet, CONFIGS
 import math
 import numpy as np
 import copy
 from . import Classifier
 import torch.nn.functional as F
-from metrics.dataset_metric import DatasetMetrics
+from function.fairness.tabular.metrics.dataset_metric import DatasetMetrics
 
 # domain independent training requires change of the model outpu
 class CFairClassifier(Classifier):
