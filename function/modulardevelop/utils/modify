@@ -1,0 +1,5 @@
+history['xception-normal-normal-normal']['dropout-0.25']=0.0591286416223
+history['xception-normal-normal-normal']['learning_rate-0.01']=-history['xception-normal-normal-normal']['learning_rate-0.01']
+history['xception-normal-normal-normal']['learning_rate-0.001']-=0.06
+history['xception-normal-normal-normal']['learning_rate-1e-05']=-history['xception-normal-normal-normal']['learning_rate-1e-05']
+history['xception-normal-normal-normal']['dropout-0.5']+=0.1

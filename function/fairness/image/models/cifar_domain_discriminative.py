@@ -6,10 +6,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 from tensorboardX import SummaryWriter
-from models import basenet
-from models import dataloader
-from models.cifar_core import CifarModel
-import utils
+from function.fairness.image.models import basenet
+from function.fairness.image.models import dataloader
+from function.fairness.image.models.cifar_core import CifarModel
+from function.fairness.image import utils
 
 class CifarDomainDiscriminative(CifarModel):
     def __init__(self, opt):
@@ -80,10 +80,13 @@ class CifarDomainDiscriminative(CifarModel):
     def test(self):
         # Test and save the result
         state_dict = None
+        print(f'self.save_path:{self.save_path}')
         if os.path.exists(os.path.join(self.save_path, 'best.pth')):
             state_dict = torch.load(os.path.join(self.save_path, 'best.pth'))
         elif os.path.exists(os.path.join(self.save_path, 'ckpt.pth')):
             state_dict = torch.load(os.path.join(self.save_path, 'ckpt.pth'))
+        # elif os.path.exists(self.model_path):
+        #     state_dict = torch.load(self.model_path)
         else:
             raise FileNotFoundError("no checkpoints available for testing")
         self.load_state_dict(state_dict)

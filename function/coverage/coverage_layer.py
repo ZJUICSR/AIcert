@@ -203,23 +203,23 @@ def coverage_visualize(model_dir, dataset, batch_size, input_size):
 
 def get_dataloader_mnist(train, batch_size=16, input_size=(32, 32)):
     transform_fn = Compose([Resize(input_size), ToTensor(), ])
-    dataset = datasets.MNIST('./data/mnist', download=True, train=train, transform=transform_fn)
+    dataset = datasets.MNIST('./dataset/data', download=True, train=train, transform=transform_fn)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
     return dataloader
 
 
 def get_dataloader_cifar(train, batch_size=2, input_size=(32, 32)):
     transform_fn = Compose([Resize(input_size), ToTensor(), ])
-    dataset = datasets.CIFAR10('./data/cifar10', download=True, train=train, transform=transform_fn)
+    dataset = datasets.CIFAR10('./dataset/data', download=True, train=train, transform=transform_fn)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
     return dataloader
 
 
 def load_dataset(dataset_type):
     if dataset_type == 'mnist':
-        return get_dataloader_mnist(False, 1, input_size=(28,28))
+        return get_dataloader_mnist(False, 2, input_size=(28,28))
     elif dataset_type == 'cifar10':
-        return get_dataloader_cifar(False, batch_size=1, input_size=(32,32))
+        return get_dataloader_cifar(False, batch_size=2, input_size=(32,32))
     assert 0
 
 
@@ -391,7 +391,7 @@ def run_visualize(
         if now_conv > best_conv + 0.05 or i %50==0:
             best_conv = now_conv
             saves.append((i, now_conv))
-            g = DrawNet_overlap(result, format='svg', type_net=model_type, outputdir=outputdir, imagename=str(i),
+            g = DrawNet_overlap(result, format='png', type_net=model_type, outputdir=outputdir, imagename=str(i),
                             number_per_dot=number_per_dot)
 
         NC.update_coverage_step(x)
@@ -405,7 +405,7 @@ def run_visualize(
             json_data['coverage_test_yz']['coverage_layer'] = []
 
             for idx, conv in saves:
-                json_data['coverage_test_yz']['coverage_layer'].append([conv, f'image_layer/{idx}.svg'])
+                json_data['coverage_test_yz']['coverage_layer'].append([conv, f'image_layer/{idx}.png'])
 
             json.dump(json_data, file_obj)
 
@@ -459,10 +459,102 @@ def run(model, test_loader, params, log_func=None):
     run_visualize(model, dataloader=test_loader, result_file=result_file, model_type=model_name,
                   outputdir=root, number_of_image=show_size, log_func=log_func)
 
+def run_visualize_layer(
+        model_path, # 模型路径, 需要可以使用torch.load加载
+        dataset,           # 数据集名称, 支持mnist,cifar10
+        model_type,         # 模型类型,支持lenet5, resnet18, vgg11,vgg13,vgg19   
+        k=0.1,                       # 算法参数,范围[0,1],例如k=0.1时,每层前10%的神经元被算作激活
+        outputdir="./output",
+        number_of_image=None,          # 总共计算多少张图片,None值时会计算整个数据集
+        logging=None):
+    
 
+    if not os.path.exists(outputdir):
+        os.mkdir(outputdir)
+    dataloader = load_dataset(dataset)
 
+    if model_type == 'lenet5':
+        num_list = [10, 6, 12, 12, 10]
+        model = LeNet5()
+        model.load_state_dict(torch.load(model_path))
+    elif model_type == "vgg11":
+        num = int(model_type[3:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+        model = torchvision.models.vgg11(num_classes=10)
+    elif model_type == "vgg13":
+        num = int(model_type[3:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+        model = torchvision.models.vgg13(num_classes=10)
+    elif model_type == "vgg19":
+        num = int(model_type[3:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+        model = torchvision.models.vgg19(num_classes=10)
+    elif model_type == "resnet18":
+        num = int(model_type[6:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 2) + [12, 10]
+        model = torchvision.models.resnet18(num_classes=10)
+    elif model_type == "resnet34":
+        num = int(model_type[6:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 2) + [12, 10]
+        model = torchvision.models.resnet34(num_classes=10)
+    else:
+        num = int(model_type[6:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+        model = torch.load(model_path)
 
-if __name__ == '__main__':
+    x, y = next(iter(dataloader))
+    C, W, H = x.shape[1:]
+    NC = NCoverage_with_output_of_conv_kernel(model=model, model_type=model_type, k=k,
+                                              input_size=(C, W, H), dataloader=dataloader)
+    best_conv = 0
+    saves = []
+    for i, (x, y) in enumerate(dataloader):
+        x = x[0:2]
+        # x = torch.unsqueeze(x[0], dim=0)
+        # x = x.expand(x.shape[0],3,x.shape[2], x.shape[2])
+        result = NC.curr_cov_dict()
+        result, number_per_dot = afterprocess(result, num_list=num_list)
+ 
+        now_conv = NC.curr_neuron_cov()
+        # if now_conv > best_conv + 0.05 or i %50==0:
+        if now_conv > best_conv + 0.05:
+            best_conv = now_conv
+            saves.append((i, now_conv))
+            g = DrawNet_overlap(result, format='png', type_net=model_type, outputdir=outputdir, imagename=str(i),
+                            number_per_dot=number_per_dot)
+
+        NC.update_coverage_step(x)
+        # print('conv:', now_conv)
+        logging.info('conv:'+str(now_conv))
+
+        json_data = {}
+        if 'coverage_test_yz' not in json_data.keys():
+            json_data['coverage_test_yz'] = {}
+        json_data['coverage_test_yz']['coverage_layer'] = []
+        for idx, conv in saves:
+            # json_data['coverage_test_yz']['coverage_layer'].append([conv, f'{outputdir}/{idx}.pdf']) 
+            json_data['coverage_test_yz']['coverage_layer'].append({"coverage":conv, "imgUrl":f'{outputdir}/{idx}.png'}) 
+        # with open(result_file, 'r') as file_obj:
+        #     json_data = json.load(file_obj)
+        # with open(result_file, 'w') as file_obj:
+        #     if 'coverage_test_yz' not in json_data.keys():
+        #         json_data['coverage_test_yz'] = {}
+        #     json_data['coverage_test_yz']['coverage_layer'] = []
+
+        #     for idx, conv in saves:
+        #         json_data['coverage_test_yz']['coverage_layer'].append([conv, f'image_layer/{idx}.svg'])
+
+        #     json.dump(json_data, file_obj)
+
+        if number_of_image is not None and i == number_of_image:
+            break
+
+        # info = "[模型测试阶段] 运行课题二的模型标准化测试准则：coverage_visualize [{:d}/{:d}]".format(i, len(dataloader))
+        # if log_func is not None:
+        #     log_func(info)
+    return json_data
+
+# if __name__ == '__main__':
     # # from resnet import resnet18
 
     # # model = torchvision.models.resnet34(False)
@@ -476,7 +568,7 @@ if __name__ == '__main__':
     # dataloader = get_dataloader_cifar(False, batch_size=4, input_size=input_size)
     # dataloader = get_dataloader_mnist(False, batch_size=4, input_size=input_size)
     # model_type参数有lenet和vgg两种取值
-    run_visualize('./lenet5.pth','mnist', 'lenet5', 0.1, 100)
+    # run_visualize('./lenet5.pth','mnist', 'lenet5', 0.1, 100)
 
 
 

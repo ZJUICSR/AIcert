@@ -20,14 +20,13 @@ import os
 import torch
 import torch.nn as nn
 
-from auto_LiRPA_verifiy.language.Transformer.modeling import BertForSequenceClassification, BertConfig
-from auto_LiRPA_verifiy.language.Transformer.utils import convert_examples_to_features
-from auto_LiRPA_verifiy.language.language_utils import build_vocab
-from auto_LiRPA.auto_LiRPA.utils import logger
-from auto_LiRPA_verifiy.language.data_utils import get_sst_data
+from function.formal_verify.auto_LiRPA_verifiy.language.Transformer.modeling import BertForSequenceClassification, BertConfig
+from function.formal_verify.auto_LiRPA_verifiy.language.Transformer.utils import convert_examples_to_features
+from function.formal_verify.auto_LiRPA_verifiy.language.language_utils import build_vocab
 
-PRE_TRAIN_MODEL = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                               'model',
+from function.formal_verify.auto_LiRPA_verifiy.language.data_utils import get_sst_data
+
+PRE_TRAIN_MODEL = os.path.join("model/auto_LiRPA_model",
                                'ckpt_transformer')
 
 
@@ -74,13 +73,13 @@ class Transformer(nn.Module):
         config.hidden_dropout_prob = dropout
         self.model = BertForSequenceClassification(
             config, self.num_labels, vocab=self.vocab).to(self.device)
-        logger.info("Model initialized")
+        print("Model initialized")
         if load:
             checkpoint = torch.load(load, map_location=torch.device(self.device))
             epoch = checkpoint['epoch']
             self.model.embeddings.load_state_dict(checkpoint['state_dict_embeddings'])
             self.model.model_from_embeddings.load_state_dict(checkpoint['state_dict_model_from_embeddings'])
-            logger.info('Checkpoint loaded: {}'.format(load))
+            print('Checkpoint loaded: {}'.format(load))
 
         self.model_from_embeddings = self.model.model_from_embeddings
         self.word_embeddings = self.model.embeddings.word_embeddings
@@ -94,7 +93,7 @@ class Transformer(nn.Module):
             'state_dict_model_from_embeddings': self.model.model_from_embeddings.state_dict(), 
             'epoch': epoch
         }, path)
-        logger.info("Model saved to {}".format(path))
+        print("Model saved to {}".format(path))
         
     def build_optimizer(self):
         # update the original model with the converted model

@@ -6,10 +6,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 from tensorboardX import SummaryWriter
-from models import basenet
-from models import dataloader
-from models.cifar_core import CifarModel
-import utils
+from function.fairness.image.models import basenet
+from function.fairness.image.models import dataloader
+from function.fairness.image.models.cifar_core import CifarModel
+from function.fairness.image import utils
 
 class CifarGradProjAdv(CifarModel):
     def __init__(self, opt):
@@ -241,6 +241,8 @@ class CifarGradProjAdv(CifarModel):
             state_dict = torch.load(os.path.join(self.model_path, 'best.pth'))
         elif os.path.exists(os.path.join(self.model_path, 'ckpt.pth')):
             state_dict = torch.load(os.path.join(self.model_path, 'ckpt.pth'))
+        # elif os.path.exists(self.model_path):
+        #     state_dict = torch.load(self.model_path)
         else:
             raise FileNotFoundError("no checkpoints available for testing")
         self.load_state_dict(state_dict)

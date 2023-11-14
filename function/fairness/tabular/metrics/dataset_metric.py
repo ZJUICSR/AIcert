@@ -1,12 +1,11 @@
 import sys
 import os
-sys.path.append(os.path.join(os.getcwd(),"function/fairness"))
-
-from fairness_datasets import FairnessDataset
+# sys.path.append(os.path.join(os.getcwd(),"function/fairness"))
+from function.fairness.tabular.fairness_datasets import FairnessDataset
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
-from metrics.metric_utils import dic_operation
-from metrics.metric_utils import *
+from function.fairness.tabular.metrics.metric_utils import dic_operation
+from function.fairness.tabular.metrics.metric_utils import *
 
 
 # select out priviledged and unpriiviledged samples from dataset
