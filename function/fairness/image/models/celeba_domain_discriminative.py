@@ -8,10 +8,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 from tensorboardX import SummaryWriter
-from models import basenet
-from models import dataloader
-from models.celeba_core import CelebaModel
-import utils
+from function.fairness.image.models import basenet
+from function.fairness.image.models import dataloader
+from function.fairness.image.models.celeba_core import CelebaModel
+from function.fairness.image import utils
 
 class CelebaDomainDiscriminative(CelebaModel):
     def __init__(self, opt):

@@ -10,25 +10,11 @@ from function.attack.attacks.utils import (
     get_labels_np_array,
     check_and_transform_label_format,
 )
-# from Attack.summary_writer import SummaryWriter
 
 if TYPE_CHECKING:
     from function.attack.attacks.utils import CLASSIFIER_LOSS_GRADIENTS_TYPE
 
-# logger = logging.getLogger(__name__)
-
 class FastGradientMethod(EvasionAttack):
-    
-    # attack_params = EvasionAttack.attack_params + [
-    #     "norm",
-    #     "eps",
-    #     "eps_step",
-    #     "targeted",
-    #     "num_random_init",
-    #     "batch_size",
-    #     "minimal",
-    #     "summary_writer",
-    # ]
 
     attack_params = EvasionAttack.attack_params + [
         "norm",
@@ -44,12 +30,8 @@ class FastGradientMethod(EvasionAttack):
         estimator: "CLASSIFIER_LOSS_GRADIENTS_TYPE",
         norm: Union[int, float, str] = np.inf,
         eps: Union[int, float, np.ndarray] = 8/255,
-        # eps_step: Union[int, float, np.ndarray] = 0.03,
         targeted: bool = False,
-        # num_random_init: int = 0,
         batch_size: int = 128,
-        # minimal: bool = False,
-        # summary_writer: Union[str, bool, SummaryWriter] = False,
     ) -> None:
         # super().__init__(estimator=estimator, summary_writer=summary_writer)
         super().__init__(estimator=estimator)
@@ -73,22 +55,7 @@ class FastGradientMethod(EvasionAttack):
         # self._check_compatibility_input_and_eps(x=x)
 
         if isinstance(self.estimator, ClassifierMixin):
-            # if y is not None:
-            #     y = check_and_transform_label_format(y, nb_classes=self.estimator.nb_classes)
             
-            # # if y is not None and not self.targeted:
-            # #     raise ValueError("Target labels `y` only need to be provided for a targeted attack.")
-
-            # if y is None:
-            #     # Throw error if attack is targeted, but no targets are provided
-            #     if self.targeted:  # pragma: no cover
-            #         raise ValueError("Target labels `y` need to be provided for a targeted attack.")
-
-            #     # Use model predictions as correct outputs
-            #     # logger.info("Using model predictions as correct labels for FGM.")
-            #     y_array = get_labels_np_array(self.estimator.predict(x, batch_size=self.batch_size))  # type: ignore
-            # else:
-            #     y_array = y
             if self.targeted:
                 if y is None:
                     raise ValueError("Target labels `y` only need to be provided for a targeted attack.")
@@ -102,73 +69,7 @@ class FastGradientMethod(EvasionAttack):
 
             # Return adversarial examples computed with minimal perturbation if option is active
             adv_x_best = x
-            # if self.minimal:
-            #     # logger.info("Performing minimal perturbation FGM.")
-            #     # adv_x_best = self._minimal_perturbation(x, y_array, mask)
-            #     rate_best = 100 * compute_success(
-            #         self.estimator,  # type: ignore
-            #         x,
-            #         y_array,
-            #         adv_x_best,
-            #         self.targeted,
-            #         batch_size=self.batch_size,  # type: ignore
-            #     )
-            # else:
-            #     rate_best = 0.0
-            #     for _ in range(max(1, self.num_random_init)):
-            #         adv_x = self._compute(
-            #             x,
-            #             x,
-            #             y_array,
-            #             mask,
-            #             self.eps,
-            #             self.eps,
-            #             self._project,
-            #             self.num_random_init > 0,
-            #         )
-
-            #         if self.num_random_init > 1:
-            #             rate = 100 * compute_success(
-            #                 self.estimator,  # type: ignore
-            #                 x,
-            #                 y_array,
-            #                 adv_x,
-            #                 self.targeted,
-            #                 batch_size=self.batch_size,  # type: ignore
-            #             )
-            #             if rate > rate_best:
-            #                 rate_best = rate
-            #                 adv_x_best = adv_x
-            #         else:
-            #             adv_x_best = adv_x
-
-                        #     rate_best = 0.0
-
-            # for _ in range(max(1, self.num_random_init)):
-            #     adv_x = self._compute(
-            #         x,
-            #         x,
-            #         y_array,
-            #         self.eps,
-            #         self.eps,
-            #         self._project,
-            #     )
-            #     adv_x_best = adv_x
-
-            # logger.info(
-            #     "Success rate of FGM attack: %.2f%%",
-            #     rate_best
-            #     if rate_best is not None
-            #     else 100
-            #     * compute_success(
-            #         self.estimator,  # type: ignore
-            #         x,
-            #         y_array,
-            #         adv_x_best,
-            #         self.targeted,
-            #         batch_size=self.batch_size,
-            #     ),
-            # )
+            
             adv_x = self._compute(
                     x,
                     y_array,
@@ -204,56 +105,6 @@ class FastGradientMethod(EvasionAttack):
 
         return adv_x_best
 
-    # def _check_params(self) -> None:
-
-    #     if self.norm not in [1, 2, np.inf, "inf"]:
-    #         raise ValueError('Norm order must be either 1, 2, `np.inf` or "inf".')
-
-    #     if not (
-    #         isinstance(self.eps, (int, float))
-    #         and isinstance(self.eps_step, (int, float))
-    #         or isinstance(self.eps, np.ndarray)
-    #         and isinstance(self.eps_step, np.ndarray)
-    #     ):
-    #         raise TypeError(
-    #             "The perturbation size `eps` and the perturbation step-size `eps_step` must have the same type of `int`"
-    #             ", `float`, or `np.ndarray`."
-    #         )
-
-    #     if isinstance(self.eps, (int, float)):
-    #         if self.eps < 0:
-    #             raise ValueError("The perturbation size `eps` has to be nonnegative.")
-    #     else:
-    #         if (self.eps < 0).any():
-    #             raise ValueError("The perturbation size `eps` has to be nonnegative.")
-
-    #     if isinstance(self.eps_step, (int, float)):
-    #         if self.eps_step <= 0:
-    #             raise ValueError("The perturbation step-size `eps_step` has to be positive.")
-    #     else:
-    #         if (self.eps_step <= 0).any():
-    #             raise ValueError("The perturbation step-size `eps_step` has to be positive.")
-
-    #     if isinstance(self.eps, np.ndarray) and isinstance(self.eps_step, np.ndarray):
-    #         if self.eps.shape != self.eps_step.shape:
-    #             raise ValueError(
-    #                 "The perturbation size `eps` and the perturbation step-size `eps_step` must have the same shape."
-    #             )
-
-    #     if not isinstance(self.targeted, bool):
-    #         raise ValueError("The flag `targeted` has to be of type bool.")
-
-        # if not isinstance(self.num_random_init, int):
-        #     raise TypeError("The number of random initialisations has to be of type integer")
-
-        # if self.num_random_init < 0:
-        #     raise ValueError("The number of random initialisations `random_init` has to be greater than or equal to 0.")
-
-        # if self.batch_size <= 0:
-        #     raise ValueError("The batch size `batch_size` has to be positive.")
-
-        # if not isinstance(self.minimal, bool):
-        #     raise ValueError("The flag `minimal` has to be of type bool.")
     
     # 计算噪声，无穷范数约束下直接返回梯度符号
     def _compute_perturbation(
@@ -270,18 +121,7 @@ class FastGradientMethod(EvasionAttack):
         # 梯度计算
         grad = self.estimator.loss_gradient(x, y) * (1 - 2 * int(self.targeted))
 
-        # # Write summary
-        # if self.summary_writer is not None:  # pragma: no cover
-        #     self.summary_writer.update(
-        #         batch_id=self._batch_id,
-        #         global_step=self._i_max_iter,
-        #         grad=grad,
-        #         patch=None,
-        #         estimator=self.estimator,
-        #         x=x,
-        #         y=y,
-        #         targeted=self.targeted,
-        #     )
+      
 
         # Check for NaN before normalisation an replace with 0
         if grad.dtype != object and np.isnan(grad).any():  # pragma: no cover
@@ -306,25 +146,8 @@ class FastGradientMethod(EvasionAttack):
 
             if norm in [np.inf, "inf"]:
                 grad = np.sign(grad)
-            # elif norm == 1:
-            #     if not object_type:
-            #         ind = tuple(range(1, len(x.shape)))
-            #     else:
-            #         ind = None
-            #     grad = grad / (np.sum(np.abs(grad), axis=ind, keepdims=True) + tol)
-            # elif norm == 2:
-            #     if not object_type:
-            #         ind = tuple(range(1, len(x.shape)))
-            #     else:
-            #         ind = None
-            #     grad = grad / (np.sqrt(np.sum(np.square(grad), axis=ind, keepdims=True)) + tol)
+           
             return grad
-
-        # Add momentum
-        # if decay is not None and momentum is not None:
-        #     grad = _apply_norm(norm=1, grad=grad)
-        #     grad = decay * momentum + grad
-        #     momentum += grad
 
         if x.dtype == object:
             for i_sample in range(x.shape[0]):
@@ -372,30 +195,9 @@ class FastGradientMethod(EvasionAttack):
         y: np.ndarray,
         # mask: Optional[np.ndarray],
         eps: Union[int, float, np.ndarray],
-        # eps_step: Union[int, float, np.ndarray],
-        # project: bool,
-        # random_init: bool,
-        # batch_id_ext: Optional[int] = None,
-        # decay: Optional[float] = None,
-        # momentum: Optional[np.ndarray] = None,
+        
     ) -> np.ndarray:
-        # if random_init:
-        #     n = x.shape[0]
-        #     m = np.prod(x.shape[1:]).item()
-        #     random_perturbation = random_sphere(n, m, eps, self.norm).reshape(x.shape).astype(MY_NUMPY_DTYPE)
-        #     # if mask is not None:
-        #     #     random_perturbation = random_perturbation * (mask.astype(MY_NUMPY_DTYPE))
-        #     # x_adv = x.astype(MY_NUMPY_DTYPE) + random_perturbation
-
-        #     if self.estimator.clip_values is not None:
-        #         clip_min, clip_max = self.estimator.clip_values
-        #         x_adv = np.clip(x_adv, clip_min, clip_max)
-        # else:
-        #     if x.dtype == object:
-        #         x_adv = x.copy()
-        #     else:
-        #         x_adv = x.astype(MY_NUMPY_DTYPE)
-
+        
         if x.dtype == object:
             x_adv = x.copy()
         else:
@@ -412,28 +214,8 @@ class FastGradientMethod(EvasionAttack):
             batch = x_adv[batch_index_1:batch_index_2]
             batch_labels = y[batch_index_1:batch_index_2]
 
-            # mask_batch = mask
-            # if mask is not None:
-            #     # Here we need to make a distinction: if the masks are different for each input, we need to index
-            #     # those for the current batch. Otherwise (i.e. mask is meant to be broadcasted), keep it as it is.
-            #     if len(mask.shape) == len(x.shape):
-            #         mask_batch = mask[batch_index_1:batch_index_2]
-
             # Get perturbation
             perturbation = self._compute_perturbation(batch, batch_labels)
-
-            # Compute batch_eps and batch_eps_step
-            # if isinstance(eps, np.ndarray) and isinstance(eps_step, np.ndarray):
-            #     if len(eps.shape) == len(x.shape) and eps.shape[0] == x.shape[0]:
-            #         batch_eps = eps[batch_index_1:batch_index_2]
-            #         batch_eps_step = eps_step[batch_index_1:batch_index_2]
-
-            #     else:
-            #         batch_eps = eps
-            #         batch_eps_step = eps_step
-            # else:
-            #     batch_eps = eps
-            #     batch_eps_step = eps_step
 
             # batch_eps = eps
             batch_eps_step = eps

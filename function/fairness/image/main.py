@@ -1,5 +1,5 @@
 import parse_args
-import utils
+from image import utils
 from metrics.multilabel_metrics import *
 
 def main(model, opt):

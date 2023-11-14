@@ -175,7 +175,7 @@ class CompasDataset(FairnessDataset):
     categotical_features = ['age_cat', 'c_charge_degree', 'c_charge_desc']
     # categotical_features = ['age_cat', 'c_charge_degree', 'c_charge_desc']
 
-    def __init__(self, path=r'datasets/Compas/compas-scores-two-years.csv', favorable=None, privileged=None, features_to_keep=None, features_to_drop=None): # TODO: use key word argues
+    def __init__(self, path=r'dataset/fairness_data/datasets/Compas/compas-scores-two-years.csv', favorable=None, privileged=None, features_to_keep=None, features_to_drop=None): # TODO: use key word argues
 
         privileged = privileged if privileged else CompasDataset.privileged
         features_to_drop = features_to_drop if features_to_drop else CompasDataset.features_to_drop
@@ -221,7 +221,7 @@ class AdultDataset(FairnessDataset):
     categotical_features = ['workclass', 'education', 'marital-status', 'occupation', 'relationship', 'native-country', 'income-per-year']
     # categotical_features = ['age_cat', 'c_charge_degree', 'c_charge_desc']
 
-    def __init__(self, train_path=r'datasets/Adult/adult.data', test_path=r'datasets/Adult/adult.test', favorable=None, privileged=None, features_to_keep=None, features_to_drop=None): # TODO: use key word argues
+    def __init__(self, train_path=r'dataset/fairness_data/datasets/Adult/adult.data', test_path=r'dataset/fairness_data/datasets/Adult/adult.test', favorable=None, privileged=None, features_to_keep=None, features_to_drop=None): # TODO: use key word argues
 
         privileged = privileged if privileged else AdultDataset.privileged
         features_to_drop = features_to_drop if features_to_drop else AdultDataset.features_to_drop
@@ -279,7 +279,7 @@ class GermanDataset(FairnessDataset):
                      'foreign_worker', 'personal_status']
     # categotical_features = ['age_cat', 'c_charge_degree', 'c_charge_desc']
 
-    def __init__(self, path=r'datasets/German/german.data', favorable=None, privileged=None, features_to_keep=None, features_to_drop=None): # TODO: use key word argues
+    def __init__(self, path=r'dataset/fairness_data/datasets/German/german.data', favorable=None, privileged=None, features_to_keep=None, features_to_drop=None): # TODO: use key word argues
 
         privileged = privileged if privileged else GermanDataset.privileged
         features_to_drop = features_to_drop if features_to_drop else GermanDataset.features_to_drop

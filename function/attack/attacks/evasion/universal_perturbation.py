@@ -47,6 +47,10 @@ class UniversalPerturbation(EvasionAttack):
         super().__init__(estimator=classifier)
         self.attacker = attacker
         self.attacker_params = attacker_params
+        if self.attack_params == None:
+            self.attack_params["norm"] = norm
+            self.attack_params["eps"] = eps
+            self.attack_params["eps_step"] = eps/10
         self.max_iter = max_iter
         self.eps = eps
         self.norm = norm

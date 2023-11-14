@@ -2,11 +2,11 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from auto_LiRPA_verifiy.language.language_utils import build_vocab
-from auto_LiRPA_verifiy.language.data_utils import get_sst_data
+from function.formal_verify.auto_LiRPA_verifiy.language.language_utils import build_vocab
+from function.formal_verify.auto_LiRPA_verifiy.language.data_utils import get_sst_data
 
 
-PRE_TRAIN_MODEL = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'model', 'ckpt_lstm')
+PRE_TRAIN_MODEL = os.path.join("model/auto_LiRPA_model", 'ckpt_lstm')
 
 
 class LSTMFromEmbeddings(nn.Module):

@@ -58,6 +58,7 @@ class AdversarialPatch(EvasionAttack):
         "batch_size",
         "targeted",
         "verbose",
+        "patch_shape"
     ]
 
     _estimator_requirements = (BaseEstimator, NeuralNetworkMixin, ClassifierMixin)
@@ -70,8 +71,8 @@ class AdversarialPatch(EvasionAttack):
         scale_max: float = 1.0,
         learning_rate: float = 5.0,
         max_iter: int = 500,
-        batch_size: int = 16,
-        patch_shape: Optional[Tuple[int, int, int]] = None,
+        batch_size: int = 128,
+        patch_shape: Optional[Tuple[int, int, int]] = (3, 32, 32),
         targeted: bool = True,
         verbose: bool = True,
     ):

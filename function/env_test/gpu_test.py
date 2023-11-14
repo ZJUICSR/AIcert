@@ -53,7 +53,7 @@ def framework_test(frame,version):
          elif cuda_version == "11.0":
              if version not in ["1.7.1","1.7.0"]:
                  message = f"Pytorch version {version} is not aviliable with cuda version {cuda_version}! Please update your cuda or change pytorch version"
-         elif cuda_version == "11.1" or "11.2":
+         elif cuda_version == "11.1" or cuda_version == "11.2":
              if version not in ["1.8.0","1.8.1","1.9.0","1.9.1","1.10.0","1.10.1"]:
                  message = f"Pytorch version {version} is not aviliable with cuda version {cuda_version}! Please update your cuda or change pytorch version"
          elif cuda_version == "11.3":
@@ -90,10 +90,10 @@ def framework_test(frame,version):
         if message == "":
             message = f"Tensorflow version {version} is not aviliable with cuda version {cuda_version}! Please update your cuda or change tensorflow version"#"risk of tensorflow-gpu version!"
     elif frame == "paddlepaddle":
-        if cuda_version == "9.0" or "10.0":
+        if cuda_version == "9.0" or cuda_version == "10.0":
             if version in ["1.4.1","1.5.2","1.6.3","1.7.2","1.8.5","2.0.2"]:
                 message = f"PaddlePaddle {version} is available!"
-        elif cuda_version == "10.1" or "10.2":
+        elif cuda_version == "10.1" or cuda_version == "10.2":
             if version in ["2.0.2","2.1.3","2.2.2","2.3.2"]:
                 message = f"PaddlePaddle {version} is available!"
         elif cuda_version == "11.0":
