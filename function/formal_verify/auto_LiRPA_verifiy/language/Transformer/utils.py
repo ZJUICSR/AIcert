@@ -15,7 +15,7 @@
 # limitations under the License.
 import torch
 from sklearn.metrics import matthews_corrcoef, f1_score
-from auto_LiRPA_verifiy.language.language_utils import tokenize, token_to_id
+from function.formal_verify.auto_LiRPA_verifiy.language.language_utils import tokenize, token_to_id
 
 def simple_accuracy(preds, labels):
     return (preds == labels).mean()

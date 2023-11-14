@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "endian.h": "c",
+        "error.h": "c",
+        "hex.h": "c"
+    }
+}

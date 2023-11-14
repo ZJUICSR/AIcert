@@ -9,6 +9,7 @@ import torch.nn as nn
 from torchvision.transforms import ToTensor, Compose, Resize
 import torchvision.datasets as datasets
 from tqdm import tqdm
+import os
 import json
 import torchvision
 
@@ -213,9 +214,9 @@ def get_dataloader_cifar(train, batch_size=2, input_size=(32, 32)):
 
 def load_dataset(dataset_type):
     if dataset_type == 'mnist':
-        return get_dataloader_mnist(False, 1, input_size=(28,28))
+        return get_dataloader_mnist(False, 2, input_size=(28,28))
     elif dataset_type == 'cifar10':
-        return get_dataloader_cifar(False, batch_size=1, input_size=(32,32))
+        return get_dataloader_cifar(False, batch_size=2, input_size=(32,32))
     assert 0
 
 def draw_note(g, name, label='', color='blue', fillcolor='blue'):
@@ -257,6 +258,24 @@ def afterprocess(net, num_list=[10, 6, 12, 12, 10], net_type='lenet'):
                     if len(value[i * step:]) > 0:
                         result[key].append(sum(value[i * step:]))
                         number_per_dot[key].append(len(value[i * step:]))
+    else:
+        for num_idx, (key, value) in enumerate(net.items()):
+            if num_idx > 20:
+                break
+            result[key] = []
+            num = num_list[num_idx]
+            step = int(ceil(len(value) / num))
+            number_per_dot[key] = []
+            for i in range(num):
+                if i * step + step < len(value):
+                    result[key].append(sum(value[i * step:i * step + step]))
+                    number_per_dot[key].append(len(value[i * step:i * step + step]))
+                else:
+                    if len(value[i * step:]) > 0:
+                        result[key].append(sum(value[i * step:]))
+                        number_per_dot[key].append(len(value[i * step:]))
+            
+                        
 
     return result, number_per_dot
 
@@ -268,7 +287,7 @@ def DrawNet_overlap(net, outputdir='', imagename='test', format='png', type_net=
     :param net:网络结构，形如{'layer1':[True,False, False, True], 'layer2':[True, True]}
     :param outputdir:可视化图像的输出路径
     :param imagename:可视化图像名称
-    :param formate:可视化图像的格式，可为png、pdf、svg等
+    :param format:可视化图像的格式，可为png、pdf、svg等
     '''
     if type(imagename) == list:
         g = Digraph(outputdir + imagename[0], format=format,
@@ -334,82 +353,12 @@ def DrawNet_overlap(net, outputdir='', imagename='test', format='png', type_net=
 
     return g
 
-
-def run_visualize(
-        model_path = './lenet5.pth', # 模型路径, 需要可以使用torch.load加载
-        dataset = 'mnist',           # 数据集名称, 支持mnist,cifar10
-        model_type='lenet5',         # 模型类型,支持lenet5, resnet18, vgg11,vgg13,vgg19   
-        k=0.1,                       # 算法参数,范围[0,＋∞],例如k=0时, 输出值大于0的神经元被看作激活
-        number_of_image=None,          # 总共计算多少张图片,None值时会计算整个数据集
-        ):
-    
-    result_file = CURR+'/converage_neural_result.json'
-    outputdir=CURR+'/image_neural'
-
-
-
-    model = torch.load(model_path)
-    dataloader = load_dataset(dataset)
-    log_func=None
-
-    
-    if model_type == 'lenet5':
-        num_list = [10, 6, 12, 12, 10]
-    elif 'vgg' in model_type:
-        num = int(model_type[3:])
-        num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
-    elif 'resnet' in model_type:
-        num = int(model_type[6:])
-        num_list = [10, 8] + [12, 8] * (num // 2 - 2) + [12, 10]
-    else:
-        num = int(model_type[6:])
-        num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
-
-
-    x, y = next(iter(dataloader))
-    C, W, H = x.shape[1:]
-    NC = NCoverage_with_output_of_conv_kernel(model=model, model_type=model_type, k=k,
-                                              input_size=(C, W, H), dataloader=dataloader)
-    best_conv = 0
-    saves = []
-    for i, (x, y) in enumerate(dataloader):
-        x = x[0:2]
-        result = NC.curr_cov_dict()
-        result, number_per_dot = afterprocess(result, num_list=num_list)
-        now_conv = NC.curr_neuron_cov()
-        if now_conv > best_conv + 0.05 or i %50==0:
-            best_conv = now_conv
-            saves.append((i, now_conv))
-            g = DrawNet_overlap(result, format='svg', type_net=model_type, outputdir=outputdir, imagename=str(i),
-                            number_per_dot=number_per_dot)
-
-        NC.update_coverage_step(x)
-        print('conv:', now_conv)
-
-        with open(result_file, 'r') as file_obj:
-            json_data = json.load(file_obj)
-        with open(result_file, 'w') as file_obj:
-            if 'coverage_test_yz' not in json_data.keys():
-                json_data['coverage_test_yz'] = {}
-
-            json_data['coverage_test_yz']['coverage_neural'] = []
-
-            for idx, conv in saves:
-                json_data['coverage_test_yz']['coverage_neural'].append([conv, f'image_neural/{idx}.svg'])
-            json.dump(json_data, file_obj)
-
-        if i == number_of_image:
-            break
-
-        info = "[模型测试阶段] 运行课题二的模型标准化测试准则：coverage_visualize [{:d}/{:d}]".format(i, len(dataloader))
-        if log_func is not None:
-            log_func(info)
-
 class LeNet5(nn.Module):
     def __init__(self):
         super(LeNet5, self).__init__()
         self.conv1=nn.Sequential(
-            nn.Conv2d(3,6,5,1),#input_size=(1*28*28)
+            nn.Conv2d(1,6,5,1),#input_size=(1*28*28)
+            # nn.Conv2d(1,6,5,1),#input_size=(1*28*28)
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2)#input_size=(6*24*24)
         )
@@ -438,36 +387,98 @@ class LeNet5(nn.Module):
         x = self.fc2(x)
         x = self.fc3(x)
         return torch.log_softmax(x, dim=-1)
+    
+    
+def run_visualize_neural(
+        model_path, # 模型路径, 需要可以使用torch.load加载
+        dataset,           # 数据集名称, 支持mnist,cifar10
+        model_type,         # 模型类型,支持lenet5, resnet18, vgg11,vgg13,vgg19   
+        k=0.1,                       # 算法参数,范围[0,＋∞],例如k=0时, 输出值大于0的神经元被看作激活
+        outputdir="./output",
+        number_of_image=None,          # 总共计算多少张图片,None值时会计算整个数据集
+        logging=None):
+    # result_file = CURR+'/converage_neural_result.json'
+    # outputdir=CURR+'/image_neural'
+    if not os.path.exists(outputdir):
+        os.mkdir(outputdir)
+    dataloader = load_dataset(dataset)
+    
+    # log_func=None
+    # model_path = CURR.rsplit('/',2)[0]+"/model/ckpt/lenet5.pth"
+    
+    if model_type == 'lenet5':
+        num_list = [10, 6, 12, 12, 10]
+        model = LeNet5()
+        model.load_state_dict(torch.load(model_path))
+    elif model_type == "vgg11":
+        num = int(model_type[3:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+        model = torchvision.models.vgg11(num_classes=10)
+    elif model_type == "vgg13":
+        num = int(model_type[3:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+        model = torchvision.models.vgg13(num_classes=10)
+    elif model_type == "vgg19":
+        num = int(model_type[3:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+        model = torchvision.models.vgg19(num_classes=10)
+    elif model_type == "resnet18":
+        num = int(model_type[6:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 2) + [12, 10]
+        model = torchvision.models.resnet18(num_classes=10)
+    elif model_type == "resnet34":
+        num = int(model_type[6:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 2) + [12, 10]
+        model = torchvision.models.resnet34(num_classes=10)
+    # elif 'vgg' in model_type:
+    #     num = int(model_type[3:])
+    #     num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+    #     model = torchvision.models.vgg11(num_classes=10)
+    # elif 'resnet' in model_type:
+    #     num = int(model_type[6:])
+    #     num_list = [10, 8] + [12, 8] * (num // 2 - 2) + [12, 10]
+    #     model = torchvision.models.resnet18(num_classes=10)
+    else:
+        num = int(model_type[6:])
+        num_list = [10, 8] + [12, 8] * (num // 2 - 1) + [10] * (num % 2)
+        model = torch.load(model_path)
 
-import os.path as osp
-def run(model, test_loader, params, log_func=None):
-    root = osp.join(params["out_path"], "keti2")
-    result_file = osp.join(root, "keti2.json")
-    model_name = params["model"]["name"].lower()
-    show_size = params["coverage"]["show_size"]
-    run_visualize(model, dataloader=test_loader, result_file=result_file, model_type=model_name,
-                  outputdir=root, number_of_image=show_size, log_func=log_func)
+    x, y = next(iter(dataloader))
+    C, W, H = x.shape[1:]
+    NC = NCoverage_with_output_of_conv_kernel(model=model, model_type=model_type, k=k,
+                                              input_size=(C, W, H), dataloader=dataloader)
+    best_conv = 0
+    saves = []
+    for i, (x, y) in enumerate(dataloader):
+        x = x[0:2]
+        result = NC.curr_cov_dict()
+        result, number_per_dot = afterprocess(result, num_list=num_list)
+        now_conv = NC.curr_neuron_cov()
+        # if now_conv > best_conv + 0.05 or i %50==0:
+        if now_conv > best_conv + 0.05:
+            best_conv = now_conv
+            saves.append((i, now_conv))
+            g = DrawNet_overlap(result, format='png', type_net=model_type, outputdir=outputdir, imagename=str(i),
+                            number_per_dot=number_per_dot)
+            # print('conv:', now_conv)
+            # break
 
+        NC.update_coverage_step(x)
+        # print('conv:', now_conv)
+        logging.info('conv:'+str(now_conv))
 
+        json_data = {}
+        if 'coverage_test_yz' not in json_data.keys():
+            json_data['coverage_test_yz'] = {}
+        json_data['coverage_test_yz']['coverage_neural'] = []
+        for idx, conv in saves:
+            # json_data['coverage_test_yz']['coverage_neural'].append([conv, f'{outputdir}/{idx}.svg']) 
+            json_data['coverage_test_yz']['coverage_neural'].append({"coverage":conv, "imgUrl":f'{outputdir}/{idx}.png'}) 
+        if i == number_of_image:
+            break
+        
 
-
-if __name__ == '__main__':
-    # # from resnet import resnet18
-
-    # # model = torchvision.models.resnet34(False)
-    # model = torchvision.models.vgg16(False)
-    # # model = torch.load('model.pt.1',map_location=torch.device('cpu'))
-    # # print(model)
-    # # exit()
-    # input_size = (32, 32)
-    # dataloader = get_dataloader_cifar(False, batch_size=4, input_size=input_size)
-
-    # model_type参数有lenet和vgg两种取值
-    CURR = osp.dirname(osp.abspath(__file__))
-    run_visualize(CURR+'/lenet5.pth', 'cifar10', 'lenet5', k=0, number_of_image=100)
-
-
-
-
-
-
+        # logging.info("[模型测试阶段] 运行课题二的模型标准化测试准则：coverage_visualize [{:d}/{:d}]".format(i, len(dataloader)))
+        # if log_func is not None:
+        #     log_func(info)
+    return json_data

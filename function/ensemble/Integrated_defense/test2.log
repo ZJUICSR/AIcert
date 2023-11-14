@@ -1,0 +1,2581 @@
+fgsm detect_info=0.9995625
+>>> SENDING MODEL TO GPU...
+Train-Epoch: [0][0/16]	Time 3.792 (3.792)	Loss 15.3116 (15.3116)	Prec@1 0.820 (0.820)
+Train-Epoch: [0][10/16]	Time 0.356 (0.673)	Loss 2.1163 (9.1484)	Prec@1 0.992 (0.892)
+| Elapsed time : 0:00:09
+prec=0.9855000009536743
+detect_info=0.9855000009536743
+bim detect_info=0.9981875
+>>> SENDING MODEL TO GPU...
+Train-Epoch: [0][0/16]	Time 0.413 (0.413)	Loss 27.7407 (27.7407)	Prec@1 0.586 (0.586)
+Train-Epoch: [0][10/16]	Time 0.358 (0.369)	Loss 1.9580 (7.9564)	Prec@1 1.000 (0.925)
+| Elapsed time : 0:00:06
+prec=0.9660000009536743
+detect_info=0.9660000009536743
+rfgsm detect_info=0.998375
+>>> SENDING MODEL TO GPU...
+Train-Epoch: [0][0/16]	Time 0.403 (0.403)	Loss 28.6436 (28.6436)	Prec@1 0.602 (0.602)
+Train-Epoch: [0][10/16]	Time 0.369 (0.367)	Loss 1.9828 (9.0087)	Prec@1 0.992 (0.905)
+| Elapsed time : 0:00:06
+prec=0.991
+detect_info=0.991
+cw detect_info=0.588125
+>>> SENDING MODEL TO GPU...
+Train-Epoch: [0][0/16]	Time 0.406 (0.406)	Loss 16.0826 (16.0826)	Prec@1 0.555 (0.555)
+Train-Epoch: [0][10/16]	Time 0.363 (0.367)	Loss 1.3187 (11.8342)	Prec@1 0.992 (0.820)
+| Elapsed time : 0:00:06
+prec=0.9805
+detect_info=0.9805
+pgd detect_info=0.99925
+>>> SENDING MODEL TO GPU...
+Train-Epoch: [0][0/16]	Time 0.390 (0.390)	Loss 17.1554 (17.1554)	Prec@1 0.773 (0.773)
+Train-Epoch: [0][10/16]	Time 0.364 (0.377)	Loss 1.7974 (10.2341)	Prec@1 1.000 (0.888)
+| Elapsed time : 0:00:06
+prec=0.9825000004768372
+detect_info=0.9825000004768372
+tpgd detect_info=0.99975
+>>> SENDING MODEL TO GPU...
+Train-Epoch: [0][0/16]	Time 0.403 (0.403)	Loss 25.8015 (25.8015)	Prec@1 0.625 (0.625)
+Train-Epoch: [0][10/16]	Time 0.366 (0.368)	Loss 2.0792 (7.1753)	Prec@1 0.984 (0.925)
+| Elapsed time : 0:00:06
+prec=0.9875
+detect_info=0.9875
+mifgsm detect_info=0.9983125
+>>> SENDING MODEL TO GPU...
+Train-Epoch: [0][0/16]	Time 0.400 (0.400)	Loss 25.8612 (25.8612)	Prec@1 0.648 (0.648)
+Train-Epoch: [0][10/16]	Time 0.363 (0.368)	Loss 1.9257 (8.5651)	Prec@1 1.000 (0.913)
+| Elapsed time : 0:00:06
+prec=0.982
+detect_info=0.982
+autopgd detect_info=0.8156875
+>>> SENDING MODEL TO GPU...
+Train-Epoch: [0][0/16]	Time 0.403 (0.403)	Loss 25.9170 (25.9170)	Prec@1 0.328 (0.328)
+Train-Epoch: [0][10/16]	Time 0.363 (0.368)	Loss 0.9533 (5.3617)	Prec@1 0.977 (0.896)
+| Elapsed time : 0:00:06
+Train-Epoch: [1][0/16]	Time 0.365 (0.365)	Loss 0.8046 (0.8046)	Prec@1 0.938 (0.938)
+Train-Epoch: [1][10/16]	Time 0.366 (0.363)	Loss 0.5751 (1.3299)	Prec@1 1.000 (0.967)
+| Elapsed time : 0:00:13
+prec=0.9645000004768371
+detect_info=0.9645000004768371
+square detect_info=0.5905
+>>> SENDING MODEL TO GPU...
+Train-Epoch: [0][0/16]	Time 0.405 (0.405)	Loss 58.3878 (58.3878)	Prec@1 0.203 (0.203)
+Train-Epoch: [0][10/16]	Time 0.363 (0.367)	Loss 1.2864 (13.5377)	Prec@1 0.992 (0.749)
+| Elapsed time : 0:00:06
+prec=0.9870000009536744
+detect_info=0.9870000009536744
+deepfool detect_info=0.98575
+>>> SENDING MODEL TO GPU...
+Train-Epoch: [0][0/16]	Time 0.890 (0.890)	Loss 17.7183 (17.7183)	Prec@1 0.414 (0.414)
+Train-Epoch: [0][10/16]	Time 0.899 (0.897)	Loss 4.0843 (13.9391)	Prec@1 0.984 (0.756)
+| Elapsed time : 0:00:15
+Train-Epoch: [1][0/16]	Time 0.877 (0.877)	Loss 3.1765 (3.1765)	Prec@1 0.984 (0.984)
+Train-Epoch: [1][10/16]	Time 0.910 (0.900)	Loss 2.3334 (5.0860)	Prec@1 0.969 (0.938)
+| Elapsed time : 0:00:31
+prec=0.9870000004768371
+detect_info=0.9870000004768371
+difgsm detect_info=0.9965
+>>> SENDING MODEL TO GPU...
+Train-Epoch: [0][0/16]	Time 0.895 (0.895)	Loss 24.0764 (24.0764)	Prec@1 0.633 (0.633)
+Train-Epoch: [0][10/16]	Time 0.911 (0.908)	Loss 1.4587 (9.0352)	Prec@1 1.000 (0.925)
+| Elapsed time : 0:00:15
+prec=0.9945000004768372
+detect_info=0.9945000004768372
+{'ori_acc': 0.992484, 'fgsm': {'attack_acc': 0.84197, 'defend_rate': 0.9995625, 'defend_attack_acc': 0.9855000009536743, 'defend_model': {'model': ResNet(
+  (conv1): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+  (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (layer1): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer2): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer3): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer4): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (linear): Linear(in_features=512, out_features=10, bias=True)
+), 'denoiser': DataParallel(
+  (module): Denoiser(
+    (forward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (4): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (backward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(384, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (upsampler): ModuleList(
+      (0): Upsample(size=(4, 4), mode=bilinear)
+      (1): Upsample(size=(7, 7), mode=bilinear)
+      (2): Upsample(size=(14, 14), mode=bilinear)
+      (3): Upsample(size=(28, 28), mode=bilinear)
+    )
+    (conv_1): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+  )
+)}}, 'bim': {'attack_acc': 0.502571, 'defend_rate': 0.9981875, 'defend_attack_acc': 0.9660000009536743, 'defend_model': {'model': ResNet(
+  (conv1): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+  (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (layer1): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer2): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer3): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer4): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (linear): Linear(in_features=512, out_features=10, bias=True)
+), 'denoiser': DataParallel(
+  (module): Denoiser(
+    (forward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (4): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (backward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(384, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (upsampler): ModuleList(
+      (0): Upsample(size=(4, 4), mode=bilinear)
+      (1): Upsample(size=(7, 7), mode=bilinear)
+      (2): Upsample(size=(14, 14), mode=bilinear)
+      (3): Upsample(size=(28, 28), mode=bilinear)
+    )
+    (conv_1): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+  )
+)}}, 'rfgsm': {'attack_acc': 0.488232, 'defend_rate': 0.998375, 'defend_attack_acc': 0.991, 'defend_model': {'model': ResNet(
+  (conv1): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+  (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (layer1): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer2): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer3): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer4): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (linear): Linear(in_features=512, out_features=10, bias=True)
+), 'denoiser': DataParallel(
+  (module): Denoiser(
+    (forward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (4): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (backward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(384, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (upsampler): ModuleList(
+      (0): Upsample(size=(4, 4), mode=bilinear)
+      (1): Upsample(size=(7, 7), mode=bilinear)
+      (2): Upsample(size=(14, 14), mode=bilinear)
+      (3): Upsample(size=(28, 28), mode=bilinear)
+    )
+    (conv_1): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+  )
+)}}, 'cw': {'attack_acc': 0.966475, 'defend_rate': 0.588125, 'defend_attack_acc': 0.9805, 'defend_model': {'model': ResNet(
+  (conv1): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+  (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (layer1): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer2): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer3): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer4): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (linear): Linear(in_features=512, out_features=10, bias=True)
+), 'denoiser': DataParallel(
+  (module): Denoiser(
+    (forward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (4): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (backward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(384, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (upsampler): ModuleList(
+      (0): Upsample(size=(4, 4), mode=bilinear)
+      (1): Upsample(size=(7, 7), mode=bilinear)
+      (2): Upsample(size=(14, 14), mode=bilinear)
+      (3): Upsample(size=(28, 28), mode=bilinear)
+    )
+    (conv_1): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+  )
+)}}, 'pgd': {'attack_acc': 0.442544, 'defend_rate': 0.99925, 'defend_attack_acc': 0.9825000004768372, 'defend_model': {'model': ResNet(
+  (conv1): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+  (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (layer1): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer2): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer3): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer4): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (linear): Linear(in_features=512, out_features=10, bias=True)
+), 'denoiser': DataParallel(
+  (module): Denoiser(
+    (forward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (4): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (backward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(384, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (upsampler): ModuleList(
+      (0): Upsample(size=(4, 4), mode=bilinear)
+      (1): Upsample(size=(7, 7), mode=bilinear)
+      (2): Upsample(size=(14, 14), mode=bilinear)
+      (3): Upsample(size=(28, 28), mode=bilinear)
+    )
+    (conv_1): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+  )
+)}}, 'tpgd': {'attack_acc': 0.727749, 'defend_rate': 0.99975, 'defend_attack_acc': 0.9875, 'defend_model': {'model': ResNet(
+  (conv1): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+  (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (layer1): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer2): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer3): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer4): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (linear): Linear(in_features=512, out_features=10, bias=True)
+), 'denoiser': DataParallel(
+  (module): Denoiser(
+    (forward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (4): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (backward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(384, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (upsampler): ModuleList(
+      (0): Upsample(size=(4, 4), mode=bilinear)
+      (1): Upsample(size=(7, 7), mode=bilinear)
+      (2): Upsample(size=(14, 14), mode=bilinear)
+      (3): Upsample(size=(28, 28), mode=bilinear)
+    )
+    (conv_1): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+  )
+)}}, 'mifgsm': {'attack_acc': 0.494561, 'defend_rate': 0.9983125, 'defend_attack_acc': 0.982, 'defend_model': {'model': ResNet(
+  (conv1): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+  (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (layer1): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer2): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer3): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer4): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (linear): Linear(in_features=512, out_features=10, bias=True)
+), 'denoiser': DataParallel(
+  (module): Denoiser(
+    (forward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (4): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (backward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(384, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (upsampler): ModuleList(
+      (0): Upsample(size=(4, 4), mode=bilinear)
+      (1): Upsample(size=(7, 7), mode=bilinear)
+      (2): Upsample(size=(14, 14), mode=bilinear)
+      (3): Upsample(size=(28, 28), mode=bilinear)
+    )
+    (conv_1): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+  )
+)}}, 'autopgd': {'attack_acc': 0.412085, 'defend_rate': 0.8156875, 'defend_attack_acc': 0.9645000004768371, 'defend_model': {'model': ResNet(
+  (conv1): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+  (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (layer1): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer2): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer3): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer4): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (linear): Linear(in_features=512, out_features=10, bias=True)
+), 'denoiser': DataParallel(
+  (module): Denoiser(
+    (forward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (4): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (backward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(384, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (upsampler): ModuleList(
+      (0): Upsample(size=(4, 4), mode=bilinear)
+      (1): Upsample(size=(7, 7), mode=bilinear)
+      (2): Upsample(size=(14, 14), mode=bilinear)
+      (3): Upsample(size=(28, 28), mode=bilinear)
+    )
+    (conv_1): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+  )
+)}}, 'square': {'attack_acc': 0.976167, 'defend_rate': 0.5905, 'defend_attack_acc': 0.9870000009536744, 'defend_model': {'model': ResNet(
+  (conv1): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+  (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (layer1): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer2): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer3): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer4): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (linear): Linear(in_features=512, out_features=10, bias=True)
+), 'denoiser': DataParallel(
+  (module): Denoiser(
+    (forward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (4): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (backward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(384, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (upsampler): ModuleList(
+      (0): Upsample(size=(4, 4), mode=bilinear)
+      (1): Upsample(size=(7, 7), mode=bilinear)
+      (2): Upsample(size=(14, 14), mode=bilinear)
+      (3): Upsample(size=(28, 28), mode=bilinear)
+    )
+    (conv_1): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+  )
+)}}, 'deepfool': {'attack_acc': 0.984869, 'defend_rate': 0.98575, 'defend_attack_acc': 0.9870000004768371, 'defend_model': {'model': ResNet(
+  (conv1): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+  (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (layer1): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer2): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer3): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer4): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (linear): Linear(in_features=512, out_features=10, bias=True)
+), 'denoiser': DataParallel(
+  (module): Denoiser(
+    (forward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (4): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (backward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(384, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (upsampler): ModuleList(
+      (0): Upsample(size=(4, 4), mode=bilinear)
+      (1): Upsample(size=(7, 7), mode=bilinear)
+      (2): Upsample(size=(14, 14), mode=bilinear)
+      (3): Upsample(size=(28, 28), mode=bilinear)
+    )
+    (conv_1): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+  )
+)}}, 'difgsm': {'attack_acc': 0.794304, 'defend_rate': 0.9965, 'defend_attack_acc': 0.9945000004768372, 'defend_model': {'model': ResNet(
+  (conv1): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+  (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (layer1): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer2): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer3): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (layer4): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+    )
+  )
+  (linear): Linear(in_features=512, out_features=10, bias=True)
+), 'denoiser': DataParallel(
+  (module): Denoiser(
+    (forward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (4): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (backward_blocks): ModuleList(
+      (0): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (1): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(512, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(256, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (2): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(384, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (2): BasicBlock(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(128, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+      (3): NetworkBlock(
+        (layer): Sequential(
+          (0): BasicBlock(
+            (conv): Conv2d(192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+          (1): BasicBlock(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (batchNorm1): BatchNorm2d(64, eps=1e-05, momentum=0.9, affine=True, track_running_stats=True)
+          )
+        )
+      )
+    )
+    (upsampler): ModuleList(
+      (0): Upsample(size=(4, 4), mode=bilinear)
+      (1): Upsample(size=(7, 7), mode=bilinear)
+      (2): Upsample(size=(14, 14), mode=bilinear)
+      (3): Upsample(size=(28, 28), mode=bilinear)
+    )
+    (conv_1): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+  )
+)}}}
