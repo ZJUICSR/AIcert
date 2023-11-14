@@ -154,3 +154,13 @@ def run_seat(modelname, lr, n_class, max_epoch, out_path, logging=None):
         "ema_nat_acc": ema_nat_acc,
         "ema_pgd20_acc": ema_pgd20_acc
     }
+    
+    
+from .RiFT.test import start_evaluate
+def run_rift(dataset, model, attack_method, evaluate_methods,  train_epoch, at_epoch, batchsize, out_path, logging=None, device=None):
+    logging.info("Start RiFT training ")
+    res = start_evaluate(ori_train_epoch=train_epoch, at_method=attack_method.lower(), at_eps=4, at_epoch=at_epoch, dataset=dataset.lower(), model_name=model.lower(),
+                   at_train_epoch=at_epoch, rift_epoch=10, batch_size=batchsize,
+                   evaluate_methods=[item.lower() for item in evaluate_methods], save_path=out_path, device="cuda")
+    logging.info("End RiFT training ")
+    return res
