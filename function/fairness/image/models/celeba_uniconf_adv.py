@@ -8,10 +8,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 from tensorboardX import SummaryWriter
-from models import basenet
-from models import dataloader
-from models.celeba_core import CelebaModel
-import utils
+from function.fairness.image.models import basenet
+from function.fairness.image.models import dataloader
+from function.fairness.image.models.celeba_core import CelebaModel
+from function.fairness.image import utils
 
 class CelebaUniConfAdv(CelebaModel):
     def __init__(self, opt):
@@ -120,7 +120,6 @@ class CelebaUniConfAdv(CelebaModel):
                       .format(self.epoch, i+1, len(loader), 
                               class_loss.item(), domain_loss.item(),
                               100.*correct/total))
-        
         self.log_result('Train epoch', 
                         {'class_loss': train_class_loss/len(loader),
                          'domain_loss': train_domain_loss/len(loader),
@@ -142,6 +141,7 @@ class CelebaUniConfAdv(CelebaModel):
         feature_list = []
         class_output_list = []
         domain_output_list = []
+        steps = len(loader)
         with torch.no_grad():
             for i, (images, targets) in enumerate(loader):
                 images, targets = images.to(self.device), targets.to(self.device)
@@ -161,7 +161,7 @@ class CelebaUniConfAdv(CelebaModel):
                 class_output_list.append(class_outputs)
                 domain_output_list.append(domain_outputs)
                 feature_list.append(features)
-                
+                print(f"{i}/{steps}")
             return test_class_loss, test_domain_loss, torch.cat(class_output_list), \
                    torch.cat(domain_output_list), torch.cat(feature_list), 100.*correct/total
         
@@ -205,11 +205,12 @@ class CelebaUniConfAdv(CelebaModel):
             state_dict = torch.load(os.path.join(self.save_path, 'best.pth'))
         elif os.path.exists(os.path.join(self.save_path, 'ckpt.pth')):
             state_dict = torch.load(os.path.join(self.save_path, 'ckpt.pth'))
+        # elif os.path.exists(self.model_path):
+        #     state_dict = torch.load(self.model_path)
         else:
             raise FileNotFoundError("no checkpoints available for testing")
 
         self.load_state_dict(state_dict)
-        
         dev_class_loss, dev_domain_loss, dev_class_output, dev_domain_output, \
             dev_feature, dev_domain_accuracy = self._test(self.dev_loader)
         dev_predict_prob = self.inference(dev_class_output)
@@ -223,7 +224,6 @@ class CelebaUniConfAdv(CelebaModel):
                       'domain_output': dev_domain_output.cpu().numpy(),
                       'domain_accuracy': dev_domain_accuracy}
         utils.save_pkl(dev_result, os.path.join(self.save_path, 'dev_result.pkl'))
-        
         test_class_loss, test_domain_loss, test_class_output, test_domain_output, \
             test_feature, test_domain_accuracy = self._test(self.test_loader)
         test_predict_prob = self.inference(test_class_output)
@@ -237,11 +237,11 @@ class CelebaUniConfAdv(CelebaModel):
                       'domain_output': test_domain_output.cpu().numpy(),
                       'domain_accuracy': test_domain_accuracy}
         utils.save_pkl(test_result, os.path.join(self.save_path, 'test_result.pkl'))
-        
         # Output the mean AP for the best model on dev and test set
         info = ('Dev mAP: {}\n'
                 'Test mAP: {}'.format(dev_mAP, test_mAP))
         utils.write_info(os.path.join(self.save_path, 'result.txt'), info)
+        print('2',self.save_path)
         result = {
             "y_pred": test_predict_prob[:, self.subclass_idx],
             "y_true": self.test_target[:, self.subclass_idx],

@@ -1,64 +1,100 @@
-import os
-import time
-import sys
+import os, sys
 import os.path as osp
-import json
-import logging
-# from Loader import ArgpLoader
+import shutil
+# import logging
 # import dataloader_clean
 from .dataloader_clean import *
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
-
-
 ROOT = osp.dirname(osp.abspath(__file__))
 sys.path.append(ROOT)
-
-def run_dataclean(dataset):
-    if dataset == "CIFAR10":
-        print()
-        transform = transforms.ToTensor()
-        train_data = datasets.CIFAR10(root=ROOT[:-19]+"/dataset/data",train=True,download=True,transform=transform)
-        test_data = datasets.CIFAR10(root=ROOT[:-19]+"/dataset/data",train=False,download=True,transform=transform)
-        train_loader = DataLoader(train_data,batch_size=4)
-        test_loader = DataLoader(test_data,batch_size=4)
-        run_cleanlab(train_loader, test_loader,root=ROOT, dataset=dataset,batch_size=test_loader.batch_size, PERT_NUM=100, MAX_IMAGES=32, log_func=print)
-    elif dataset=="MNIST":
-        # run_cleanlab参数需确认
-        transform = transforms.ToTensor()
-        train_data = datasets.MNIST(root=ROOT[:-19]+"/dataset/data",train=True,download=True,transform=transform)
-        test_data = datasets.MNIST(root=ROOT[:-19]+"/dataset/data",train=False,download=True,transform=transform)
-        train_loader = DataLoader(train_data,batch_size=4)
-        test_loader = DataLoader(test_data,batch_size=4)
-        run_cleanlab(train_loader, test_loader,root=ROOT, dataset=dataset,batch_size=test_loader.batch_size, PERT_NUM=100, MAX_IMAGES=32, log_func=print)
-    elif dataset=="Text": 
-        run_format_clean(inputfile=osp.join(current_dir,'text_sample1.txt'),outputfile=osp.join(ROOT,'text_sample1_benign.txt'),filler=" ",root=ROOT)
-        run_encoding_clean(inputfile=osp.join(current_dir,'text_sample2.txt'),outputfile=osp.join(ROOT,'text_sample2_benign.txt'),root=ROOT)
-    elif dataset=="Table":
-        generate_abnormal_sample(outputfile=osp.join(current_dir,'abnormal_table.npz'))
-        run_abnormal_table(inputfile=osp.join(current_dir,'abnormal_table.npz'),outputfile=osp.join(ROOT,'benign_table.npy'),root=ROOT)
-    else:
-        # 上传
-        pass
-    
+  
+def run_dataclean(dataset, upload_flag, upload_path, out_path, logging=None):
+    if not osp.exists(out_path):
+        os.mkdir(out_path)
+    logging.info("开始运行【异常数据检测】算法：dataloader_clean")
+    transform = transforms.ToTensor()
+    if dataset == "table":
+        if upload_flag == 0:
+            dataloader_clean.generate_abnormal_sample(outputfile=osp.join(out_path,'abnormal_table.npz'),logging=logging)
+            res = dataloader_clean.run_abnormal_table(inputfile=osp.join(out_path,'abnormal_table.npz'),outputfile=osp.join(out_path,'benign_table.npy'),root=out_path, logging=logging)
+            res["input_file"] = osp.join(out_path,'abnormal_table.npz')
+        else:
+            logging.info('已选择上传样本，进行读取')
+            res = dataloader_clean.run_abnormal_table(inputfile=upload_path,outputfile=osp.join(out_path,'benign_table.npy'),root=out_path, logging=logging)
+            res["input_file"] = upload_path
+        res["output_file"]=osp.join(out_path,'benign_table.npy')
+        logging.info("运行完成【异常数据检测】算法：dataloader_clean")
+        return res
+    elif dataset == "txt_format":
+        logging.info('文本标点格式清洗中')
+        shutil.copy(ROOT.rsplit("/",2)[0]+"/dataset/data/ckpt/text_sample1.txt",osp.join(out_path,"text_sample1.txt"))
+        res = dataloader_clean.run_format_clean(inputfile=osp.join(out_path,'text_sample1.txt'),outputfile=osp.join(out_path,'text_sample1_benign.txt'),filler=" ",root=out_path)
+        res["input_file"],  res["output_file"] = osp.join(out_path,'text_sample1.txt'), osp.join(out_path,'text_sample1_benign.txt')
+        logging.info("清洗前后结果分别存放至{}与{}".format(res["input_file"],  res["output_file"]))
+        logging.info("运行完成【异常数据检测】算法：dataloader_clean")
+        return res
+    elif dataset == "txt_encode":
+        logging.info('文本编码错误清洗中')
+        shutil.copy(ROOT.rsplit("/",2)[0]+"/dataset/data/ckpt/text_sample2.txt",osp.join(out_path,"text_sample2.txt"))
+        res = dataloader_clean.run_encoding_clean(inputfile=osp.join(out_path,'text_sample2.txt'),outputfile=osp.join(out_path,'text_sample2_benign.txt'),root=out_path)
+        res["input_file"],  res["output_file"] = osp.join(out_path,'text_sample2.txt'), osp.join(out_path,'text_sample2_benign.txt')
+        logging.info("清洗前后结果分别存放至{}与{}".format(res["input_file"],  res["output_file"]))
+        logging.info("运行完成【异常数据检测】算法：dataloader_clean")
+        return res
+    elif dataset == "MNIST":
+        logging.info('MNIST标签错误清洗中')
+        train_data = datasets.MNIST(root="./dataset/data",train=True,download=True,transform=transform)
+        test_data = datasets.MNIST(root="./dataset/data",train=False,download=True,transform=transform)         
+    elif dataset == "CIFAR10":
+        logging.info('CIFAR10标签错误清洗中')
+        train_data = datasets.CIFAR10(root="./dataset/data",train=True,download=True,transform=transform)
+        test_data = datasets.CIFAR10(root="./dataset/data",train=False,download=True,transform=transform)
+    train_loader = DataLoader(train_data,batch_size=64)
+    test_loader = DataLoader(test_data,batch_size=64) 
+    res = dataloader_clean.run_image(dataset, train_loader, test_loader, out_path, log_func=logging) 
+    logging.info("运行完成【异常数据检测】算法：dataloader_clean")
+    return res 
     
 def run(params):
     # data_loader = ArgpLoader(data_root='./data/', dataset=task)
+    # logging.info("[模型测试阶段]【指标2.1】即将运行课题二的【异常数据检测】算法：dataloader_clean")
     transform = transforms.ToTensor()
-    train_data = datasets.CIFAR10(root="./dataset/data",train=True,download=True,transform=transform)
-    test_data = datasets.CIFAR10(root="./dataset/data",train=False,download=True,transform=transform)
+    if params["dataset"]["name"] == "table":
+        ROOT = params["out_path"]
+        if params["dataset"]["upload_flag"] == 0:
+            dataloader_clean.generate_abnormal_sample(outputfile=osp.join(ROOT,'abnormal_table.npz'))
+            dataloader_clean.run_abnormal_table(inputfile=osp.join(ROOT,'abnormal_table.npz'),outputfile=osp.join(ROOT,'benign_table.npy'),root=params["out_path"])
+        else:
+            dataloader_clean.run_abnormal_table(inputfile=params["dataset"]["upload_path"],outputfile=osp.join(ROOT,'benign_table.npy'),root=params["out_path"])
+        return
+    elif params["dataset"]["name"] == "txt_format":
+        ROOT = params["out_path"]
+        dataloader_clean.run_format_clean(inputfile=osp.join(ROOT,'text_sample1.txt'),outputfile=osp.join(ROOT,'text_sample1_benign.txt'),filler=" ",root=ROOT)
+        return
+    elif params["dataset"]["name"] == "txt_encode":
+        ROOT = params["out_path"]
+        dataloader_clean.run_encoding_clean(inputfile=osp.join(ROOT,'text_sample2.txt'),outputfile=osp.join(ROOT,'text_sample2_benign.txt'),root=ROOT)
+        return
+    elif params["dataset"]["name"] == "MNIST":
+        train_data = datasets.MNIST(root="./dataset/data",train=True,download=True,transform=transform)
+        test_data = datasets.MNIST(root="./dataset/data",train=False,download=True,transform=transform)         
+    elif params["dataset"]["name"] == "CIFAR10":
+        train_data = datasets.CIFAR10(root="./dataset/data",train=True,download=True,transform=transform)
+        test_data = datasets.CIFAR10(root="./dataset/data",train=False,download=True,transform=transform)
     # train_data = datasets.CIFAR10(root=ROOT[:-19]+"/dataset/data",train=True,download=True,transform=transform)
     # test_data = datasets.CIFAR10(root=ROOT[:-19]+"/dataset/data",train=False,download=True,transform=transform)
-    train_loader = DataLoader(train_data,batch_size=4)
-    test_loader = DataLoader(test_data,batch_size=4)
-    logging.info("[模型测试阶段]【指标2.1】即将运行课题二的【异常数据检测】算法：dataloader_clean")
+    train_loader = DataLoader(train_data,batch_size=64)
+    test_loader = DataLoader(test_data,batch_size=64) 
     dataloader_clean.run(train_loader, test_loader, params, log_func=print)
 
 if __name__=='__main__':
     params = {}
     params["dataset"] = {}
-    params["dataset"]["name"] = "CIFAR10"
+    params["dataset"]["name"] = "MNIST" # CIFAR10/MNIST/table/txt_format/txt_encode
+    params["dataset"]["upload_flag"] = 0
+    params["dataset"]["upload_path"] = ""
     params["out_path"] = "./"
     params["device"] = 3
-
     run(params)
+    # run_dataclean('MNIST')

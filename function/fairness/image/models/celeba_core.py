@@ -8,9 +8,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 from tensorboardX import SummaryWriter
-from models import basenet
-from models import dataloader
-import utils
+from function.fairness.image.models import basenet
+from function.fairness.image.models import dataloader
+from function.fairness.image import utils
 
 class CelebaModel():
     def __init__(self, opt):
@@ -158,6 +158,7 @@ class CelebaModel():
         test_loss = 0
         output_list = []
         feature_list = []
+        steps = len(loader)
         with torch.no_grad():
             for i, (images, targets) in enumerate(loader):
                 images, targets = images.to(self.device), targets.to(self.device)
@@ -167,6 +168,7 @@ class CelebaModel():
 
                 output_list.append(outputs)
                 feature_list.append(features)
+                print(f"{i}/{steps}")
 
         return test_loss, torch.cat(output_list), torch.cat(feature_list)
 
@@ -203,11 +205,14 @@ class CelebaModel():
 
     def test(self):
         # Test and save the result
+        print("self.model_path2:",self.model_path)
         state_dict = None
         if os.path.exists(os.path.join(self.model_path, 'best.pth')):
             state_dict = torch.load(os.path.join(self.model_path, 'best.pth'))
         elif os.path.exists(os.path.join(self.model_path, 'ckpt.pth')):
             state_dict = torch.load(os.path.join(self.model_path, 'ckpt.pth'))
+        # elif os.path.exists(self.model_path):
+        #     state_dict = torch.load(self.model_path)
         else:
             raise FileNotFoundError("no checkpoints available for testing")
 
