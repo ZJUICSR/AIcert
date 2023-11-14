@@ -29,36 +29,36 @@ import random
 import pandas as pd
 
 
-parser = argparse.ArgumentParser(description='PyTorch dnn test')
-parser.add_argument('--test-batch-size', type=int, default=200, metavar='N',
-                    help='input batch size for testing (default: 200)')
-parser.add_argument('--dataset', default='cifar10', help='use what dataset')
-parser.add_argument('--no-cuda', action='store_true', default=False,
-                    help='disables CUDA training')
-parser.add_argument('--epsilon', default=0.031,
-                    help='perturbation')
-parser.add_argument('--num-steps', default=20,
-                    help='perturb number of steps')
-parser.add_argument('--step-size', default=0.003,
-                    help='perturb step size')
-parser.add_argument('--random',
-                    default=True,
-                    help='random initialization for PGD')
-parser.add_argument('--model',
-                    default='resnet18',
-                    help='model name for evaluation')
-parser.add_argument('--model-path',
-                    default='./model-cifar-vggNet/model-wideres-epoch58.pt',
-                    help='model for white-box attack evaluation')
-parser.add_argument('--white-box-attack', default=True,
-                    help='whether perform white-box attack')
+# parser = argparse.ArgumentParser(description='PyTorch dnn test')
+# parser.add_argument('--test-batch-size', type=int, default=200, metavar='N',
+#                     help='input batch size for testing (default: 200)')
+# parser.add_argument('--dataset', default='cifar10', help='use what dataset')
+# parser.add_argument('--no-cuda', action='store_true', default=False,
+#                     help='disables CUDA training')
+# parser.add_argument('--epsilon', default=0.031,
+#                     help='perturbation')
+# parser.add_argument('--num-steps', default=20,
+#                     help='perturb number of steps')
+# parser.add_argument('--step-size', default=0.003,
+#                     help='perturb step size')
+# parser.add_argument('--random',
+#                     default=True,
+#                     help='random initialization for PGD')
+# parser.add_argument('--model',
+#                     default='resnet18',
+#                     help='model name for evaluation')
+# parser.add_argument('--model-path',
+#                     default='./model-cifar-vggNet/model-wideres-epoch58.pt',
+#                     help='model for white-box attack evaluation')
+# parser.add_argument('--white-box-attack', default=True,
+#                     help='whether perform white-box attack')
 
-args = parser.parse_args()
+# args = parser.parse_args()
 
 # settings
-use_cuda = not args.no_cuda and torch.cuda.is_available()
+# use_cuda = not args.no_cuda and torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
-kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+# kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
 
 ## deeplogic
