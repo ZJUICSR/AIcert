@@ -236,7 +236,7 @@ print("resnet34+cifar10 testcaseset ok!!!")
 val_dataset = datasets.FashionMNIST(root='../dataset/data', train=False,download=False, transform=transforms.ToTensor())
 val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 model = ResNet18().to(device)
-model.load_state_dict((torch.load('../adv_train/model-resnet18-fashionminist/Standard-fashionminist-model-resnet18-epoch300.pt')))#评估普通模型-干净样本准确率
+model.load_state_dict((torch.load('model/ckpt/Standard-fashionminist-model-resnet18-epoch300.pt')))#评估普通模型-干净样本准确率
 model = model.to(device).eval()
 get_testcase("resnet18","fashionminist",model,val_dataloader)
 print("resnet18+fashionminist testcaseset ok!!!")
@@ -245,7 +245,7 @@ print("resnet18+fashionminist testcaseset ok!!!")
 val_dataset = datasets.FashionMNIST(root='../dataset/data', train=False, download=True, transform=transforms.ToTensor())
 val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 model = SmallCNN().to(device)
-model.load_state_dict((torch.load('../adv_train/model-smallcnn-fashionminist/Standard-fashionminist-model-smallcnn-epoch300.pt')))#评估普通模型-干净样本准确率
+model.load_state_dict((torch.load('model/ckpt/Standard-fashionminist-model-smallcnn-epoch300.pt')))#评估普通模型-干净样本准确率
 model = model.to(device).eval()
 get_testcase("smallcnn","fashionminist",model,val_dataloader)
 print("smallcnn+fashionminist testcaseset ok!!!")

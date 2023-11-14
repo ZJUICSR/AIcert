@@ -71,6 +71,7 @@ class AutoAttack(EvasionAttack):
             DeepFool(
                 classifier=estimator,
                 max_iter=100,
+                norm=norm,
                 # nb_grads=10,
                 batch_size=batch_size,
             )

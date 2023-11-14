@@ -1,6 +1,5 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 # import logging
-from typing import Optional, TYPE_CHECKING
 import numpy as np
 from tqdm.auto import trange
 from function.attack.attacks.config import MY_NUMPY_DTYPE
@@ -8,6 +7,8 @@ from function.attack.estimators.estimator import BaseEstimator
 from function.attack.estimators.classification.classifier import ClassGradientsMixin
 from function.attack.attacks.attack import EvasionAttack
 from function.attack.attacks.utils import is_probability
+from function.attack.attacks.utils import projection
+from typing import Any, Dict, Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from utils import CLASSIFIER_CLASS_LOSS_GRADIENTS_TYPE
@@ -20,16 +21,18 @@ class DeepFool(EvasionAttack):
         # "nb_grads",
         "batch_size",
         # "verbose",
+        "norm",
     ]
     _estimator_requirements = (BaseEstimator, ClassGradientsMixin)
 
     def __init__(
         self,
         classifier: "CLASSIFIER_CLASS_LOSS_GRADIENTS_TYPE",
-        max_iter: int = 10,
+        max_iter: int = 50,
         eta: float = 0.02,
         # nb_grads: int = 10,
         batch_size: int = 128,
+        norm: Union[int, float, str] = np.inf,
         # verbose: bool = True,
     ) -> None:
         super().__init__(estimator=classifier)
@@ -45,6 +48,7 @@ class DeepFool(EvasionAttack):
         #         "default generate adversarial perturbations scaled for input values in the range [0, 1] but not clip "
         #         "the adversarial example."
         #     )
+        self.norm = norm
 
     def generate(self, x: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> np.ndarray:
         x_adv = x.astype(MY_NUMPY_DTYPE)
@@ -104,16 +108,39 @@ class DeepFool(EvasionAttack):
                 f_diff = f_batch[:, labels_set] - f_batch[np.arange(len(f_batch)), labels_indices][:, None]
 
                 # 这里的DeepFool仅仅考虑了二范数下的扰动
-                norm = np.linalg.norm(grad_diff.reshape(len(grad_diff), len(labels_set), -1), axis=2) + tol
-                value = np.abs(f_diff) / norm
-                value[np.arange(len(value)), labels_indices] = np.inf
-                l_var = np.argmin(value, axis=1)
-                absolute1 = abs(f_diff[np.arange(len(f_diff)), l_var])
-                draddiff = grad_diff[np.arange(len(grad_diff)), l_var].reshape(len(grad_diff), -1)
-                pow1 = (pow(np.linalg.norm(draddiff, axis=1),2,)+ tol)
-                r_var = absolute1 / pow1
-                r_var = r_var.reshape((-1,) + (1,) * (len(x.shape) - 1))
-                r_var = r_var * grad_diff[np.arange(len(grad_diff)), l_var]
+                if self.norm == 2:
+                    norm = np.linalg.norm(grad_diff.reshape(len(grad_diff), len(labels_set), -1), axis=2, ord=2) + tol
+                    value = np.abs(f_diff) / norm
+                    value[np.arange(len(value)), labels_indices] = np.inf
+                    l_var = np.argmin(value, axis=1)
+                    absolute1 = abs(f_diff[np.arange(len(f_diff)), l_var])
+                    draddiff = grad_diff[np.arange(len(grad_diff)), l_var].reshape(len(grad_diff), -1)
+                    pow1 = (pow(np.linalg.norm(draddiff, axis=1, ord=2),2,)+ tol)
+                    r_var = absolute1 / pow1
+                    r_var = r_var.reshape((-1,) + (1,) * (len(x.shape) - 1))
+                    r_var = r_var * grad_diff[np.arange(len(grad_diff)), l_var]
+                elif self.norm == 1:
+                    norm = np.linalg.norm(grad_diff.reshape(len(grad_diff), len(labels_set), -1), axis=2, ord=2) + tol
+                    value = np.abs(f_diff) / norm
+                    value[np.arange(len(value)), labels_indices] = np.inf
+                    l_var = np.argmin(value, axis=1)
+                    absolute1 = abs(f_diff[np.arange(len(f_diff)), l_var])
+                    draddiff = grad_diff[np.arange(len(grad_diff)), l_var].reshape(len(grad_diff), -1)
+                    pow1 = (pow(np.linalg.norm(draddiff, axis=1, ord=2),2,)+ tol)
+                    r_var = absolute1 / pow1
+                    r_var = r_var.reshape((-1,) + (1,) * (len(x.shape) - 1))
+                    r_var = r_var * grad_diff[np.arange(len(grad_diff)), l_var]
+                elif self.norm in ["inf", np.inf]:
+                    norm = np.linalg.norm(grad_diff.reshape(len(grad_diff), len(labels_set), -1), axis=2, ord=1) + tol
+                    value = np.abs(f_diff) / norm
+                    value[np.arange(len(value)), labels_indices] = np.inf
+                    l_var = np.argmin(value, axis=1)
+                    absolute1 = abs(f_diff[np.arange(len(f_diff)), l_var])
+                    draddiff = grad_diff[np.arange(len(grad_diff)), l_var].reshape(len(grad_diff), -1)
+                    pow1 = (np.linalg.norm(draddiff, axis=1, ord=1)+ tol)
+                    r_var = absolute1 / pow1
+                    r_var = r_var.reshape((-1,) + (1,) * (len(x.shape) - 1))
+                    r_var = r_var * np.sign(grad_diff[np.arange(len(grad_diff)), l_var])
 
                 # 叠加以上得到的噪声并且将对抗样本值clip到合理的范围
                 if self.estimator.clip_values is not None:

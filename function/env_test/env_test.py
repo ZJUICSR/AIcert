@@ -8,7 +8,6 @@ import pandas
 import re
 import time
 import pickle
-# import winreg
 import json
 
 def closeReg(key):
@@ -207,15 +206,6 @@ def judge_vulnerable(val_dict,cve_dir):
         df = pandas.read_csv(cve)
         potential_val=search_update(potential_val,df,val_dict)
         print('finish {}'.format(cve))
-        # length=len(df)
-        # for l in range(length):
-
-        #     if year in df.iloc[l]['Name']:
-        #         year_path=os.path.join(args.output_dir,'{}.csv'.format(year))
-        #         if not os.path.exists(year_path):
-        #             df[l:l+1].to_csv(year_path,mode='w', header=True,index=None)
-        #         else:
-        #             df[l:l+1].to_csv(year_path,mode='a', header=False,index=None)
 
     return potential_val
 
@@ -250,6 +240,7 @@ def env_detection(args):
     info=get_sys_info()
     # info is the system msg
     print("--------------Start Extract Lib Version--------------")
+    distribution=None
     if info=={}:
         os._exit(0)
     elif info['system']=='Windows':
@@ -261,8 +252,9 @@ def env_detection(args):
     elif info['system']=='Linux':
         if 'ubuntu' in info['sys_version'].lower():
             val= ubuntu_get_software_list(self.save_path)
+            distribution='Ubuntu'
         elif 'debian' in info['sys_version'].lower():
-            pass
+            distribution='Debian'
     else:
         print('Not support System')
         os._exit(0)
@@ -270,6 +262,7 @@ def env_detection(args):
     sys_msg={}
     sys_msg['software_lib_list']=val
     sys_msg['env_info']=info
+    sys_msg['linux_distribution']=distribution
     sys_msg['description']="The system architecture is {} with total of {} libs.\nThe detailed infomation of environment is shown in `env_info`.\
          And the libs and softwares in the system is shown in `Software_lib_list`.".format(info['system'],len(val))
     # save system msg
@@ -318,54 +311,6 @@ def env_detection(args):
     
     print("--------------Finish!--------------")
 
-# def code_check(dir_check,dir_log):
-#     from static_check import batch_check,save_json
-#     import time
-#     dir_to_check = dir_check
-#     check_info_dir = dir_log
-
-#     time_start = time.time()
-#     line_counts, num_problems, num_vuls = batch_check(dir_to_check, check_info_dir)
-#     time_end = time.time()
-#     time_cost = time_end - time_start
-
-#     time_cost_str = "Time costs :"+str(time_cost)+"s"
-#     line_conunts_str = "Lines: {}".format(line_counts)
-#     speed_str = "Speed: {:.2f} lines/s ({:d} lines/hour)".format(line_counts*1. / time_cost, int(line_counts*1. / time_cost*3600))
-
-#     print("*" * 20)
-#     print(time_cost_str)
-#     print(line_conunts_str)
-#     print(speed_str)
-#     print("{} problem(s) found ({} vulnerability(ies).)".format(num_problems, num_vuls))
-
-#     output_json = {}
-#     output_json['file'] = dir_to_check
-#     output_json['time_cost'] = time_cost
-#     output_json['lines'] = line_counts
-#     output_json['speed'] = int(line_counts * 1. / time_cost * 3600)
-#     output_json['message'] =("{} problem(s) found ({} vulnerability(ies).)".format(num_problems, num_vuls))
-
-#     save_json([output_json], os.path.join(check_info_dir, 'check_summary.json'))
-
-# if __name__ == '__main__':
-#     parser = argparse.ArgumentParser(description='Test image classification')
-#     parser.add_argument('--savepath','-sp',default='/home/zxy/main/Projects/2020_ZhongDian/Evironment/code_check/tmp.pkl', help='savepath')#'D:\\workspace\\project\\tmp.pkl'
-#     parser.add_argument('--savedir','-sd',default='/home/zxy/main/Projects/2020_ZhongDian/Evironment/code_check/tmp', help='savedir')#'D:\\workspace\\project\\tmp.pkl'
-#     parser.add_argument('--cvepath','-cvep',default="/data2/zxy/Projects/2020_ZhongDian/Evironment/cvelist-master/valid_extract.pkl", help='cve lib path')#'D:\\workspace\\project\\tmp.pkl' /home/zxy/main/Projects/2020_ZhongDian/Evironment/code_check/all_csv/out
-#     parser.add_argument('--method','-mtd',default="hard", help='potential problem search method')#'D:\\workspace\\project\\tmp.pkl' /home/zxy/main/Projects/2020_ZhongDian/Evironment/code_check/all_csv/out
-#     parser.add_argument('--code_check_enable', '-cce',default=True, help='The directory to save logs.')
-#     parser.add_argument('--code_input', '-ci',default='/data2/zxy/Projects/2020_ZhongDian/Evironment/code_check/autokeras/autokeras', help='The directory to check.')
-#     parser.add_argument('--detection_result', '-dr',default='/data2/zxy/Projects/2020_ZhongDian/Evironment/code_check/tmp_out', help='The directory to save logs.')
-
-#     args = parser.parse_args()
-#     env_detection(args)
-#     # if args.code_check_enable:
-#     #     print("--------------Start Code Check--------------")
-#     #     code_check(args.code_input,args.detection_result)
-#     print("Detection Finished!\nThe environment detection result is saved in
-#     {}".format(self.save_dir))
-
 def read_centos_sys(centos_sys_path,info):
 
     f = open(centos_sys_path, 'r')
@@ -400,6 +345,7 @@ class ENVT(object):
         info=self.get_sys_info()
         # info is the system msg
         print("--------------Start Extract Lib Version--------------")
+        distribution=None
         if info=={}:
             os._exit(0)
         elif info['system']=='Windows':
@@ -411,8 +357,9 @@ class ENVT(object):
         elif info['system']=='Linux':
             if 'ubuntu' in info['sys_version'].lower():
                 val= self.ubuntu_get_software_list(self.save_path)
+                distribution='Ubuntu'
             elif 'debian' in info['sys_version'].lower():
-                pass
+                distribution='Debian'
             else:
                 import subprocess
                 command="lsb_release -a >{}"
@@ -432,6 +379,7 @@ class ENVT(object):
         sys_msg={}
         sys_msg['software_lib_list']=val
         sys_msg['env_info']=info
+        sys_msg['linux_distribution']=distribution
         sys_msg['description']="The system architecture is {} with total of {} libs.\nThe detailed infomation of environment is shown in `env_info`.\
             And the libs and softwares in the system is shown in `Software_lib_list`.".format(info['system'],len(val))
         # save system msg

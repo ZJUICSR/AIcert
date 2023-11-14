@@ -54,7 +54,7 @@ class FeatureAdversariesNumpy(EvasionAttack):
         classifier: "CLASSIFIER_NEURALNETWORK_TYPE",
         delta: Optional[float] = None,
         layer: Optional[int] = None,
-        batch_size: int = 32,
+        batch_size: int = 128,
     ):
         """
         Create a :class:`.FeatureAdversaries` instance.

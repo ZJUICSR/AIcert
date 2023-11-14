@@ -2,7 +2,7 @@ import torch
 import pickle
 import numpy as np
 from PIL import Image
-import utils
+from function.fairness.image import utils
 
 class CifarDataset(torch.utils.data.Dataset):
     """Cifar dataloader, output image and target"""

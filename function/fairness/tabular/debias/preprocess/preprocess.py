@@ -1,4 +1,4 @@
-from fairness_datasets import *
+from function.fairness.tabular.fairness_datasets import *
 
 class Preprocess():
     def __init__(self, dataset: FairnessDataset, sensitive=[], single=True, csy=0):
