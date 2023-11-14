@@ -1,0 +1,392 @@
+[
+    {
+        "name": "\u9003\u9038\u653b\u51fb",
+        "desc": "\u653b\u51fb\u6a21\u5f0f",
+        "paper": "",
+        "method_type": ""
+    },
+    {
+        "name": "\u6bd2\u5316\u653b\u51fb",
+        "desc": "\u653b\u51fb\u6a21\u5f0f",
+        "paper": "",
+        "method_type": ""
+    },
+    {
+        "name": "\u56fe\u7247",
+        "desc": "\u653b\u51fb\u6570\u636e",
+        "paper": "",
+        "method_type": ""
+    },
+    {
+        "name": "\u6587\u672c",
+        "desc": "\u653b\u51fb\u6570\u636e",
+        "paper": "",
+        "method_type": ""
+    },
+    {
+        "name": "\u56fe",
+        "desc": "\u653b\u51fb\u6570\u636e",
+        "paper": "",
+        "method_type": ""
+    },
+    {
+        "name": "\u9ed1\u76d2",
+        "desc": "\u653b\u51fb\u573a\u666f",
+        "paper": "",
+        "method_type": ""
+    },
+    {
+        "name": "\u767d\u76d2",
+        "desc": "\u653b\u51fb\u573a\u666f",
+        "paper": "",
+        "method_type": ""
+    },
+    {
+        "name": "L-BFGS",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Intriguing properties of neural networks",
+        "method_type": "\u57fa\u4e8e\u4f18\u5316"
+    },
+    {
+        "name": "FGSM",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Explaining and harnessing adversarial examples",
+        "method_type": "\u57fa\u4e8e\u68af\u5ea6"
+    },
+    {
+        "name": "DeepFool",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Deepfool: a simple and accurate method to fool deep neural networks",
+        "method_type": "\u57fa\u4e8e\u8d85\u5e73\u9762"
+    },
+    {
+        "name": "C&W",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Towards neural networks",
+        "method_type": "\u57fa\u4e8e\u4f18\u5316"
+    },
+    {
+        "name": "BIM",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Adversarial machine learning at scale",
+        "method_type": "\u57fa\u4e8e\u68af\u5ea6"
+    },
+    {
+        "name": "Adversarial Patch",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Adversarial patch",
+        "method_type": "\u5bf9\u6297\u8865\u4e01"
+    },
+    {
+        "name": "ATN",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Adversarial Transformation Networks",
+        "method_type": "\u57fa\u4e8e\u751f\u6210\u6a21\u578b"
+    },
+    {
+        "name": "JSMA",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "The limitations of deep learning in adversarial settings",
+        "method_type": "\u57fa\u4e8e\u68af\u5ea6"
+    },
+    {
+        "name": "PGD",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Towards deep learning models resistant to adversarial attacks",
+        "method_type": "\u57fa\u4e8e\u68af\u5ea6"
+    },
+    {
+        "name": "AutoPGD",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Reliable evaluation of adversarial robustness with an ensemble of diverse parameter-free attacks",
+        "method_type": "\u57fa\u4e8e\u68af\u5ea6"
+    },
+    {
+        "name": "ZOO",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Zoo: Zeroth order optimization based black-box attacks to deep neural networks without training substitute models",
+        "method_type": "\u57fa\u4e8e\u68af\u5ea6\u4f30\u8ba1"
+    },
+    {
+        "name": "AutoZOOM",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Autozoom: Autoencoder-based zeroth order optimization method for attacking black-box neural networks",
+        "method_type": "\u57fa\u4e8e\u68af\u5ea6\u4f30\u8ba1"
+    },
+    {
+        "name": "Boundary-Attack",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Decision-based adversarial attacks: Reliable attacks against black-box machine learning \nmodels",
+        "method_type": "\u57fa\u4e8e\u51b3\u7b56"
+    },
+    {
+        "name": "Substitute-Model",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "",
+        "method_type": "\u57fa\u4e8e\u66ff\u4ee3\u6a21\u578b"
+    },
+    {
+        "name": "NES-Attack",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Black-box Adversarial Attacks with Limited Queries and Information",
+        "method_type": "\u57fa\u4e8e\u68af\u5ea6\u4f30\u8ba1"
+    },
+    {
+        "name": "DeepConfuse",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Learning to confuse: Generating training time adversarial data with auto-encoder",
+        "method_type": "\u6295\u6bd2\u653b\u51fb"
+    },
+    {
+        "name": "NNPoision",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Generative Poisoning Attack Method Against Neural Networks",
+        "method_type": "\u6295\u6bd2\u653b\u51fb"
+    },
+    {
+        "name": "BPDA",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Obfuscated gradients give a false sense of security: Circumventing defenses to adversarial examples",
+        "method_type": "\u57fa\u4e8e\u68af\u5ea6"
+    },
+    {
+        "name": "MI-FGSM",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Boosting Adversarial Attacks with Momentum",
+        "method_type": "\u57fa\u4e8e\u68af\u5ea6"
+    },
+    {
+        "name": "Adversarial-Training",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Explaining and harnessing adversarial examples",
+        "method_type": "\u5bf9\u6297\u8bad\u7ec3"
+    },
+    {
+        "name": "IBP-CROWN",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Towards stable and efficient training of verifiably robust neural networks",
+        "method_type": "\u5f62\u5f0f\u5316\u9a8c\u8bc1"
+    },
+    {
+        "name": "Defense-GAN",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Defense-gan: Protecting classifiers against adversarial attacks using generative models",
+        "method_type": "\u56fe\u50cf\u9884\u5904\u7406"
+    },
+    {
+        "name": "InvGAN",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Invert and Defend: Model-based Approximate Inversion of Generative Adversarial Networks for Secure Inference",
+        "method_type": "\u56fe\u50cf\u9884\u5904\u7406"
+    },
+    {
+        "name": "SID",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Detecting Adversarial Examples from Sensitivity Inconsistency of Spatial-Transform Domain",
+        "method_type": "\u5bf9\u6297\u6837\u672c\u68c0\u6d4b"
+    },
+    {
+        "name": "ADC-detector",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "ACT-Detector: Adaptive channel transformation-based light-weighted detector for adversarial attacks",
+        "method_type": "\u5bf9\u6297\u6837\u672c\u68c0\u6d4b"
+    },
+    {
+        "name": "DIP",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Real-Time Adversarial Attack Detection with Deep Image Prior Initialized as a High-Level Representation Based Blurring Network",
+        "method_type": "\u5bf9\u6297\u6837\u672c\u68c0\u6d4b"
+    },
+    {
+        "name": "SmsNet",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "SmsNet: A New Deep Convolutional Neural Network Model for Adversarial Example Detection",
+        "method_type": "\u5bf9\u6297\u6837\u672c\u68c0\u6d4b"
+    },
+    {
+        "name": "DeepWordBug",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Black-box generation of adversarial text sequences to evade deep learning classifiers",
+        "method_type": "\u5173\u952e\u5355\u8bcd\u6216\u5b57\u6bcd\u66ff\u6362"
+    },
+    {
+        "name": "BERT-Attack",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Bert-attack: Adversarial attack against bert using bert",
+        "method_type": "\u5b9e\u7528Bert\u653b\u51fb"
+    },
+    {
+        "name": "WordChange",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Wordchange: Adversarial examples generation approach for chinese text classification",
+        "method_type": "\u5173\u952e\u5355\u8bcd\u6216\u5b57\u6bcd\u66ff\u6362"
+    },
+    {
+        "name": "BAE",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Bae: Bert-based adversarial examples for text classification",
+        "method_type": "\u5173\u952e\u5355\u8bcd\u66ff\u6362"
+    },
+    {
+        "name": "TextFooler",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Is bert really robust? a strong baseline for natural language attack on text classification and entailment",
+        "method_type": "\u5173\u952e\u5355\u8bcd\u66ff\u6362"
+    },
+    {
+        "name": "CLARE",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Contextualized perturbation for textual adversarial attack",
+        "method_type": "\u5173\u952e\u5355\u8bcd\u66ff\u6362"
+    },
+    {
+        "name": "AEG",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Generating black-box adversarial examples for text classifiers using a deep reinforced model",
+        "method_type": "\u5173\u952e\u5355\u8bcd\u66ff\u6362"
+    },
+    {
+        "name": "Hard-Label-Attack",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Generating natural language attacks in a hard label black box setting",
+        "method_type": "\u540c\u610f\u8bcd\u66ff\u6362"
+    },
+    {
+        "name": "Lage-Scale-Adversarial-Attack",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Generating natural language adversarial examples on a large scale with generative models",
+        "method_type": "\u751f\u6210\u6a21\u578b"
+    },
+    {
+        "name": "Robust-Word-Recognition",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Combating adversarial misspellings with robust word recognition",
+        "method_type": "\u8bed\u6cd5\u68c0\u67e5"
+    },
+    {
+        "name": "DISP",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Learning to discriminate perturbations for blocking adversarial attacks in text classification",
+        "method_type": "\u6570\u636e\u8f6c\u6362"
+    },
+    {
+        "name": "AMDA",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Better robustness by more coverage: Adversarial training with mixup augmentation for robust fine-tuning",
+        "method_type": "\u9c81\u68d2\u6027\u8bad\u7ec3"
+    },
+    {
+        "name": "Safer",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "SAFER: A structure-free approach for certified robustness to adversarial word substitutions",
+        "method_type": "\u5f62\u5f0f\u5316\u9a8c\u8bc1"
+    },
+    {
+        "name": "FGWS",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Frequency-guided word substitutions for detecting textual adversarial examples",
+        "method_type": "\u5bf9\u6297\u6837\u672c\u68c0\u6d4b"
+    },
+    {
+        "name": "RanMask",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Certified Robustness to Text Adversarial Attacks by Randomized [MASK]",
+        "method_type": "\u5f62\u5f0f\u5316\u9a8c\u8bc1"
+    },
+    {
+        "name": "TextFirewall",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "TextFirewall: Omni-Defending Against Adversarial Texts in Sentiment Classification",
+        "method_type": "\u5bf9\u6297\u6837\u672c\u68c0\u6d4b"
+    },
+    {
+        "name": "BAT",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Adversarial training for aspect-based sentiment analysis with bert",
+        "method_type": "\u6570\u636e\u8f6c\u6362"
+    },
+    {
+        "name": "PWWS",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Frequency-guided word substitutions for detecting textual adversarial examples",
+        "method_type": ""
+    },
+    {
+        "name": "NIPA",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Adversarial attacks on graph neural networks via node injections: A hierarchical reinforcement learning approach",
+        "method_type": ""
+    },
+    {
+        "name": "PoisonRec",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Poisonrec: an adaptive data poisoning framework for attacking black-box recommender systems",
+        "method_type": ""
+    },
+    {
+        "name": "GF-Attack",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Adversarial Attack Framework on Graph Embedding Models with Limited Knowledge[",
+        "method_type": ""
+    },
+    {
+        "name": "TNA",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Influence function based data poisoning attacks to top-n recommender systems",
+        "method_type": ""
+    },
+    {
+        "name": "CopyAttack",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Attacking Black-box Recommendations via Copying Cross-domain User Profiles",
+        "method_type": ""
+    },
+    {
+        "name": "Single-Node-Attack",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Single-Node Attack for Fooling Graph Neural Networks",
+        "method_type": ""
+    },
+    {
+        "name": "TrialAttack",
+        "desc": "\u653b\u51fb\u7b97\u6cd5",
+        "paper": "Triple Adversarial Learning for Influence based Poisoning Attack in Recommender Systems",
+        "method_type": ""
+    },
+    {
+        "name": "AMR",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Adversarial training towards robust multimedia recommender system",
+        "method_type": "\u9c81\u68d2\u6027\u8bad\u7ec3"
+    },
+    {
+        "name": "FNCF",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Enhancing the robustness of neural collaborative filtering systems under malicious attacks",
+        "method_type": ""
+    },
+    {
+        "name": "APT",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Fight Fire with Fire: Towards Robust Recommender Systems via Adversarial Poisoning Training",
+        "method_type": "\u9c81\u68d2\u6027\u8bad\u7ec3"
+    },
+    {
+        "name": "DAVE",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Dual Adversarial Variational Embedding for Robust Recommendation",
+        "method_type": "\u9c81\u68d2\u6027\u8bad\u7ec3"
+    },
+    {
+        "name": "SAO",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Sequential-based adversarial optimisation for personalised top-n item recommendation",
+        "method_type": "\u9c81\u68d2\u6027\u8bad\u7ec3"
+    },
+    {
+        "name": "ATMBPR",
+        "desc": "\u9632\u5fa1\u7b97\u6cd5",
+        "paper": "Adversarial training-based mean Bayesian personalized ranking for recommender system",
+        "method_type": "\u9c81\u68d2\u6027\u8bad\u7ec3"
+    }
+]

@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding:utf-8 -*-
-
 __author__ = 'homeway'
 __copyright__ = 'Copyright © 2021/07/01, ZJUICSR'
 
@@ -24,7 +21,6 @@ import shutil
 import torch
 from torch.utils.data import Dataset,DataLoader
 from torchvision.datasets import ImageFolder
-import gol
 
 class mydataset(MNIST):
     flag = False
@@ -215,8 +211,8 @@ class ArgpLoader(BaseDataLoader):
     def get_mean_std(dataset):
         attribute = {
             "MNIST": [(0.1307), (0.3081)],
-            "CIFAR": [(0.43768206, 0.44376972, 0.47280434), (0.19803014, 0.20101564, 0.19703615)],
-            "Imagenet1k": [(0.485, 0.456, 0.406), (0.2023, 0.1994, 0.2010)],
+            "CIFAR": [(0.485, 0.456, 0.406), (0.229, 0.224, 0.225)],
+            "Imagenet1k": [(0.485, 0.456, 0.406), (0.229, 0.224, 0.225)],
             "CUBS200": [(0.485, 0.456, 0.406), (0.229, 0.224, 0.225)],
             "SVHN": [(0.4377, 0.4438, 0.4728), (0.1980, 0.2010, 0.1970)]
         }
@@ -426,14 +422,3 @@ if __name__ == '__main__':
     print(dataset[2])
     print(dataset[2][0].shape)
     data_loader = DataLoader(dataset=dataset, batch_size=64, shuffle=True)
-
-
-
-
-
-
-
-
-
-
-

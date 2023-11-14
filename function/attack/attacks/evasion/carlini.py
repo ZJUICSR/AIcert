@@ -157,10 +157,10 @@ class CarliniWagner(EvasionAttack):
         ):
             batch_index_1, batch_index_2 = batch_id * self.batch_size, (batch_id + 1) * self.batch_size
             x_batch = torch.from_numpy(x[batch_index_1:batch_index_2].copy()).to(self.estimator.device)
-            if y != None:
-                y_batch = torch.from_numpy(y[batch_index_1:batch_index_2].copy()).to(self.estimator.device)
-            else:
+            if isinstance(y,type(None)) :
                 y_batch = None
+            else:
+                y_batch = torch.from_numpy(y[batch_index_1:batch_index_2].copy()).to(self.estimator.device)
             adv_x[batch_index_1:batch_index_2] = self.carlini_wagner_l2(x_batch, y_batch)
             x_batch.cpu()
             if y_batch != None:

@@ -1,5 +1,7 @@
-from auto_LiRPA.auto_LiRPA import BoundedModule, BoundedTensor
-from auto_LiRPA.auto_LiRPA.perturbations import *
+# from auto_LiRPA.auto_LiRPA import BoundedModule, BoundedTensor
+# from auto_LiRPA.auto_LiRPA.perturbations import *
+from auto_LiRPA import BoundedModule, BoundedTensor
+from auto_LiRPA.perturbations import *
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
@@ -50,9 +52,7 @@ class LanguageAutoLirpaVerify(object):
 
     def write_logs(self, info: str, task_finish=False):
         if self.log_func is not None:
-            self.log_func(info=info,
-                          task_id=self.task_id,
-                          task_finish=task_finish)
+            self.log_func.info(info)
         print(info)
 
     def computer_eps_range(self):

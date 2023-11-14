@@ -78,7 +78,7 @@ class AdversarialPatchPyTorch(EvasionAttack):
         distortion_scale_max: float = 0.0,
         learning_rate: float = 5.0,
         max_iter: int = 500,
-        batch_size: int = 16,
+        batch_size: int = 128,
         patch_shape: Tuple[int, int, int] = (3, 224, 224),
         patch_location: Optional[Tuple[int, int]] = None,
         patch_type: str = "circle",

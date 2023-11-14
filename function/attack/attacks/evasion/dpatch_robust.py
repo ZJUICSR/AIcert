@@ -57,7 +57,7 @@ class RobustDPatch(EvasionAttack):
         sample_size: int = 1,
         learning_rate: float = 5.0,
         max_iter: int = 500,
-        batch_size: int = 16,
+        batch_size: int = 128,
         targeted: bool = False,
         summary_writer: Union[str, bool, SummaryWriter] = False,
         verbose: bool = True,

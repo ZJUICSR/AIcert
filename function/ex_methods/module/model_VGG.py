@@ -32,22 +32,22 @@ class VGG(Module):
         if reference_model == None:
             if batch_norm == True:
                 if name == "A":
-                    model = torchvision.models.vgg11_bn(weights=torchvision.models.VGG11_BN_Weights.DEFAULT)
+                    model = torchvision.models.vgg11_bn(pretrained=True)
                 elif name == "B":
-                    model = torchvision.models.vgg13_bn(weights=torchvision.models.VGG13_BN_Weights.DEFAULT)
+                    model = torchvision.models.vgg13_bn(pretrained=True)
                 elif name == "D":
-                    model = torchvision.models.vgg16_bn(weights=torchvision.models.VGG16_BN_Weights.DEFAULT)
+                    model = torchvision.models.vgg16_bn(pretrained=True)
                 elif name == "E":
-                    model = torchvision.models.vgg19_bn(weights=torchvision.models.VGG19_BN_Weights.DEFAULT)
+                    model = torchvision.models.vgg19_bn(pretrained=True)
             else:
                 if name == "A":
-                    model = torchvision.models.vgg11(weights=torchvision.models.VGG11_Weights.DEFAULT)
+                    model = torchvision.models.vgg11(pretrained=True)
                 elif name == "B":
-                    model = torchvision.models.vgg13(weights=torchvision.models.VGG13_Weights.DEFAULT)
+                    model = torchvision.models.vgg13(pretrained=True)
                 elif name == "D":
-                    model = torchvision.models.vgg16(weights=torchvision.models.VGG16_Weights.DEFAULT)
+                    model = torchvision.models.vgg16(pretrained=True)
                 elif name == "E":
-                    model = torchvision.models.vgg19(weights=torchvision.models.VGG19_Weights.DEFAULT)
+                    model = torchvision.models.vgg19(pretrained=True)
         else:
             model = reference_model
 
