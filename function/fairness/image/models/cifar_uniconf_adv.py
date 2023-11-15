@@ -110,6 +110,11 @@ class CifarUniConfAdv(CifarModel):
         }
         return state_dict
     
+    def load_state_dict(self, state_dict):
+        self.base_network.load_state_dict(state_dict['base_network'])
+        self.class_network.load_state_dict(state_dict['class_network'])
+        self.domain_network.load_state_dict(state_dict['domain_network'])
+    
     def  _train(self, loader):
         """Train the model for one epoch"""
         
