@@ -188,31 +188,31 @@ def RobustEnhance(args_dict):
     testset = 0
     classes = 0
     if args_dict['dataset'] == 'cifar10':
-        trainset = torchvision.datasets.CIFAR10(root='/home/Wenjie/AI-Platform/dataset/CIFAR10',
+        trainset = torchvision.datasets.CIFAR10(root='dataset/CIFAR10',
                                                 train=True,
                                                 download=False,
                                                 transform=transform_train)
-        testset = torchvision.datasets.CIFAR10(root='/home/Wenjie/AI-Platform/dataset/CIFAR10',
+        testset = torchvision.datasets.CIFAR10(root='dataset/CIFAR10',
                                                train=False,
                                                download=True,
                                                transform=transform_test)
         classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse',
                    'ship', 'truck')
     elif args_dict['dataset'] == 'cifar100':
-        trainset = torchvision.datasets.CIFAR100(root='/home/Wenjie/AI-Platform/dataset/CIFAR100',
+        trainset = torchvision.datasets.CIFAR100(root='dataset/CIFAR100',
                                                  train=True,
                                                  download=True,
                                                  transform=transform_train)
-        testset = torchvision.datasets.CIFAR100(root='/home/Wenjie/AI-Platform/dataset/CIFAR100',
+        testset = torchvision.datasets.CIFAR100(root='dataset/CIFAR100',
                                                 train=False,
                                                 download=True,
                                                 transform=transform_test)
     elif args_dict['dataset'] == 'svhn':
-        trainset = torchvision.datasets.SVHN(root='/home/Wenjie/AI-Platform/dataset/SVHN',
+        trainset = torchvision.datasets.SVHN(root='dataset/SVHN',
                                              split='train',
                                              download=True,
                                              transform=transform_train)
-        testset = torchvision.datasets.SVHN(root='/home/Wenjie/AI-Platform/dataset/SVHN',
+        testset = torchvision.datasets.SVHN(root='dataset/SVHN',
                                             split='test',
                                             download=True,
                                             transform=transform_test)
