@@ -3,7 +3,7 @@ from __future__ import print_function
 import os,sys
 sys.path.append(os.path.dirname(__file__).rsplit('/',1)[0])
 import os
-import argparse
+# import argparse
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -57,7 +57,7 @@ import pandas as pd
 
 # settings
 # use_cuda = not args.no_cuda and torch.cuda.is_available()
-device = torch.device("cuda" if use_cuda else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
 
