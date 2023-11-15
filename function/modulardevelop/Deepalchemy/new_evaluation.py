@@ -98,11 +98,11 @@ def gen_train(model, x_train, y_train, x_test, y_test, epochs, imgGen=None):
     val_loss = history.history['val_loss']
     acc = history.history['categorical_accuracy']
     val_acc = history.history['val_categorical_accuracy']
-    model.save("./models/" + name + ".h5")
-    np.save('./data/' + name + '_loss', loss)
-    np.save('./data/' + name + '_valloss', val_loss)
-    np.save('./data/' + name + '_acc', acc)
-    np.save('./data/' + name + '_valacc', val_acc)
+    model.save("./output/cache/develop/model/" + name + ".h5")
+    np.save('./output/cache/develop/data/' + name + '_loss', loss)
+    np.save('./output/cache/develop/data/' + name + '_valloss', val_loss)
+    np.save('./output/cache/develop/data/' + name + '_acc', acc)
+    np.save('./output/cache/develop/data/' + name + '_valacc', val_acc)
     return model, acc, val_acc, loss, val_loss
 
 
@@ -128,11 +128,11 @@ def train_with_hypers(model, x_train, y_train, x_test, y_test, bs, lr, epochs, o
     val_loss = history.history['val_loss']
     acc = history.history['categorical_accuracy']
     val_acc = history.history['val_categorical_accuracy']
-    model.save("./models/" + name + ".h5")
-    np.save('./data/' + name + '_loss', loss)
-    np.save('./data/' + name + '_valloss', val_loss) 
-    np.save('./data/' + name + '_acc', acc)
-    np.save('./data/' + name + '_valacc', val_acc)
+    model.save("./output/cache/develop/model/" + name + ".h5")
+    np.save('./output/cache/develop/data/' + name + '_loss', loss)
+    np.save('./output/cache/develop/data/' + name + '_valloss', val_loss) 
+    np.save('./output/cache/develop/data/' + name + '_acc', acc)
+    np.save('./output/cache/develop/data/' + name + '_valacc', val_acc)
     return model, acc, val_acc, loss, val_loss
 
 
@@ -149,8 +149,8 @@ def my_random_crop(image):
 
 
 def load_data():
-    x_train = np.load('./tmp/xtr.npy')
-    y_train = np.load('./tmp/ytr.npy')
-    x_test = np.load('./tmp/xte.npy')
-    y_test = np.load('./tmp/yte.npy')
+    x_train = np.load('./output/cache/develop/tmp/xtr.npy')
+    y_train = np.load('./output/cache/develop/tmp/ytr.npy')
+    x_test = np.load('./output/cache/develop/tmp/xte.npy')
+    y_test = np.load('./output/cache/develop/tmp/yte.npy')
     return x_train,y_train,x_test,y_test

@@ -148,11 +148,11 @@ def model_generate(
         shutil.rmtree(root_path)
     if os.path.exists(tmp_dir):
         shutil.rmtree(tmp_dir)
-    if os.path.exists('./tmp'):
-        shutil.rmtree('./tmp')
+    if os.path.exists('./output/cache/develop/tmp'):
+        shutil.rmtree('./output/cache/develop/tmp')
     os.makedirs(root_path)
     os.makedirs(tmp_dir)
-    os.makedirs('./tmp')
+    os.makedirs('./output/cache/develop/tmp')
     log_path=os.path.join(root_path,'log.pkl')
     
     if data=='mnist':
@@ -220,29 +220,29 @@ def model_generate(
             if len(x_test.shape) == 3:
                 x_test = np.expand_dims(x_test,-1)
 
-            np.save('./tmp/xtr.npy',x_train)
-            np.save('./tmp/ytr.npy',y_train)
-            np.save('./tmp/xte.npy',x_test)
-            np.save('./tmp/yte.npy',y_test)
+            np.save('./output/cache/develop/tmp/xtr.npy',x_train)
+            np.save('./output/cache/develop/tmp/ytr.npy',y_train)
+            np.save('./output/cache/develop/tmp/xte.npy',x_test)
+            np.save('./output/cache/develop/tmp/yte.npy',y_test)
             trainfunc, nmax = da.gen_train_function(False, gpu, block_type, epoch, [x_train, y_train, x_test, y_test])
             wmin, wmax, dmin, dmax = da.NM_search_min(block_type, trainfunc, nmax, init, iter_num)
 
             trainfunc, nmax = da.gen_train_function(True, gpu, block_type, epoch, [x_train, y_train, x_test, y_test])
             model_path = os.path.join(root_path, 'best_model.h5')
             valloss = trainfunc(dmin, dmax, wmin, wmax)
-            shutil.copyfile("./best.h5",model_path)
-            shutil.copyfile("./tmp/best_param.pkl", os.path.join(root_path, 'best_param.pkl'))
-            shutil.rmtree('./models')
-            shutil.rmtree('./data')
-            shutil.rmtree('./tmp')
-            os.remove('./best.h5')
+            shutil.copyfile("./output/cache/develop/best.h5",model_path)
+            shutil.copyfile("./output/cache/develop/tmp/best_param.pkl", os.path.join(root_path, 'best_param.pkl'))
+            shutil.rmtree('./output/cache/develop/model')
+            shutil.rmtree('./output/cache/develop/data')
+            shutil.rmtree('./output/cache/develop/tmp')
+            os.remove('./output/cache/develop/best.h5')
             # os.remove('./best.h5')
 
     else:
         # DEMO 2
-        with open('./hypermodel.pkl', 'rb') as f:
+        with open('./output/cache/develop/hypermodel.pkl', 'rb') as f:
             hm = pickle.load(f)
-        with open('./hyperparam.pkl', 'rb') as f: #you need to input the parameter of the model here
+        with open('./output/cache/develop/hyperparam.pkl', 'rb') as f: #you need to input the parameter of the model here
             model_hyperparameter = pickle.load(f)
         with open(param_path, 'rb') as f: #you need to input the parameter of the model here
             param = pickle.load(f)
