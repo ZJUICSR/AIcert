@@ -330,8 +330,8 @@ def model_evaluate(dataset_name, model_name, metrics=['DI', 'DP', 'PE', 'EOD', '
         model.train(dataset=dataset, epochs=2000, save_folder=model_path)
     else:
         print(f"loading model from path: {model_path}")
-        model.load_state_dict(torch.load(model_path)["model"])
-
+        model.load_state_dict(torch.load(os.path.join(model_path,'ckpt.pth'))["model"])
+    # torch.save(model.state_dict(), os.path.join('output/cache/fairness', dataset_name+'_ckpt.pth'))
     # evaluating model
     logger.info(f'calculating fairness metrics for model: \'{model_name}\' on dataset: \'{dataset_name}\'.')
     pred_dataset = model.predicted_dataset(dataset=dataset)
@@ -446,7 +446,7 @@ def model_debias(dataset_name, model_name, algorithm_name, metrics=['DI', 'DP', 
         model.train(dataset=dataset, epochs=2000, save_folder=model_path)
     else:
         print(f"loading model from path: {model_path}")
-        model.load_state_dict(torch.load(model_path)["model"])
+        model.load_state_dict(torch.load(os.path.join(model_path,'ckpt.pth'))["model"])
 
     if save_folder=='':
         save_folder = os.path.join('output/cache/fairness', dataset_name, 'test')
