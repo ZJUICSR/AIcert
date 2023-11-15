@@ -73,16 +73,16 @@ def model_debias(dataset_name='cifar-s', model_path = '', model_name="Resnet50",
     logger.info(f"start improving fairness of model: \'{model_name}\' on dataset: \'{dataset_name}\'.")
     model, opt = collect_args(model_path=model_path, dataset_name=dataset_name, algorithm_name=algorithm_name)
     if test_mode:
-        if os.path.exists(opt['save_folder'], 'best.pth'):
+        if os.path.exists(os.path.join(opt['save_folder'], 'best.pth')):
             opt['test_mode'] = True
-            downloadpath = opt['save_folder'], 'best.pth'
+            downloadpath = os.path.join(opt['save_folder'], 'best.pth')
         else:
             logger.info(f"model not exists , retrain now.")
             opt['test_mode'] = False
-            downloadpath = opt['save_folder'], 'ckpt.pth'
+            downloadpath = os.path.join(opt['save_folder'], 'ckpt.pth')
     else:
         opt['test_mode'] = False
-        downloadpath = opt['save_folder'], 'ckpt.pth' 
+        downloadpath = os.path.join(opt['save_folder'], 'ckpt.pth' )
     opt['test_mode'] = test_mode
     print('************opt*************')
     print(opt)

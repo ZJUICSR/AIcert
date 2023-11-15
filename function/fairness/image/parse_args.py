@@ -101,8 +101,8 @@ def create_exerpiment_setting(opt):
         opt['device'] = IOtool.get_device()
         opt['print_freq'] = 50
         opt['batch_size'] = 64
-        # opt['total_epochs'] = 50
-        opt['total_epochs'] = 2
+        opt['total_epochs'] = 50
+        # opt['total_epochs'] = 2
         # opt['save_folder'] = os.path.join('record/'+opt['experiment'], 
         #                                   opt['experiment_name'])
         if opt['save_folder'] == '' :
