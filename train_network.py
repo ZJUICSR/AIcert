@@ -166,7 +166,8 @@ def robust_train(model, train_loader, test_loader, adv_loader, attack, device, e
                 x = x.detach().to('cpu').numpy()
                 y = y.detach().to('cpu').numpy()
                 # x, y = x.to(device), y.to(device)
-                x[idx] = attack(copy.deepcopy(x[idx]), copy.deepcopy(y[idx]))
+                x[idx] = attack.attack(x=copy.deepcopy(x[idx]),**adv_param)
+                # x[idx] = attack(copy.deepcopy(x[idx]), copy.deepcopy(y[idx]))
             x, y = torch.tensor(x).to(device), torch.tensor(y).to(device)
             # 向模型中输入数据
             out = model.forward(x)
