@@ -209,11 +209,11 @@ def DataFairnessDebias():
             staAttrList=inputParam["staAttrList"]
         # 执行任务
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.run_data_debias_api, tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList)
-        t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+        t2 = pool.submit(interface.run_data_debias_api, tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList)
+        # t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
         
         IOtool.add_task_queue(tid, stid, t2, 300)
-        interface.run_data_debias_api(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList)
+        # interface.run_data_debias_api(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList)
         # t2 = threading.Thread(target=interface.run_data_debias_api,args=(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList))
         # t2.setDaemon(True)
         # t2.start()
@@ -255,8 +255,8 @@ def ModelFairnessEvaluate():
         IOtool.change_task_info(tid, "model", modelname)
         
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
-        IOtool.add_task_queue(tid, stid, t2, 300)
+        # t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+        # IOtool.add_task_queue(tid, stid, t2, 300)
         if dataname in ["Compas", "Adult", "German"]:
             try:
                 metrics = json.loads(inputParam["metrics"])
@@ -268,8 +268,8 @@ def ModelFairnessEvaluate():
                 senAttrList=inputParam["senAttrList"]
                 tarAttrList=inputParam["tarAttrList"]
                 staAttrList=inputParam["staAttrList"]
-            # t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname,  model_path='', modelname=modelname, metrics = metrics, senAttrList = senAttrList, tarAttrList = tarAttrList, staAttrList = staAttrList)
-            interface.run_model_eva_api(tid, stid, dataname,  model_path=model_path, modelname=modelname, metrics = metrics, senAttrList = senAttrList, tarAttrList = tarAttrList, staAttrList = staAttrList)
+            t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname,  model_path=model_path, modelname=modelname, metrics = metrics, senAttrList = senAttrList, tarAttrList = tarAttrList, staAttrList = staAttrList)
+            # interface.run_model_eva_api(tid, stid, dataname,  model_path=model_path, modelname=modelname, metrics = metrics, senAttrList = senAttrList, tarAttrList = tarAttrList, staAttrList = staAttrList)
         else:
             dataname = dataname.lower()
             if dataname == "cifar10-s":
@@ -279,10 +279,10 @@ def ModelFairnessEvaluate():
             except:
                 metrics = inputParam["metrics"]
             test_mode = inputParam["test_mode"]
-            # t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname,  model_path='', modelname=modelname, metrics = metrics, test_mode = test_mode)
-            interface.run_model_eva_api(tid, stid, dataname,  model_path=model_path, modelname=modelname, metrics = metrics, test_mode = test_mode)
+            t2 = pool.submit(interface.run_model_eva_api, tid, stid, dataname,  model_path=model_path, modelname=modelname, metrics = metrics, test_mode = test_mode)
+            # interface.run_model_eva_api(tid, stid, dataname,  model_path=model_path, modelname=modelname, metrics = metrics, test_mode = test_mode)
         
-        # IOtool.add_task_queue(tid, stid, t2, 300)
+        IOtool.add_task_queue(tid, stid, t2, 300)
         # interface.run_model_eva_api( tid, stid, dataname, modelname, metrics = metrics, test_mode = test_mode)
         res = {
             "tid":tid,
@@ -360,10 +360,7 @@ def ModelFairnessDebias():
                              test_mode = test_mode, model_path=model_path, save_folder=save_folder)
             # time.sleep(20)
             
-        # IOtool.add_task_queue(tid, AAtid, t2, 300)
-        # interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, test_mode = test_mode)
-        # interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, senAttrList, tarAttrList, staAttrList)
-        
+        # IOtool.add_task_queue(tid, AAtid, t2, 30000)    
         res = {
             "tid":tid,
             "stid":AAtid
@@ -718,7 +715,9 @@ def BackdoorAttack():
         # 执行任务
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_backdoor_attack, tid, stid, dataname, model, adv_method, inputParam)
+        # t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
         IOtool.add_task_queue(tid, stid, t2, 72000*len(adv_method))
+        # interface.run_backdoor_attack(tid, stid, dataname, model, adv_method, inputParam)
         # t2 = threading.Thread(target=interface.run_backdoor_attack,args=(tid, stid, dataname, model, adv_method, inputParam))
         # t2.setDaemon(True)
         # t2.start()
@@ -1075,12 +1074,18 @@ def Detect():
     format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
     stid = "S"+IOtool.get_task_id(str(format_time))
     IOtool.write_json(inputParam, osp.join(ROOT,"output", tid, stid + "_param.json"))
-    
+    typevalue = ''
+    backdoorlist = ['Activation','Spectral Signature', 'Provenance','Neural Cleanse L1',
+                    'Neural Cleanse L2','Neural Cleanse Linf','SAGE',"STRIP"]
+    if defense_methods[0] in  backdoorlist:
+        typevalue = 'backdoor_defense'
+    else:
+        typevalue = "attack_defense"
     adv_nums = int(adv_nums)
     value = {
-        "type":"attack_defense",
+        "type":typevalue,
         "state":0,
-        "name":["attack_defense"],
+        "name":[typevalue],
         "dataset":adv_dataset,
         "method":defense_methods,
         "model":adv_method,
@@ -1382,7 +1387,7 @@ def DeepSstParamSet():
             pass
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
-        inputParam-{
+        inputParam={
             "dataset":dataset,
             "model":modelname,
             "pertube":pertube,
@@ -1431,7 +1436,8 @@ def DeepLogicParamSet():
             pass
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
-        IOtool.write_json(json.loads(request.form), osp.join(ROOT,"output", tid, AAtid + "_param.json"))
+        print(inputdata)
+        IOtool.write_json(inputdata, osp.join(ROOT,"output", tid, AAtid + "_param.json"))
         value = {
             "type":"DeepLogic",
             "state":0,
@@ -1547,8 +1553,10 @@ def ModularDevelopParamSet():
         IOtool.change_task_info(tid, "dataset", dataset)
         IOtool.change_task_info(tid, "model", model)
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.run_modulardevelop, tid, AAtid, dataset, model, tuner, init, epoch, iternum)
+        # t2 = pool.submit(interface.run_modulardevelop, tid, AAtid, dataset, model, tuner, init, epoch, iternum)
+        t2 = pool.submit(interface.submitAandB, tid, AAtid, 1, 2)
         IOtool.add_task_queue(tid, AAtid, t2, 3000)
+        interface.run_modulardevelop( tid, AAtid, dataset, model, tuner, init, epoch, iternum )
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:

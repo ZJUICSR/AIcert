@@ -10,11 +10,15 @@ test.log
 function/ex_methods/cache/adv_params copy.json
 spec-list1.txt
 function/formal_verify/auto_LiRPA/*
+function/adversarial_test/flow_line_rules/results/*
+function/adversarial_test/rules/results/*
 function/GroupDefense_3/
 function/adversarial_test/graph_knowledge/results/
 function/side/CMake_Research3/libresreach3.so_bak
 function/ensemble/paca_detect/detect_models/*
 record
+temp_model.py
+tempparas.py
 web/static/imgs/tmp_imgs/*
 web/static/img/tmp_imgs/
 function/ensemble/paca_detect/results

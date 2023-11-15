@@ -60,16 +60,16 @@ def create_model(deep, width):
 
     # del(imgGen)
     name = model.name + '_bs_' + str(batch_size) + '_lr_' + str(learning_rate) + '_epo_' + str(epochs) + '_' + opname
-    model.save("./models/" + name + ".h5")
+    model.save("./output/cache/develop/model" + name + ".h5")
     loss = history.history['loss']
     val_loss = history.history['val_loss']
     acc = history.history['categorical_accuracy']
     val_acc = history.history['val_categorical_accuracy']
-    model.save("./models/" + name + ".h5")
-    np.save('./data/' + name + '_loss', loss)
-    np.save('./data/' + name + '_valloss', val_loss)
-    np.save('./data/' + name + '_acc', acc)
-    np.save('./data/' + name + '_valacc', val_acc)
+    model.save("./output/cache/develop/model" + name + ".h5")
+    np.save('./output/cache/develop/data/' + name + '_loss', loss)
+    np.save('./output/cache/develop/data/' + name + '_valloss', val_loss)
+    np.save('./output/cache/develop/data/' + name + '_acc', acc)
+    np.save('./output/cache/develop/data/' + name + '_valacc', val_acc)
     del (model)
     # del(x_train)
     # del(y_train)
@@ -106,8 +106,8 @@ if __name__ == '__main__':
     g = args.gpu
     t = args.times
     os.environ["CUDA_VISIBLE_DEVICES"] = str(g)
-    if not os.path.exists('./data'):
-        os.mkdir('./data')
+    if not os.path.exists('./output/cache/develop/data'):
+        os.mkdir('./output/cache/develop/data')
 
     gpus = tf.config.experimental.list_physical_devices('GPU')
     for gpu in gpus:
@@ -121,11 +121,11 @@ if __name__ == '__main__':
                                          verbose=False,
                                          return_space=True,
                                         keep_temp=False)
-    valloss = np.load('./data/' + str(name) + '_valloss.npy')
-    loss = np.load('./data/' + str(name) + '_loss.npy')
-    valacc = np.load('./data/' + str(name) + '_valacc.npy')
-    acc = np.load('./data/' + str(name) + '_acc.npy')
-    np.save('./data/best.npy', valloss)
+    valloss = np.load('./output/cache/develop/data/' + str(name) + '_valloss.npy')
+    loss = np.load('./output/cache/develop/data/' + str(name) + '_loss.npy')
+    valacc = np.load('./output/cache/develop/data/' + str(name) + '_valacc.npy')
+    acc = np.load('./output/cache/develop/data/' + str(name) + '_acc.npy')
+    np.save('./output/cache/develop/data/best.npy', valloss)
     history = {
         'loss': list(loss),
         'val_loss': list(valloss),
@@ -135,8 +135,8 @@ if __name__ == '__main__':
     output = open('../history_da.pkl', 'wb')
     pickle.dump(history, output)
     output.close()
-    model = tf.keras.models.load_model('./models/' + str(name) + '.h5')
-    model.save("./best.h5")
+    model = tf.keras.models.load_model('./output/cache/develop/model/' + str(name) + '.h5')
+    model.save("./output/cache/develop/best.h5")
     
 
     print('The best model:')
@@ -147,7 +147,7 @@ if __name__ == '__main__':
         else:
             savedict[hp] = space[hp].pos_args[result[hp] + 1].obj
 
-    output = open('./tmp/best_param.pkl', 'wb')
+    output = open('./output/cache/develop/tmp/best_param.pkl', 'wb')
     pickle.dump(savedict, output)
     output.close()
     # os.remove('./tempparas.py')
