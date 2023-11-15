@@ -98,18 +98,18 @@ def RobustTest(args_dict):
         ])
 
     if args_dict['dataset'] == 'cifar10':
-        testset = torchvision.datasets.CIFAR10(root='/home/Wenjie/AI-Platform/dataset/CIFAR10',
+        testset = torchvision.datasets.CIFAR10(root='dataset/CIFAR10',
                                                train=False,
                                                download=True,
                                                transform=transform_test)
     elif args_dict['dataset'] == 'cifar100':
-        testset = torchvision.datasets.CIFAR100(root='/home/Wenjie/AI-Platform/dataset/CIFAR100',
+        testset = torchvision.datasets.CIFAR100(root='dataset/CIFAR100',
                                                 train=False,
                                                 download=True,
                                                 transform=transform_test)
 
     elif args_dict['dataset'] == 'svhn':
-        testset = torchvision.datasets.SVHN(root='/home/Wenjie/AI-Platform/dataset/SVHN',
+        testset = torchvision.datasets.SVHN(root='dataset/SVHN',
                                             split='test',
                                             download=True,
                                             transform=transform_test)
