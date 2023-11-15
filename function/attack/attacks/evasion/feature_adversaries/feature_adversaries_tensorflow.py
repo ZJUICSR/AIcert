@@ -70,7 +70,7 @@ class FeatureAdversariesTensorFlowV2(EvasionAttack):
         lambda_: float = 0.0,
         layer: Union[int, str, Tuple[int, ...], Tuple[str, ...]] = -1,
         max_iter: int = 100,
-        batch_size: int = 32,
+        batch_size: int = 128,
         step_size: Optional[Union[int, float]] = None,
         random_start: bool = False,
         verbose: bool = True,

@@ -6,10 +6,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 from tensorboardX import SummaryWriter
-from image.models import basenet
-from image.models import dataloader
-from image.models.cifar_core import CifarModel
-from image import utils
+from function.fairness.image.models import basenet
+from function.fairness.image.models import dataloader
+from function.fairness.image.models.cifar_core import CifarModel
+from function.fairness.image import utils
 
 class CifarUniConfAdv(CifarModel):
     def __init__(self, opt):
@@ -70,6 +70,9 @@ class CifarUniConfAdv(CifarModel):
                                                  data_setting['domain_label_path'],
                                                  transform_test)
 
+        self.test_color_target = np.array(test_color_data.class_label)
+        self.test_gray_target = np.array(test_gray_data.class_label)
+
         self.train_loader = torch.utils.data.DataLoader(
                                  train_data, batch_size=opt['batch_size'],
                                  shuffle=True, num_workers=1)
@@ -109,6 +112,11 @@ class CifarUniConfAdv(CifarModel):
             'epoch': self.epoch
         }
         return state_dict
+    
+    def load_state_dict(self, state_dict):
+        self.base_network.load_state_dict(state_dict['base_network'])
+        self.class_network.load_state_dict(state_dict['class_network'])
+        self.domain_network.load_state_dict(state_dict['domain_network'])
     
     def  _train(self, loader):
         """Train the model for one epoch"""
@@ -248,6 +256,8 @@ class CifarUniConfAdv(CifarModel):
             state_dict = torch.load(os.path.join(self.save_path, 'best.pth'))
         elif os.path.exists(os.path.join(self.save_path, 'ckpt.pth')):
             state_dict = torch.load(os.path.join(self.save_path, 'ckpt.pth'))
+        # elif os.path.exists(self.model_path):
+        #     state_dict = torch.load(self.model_path)
         else:
             raise FileNotFoundError("no checkpoints available for testing")
         self.load_state_dict(state_dict)

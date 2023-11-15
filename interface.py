@@ -25,7 +25,8 @@ from torchvision.datasets import CIFAR10, mnist
 from function.side import *
 
 ROOT = osp.dirname(osp.abspath(__file__))
-def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics = [], sensattrs = [], targetattr=None, staAttrList= [], test_mode = True):
+def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics = [], sensattrs = [], targetattr=None, staAttrList= [], 
+                         test_mode = True, model_path='', save_folder=''):
     """模型公平性提升
     :params tid:主任务ID
     :params stid:子任务id
@@ -38,9 +39,11 @@ def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics 
     IOtool.set_task_starttime(tid, stid, time.time())
     logging = IOtool.get_logger(stid)
     if dataname in ["Compas", "Adult", "German"]:
-        res = run_model_debias(dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList, logging=logging)
+        res = run_model_debias(dataname, modelname, algorithmname, metrics, sensattrs, targetattr, staAttrList, logging=logging, model_path=model_path, save_folder=save_folder)
     else:
-        res = run_image_model_debias(dataname, modelname, algorithmname, metrics, test_mode, logging=logging)
+        res = run_image_model_debias(dataset_name=dataname,model_path=model_path, 
+                                     model_name=modelname, algorithm_name=algorithmname, 
+                                     metrics=metrics, test_mode=test_mode, logging=logging, save_folder=save_folder)
     res["stop"] = 1
     
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json"))
@@ -48,7 +51,7 @@ def run_model_debias_api(tid, stid, dataname, modelname, algorithmname, metrics 
     IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid=tid)
 
-def run_model_eva_api(tid, stid, dataname, modelname, metrics = [], senAttrList = [], tarAttrList = [], staAttrList= [], test_mode = True):
+def run_model_eva_api(tid, stid, dataname, model_path='', modelname='', metrics = [], senAttrList = [], tarAttrList = [], staAttrList= [], test_mode = True):
     """模型公平性提升
     :params tid:主任务ID
     :params stid:子任务id
@@ -61,9 +64,9 @@ def run_model_eva_api(tid, stid, dataname, modelname, metrics = [], senAttrList 
     IOtool.set_task_starttime(tid, stid, time.time())
     logging = IOtool.get_logger(stid)
     if dataname in ["Compas", "Adult", "German"]:
-        res = run_model_evaluate(dataname, modelname, metrics, senAttrList, tarAttrList, staAttrList, logging=logging)
+        res = run_model_evaluate(dataname, model_path, modelname, metrics, senAttrList, tarAttrList, staAttrList, logging=logging)
     else:
-        res = run_image_model_evaluate(dataname, modelname, metrics, test_mode, logging=logging)
+        res = run_image_model_evaluate(dataname, model_path, modelname, metrics, test_mode, logging=logging)
     if "Consistency" in res.keys():
         res["Consistency"] = float(res["Consistency"])
     res["stop"] = 1
@@ -1079,21 +1082,30 @@ from function.ensemble import ensemble_defense
 from dataset import ArgpLoader
 # from function.ex_methods.module.train_model import
 from function.ensemble import paca_detect
-def load_dataset(dataset, batchsize):
+def load_dataset(dataset, batchsize, rate=0.1):
     if dataset.lower() == "mnist":
         transform = transforms.Compose([transforms.Resize(28), transforms.ToTensor(), transforms.Normalize([0.1307], [0.3081])])
         train_dataset = mnist.MNIST('./dataset/data/MNIST', train=True, transform=transform, download=True)
         test_dataset = mnist.MNIST('./dataset/data/MNIST', train=False, transform=transform, download=False)
         channel = 1
     elif dataset.lower() == "cifar10":
-        print("cifar10")
         transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms.RandomHorizontalFlip(),transforms.ToTensor(),transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])])
         # mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225]
         train_dataset = CIFAR10('./dataset/data/CIFAR10', train=True, transform=transform, download=True)
         test_dataset = CIFAR10('./dataset/data/CIFAR10', train=False, transform=transform, download=False)
         channel = 3
-    train_loader = DataLoader(train_dataset, batch_size=batchsize, shuffle=True,num_workers=2)
-    test_loader = DataLoader(test_dataset, batch_size=batchsize,shuffle=False)
+        
+    test_sample_num = int(len(test_dataset) * rate)
+    train_sample_num = int(len(train_dataset) * rate)
+    test_sample_size = len(test_dataset) - test_sample_num
+    train_sample_size = len(train_dataset) - train_sample_num
+    
+    _, train_dataset_sample = torch.utils.data.random_split(train_dataset, [train_sample_size, train_sample_num])
+    _, test_dataset_sample = torch.utils.data.random_split(test_dataset, [test_sample_size, test_sample_num])
+    test_loader = DataLoader(test_dataset_sample, batch_size=batchsize,shuffle=False)
+    train_loader = DataLoader(train_dataset_sample, batch_size=batchsize, shuffle=True,num_workers=2)
+    # train_loader = DataLoader(train_dataset, batch_size=batchsize, shuffle=True,num_workers=2)
+    # test_loader = DataLoader(test_dataset, batch_size=batchsize,shuffle=False)
     return train_loader, test_loader, channel
 
 def load_model_net(modelname, dataset, upload={'flag':0, 'upload_path':None}, channel=3, logging=None):
@@ -1131,7 +1143,7 @@ def load_model_net(modelname, dataset, upload={'flag':0, 'upload_path':None}, ch
         model.load_state_dict(checkpoint['net'])
     return model
 from function.ex_methods.module.func import get_loader
-from function.attack import run_get_adv_data, run_get_adv_attack
+from function.attack import run_get_adv_data, run_get_adv_attack, Attack_Obj
 def get_load_adv_data(datasetparam, modelparam, adv_methods, adv_param, model, test_loader, device, batchsize, logging=None):
     adv_save_root = "dataset/adv_data"
     adv_loader = {}
@@ -1198,7 +1210,7 @@ def run_group_defense(tid,stid, datasetparam, modelparam, adv_methods, adv_param
         "sys":{}
     }
     # 加载数据
-    train_loader, test_loader, channel = load_dataset(datasetparam['name'], batchsize=batchsize)
+    train_loader, test_loader, channel = load_dataset(datasetparam['name'], batchsize=batchsize, rate=0.1)
     # 加载模型
     model = load_model_net(modelparam['name'], datasetparam['name'], channel=channel, logging=logging)
     # 记载对抗样本
@@ -1277,7 +1289,8 @@ def run_group_defense(tid,stid, datasetparam, modelparam, adv_methods, adv_param
             if cahce_weights is None:
                 logging.info('[攻防推演阶段]缓存模型不存在，开始模型鲁棒训练（这步骤耗时较长）')
                 logging.info('[软硬件协同安全攻防测试] 测试任务编号：{:s}'.format(tid))
-                attack = run_get_adv_attack(dataset_name = datasetparam['name'], model = model, dataloader = test_loader, device = device, method= method, attackparam=adv_param[method])
+                # attack = run_get_adv_attack(dataset_name = datasetparam['name'], model = model, dataloader = test_loader, device = device, method= method, attackparam=adv_param[method])
+                attack = Attack_Obj(dataset_name = datasetparam['name'], model = model, dataloader = test_loader, device = device, method= method, attackparam=adv_param[method])
                 rst_model = robust_train(copy_model, train_loader, test_loader,
                                                      adv_loader=adv_loader[method], attack=attack, device=device,  epochs=10, method=method, adv_param=adv_param[method],
                                                      atk_method=method, def_method=def_method

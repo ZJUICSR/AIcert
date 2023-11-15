@@ -16,8 +16,8 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-MODEL_SAVE_PATH = os.path.join(os.path.dirname(__file__), 'detect_models')
-RESULT_SAVE_PATH = os.path.join(os.path.dirname(__file__), 'results')
+MODEL_SAVE_PATH = os.path.join('output/cache', 'detect_models')
+RESULT_SAVE_PATH = os.path.join('output/cache', 'results')
 
 for path in [MODEL_SAVE_PATH, RESULT_SAVE_PATH]:
     if not os.path.exists(path):
