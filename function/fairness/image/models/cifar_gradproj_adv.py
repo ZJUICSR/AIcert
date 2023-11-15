@@ -65,6 +65,9 @@ class CifarGradProjAdv(CifarModel):
                                                  data_setting['test_label_path'],
                                                  data_setting['domain_label_path'],
                                                  transform_test)
+        
+        self.test_color_target = np.array(test_color_data.class_label)
+        self.test_gray_target = np.array(test_gray_data.class_label)
 
         self.train_loader = torch.utils.data.DataLoader(
                                  train_data, batch_size=opt['batch_size'],
