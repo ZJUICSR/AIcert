@@ -32,7 +32,7 @@ class Fastdrop(EvasionAttack):
     def __init__(
         self,
         classifier: "CLASSIFIER_TYPE",
-        batch_size = 1,
+        batch_size = 128,
     ):
         super().__init__(estimator=classifier)
         self.batch_size = batch_size

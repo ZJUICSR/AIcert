@@ -1,8 +1,8 @@
-from image.metrics.multilabel_metrics import calculate_demographic_parity as cal_ml_metrics
-from image.metrics.singlelabel_metrics import calculate_demographic_parity as cal_sl_metrics
+from function.fairness.image.metrics.multilabel_metrics import calculate_demographic_parity as cal_ml_metrics
+from function.fairness.image.metrics.singlelabel_metrics import calculate_demographic_parity as cal_sl_metrics
 
-from image.metrics.multilabel_metrics import FAIRNESS_METRICS as ml_metrics
-from image.metrics.singlelabel_metrics import FAIRNESS_METRICS as sl_metrics
+from function.fairness.image.metrics.multilabel_metrics import FAIRNESS_METRICS as ml_metrics
+from function.fairness.image.metrics.singlelabel_metrics import FAIRNESS_METRICS as sl_metrics
 
 METRICS_FULL_NAME = {
     "mPre": "Mean Precision",

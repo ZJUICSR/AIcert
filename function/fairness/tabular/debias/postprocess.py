@@ -1,7 +1,7 @@
-from tabular.fairness_datasets import FairnessDataset
+from function.fairness.tabular.fairness_datasets import FairnessDataset
 import numpy as np
-from tabular.metrics.dataset_metric import DatasetMetrics
-from tabular.metrics.model_metrics import ModelMetrics
+from function.fairness.tabular.metrics.dataset_metric import DatasetMetrics
+from function.fairness.tabular.metrics.model_metrics import ModelMetrics
 
 class PostProcess:
     def __init__(self):

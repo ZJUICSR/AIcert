@@ -194,7 +194,7 @@ class EvasionAttacker():
         # 第一次计算干净样本上的分类准确率
         print("first accurate:{}".format(compute_predict_accuracy(classifier.predict(cln_examples), real_lables)))
         # adv_examples  = self.attack.generate(cln_examples, real_lables)
-        adv_examples  = self.attack.generate(cln_examples, real_lables)
+        adv_examples  = self.attack.generate(cln_examples)
         # 性能评估
 
         adv_predictions = classifier.predict(adv_examples)
@@ -211,7 +211,7 @@ class EvasionAttacker():
         print(self.method)
         for key, value in kwargs.items():
             if key not in self.attack.attack_params:
-                if key != "save_path":
+                if key not in ["save_path",'eps']:
                     error = "{} is not the parameter of {}".format(key, method)
                     raise ValueError(error)
             else:

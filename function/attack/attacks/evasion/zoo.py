@@ -49,7 +49,7 @@ class ZooAttack(EvasionAttack):
         binary_search_steps: int = 9,
         initial_const: float = 0.01,
         abort_early: bool = True,
-        batch_size: int = 1,
+        batch_size: int = 128,
         adam_beta1: float = 0.9,
         adam_beta2: float = 0.999,
         solver: str = "adam",

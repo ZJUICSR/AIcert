@@ -99,7 +99,7 @@ class SignOPTAttack(EvasionAttack):
         alpha: float = 0.2,
         beta: float = 0.001,
         eval_perform: bool = False,
-        batch_size: int = 64,
+        batch_size: int = 128,
         verbose: bool = True,
     ) -> None:
         """
