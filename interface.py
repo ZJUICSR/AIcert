@@ -1766,8 +1766,8 @@ def run_advtraining_at(tid,AAtid, dataset, modelname, adv_method, evaluate_metho
     IOtool.change_subtask_state(tid, AAtid, 1)
     IOtool.change_task_state(tid, 1)
     IOtool.set_task_starttime(tid, AAtid, time.time())
-    # device = IOtool.get_device()
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu' )
+    device = IOtool.get_device()
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu' )
     logging = IOtool.get_logger(AAtid)
     
     # 预处理数据，保持格式一致
