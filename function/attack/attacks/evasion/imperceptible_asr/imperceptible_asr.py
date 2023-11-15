@@ -85,7 +85,7 @@ class ImperceptibleASR(EvasionAttack):
         num_iter_increase_alpha: int = 20,
         decrease_factor_alpha: float = 0.8,
         num_iter_decrease_alpha: int = 50,
-        batch_size: int = 1,
+        batch_size: int = 128,
     ) -> None:
         """
         Create an instance of the :class:`.ImperceptibleASR`.
