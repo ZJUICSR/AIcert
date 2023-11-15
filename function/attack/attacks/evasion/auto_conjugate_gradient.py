@@ -93,7 +93,7 @@ class AutoConjugateGradient(EvasionAttack):
         max_iter: int = 100,
         targeted: bool = False,
         nb_random_init: int = 5,
-        batch_size: int = 32,
+        batch_size: int = 128,
         loss_type: Optional[str] = None,
         verbose: bool = True,
     ):

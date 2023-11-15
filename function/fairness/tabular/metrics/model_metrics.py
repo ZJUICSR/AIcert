@@ -1,8 +1,8 @@
-from tabular.fairness_datasets import FairnessDataset
-from tabular.metrics.dataset_metric import DatasetMetrics
+from function.fairness.tabular.fairness_datasets import FairnessDataset
+from function.fairness.tabular.metrics.dataset_metric import DatasetMetrics
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
-from tabular.metrics.metric_utils import *
+from function.fairness.tabular.metrics.metric_utils import *
 
 # def dic_operation(dic1, dic2, func):
 #     result = {}

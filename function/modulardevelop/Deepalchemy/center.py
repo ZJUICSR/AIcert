@@ -50,13 +50,13 @@ def create_model(deep, width):
         #del(imgGen)
     name = model.name + '_bs_' + str(batch_size) + '_lr_' + str(learning_rate) + '_epo_' + str(epochs) + '_' + opname
     val_loss = history.history['val_loss']
-    model.save("./models/" + name + ".h5")
+    model.save("./output/cache/develop/" + name + ".h5")
     del(model)
     #del(x_train)
     #del(y_train)
     #del(x_test)
     #del(y_test)
-    np.save('./data/' + name + '_valloss', val_loss)
+    np.save('./output/cache/develop/' + name + '_valloss', val_loss)
     return {'loss': val_loss[-1], 'status': STATUS_OK, 'model': name}
 
 
@@ -89,10 +89,12 @@ if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"] = str(g)
     save_path = os.path.dirname(__file__)
     # print('here!')
-    if not os.path.exists('./data'):
-        os.mkdir('./data')
-    if not os.path.exists('./models'):
-        os.mkdir('./models')
+    if not os.path.exists('./output/cache/develop/'):
+        os.mkdir('./output/cache/develop/')
+    if not os.path.exists('./output/cache/develop/data'):
+        os.mkdir('./output/cache/develop/data')
+    if not os.path.exists('./output/cache/develop/model'):
+        os.mkdir('./output/cache/develop/model')
 
     gpus = tf.config.experimental.list_physical_devices('GPU')
     for gpu in gpus:

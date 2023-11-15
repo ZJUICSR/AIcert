@@ -55,7 +55,7 @@ class NewtonFool(EvasionAttack):
         classifier: "CLASSIFIER_CLASS_LOSS_GRADIENTS_TYPE",
         max_iter: int = 10,
         eta: float = 0.01,
-        batch_size: int = 1,
+        batch_size: int = 128,
         verbose: bool = True,
     ) -> None:
         """
