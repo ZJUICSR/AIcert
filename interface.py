@@ -1753,14 +1753,14 @@ def run_ensemble_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_p
     IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
 
-def run_advtraining_at(tid,AAtid, dataset, modelname, adv_method, test_methods):
+def run_advtraining_at(tid,AAtid, dataset, modelname, adv_method, evaluate_methods):
     """CNN对抗训练
     :params tid:主任务ID
     :params AAtid:子任务id
     :params dataset: 数据集名称
     :params modelname：模型类型
     :params adv_method：对抗训练算法
-    :params test_methods：攻击方法
+    :params evaluate_methodss：攻击方法
     :output res:需保存到子任务json中的返回结果/路径
     """
     IOtool.change_subtask_state(tid, AAtid, 1)
@@ -1771,35 +1771,36 @@ def run_advtraining_at(tid,AAtid, dataset, modelname, adv_method, test_methods):
     logging = IOtool.get_logger(AAtid)
     
     # 预处理数据，保持格式一致
-    batch_size = 128
+    batch_size = 32
     datasetparam = {}
     modelparam = {}
-    adv_param = {
-        "FGSM":{
-            "eps": 0.031,
+    adv_param = {'FGSM': {'eps': 0.031, 'norm': '1'}, 'FFGSM': {}, 'RFGSM': {}, 'MIFGSM': {}, 'BIM': {'eps': 0.031, 'eps_step': 0.01, 'max_iter': 20, 'norm': 'inf'}, 'PGDL1': {'eps': 0.3, 'eps_step': 0.1, 'max_iter': 20, 'num_random_init': 1}, 'PGDL2': {'eps': 0.3, 'eps_step': 0.1, 'max_iter': 20, 'num_random_init': 1}, 'DIFGSM': {}, 'C&W': {'max_iterations': 1000, 'lr': 0.01}, 'TPGD': {}}
+    # {
+    #     "FGSM":{
+    #         "eps": 0.031,
             
-            },
-        "FFGSM":{
-            "steps": 1,
-            "eps": 0.031
-            },
-        "RFGSM":{
-            "steps": 1,
-            "eps": 0.031
-            },
-        "MIGSM":{
-            "steps": 1,
-            "eps": 0.031
-            },
-        "BIM":{
-            "steps": 0.01,
-            "eps": 0.031
-            },
-        "PGD":{
-            "steps": 0.1,
-            "eps": 0.3
-            }
-    }
+    #         },
+    #     "FFGSM":{
+    #         "steps": 1,
+    #         "eps": 0.031
+    #         },
+    #     "RFGSM":{
+    #         "steps": 1,
+    #         "eps": 0.031
+    #         },
+    #     "MIGSM":{
+    #         "steps": 1,
+    #         "eps": 0.031
+    #         },
+    #     "BIM":{
+    #         "steps": 0.01,
+    #         "eps": 0.031
+    #         },
+    #     "PGD":{
+    #         "steps": 0.1,
+    #         "eps": 0.3
+    #         }
+    # }
     result = {
         "Normal": {
             "atk_acc":{},
@@ -1822,20 +1823,20 @@ def run_advtraining_at(tid,AAtid, dataset, modelname, adv_method, test_methods):
     model = load_model_net(modelname, dataset, channel=channel, logging=logging)
     # Normal模型对抗攻击
     logging.info('[对抗鲁棒性训练]即将进行模型对抗测试')
-    adv_loader = get_load_adv_data(datasetparam, modelparam, test_methods, adv_param, model, test_loader, device, batch_size, logging=logging)
-    for i, method in enumerate(test_methods):
+    adv_loader = get_load_adv_data(datasetparam, modelparam, evaluate_methods, adv_param, model, test_loader, device, batch_size, logging=logging)
+    for i, method in enumerate(evaluate_methods):
         result["Normal"]["atk_acc"][method] = eval_test(model.eval().to(device), adv_loader[method], device=device)
         result["Normal"]["atk_asr"][method] = 100 - result["Normal"]["atk_acc"][method]
         logging.info("[对抗鲁棒性训练] {:s}对抗样本测试准确率：{:.3f}% ".format(adv_method, result["Normal"]["atk_acc"][adv_method]))
     # 训练/加载Enhance模型
-    logging.info('[对抗鲁棒性训练]正在加载{:d}种鲁棒训练模型{:s}'.format(len(test_methods),modelname))
+    logging.info('[对抗鲁棒性训练]正在加载{:d}种鲁棒训练模型{:s}'.format(len(evaluate_methods),modelname))
     copy_model = copy.deepcopy(model)
-    logging.info('[攻防推演阶段]使用对抗样本算法{:s}生成的样本作为鲁棒训练数据，eps参数为：{:.3f}'.format(method, float(adv_param[method]["eps"])))
+    logging.info('[对抗鲁棒性训练]使用对抗样本算法{:s}生成的样本作为鲁棒训练数据，eps参数为：{:.3f}'.format(method, float(adv_param[method]["eps"])))
     def_method = "{:s}_{:.5f}".format(method, adv_param[method]["eps"])
     cahce_weights = IOtool.load(arch=modelname, task=dataset, tag=def_method)
     if cahce_weights is None:
-        logging.info('[攻防推演阶段]缓存模型不存在，开始模型鲁棒训练（这步骤耗时较长）')
-        logging.info('[软硬件协同安全攻防测试] 测试任务编号：{:s}'.format(tid))
+        logging.info('[对抗鲁棒性训练]缓存模型不存在，开始模型鲁棒训练（这步骤耗时较长）')
+        logging.info('[对抗鲁棒性训练] 测试任务编号：{:s}'.format(tid))
         attack = run_get_adv_attack(dataset_name = datasetparam['name'], 
                                     model = model, dataloader = test_loader, device = device, method= method, attackparam=adv_param[method])
         rst_model = robust_train(copy_model, train_loader, test_loader,
@@ -1844,7 +1845,7 @@ def run_advtraining_at(tid,AAtid, dataset, modelname, adv_method, test_methods):
                                                 )
         IOtool.save(model=rst_model, arch=modelname, task=dataset, tag=def_method)
     else:
-        logging.info('[攻防推演阶段]从默认文件夹载入缓存模型')
+        logging.info('[对抗鲁棒性训练]从默认文件夹载入缓存模型')
         temp_model = copy.deepcopy(copy_model)
         temp_model.load_state_dict(cahce_weights)
         rst_model = copy.deepcopy(temp_model).cpu()
@@ -1859,7 +1860,7 @@ def run_advtraining_at(tid,AAtid, dataset, modelname, adv_method, test_methods):
     test_acc = eval_test(rst_model, test_loader=test_loader, device=device)
     adv_test_acc = eval_test(rst_model, test_loader=adv_loader[method], device=device)
     logging.info(
-        "[攻防推演阶段]鲁棒训练方法'{:s}'结束，模型准确率为：{:.3f}%，模型鲁棒性为：{:.3f}%".format(def_method, test_acc,
+        "[对抗鲁棒性训练]鲁棒训练方法'{:s}'结束，模型准确率为：{:.3f}%，模型鲁棒性为：{:.3f}%".format(def_method, test_acc,
                                                                                 adv_test_acc))
     
     # add 结果
@@ -1981,7 +1982,7 @@ def run_rift(tid, AAtid, dataset, model, attack_method, evaluate_methods, train_
     :params dataset: 数据集名称
     :params modelname：模型类型
     :params attack_method：对抗训练方法
-    :params test_methods: 测试攻击方法list
+    :params evaluate_methods: 测试攻击方法list
     :params max_epoch：最大训练轮数
     :output res:需保存到子任务json中的返回结果/路径
     """
