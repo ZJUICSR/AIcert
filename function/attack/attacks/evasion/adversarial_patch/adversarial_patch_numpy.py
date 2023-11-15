@@ -73,7 +73,7 @@ class AdversarialPatchNumpy(EvasionAttack):
         learning_rate: float = 5.0,
         max_iter: int = 500,
         clip_patch: Union[list, tuple, None] = None,
-        batch_size: int = 16,
+        batch_size: int = 128,
         targeted: bool = True,
         verbose: bool = True,
     ) -> None:

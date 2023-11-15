@@ -2,14 +2,15 @@ import os
 import argparse
 import torch
 
-from image import models
-from image import utils
-from image.metrics import *
+from function.fairness.image import models
+from function.fairness.image import utils
+from function.fairness.image.metrics import *
 from IOtool import IOtool
 
 def collect_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--experiment', 
+    parser.add_argument('--experiment',
+                        default='cifar-s_baseline',
                         choices=[
                                  'cifar_color', # train on color images
                                  'cifar_gray', # train on gray images
@@ -54,11 +55,13 @@ def collect_args():
                                  'celeba_uniconf_adv',
                                  'celeba_gradproj_adv',    
                                 ],
-                        default='celeba_baseline')
+                        )
     
     parser.add_argument('--experiment_name', type=str, default='test')
     parser.add_argument('--no_cuda', dest='cuda', action='store_false')
     parser.add_argument('--random_seed', type=int, default=0)
+    parser.add_argument("--save_folder", type=str, default='')
+    parser.add_argument("--mdoel_path", type=str, default='')
     parser.set_defaults(cuda=True)
 
     opt = vars(parser.parse_args())
@@ -76,8 +79,11 @@ def create_exerpiment_setting(opt):
         opt['batch_size'] = 128
         # opt['total_epochs'] = 200
         opt['total_epochs'] = 2
-        opt['save_folder'] = os.path.join('output/cache/record/'+opt['experiment'], 
-                                          opt['experiment_name'])
+        # opt['save_folder'] = os.path.join('record/'+opt['experiment'], 
+        #                                   opt['experiment_name'])
+        if opt['save_folder'] == '' :
+            opt['save_folder'] = os.path.join('output/cache/fairness/'+opt['experiment'], 
+                                              opt['experiment_name'])
         utils.creat_folder(opt['save_folder'])
     
         optimizer_setting = {
@@ -96,7 +102,11 @@ def create_exerpiment_setting(opt):
         opt['print_freq'] = 50
         opt['batch_size'] = 64
         opt['total_epochs'] = 50
-        opt['save_folder'] = os.path.join('output/cache/record/'+opt['experiment'], 
+        # opt['total_epochs'] = 2
+        # opt['save_folder'] = os.path.join('record/'+opt['experiment'], 
+        #                                   opt['experiment_name'])
+        if opt['save_folder'] == '' :
+            opt['save_folder'] = os.path.join('output/cache/fairness/'+opt['experiment'], 
                                           opt['experiment_name'])
         utils.creat_folder(opt['save_folder'])
         opt['output_dim'] = 39
@@ -207,7 +217,8 @@ def create_exerpiment_setting(opt):
         
     elif opt['experiment'] == 'cifar-s_uniconf_adv':
         opt['output_dim'] = 10
-        opt['total_epochs'] = 500
+        # opt['total_epochs'] = 500
+        opt['total_epochs'] = 2
         opt['training_ratio'] = 3
         opt['alpha'] = 1.
         
@@ -233,7 +244,8 @@ def create_exerpiment_setting(opt):
         
     elif opt['experiment'] == 'cifar-s_gradproj_adv':
         opt['output_dim'] = 10
-        opt['total_epochs'] = 500
+        # opt['total_epochs'] = 500
+        opt['total_epochs'] = 2
         opt['training_ratio'] = 3
         opt['alpha'] = 1.
         

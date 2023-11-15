@@ -28,7 +28,7 @@ class GeoDA(EvasionAttack):
     def __init__(
         self,
         estimator: "CLASSIFIER_TYPE",
-        batch_size: int = 64,
+        batch_size: int = 128,
         norm: Union[int, float, str] = 2,
         sub_dim: int = 10,
         max_iter: int = 1000,# 需要是500的倍数

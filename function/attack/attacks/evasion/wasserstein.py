@@ -86,7 +86,7 @@ class Wasserstein(EvasionAttack):
         max_iter: int = 400,
         conjugate_sinkhorn_max_iter: int = 400,
         projected_sinkhorn_max_iter: int = 400,
-        batch_size: int = 1,
+        batch_size: int = 128,
         verbose: bool = True,
     ):
         """
