@@ -34,7 +34,7 @@ class ProjectedGradientDescentCommon():
         max_iter: int = 100,
         targeted: bool = False,
         num_random_init: int = 0,
-        batch_size: int = 32,
+        batch_size: int = 128,
         random_eps: bool = False,
         verbose: bool = True,
     ) -> None:
@@ -221,7 +221,7 @@ class ProjectedGradientDescentPyTorch(ProjectedGradientDescentCommon):
         max_iter: int = 100,
         targeted: bool = False,
         num_random_init: int = 0,
-        batch_size: int = 32,
+        batch_size: int = 128,
         random_eps: bool = False,
         verbose: bool = True,
     ):
@@ -688,7 +688,7 @@ class ProjectedGradientDescent(EvasionAttack):
         max_iter: int = 20,
         targeted: bool = False,
         num_random_init: int = 0,
-        batch_size: int = 2048,
+        batch_size: int = 128,
         random_eps: bool = False,
         summary_writer: Union[str, bool, SummaryWriter] = False,
         verbose: bool = True,

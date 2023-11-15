@@ -26,7 +26,7 @@ import tensorflow.keras.layers as L
 import tensorflow.keras.activations as A
 import tensorflow.keras.initializers as I
 
-tmp_model_path='./tmp_models'
+tmp_model_path='./output/cache/develop/tmp_models'
 Insert_Layers=['dense','conv']
 
 def has_NaN(output):
