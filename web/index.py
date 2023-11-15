@@ -1695,7 +1695,7 @@ def CNN_AT():
         dataset = inputParam["dataset"]
         modelname = inputParam["modelname"]
         attackmethod = inputParam["attackmethod"]
-        test_methods = inputParam["test_methods"]
+        evaluate_methods = inputParam["evaluate_methods"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
         value = {
@@ -1704,13 +1704,14 @@ def CNN_AT():
             "name":["CNN_AT"],
             "dataset":dataset,
             "modelname":modelname,
-            "attackmethod":attackmethod
+            "attackmethod":attackmethod,
+            "evaluate_methods":evaluate_methods,
         }
         IOtool.add_subtask_info(tid, stid, value)
         IOtool.change_task_info(tid, "dataset", inputParam["dataset"])
         # 执行任务
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.run_advtraining_at, tid, stid, dataset, modelname, attackmethod, test_methods)
+        t2 = pool.submit(interface.run_advtraining_at, tid, stid, dataset, modelname, attackmethod, evaluate_methods)
         IOtool.add_task_queue(tid, stid, t2, 300000)
         res = {"code":1,"msg":"success","Taskid":tid,"stid":stid}
         return jsonify(res)
