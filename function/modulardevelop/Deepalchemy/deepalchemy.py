@@ -281,7 +281,7 @@ def calc_nmax(n_dataset, imggen_dict):
 
 def write_temp(key, data, model, epochs, **kwargs):
     # with open('./function/modulardevelop/tempparas.py','w') as f:
-    with open('./output/cache/develop/tempparas.py','w') as f:
+    with open('tempparas.py','w') as f:
         f.write('import tensorflow as tf\n')
         # f.write('import datasets\n')
         f.write('import new_evaluation as eva\n')
@@ -353,7 +353,7 @@ def gen_train_function(hpo,  gpu, modeln,epochs,data):
 
         write_temp(0, data, modeln, epochs, dmin=dmin, dmax=dmax, wmin=wmin, wmax=wmax)
         os.system('python ' + nowdir + '/domodelhpo.py --gpu='+gpu+' --times=5 --model='+modeln)
-        valloss = np.load('./output/cache/develop/data/best.npy')
+        valloss = np.load('./data/best.npy')
         return valloss
     return trainfunc if not hpo else trainfunc_hpo, nmax
 
