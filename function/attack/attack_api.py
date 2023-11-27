@@ -62,7 +62,7 @@ class EvasionAttacker():
         else:
             raise ValueError("Dataset not supported")
         if sample_num > 0:
-            self.input_shape, (self.x_select, self.y_select), _, _, self.min_pixel_value, self.max_pixel_value = self.loaddataset(self.datasetpath, sample_num, normalize=self.datanormalize)
+            self.input_shape, (self.x_select, self.y_select), _, _, self.min_pixel_value, self.max_pixel_value, _ = self.loaddataset(self.datasetpath, sample_num, normalize=self.datanormalize)
             criterion = nn.CrossEntropyLoss()
             optimizer = optim.Adam(self.model.parameters(), lr=0.006)
             self.classifier = PyTorchClassifier (
@@ -278,7 +278,7 @@ class BackdoorAttacker():
     def __init__(
     self, modelnet=None, modelpath: str="./models/model_ckpt/ckpt-resnet18-mnist_epoch3_acc0.9898.pth", 
     dataset="mnist", datasetpath="./datasets/", nb_classes=10, datanormalize: bool = False, 
-    device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")) -> None:
+    device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),test_sample_num=1000,train_sample_num=1000) -> None:
         self.modelnet = modelnet
         self.modelpath = modelpath
         self.dataset = dataset
@@ -289,13 +289,13 @@ class BackdoorAttacker():
         self.norm_param = ""
         if dataset == "cifar10":
             self.loaddataset = load_cifar10
-            self.backdoor_color = 1
         elif dataset == "mnist":
             self.loaddataset = load_mnist
-            self.backdoor_color = 2
         else:
             raise ValueError("Dataset not supported")
-    
+        # 数据集加载
+        self.input_shape, (self.x_select, self.y_select), (self.x_train, self.y_train), _, self.min_pixel_value, self.max_pixel_value, (self.train_x_select, self.train_y_select )= self.loaddataset(self.datasetpath, samplenum=test_sample_num, train_sample_num = train_sample_num)
+        
     # 添加固定样式的后门
     def add_backdoor(self, x: np.ndarray):
         if self.px+self.l >= x.shape[2] or self.py+self.l >= x.shape[3]:
@@ -351,15 +351,18 @@ class BackdoorAttacker():
         torch.save(self.classifier.model.state_dict(), path)
 
     def save_examples(self, save_num, label: np.ndarray, clean_example: np.ndarray, poisoned_example: np.ndarray, path:str="output/cache/results/"):
-        path = os.path.join(path, self.method+self.norm_param)
+        if self.norm_param != '':
+            path = os.path.join(path, self.method+'L'+self.norm_param)
+        else:
+            path = os.path.join(path, self.method)
+        if save_num <= 0:
+            return
         try:
             os.makedirs(path)
         except Exception as e:
             shutil.rmtree(path)
             os.makedirs(path)
 
-        if save_num <= 0:
-            return
         else:
             random_index = random.sample(range(0, len(clean_example)), len(clean_example))
             l = np.argmax(label,1)
@@ -383,7 +386,7 @@ class BackdoorAttacker():
     
     # 训练集投毒函数
     # **kwargs中是除了poision函数参数以外的其他投毒参数
-    def poision(self, method: str="PoisoningAttackBackdoor", pp_poison: float=0.001, save_num: int=32, test_sample_num: int = 4096, target: int=3, trigger: List=[25, 25, 2, 1], **kwargs):
+    def poision(self, method: str="PoisoningAttackBackdoor", pp_poison: float=0.001, save_num: int=32, target: int=3, trigger: List=[25, 25, 2, 1], **kwargs):
         
         self.support_method = ["PoisoningAttackBackdoor", "PoisoningAttackCleanLabelBackdoor", "FeatureCollisionAttack", "PoisoningAttackAdversarialEmbedding"]
         if method not in self.support_method:
@@ -398,26 +401,28 @@ class BackdoorAttacker():
             self.model.load_state_dict(checkpoint['net'])
         
         self.model.to(self.device)
-        self.datasetpath = self.datasetpath
+        # self.datasetpath = self.datasetpath
 
         # 训练参数
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
-
         # 数据集加载
-        input_shape, (x_select, y_select), (x_train, y_train), _, min_pixel_value, max_pixel_value = self.loaddataset(self.datasetpath, test_sample_num)
+        # self.input_shape, (self.x_select, self.y_select), (self.x_train, self.y_train), _, self.min_pixel_value, self.max_pixel_value, (self.train_x_select, self.train_y_select )= self.loaddataset(self.datasetpath, samplenum=100, train_sample_num=1000)
+        
         # 数据集规范
-        x_train_tmp = x_train.astype(MY_NUMPY_DTYPE)
-        y_train_tmp = y_train.astype(MY_NUMPY_DTYPE)
-        x_select_tmp = x_select.astype(MY_NUMPY_DTYPE)
-        y_select_tmp = y_select.astype(MY_NUMPY_DTYPE)
+        # x_train_tmp = self.train_x_select.astype(MY_NUMPY_DTYPE)
+        # y_train_tmp = self.train_y_select.astype(MY_NUMPY_DTYPE)
+        x_train_tmp = self.train_x_select.astype(MY_NUMPY_DTYPE)
+        y_train_tmp = self.train_y_select.astype(MY_NUMPY_DTYPE)
+        x_select_tmp = self.x_select.astype(MY_NUMPY_DTYPE)
+        y_select_tmp = self.y_select.astype(MY_NUMPY_DTYPE)
         # 构造分类器方便使用
         self.classifier = PyTorchClassifier (
             model=self.model,
-            clip_values=(min_pixel_value, max_pixel_value),
+            clip_values=(self.min_pixel_value, self.max_pixel_value),
             loss=self.criterion,
             optimizer=self.optimizer,
-            input_shape=input_shape,
+            input_shape=self.input_shape,
             nb_classes=10,
             device=self.device,
         )
@@ -453,7 +458,7 @@ class BackdoorAttacker():
         # 然后根据用户输入设置攻击参数
         print(self.method)
         for key, value in kwargs.items():
-            if key == "save_path":
+            if key in ["save_path","test_sample_num","train_sample_num"]:
                 continue
             if key not in self.attack.attack_params:
                 error = "{} is not the parameter of {}".format(key, self.method)
@@ -482,6 +487,9 @@ class BackdoorAttacker():
             self.train_poisoned_num = int(pp_poison*np.sum(np.argmax(y_train_tmp, axis=1) == np.argmax(self.target, axis=0)))
             self.test_poisoned_num = int(0.5*np.sum(np.argmax(y_select_tmp, axis=1) == np.argmax(self.target, axis=0)))
         print("投毒样本数目:{}".format(self.train_poisoned_num))
+        if self.train_poisoned_num == 0:
+            return -1
+        
 
         if self.method == "PoisoningAttackBackdoor":
             # 训练集投毒
@@ -559,13 +567,13 @@ class BackdoorAttacker():
             self.y_test_poisoned = ytep
         
         # 保存部分投毒样本
-        if "save_path" in kwargs.keys():
+        if  "save_path" in kwargs.keys():
             self.save_examples(save_num=save_num, label=y_train_tmp[self.train_list], clean_example=x_train_tmp[self.train_list], poisoned_example=self.x_train_poisoned[self.train_list], path=kwargs['save_path'])
         else:
             self.save_examples(save_num=save_num, label=y_train_tmp[self.train_list], clean_example=x_train_tmp[self.train_list], poisoned_example=self.x_train_poisoned[self.train_list])
-    
+        return 1
     # 在投毒数据集上进行训练
-    def train(self, num_epochs: int=40, batch_size: int=128, save_model: bool = True):
+    def train(self, num_epochs: int=20, batch_size: int=128, save_model: bool = True):
         self.batch_size = batch_size
 
         num_batch = int(np.ceil(len(self.x_train_poisoned) / float(batch_size)))
