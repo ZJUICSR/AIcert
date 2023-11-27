@@ -1169,7 +1169,7 @@ def get_load_adv_data(datasetparam, modelparam, adv_methods, adv_param, model, t
     if not osp.exists(adv_save_root):
         os.makedirs(adv_save_root)
     
-    for i, adv_method in enumerate(adv_methods):
+    for i, adv_method in enumerate(adv_methods): 
         logging.info("[模型测试阶段] 正在运行对抗样本攻击:{:s}...[{:d}/{:d}]".format(adv_method, i + 1, len(adv_methods)))
         if 'eps' in adv_param[adv_method]:
             eps = adv_param[adv_method]['eps']
@@ -1785,6 +1785,107 @@ def run_ensemble_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_p
     IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
 
+def run_advtraining_at(tid,AAtid, dataset, modelname, attackmethod, evaluate_methods):
+    """CNN对抗训练
+    :params tid:主任务ID
+    :params AAtid:子任务id
+    :params dataset: 数据集名称
+    :params modelname：模型类型
+    :params adv_method：对抗训练算法
+    :params evaluate_methodss：攻击方法
+    :output res:需保存到子任务json中的返回结果/路径
+    """
+    IOtool.change_subtask_state(tid, AAtid, 1)
+    IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, AAtid, time.time())
+    device = IOtool.get_device()
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu' )
+    logging = IOtool.get_logger(AAtid)
+    
+    # 预处理数据，保持格式一致
+    batch_size = 32
+    datasetparam = {}
+    modelparam = {}
+    adv_param = {'FGSM': {'eps': 0.031, 'norm': '1'}, 'FFGSM': {}, 'RFGSM': {}, 'MIFGSM': {}, 'BIM': {'eps': 0.031, 'eps_step': 0.01, 'max_iter': 20, 'norm': 'inf'}, 'PGDL1': {'eps': 0.3, 'eps_step': 0.1, 'max_iter': 20, 'num_random_init': 1}, 'PGDL2': {'eps': 0.3, 'eps_step': 0.1, 'max_iter': 20, 'num_random_init': 1}, 'DIFGSM': {}, 'C&W': {'max_iterations': 1000, 'lr': 0.01}, 'TPGD': {}}
+    result = {
+        "Normal": {
+            "atk_acc":{},
+            "atk_asr":{},
+            },
+        "Enhance":{
+            "atk_acc":{},
+            "atk_asr":{},
+        }
+    }
+    
+    datasetparam["name"] = dataset
+    modelparam["name"] = modelname
+    # CNN对抗训练
+    # 加载数据
+    logging.info('[对抗鲁棒性训练]正在加载数据{:s}'.format(dataset))
+    train_loader, test_loader, channel = load_dataset(dataset, batchsize=batch_size)
+    # 训练/加载Normal模型
+    logging.info('[对抗鲁棒性训练]正在加载模型{:s}'.format(modelname))
+    model = load_model_net(modelname, dataset, channel=channel, logging=logging)
+    # Normal模型对抗攻击
+    logging.info('[对抗鲁棒性训练]即将进行模型对抗测试')
+    all_atk = evaluate_methods
+    if attackmethod not in evaluate_methods:
+        all_atk.append(attackmethod)
+    adv_loader = get_load_adv_data(datasetparam, modelparam, all_atk, adv_param, model, test_loader, device, batch_size, logging=logging)
+    for i, method in enumerate(evaluate_methods):
+        result["Normal"]["atk_acc"][method] = eval_test(model.eval().to(device), adv_loader[method], device=device)
+        result["Normal"]["atk_asr"][method] = 100 - result["Normal"]["atk_acc"][method]
+        logging.info("[对抗鲁棒性训练] {:s}对抗样本测试准确率：{:.3f}% ".format(method, result["Normal"]["atk_acc"][method]))
+    # 训练/加载Enhance模型
+    logging.info('[对抗鲁棒性训练]正在加载鲁棒训练模型{:s}'.format(modelname))
+    copy_model = copy.deepcopy(model)
+    if "eps" not in adv_param[attackmethod].keys():
+        adv_param[attackmethod]["eps"] = 1
+    logging.info('[对抗鲁棒性训练]使用对抗样本算法{:s}生成的样本作为鲁棒训练数据，eps参数为：{:.3f}'.format(attackmethod, float(adv_param[attackmethod]["eps"])))
+    def_method = "{:s}_{:.5f}".format(attackmethod, adv_param[attackmethod]["eps"])
+    cahce_weights = IOtool.load(arch=modelname, task=dataset, tag=def_method)
+    if cahce_weights is None:
+        logging.info('[对抗鲁棒性训练]缓存模型不存在，开始模型鲁棒训练（这步骤耗时较长）')
+        logging.info('[对抗鲁棒性训练] 测试任务编号：{:s}'.format(tid))
+        attack = Attack_Obj(dataset_name = datasetparam['name'], model = model, dataloader = test_loader, device = device, method= attackmethod, attackparam=adv_param[attackmethod])
+        rst_model = robust_train(copy_model, train_loader, test_loader,
+                    adv_loader=adv_loader[attackmethod], attack=attack, device=device,  epochs=10, method=attackmethod, adv_param=adv_param[attackmethod],
+                    atk_method=attackmethod, def_method=def_method
+                                                )
+        IOtool.save(model=rst_model, arch=modelname, task=dataset, tag=def_method)
+    else:
+        logging.info('[对抗鲁棒性训练]从默认文件夹载入缓存模型')
+        temp_model = copy.deepcopy(copy_model)
+        temp_model.load_state_dict(cahce_weights)
+        rst_model = copy.deepcopy(temp_model).cpu()
+    try:
+        robust_models = copy.deepcopy(rst_model).cpu()
+    except RuntimeError as e:
+        temp_model = copy.deepcopy(copy_model)
+        temp_model.load_state_dict(IOtool.load(arch=modelname, task=dataset, tag=def_method))
+        robust_models = copy.deepcopy(temp_model).cpu()
+    
+    # Enhance模型对抗攻击
+    test_acc = eval_test(rst_model, test_loader=test_loader, device=device)
+    for i, method in enumerate(evaluate_methods):
+        result["Enhance"]["atk_acc"][method] = eval_test(rst_model, adv_loader[method], device=device)
+        result["Enhance"]["atk_asr"][method] = 100 - result["Enhance"]["atk_acc"][method]
+        logging.info("[对抗鲁棒性训练] {:s}对抗样本测试准确率：{:.3f}% ".format(method, result["Normal"]["atk_acc"][method]))
+        # adv_test_acc = eval_test(rst_model, test_loader=adv_loader[adv_method], device=device)
+        logging.info(
+        "[对抗鲁棒性训练]鲁棒训练方法'{:s}'结束，模型准确率为：{:.3f}%，模型鲁棒性为：{:.3f}%".format(def_method, test_acc,
+                                                                                result["Enhance"]["atk_acc"][method]))
+    
+    tmp_path = osp.join(f"/model/ckpt/{dataset}_{modelname}_{def_method}.pt")
+    result["Enhance"]["rbst_model_path"]= tmp_path
+    
+    result["stop"] = 1
+    IOtool.write_json(result,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+    IOtool.change_subtask_state(tid, AAtid, 2)
+    IOtool.change_task_success_v2(tid=tid)
+    
+
 def run_advtraining_gnn(tid,AAtid, dataset, batch_size, train_size, test_size, val_size, n_iters, train_Q, margin_iters, q_ratio, burn_in, random_state):
     """图神经网络鲁棒训练
     :params tid:主任务ID
@@ -1875,11 +1976,33 @@ def run_seat(tid,AAtid, dataset, modelname, lr, n_class, max_epoch):
     # devive = IOtool.get_device()
     logging = IOtool.get_logger(AAtid)
     res = adv_traind.run_seat(
-        modelname=modelname.lower(),  
+        modelname=modelname,  
         lr = lr, 
         n_class=n_class,  
         max_epoch = max_epoch,
         out_path=osp.join(ROOT,"output", tid, AAtid), logging=logging)  
+    res["stop"] = 1
+    IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
+    IOtool.change_subtask_state(tid, AAtid, 2)
+    IOtool.change_task_success_v2(tid=tid)
+   
+def run_rift(tid, AAtid, dataset, model, attack_method, evaluate_methods, train_epoch, at_epoch, batchsize):
+    """关键参数微调鲁棒训练
+    :params tid:主任务ID
+    :params AAtid:子任务id
+    :params dataset: 数据集名称
+    :params modelname：模型类型
+    :params attack_method：对抗训练方法
+    :params evaluate_methods: 测试攻击方法list
+    :params max_epoch：最大训练轮数
+    :output res:需保存到子任务json中的返回结果/路径
+    """
+    IOtool.change_subtask_state(tid, AAtid, 1)
+    IOtool.change_task_state(tid, 1)
+    IOtool.set_task_starttime(tid, AAtid, time.time())
+    device = IOtool.get_device()
+    logging = IOtool.get_logger(AAtid)
+    res = adv_traind.run_rift(dataset, model, attack_method, evaluate_methods,  train_epoch, at_epoch, batchsize, out_path=osp.join(ROOT,"output", tid, AAtid), logging=logging, device=device)  
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     IOtool.change_subtask_state(tid, AAtid, 2)
