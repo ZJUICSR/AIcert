@@ -55,11 +55,10 @@ import pandas as pd
 
 # args = parser.parse_args()
 
-# # settings
+# settings
 # use_cuda = not args.no_cuda and torch.cuda.is_available()
-use_cuda = torch.cuda.is_available()
-device = torch.device("cuda" if use_cuda else "cpu")
-kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
 
 ## deeplogic
