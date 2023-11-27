@@ -4,7 +4,11 @@ import torch, copy, random
 from function.attack.attacks.utils import load_mnist, load_cifar10
 from model.model_net.lenet import Lenet
 from model.model_net.resnet_attack import *
-from model.model_net.resnet_attack import *
+from model.model_net.resnet_attack_feature import ResNet18 as ResNet18_f
+from model.model_net.resnet_attack_feature import ResNet34 as ResNet34_f
+from model.model_net.resnet_attack_feature import ResNet50 as ResNet50_f
+from model.model_net.resnet_attack_feature import ResNet101 as ResNet101_f
+from model.model_net.resnet_attack_feature import ResNet152 as ResNet152_f
 import torch.optim as optim
 from function.attack.estimators.classification import PyTorchClassifier
 # from models.model_net.resnet import ResNet18
@@ -12,15 +16,16 @@ from model.model_net.mnist import Mnist
 from function.attack.attacks.utils import compute_success, compute_accuracy
 
 # Resnet-Mnist
-def train_resnet_mnist(modelname, modelpath='', logging = None, device = None):
+def train_resnet_mnist(name, modelpath='', logging = None, device = None, feature=False):
     if device:
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     if logging:
-        logging.info(f"[模型训练]:加载与训练模型{modelname}")
+        logging.info(f"[模型训练]:加载与训练模型{name}")
+    modelname = name+'_f' if feature else name
     model = eval(modelname)(1).to(device)
     if logging:
         logging.info(f"[模型训练]:加载数据集MNIST")
-    input_shape, (_, _), (x_train, y_train), (x_test, y_test), min_pixel_value, max_pixel_value = load_mnist("/root/fairness/AI-Platform/dataset/MNIST", 1)
+    input_shape, (_, _), (x_train, y_train), (x_test, y_test), min_pixel_value, max_pixel_value , _= load_mnist("/root/fairness/AI-Platform/dataset/MNIST", 1)
     batch_size = 256
     num_epochs = 5
     num_batch = int(np.ceil(len(x_train) / float(batch_size)))
@@ -58,19 +63,20 @@ def train_resnet_mnist(modelname, modelpath='', logging = None, device = None):
         if logging:
             logging.info("[模型训练]:Epoch [{}/{}], train_loss: {:.4f}".format(epoch+1, num_epochs, train_loss / total_step))
     if modelpath == '':
-        modelpath = "./model/ckpt/MNIST_{}.pth".format(modelname.lower())
+        modelpath = "./model/ckpt/MNIST_{}.pth".format(name.lower())
     torch.save(model.state_dict(), modelpath)
 
 # Resnet-cifar10
-def train_resnet_cifar10(modelname, modelpath='', logging=None, device=None):
+def train_resnet_cifar10(name, modelpath='', logging=None, device=None, feature=False):
     if device:
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     if logging:
-        logging.info(f"[模型训练]:加载与训练模型{modelname}") 
+        logging.info(f"[模型训练]:加载与训练模型{name}") 
+    modelname = name+'_f' if feature else name
     model = eval(modelname)(3).to(device)
     if logging:
         logging.info(f"[模型训练]:加载数据集CIFAR10") 
-    input_shape, (_, _), (x_train, y_train), (x_test, y_test), min_pixel_value, max_pixel_value = load_cifar10("/root/fairness/AI-Platform/dataset/CIFAR10", 1)
+    input_shape, (_, _), (x_train, y_train), (x_test, y_test), min_pixel_value, max_pixel_value, _= load_cifar10("/root/fairness/AI-Platform/dataset/CIFAR10", 1)
 
     batch_size = 128
     num_epochs = 20
@@ -109,7 +115,7 @@ def train_resnet_cifar10(modelname, modelpath='', logging=None, device=None):
         if logging:
             logging.info("[模型训练]:Epoch [{}/{}], train_loss: {:.4f}".format(epoch+1, num_epochs, train_loss / total_step))
     if modelpath == '':
-        modelpath = "./model/ckpt/CIFAR10_{}.pth".format(modelname.lower())
+        modelpath = "./model/ckpt/CIFAR10_{}.pth".format(name.lower())
     torch.save(model.state_dict(), modelpath)
 
 
@@ -225,7 +231,6 @@ def robust_train(model, train_loader, test_loader, adv_loader, attack, device, e
     return model
 
 def test_batch(model, test_loader, device=None, **kwargs):
-    # print(device)
     model = model.to(device)
     with torch.no_grad():
         x, y = iter(test_loader).next()

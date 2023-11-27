@@ -219,8 +219,8 @@ def model_generate(
             trainfunc, nmax = da.gen_train_function(True, gpu, block_type, epoch, [x_train, y_train, x_test, y_test])
             model_path = os.path.join(root_path, 'best_model.h5')
             valloss = trainfunc(dmin, dmax, wmin, wmax)
-            shutil.copyfile("./best.h5",model_path)
-            shutil.copyfile("../best_param.pkl", os.path.join(root_path, 'best_param.pkl'))
+            shutil.copyfile("./output/cache/develop/best.h5",model_path)
+            shutil.copyfile("./output/cache/develop/best_param.pkl", os.path.join(root_path, 'best_param.pkl'))
 
     else:
         # DEMO 2

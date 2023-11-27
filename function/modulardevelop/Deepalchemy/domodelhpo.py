@@ -65,7 +65,7 @@ def create_model(deep, width):
     val_loss = history.history['val_loss']
     acc = history.history['categorical_accuracy']
     val_acc = history.history['val_categorical_accuracy']
-    model.save("./output/cache/develop/model" + name + ".h5")
+    model.save("./output/cache/develop/model/" + name + ".h5")
     np.save('./output/cache/develop/data/' + name + '_loss', loss)
     np.save('./output/cache/develop/data/' + name + '_valloss', val_loss)
     np.save('./output/cache/develop/data/' + name + '_acc', acc)
@@ -132,7 +132,7 @@ if __name__ == '__main__':
         'accuracy': list(acc),
         'val_accuracy': list(valacc)
     }
-    output = open('../history_da.pkl', 'wb')
+    output = open('./output/cache/develop/history_da.pkl', 'wb')
     pickle.dump(history, output)
     output.close()
     model = tf.keras.models.load_model('./output/cache/develop/model/' + str(name) + '.h5')
@@ -147,7 +147,7 @@ if __name__ == '__main__':
         else:
             savedict[hp] = space[hp].pos_args[result[hp] + 1].obj
 
-    output = open('./output/cache/develop/tmp/best_param.pkl', 'wb')
+    output = open('./output/cache/develop/best_param.pkl', 'wb')
     pickle.dump(savedict, output)
     output.close()
     # os.remove('./tempparas.py')

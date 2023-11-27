@@ -486,7 +486,13 @@ class IOtool:
         ben_prob = ben_prob[:_min]
         adv_prob = adv_prob[:_min]
         probs = torch.cat([ben_prob, adv_prob]).cpu().numpy()
-        x = TSNE(n_components=2, n_iter=1000, random_state=seed).fit_transform(probs)
+        probs1 = copy.deepcopy(probs)
+        for i in range(len(probs1)):
+            minv = min(probs[i])
+            maxv = max(probs[i])
+            if np.isnan(minv):
+                probs1[i] = np.nan_to_num(probs[1].astype(np.float32))
+        x = TSNE(n_components=2, n_iter=1000, random_state=seed).fit_transform(probs1)
         return x
     
     @staticmethod
