@@ -235,7 +235,7 @@ def model_generate(
             shutil.rmtree('./output/cache/develop/model')
             shutil.rmtree('./output/cache/develop/data')
             shutil.rmtree('./output/cache/develop/tmp')
-            os.remove('./best.h5')
+            os.remove('./output/cache/develop/best.h5')
             # os.remove('./best.h5')
 
     else:

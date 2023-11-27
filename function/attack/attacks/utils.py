@@ -902,6 +902,7 @@ def load_cifar10 (
     samplenum: int=50,
     raw: bool = False,
     normalize: bool = False,
+    train_sample_num:int=1000,
 ) -> DATASET_TYPE:
     def load_batch(fpath: str) -> Tuple[np.ndarray, np.ndarray]:
         with open(fpath, "rb") as file_:
@@ -940,6 +941,10 @@ def load_cifar10 (
     select_list = random.sample(range(0, 10000), samplenum)
     x_select = x_test.take(select_list, axis=0)
     y_select = y_test.take(select_list, axis=0)
+    # 从训练集中选取数据集
+    train_select_list = random.sample(range(0, 50000), train_sample_num)
+    train_x_select = x_train.take(train_select_list, axis=0)
+    train_y_select = y_train.take(train_select_list, axis=0)
     min_, max_ = 0.0, 255.0
     # 归一化
     if not raw:
@@ -947,6 +952,7 @@ def load_cifar10 (
         x_train, y_train = preprocess(x_train, y_train, clip_values=(0, 255))
         x_test, y_test = preprocess(x_test, y_test, clip_values=(0, 255))
         x_select, y_select = preprocess(x_select, y_select, clip_values=(0, 255))
+        train_x_select, train_y_select = preprocess(train_x_select, train_y_select, clip_values=(0, 255))
     # 标准化
     mean = np.array([0.4914, 0.4822, 0.4465])
     std = np.array([0.2023, 0.1994, 0.2010])
@@ -955,6 +961,10 @@ def load_cifar10 (
             x_train[:, i, :, :] = (x_train[:, i, :, :] - mean[i]) / std[i]
         min_value = np.amin(x_train)
         max_value = np.amax(x_train)
+        for i in range(train_x_select.shape[1]):
+            train_x_select[:, i, :, :] = (train_x_select[:, i, :, :] - mean[i]) / std[i]
+        min_value = np.amin(train_x_select) if np.amin(train_x_select) < min_value else min_value
+        max_value = np.amax(train_x_select) if np.amax(train_x_select) > max_value else max_value
         for i in range(x_test.shape[1]):
             x_test[:, i, :, :] = (x_test[:, i, :, :] - mean[i]) / std[i]
         min_value = np.amin(x_test) if np.amin(x_test) < min_value else min_value
@@ -966,15 +976,17 @@ def load_cifar10 (
         min_ = min_value
         max_ = max_value
     x_select = x_select.astype(np.float32)
+    train_x_select = train_x_select.astype(np.float32)
     x_train = x_train.astype(np.float32)
     x_test = x_test.astype(np.float32)
-    return (3, 32, 32), (x_select, y_select), (x_train, y_train), (x_test, y_test), min_, max_
+    return (3, 32, 32), (x_select, y_select), (x_train, y_train), (x_test, y_test), min_, max_,(train_x_select, train_y_select )
 
 def load_mnist (
     datasetpath: str,
     samplenum: int=50,
     raw: bool = False,
     normalize: bool = False,
+    train_sample_num:int=1000,
 ) -> DATASET_TYPE:
     path = get_file(
         "mnist.npz",
@@ -991,6 +1003,9 @@ def load_mnist (
     select_list = random.sample(range(0, 10000), samplenum)
     x_select = x_test.take(select_list, axis=0)
     y_select = y_test.take(select_list, axis=0)
+    trian_select_list = random.sample(range(0, 10000), train_sample_num)
+    trian_x_select = x_train.take(trian_select_list, axis=0)
+    trian_y_select = y_train.take(trian_select_list, axis=0)
     dict_mnist.close()
 
     # Add channel axis
@@ -1006,6 +1021,10 @@ def load_mnist (
         x_select, y_select = preprocess(x_select, y_select, clip_values=(0, 255))
         x_select = np.expand_dims(x_select, axis=3)
         x_select = np.transpose(x_select, (0, 3, 1, 2))
+        
+        trian_x_select = np.expand_dims(trian_x_select, axis=3)
+        trian_x_select = np.transpose(trian_x_select, (0, 3, 1, 2))
+        trian_x_select, trian_y_select = preprocess(trian_x_select, trian_y_select, clip_values=(0, 255))
     mean = (0.1307,)
     std = (0.3081,)
     if normalize:
@@ -1021,12 +1040,17 @@ def load_mnist (
             x_select[:, i, :, :] = (x_select[:, i, :, :] - mean[i]) / std[i]
         min_value = np.amin(x_select) if np.amin(x_select) < min_value else min_value
         max_value = np.amax(x_select) if np.amax(x_select) > max_value else max_value
+        for i in range(trian_x_select.shape[1]):
+            trian_x_select[:, i, :, :] = (trian_x_select[:, i, :, :] - mean[i]) / std[i]
+        min_value = np.amin(trian_x_select) if np.amin(trian_x_select) < min_value else min_value
+        max_value = np.amax(trian_x_select) if np.amax(trian_x_select) > max_value else max_value
         min_ = min_value
         max_ = max_value
     x_select = x_select.astype(np.float32)
     x_train = x_train.astype(np.float32)
     x_test = x_test.astype(np.float32)
-    return (1, 28, 28), (x_select, y_select), (x_train, y_train), (x_test, y_test), min_, max_
+    trian_x_select = trian_x_select.astype(np.float32)
+    return (1, 28, 28), (x_select, y_select), (x_train, y_train), (x_test, y_test), min_, max_,(trian_x_select,trian_y_select)
 
 def load_stl() -> DATASET_TYPE:
     """

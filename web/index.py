@@ -24,17 +24,27 @@ def favicon():
 
 @app.route('/', methods=['GET'])
 def index():
+    '''
+    首页
+    '''
     if request.method == "GET":
         return render_template("index.html")
 
 @app.route('/index_function_introduction', methods=['GET'])
 def index_function_introduction():
+    '''
+    任务中心页
+    '''
     if request.method == "GET":
         # return render_template("index_function_introduction.html")
         return render_template("task_center.html")
 
 @app.route('/ex/uploadModel', methods=['POST'])
 def ExUploadModel():
+    '''
+    攻击机理分析上传模型
+    ex_upload_model:上传模型
+    '''
     fileinfo = request.files.get("ex_upload_model")
     filepath = "model/ckpt/ex_upload_model.pt"
     if osp.exists(filepath):
@@ -48,8 +58,14 @@ def ExUploadModel():
 
 @app.route('/fairness/uploadModel', methods=['POST'])
 def FairnessUploadModel():
+    '''
+    公平性模块上传模型
+    ckpt:上传模型
+    '''
     fileinfo = request.files.get("ckpt")
     filepath = "output/cache/fairness/ckpt.pth"
+    if not osp.exists('output/cache/fairness'):
+        os.makedirs('output/cache/fairness')
     modelpath, modelname = os.path.split(filepath)
     if osp.exists(filepath):
         os.remove(filepath)
@@ -64,6 +80,11 @@ def FairnessUploadModel():
 
 @app.route('/login', methods=['POST'])
 def login():
+    '''
+    登录
+    username：用户名
+    password：密码
+    '''
     if request.method == 'POST' and request.form.get('username') and request.form.get('password'):
         datax = request.form.to_dict()
         usernamx = datax.get("username")
@@ -92,6 +113,11 @@ def login():
 
 @app.route('/register', methods=['POST'])
 def register():
+    '''
+    注册
+    username：用户名
+    password：密码
+    '''
     if request.method == 'POST' and request.form.get('username') and request.form.get('password'):
         datax = request.form.to_dict()
         usernamx = datax.get("username")
@@ -120,6 +146,9 @@ def DataFairnessEvaluate():
     数据集公平性评估
     输入：tid：主任务ID
     dataname：数据集名称
+    senAttrList:敏感属性列表
+    tarAttrList：目标属性列表
+    staAttrList：统计属性列表
     """
     if (request.method == "POST"):
         inputParam = json.loads(request.data)
@@ -179,6 +208,9 @@ def DataFairnessDebias():
     输入：tid：主任务ID
     dataname：数据集名称
     datamethod：数据集优化算法名称
+    senAttrList:敏感属性列表
+    tarAttrList：目标属性列表
+    staAttrList：统计属性列表
     """
     global LiRPA_LOGS
     if (request.method == "POST"):
@@ -214,9 +246,7 @@ def DataFairnessDebias():
         
         IOtool.add_task_queue(tid, stid, t2, 300)
         # interface.run_data_debias_api(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList)
-        # t2 = threading.Thread(target=interface.run_data_debias_api,args=(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList))
-        # t2.setDaemon(True)
-        # t2.start()
+        
         res = {
             "tid":tid,
             "stid":stid
@@ -232,6 +262,10 @@ def ModelFairnessEvaluate():
     输入：tid：主任务ID
     dataname：数据集名称
     modelname：模型名称
+    metrics：公平性评估算法列表
+    senAttrList:敏感属性列表
+    tarAttrList：目标属性
+    staAttrList：统计属性列表
     """
     global LiRPA_LOGS
     if (request.method == "POST"):
@@ -301,6 +335,10 @@ def ModelFairnessDebias():
     dataname：数据集名称
     modelname：模型名称
     algorithmname：模型优化算法名称
+    metrics：公平性评估算法列表
+    senAttrList:敏感属性列表
+    tarAttrList：目标属性
+    staAttrList：统计属性列表
     """
     global LiRPA_LOGS
     if (request.method == "POST"):
@@ -572,6 +610,11 @@ def delete_task():
 # 结果输出
 @app.route("/output/Resultdata", methods=["GET"])
 def get_result():
+    '''
+    结果查询接口
+    输入：
+    Taskid：主任务id
+    '''
     if request.method == "GET":
         stidlist = []
         # 使用postman获取参数
@@ -633,6 +676,7 @@ def AdvAttack():
     Dataset：数据集名称
     Model：模型名称
     Method:list 对抗攻击算法名称
+    attackparam：攻击参数
     
     """
     global LiRPA_LOGS
@@ -684,7 +728,7 @@ def BackdoorAttack():
     Dataset：数据集名称
     Model：模型名称
     Method:list 后门算法名称
-    
+    attackparam：攻击参数
     """
     global LiRPA_LOGS
     if (request.method == "POST"):
@@ -714,10 +758,10 @@ def BackdoorAttack():
         IOtool.change_task_info(tid, "model", model)
         # 执行任务
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.run_backdoor_attack, tid, stid, dataname, model, adv_method, inputParam)
-        # t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+        # t2 = pool.submit(interface.run_backdoor_attack, tid, stid, dataname, model, adv_method, inputParam)
+        t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
         IOtool.add_task_queue(tid, stid, t2, 72000*len(adv_method))
-        # interface.run_backdoor_attack(tid, stid, dataname, model, adv_method, inputParam)
+        interface.run_backdoor_attack(tid, stid, dataname, model, adv_method, inputParam)
         # t2 = threading.Thread(target=interface.run_backdoor_attack,args=(tid, stid, dataname, model, adv_method, inputParam))
         # t2.setDaemon(True)
         # t2.start()
@@ -740,6 +784,7 @@ def AttackDimReduciton():
     Dataset：数据集名称
     Model：模型名称
     AdvMethods:list 对抗攻击算法名称
+    VisMethods：list 数据降维方法
     
     """
     global LiRPA_LOGS
@@ -790,6 +835,14 @@ def AttackDimReduciton():
 
 @app.route('/reach',methods=["GET","POST"])
 def model_reach():
+    '''
+    可达性验证
+    输入：
+    pic：上传样本
+    label：真实标签
+    target：目标标签
+    tid：主任务id
+    '''
     if request.method=='POST':
         inputParam = json.loads(request.data)
         dataset=inputParam['dataset']
@@ -837,6 +890,15 @@ def model_reach():
     
 @app.route('/knowledge_consistency',methods=["GET","POST"])
 def model_consistency():
+    '''
+    一致性验证
+    输入：
+    net：模型名称
+    layer：模型层
+    pic：上传样本
+    dataset：数据集名称
+    tid：主任务id
+    '''
     if request.method=='POST':
         inputParam = json.loads(request.data)
         tid = inputParam["tid"]
@@ -847,10 +909,10 @@ def model_consistency():
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
         IOtool.write_json(inputParam, osp.join(ROOT,"output", tid, stid + "_param.json"))
-        img_dir=os.path.join(os.getcwd(),"web/static/img/tmp_imgs")
+        img_dir=os.path.join(os.getcwd(),"output",tid, stid)
         if not os.path.exists(img_dir):
             os.mkdir(img_dir)
-        pic_path=os.path.join(img_dir,tid,stid+'.png')
+        pic_path=os.path.join(img_dir,'input.png')
         try:
             os.mkdir(os.path.join(img_dir,tid))
         except:
@@ -902,10 +964,10 @@ def auto_verify_img():
         
         pic=inputParam['pic']
         dataset=inputParam['dataset']
-        img_dir=os.path.join(os.getcwd(),"web/static/img/tmp_imgs")
+        img_dir=os.path.join(os.getcwd(),"output",tid, stid)
         if not os.path.exists(img_dir):
             os.mkdir(img_dir)
-        pic_path=os.path.join(img_dir,tid,stid+'.png')
+        pic_path=os.path.join(img_dir,'input.png')
         try:
             os.mkdir(os.path.join(img_dir,tid))
         except:
@@ -983,11 +1045,6 @@ def AttackAttrbutionAnalysis():
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_attrbution_analysis, tid, stid, datasetparam, modelparam, ex_methods, adv_methods, use_layer_explain)
         IOtool.add_task_queue(tid, stid, t2, 40000 * len(ex_methods) + 30000*len(adv_methods))
-        # print(t2.done())
-        # print(t2.result())
-        # t2 = threading.Thread(target=interface.run_attrbution_analysis,args=(tid, stid, datasetparam, modelparam, ex_methods, adv_methods, device, use_layer_explain))
-        # t2.setDaemon(True)
-        # t2.start()
         res = {
             "code":1,
             "msg":"success",
@@ -1038,10 +1095,6 @@ def AttackLime():
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_lime, tid, stid, datasetparam, modelparam, adv_methods)
         IOtool.add_task_queue(tid, stid, t2, 300)
-        
-        # t2 = threading.Thread(target=interface.run_lime,args=(tid, stid, datasetparam, modelparam, adv_methods, device))
-        # t2.setDaemon(True)
-        # t2.start()
         res = {
             "code":1,
             "msg":"success",
@@ -1053,13 +1106,18 @@ def AttackLime():
         abort(403)
 from werkzeug.utils import secure_filename
 # ----------------- 课题1 防御 -----------------
-@app.route("/defense", methods=["GET", "POST"])
-def home():
-    return render_template("Adv_detect.html")
 
 @app.route("/detect", methods=["POST"])
 def Detect():
-    
+    '''
+    对抗攻击防御与后门防御
+    adv_dataset：数据集名称
+    adv_model：模型名称
+    adv_method：攻击方法
+    adv_nums：攻击数量
+    defense_methods：list，防御方法
+    tid:主任务id
+    '''
     inputParam = json.loads(request.data)
     adv_dataset = inputParam["adv_dataset"]
     adv_model = inputParam["adv_model"]
@@ -1118,6 +1176,14 @@ def Detect():
 # ----------------- 课题2 测试样本自动生成 -----------------
 @app.route('/Concolic/SamGenParamSet', methods=['GET','POST'])
 def Concolic():
+    '''
+    测试样本自动生成
+    dataname:数据集名称
+    modelname:模型名称
+    norm:范数
+    times:执行次数
+    tid:主任务id
+    '''
     if (request.method == "GET"):
         return render_template("")
     elif (request.method == "POST"):
@@ -1137,16 +1203,10 @@ def Concolic():
             tid = inputdata["tid"]
         except:
             pass
-        if not inputdata:
-            inputdata = {
-                "tid":tid,
-                "matchmethod":matchmethod,
-                "frameworkname":frameworkname,
-                "frameversion":frameversion
-            }
-        IOtool.write_json(inputdata, osp.join(ROOT,"output", tid, AAtid + "_param.json"))
+        
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         AAtid = "S"+IOtool.get_task_id(str(format_time))
+        IOtool.write_json(inputdata, osp.join(ROOT,"output", tid, AAtid + "_param.json"))
         value = {
             "type":"Concolic",
             "state":0,
@@ -1163,9 +1223,6 @@ def Concolic():
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_concolic, tid, AAtid, concolic_dataset, concolic_model, norm, times)
         IOtool.add_task_queue(tid, AAtid, t2, 300)
-        # t2 = threading.Thread(target=interface.run_concolic,args=(tid,AAtid,concolic_dataset,concolic_model,norm, times))
-        # t2.setDaemon(True)
-        # t2.start()
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
@@ -1212,9 +1269,6 @@ def EnvTest():
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_envtest, tid, AAtid, matchmethod, frameworkname, frameversion)
         IOtool.add_task_queue(tid, AAtid, t2, 300)
-        # t2 = threading.Thread(target=interface.run_envtest,args=(tid,AAtid,matchmethod, frameworkname,frameversion))
-        # t2.setDaemon(True)
-        # t2.start()
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
@@ -1253,9 +1307,6 @@ def DataClean():
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_dataclean, tid, AAtid, dataset, upload_flag, upload_path)
         IOtool.add_task_queue(tid, AAtid, t2, 300)
-        # t2 = threading.Thread(target=interface.run_dataclean,args=(tid,AAtid,dataset))
-        # t2.setDaemon(True)
-        # t2.start()
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
@@ -1586,9 +1637,6 @@ def SideAnalysis():
         t2 = pool.submit(interface.run_side_api, trs_file, methods, tid, stid)
         IOtool.add_task_queue(tid, stid, t2, 300)
         # interface.run_side_api(trs_file, methods, tid, stid)
-        # t2 = threading.Thread(target=interface.run_side_api,args=(trs_file, methods, tid, stid))
-        # t2.setDaemon(True)
-        # t2.start()
         res = {"code":1,"msg":"success","Taskid":tid,"stid":stid}
         return jsonify(res)
     else:
@@ -1629,9 +1677,6 @@ def FormalVerification():
         t2 = pool.submit(interface.run_verify, tid, stid, param)
         IOtool.add_task_queue(tid, stid, t2, 30000)
         # interface.run_verify(tid, stid, param)
-        # t2 = threading.Thread(target=interface.run_verify, args=(tid, stid, param))
-        # t2.setDaemon(True)
-        # t2.start()
         res = {
             "tid":tid,
             "stid":stid
@@ -1727,10 +1772,10 @@ def auto_attack():
         datasetparam["name"] = datasetparam["name"]
         modelparam["name"] = modelparam["name"]
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.run_group_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
-        t2 = pool.submit(interface.submitAandB, tid, stid, 10, 20)
+        t2 = pool.submit(interface.run_graph_knowledge, tid, stid, datasetparam, modelparam, auto_method, inputParam)
+        # t2 = pool.submit(interface.submitAandB, tid, stid, 10, 20)
         IOtool.add_task_queue(tid, stid, t2, 72000)
-        interface.run_graph_knowledge(tid, stid, datasetparam, modelparam, auto_method, inputParam)
+        # interface.run_graph_knowledge(tid, stid, datasetparam, modelparam, auto_method, inputParam)
         res = {
             "code":1,
             "msg":"success",
@@ -1983,6 +2028,3 @@ def LLM_attack():
 def app_run(args):
     web_config={'host':args.host,'port':args.port,'debug':args.debug}
     app.run(**web_config)
-    
-
-    
