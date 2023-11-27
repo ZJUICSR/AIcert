@@ -11,12 +11,11 @@ print(tensorflow.__version__)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='compute model gradient by cpu')
-    parser.add_argument('--model','-m',default='./output/cache/develop/tmp/model.h5', help='model path')# 'auto' 'cust'
-    parser.add_argument('--data_x','-dx',default='./output/cache/develop/tmp/x.npy', help='input')# 'auto' 'cust'
-    parser.add_argument('--data_y','-dy',default='./output/cache/develop/tmp/y.npy', help='output')# 'auto' 'cust'
+    parser.add_argument('--model','-m',default='./tmp/model.h5', help='model path')# 'auto' 'cust'
+    parser.add_argument('--data_x','-dx',default='./tmp/x.npy', help='input')# 'auto' 'cust'
+    parser.add_argument('--data_y','-dy',default='./tmp/y.npy', help='output')# 'auto' 'cust'
     parser.add_argument('--epoch','-ep',default=0, help='current training epoch')# 'auto' 'cust'
-    parser.add_argument('--save_path','-sp',default='./output/cache/develop/tmp/gradient_weight.pkl', help='the path to save gradients and weights')# 'auto' 'cust'
-
+    parser.add_argument('--save_path','-sp',default='./tmp/gradient_weight.pkl', help='the path to save gradients and weights')# 'auto' 'cust'
 
     args = parser.parse_args()
    
