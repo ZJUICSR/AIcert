@@ -1,4 +1,3 @@
-from __future__ import print_function
 import time
 import numpy as np
 import torch
@@ -8,7 +7,6 @@ import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 import torchvision
 import torchvision.transforms as transforms
-from torch.autograd import Variable
 import os
 import argparse
 from tqdm import tqdm
@@ -141,7 +139,7 @@ def RobustEnhance(args_dict):
     # parser.add_argument('--adv_mode', default='source', type=str, help='adv_mode (feature_scatter)')
     parser.add_argument('--save_epochs', default=100, type=int, help='save period')
     parser.add_argument('--momentum', default=0.9, type=float, help='momentum (1-tf.momentum)')
-    parser.add_argument('--weight_decay', default=2e-4, type=float, help='weight decay')
+    parser.add_argument('--weight_decay', default=2e-1, type=float, help='weight decay')
     parser.add_argument('--log_step', default=10, type=int, help='log_step')
     args = parser.parse_args()
 
@@ -253,7 +251,7 @@ def RobustEnhance(args_dict):
         'train': True
     }
 
-    if args.adv_mode.lower() == 'feature_scatter':
+    if args_dict['adv_mode'].lower() == 'feature_scatter':
         print('-----Feature Scatter mode -----')
         net = Attack_FeaScatter(basic_net, config_feature_scatter)
     elif args_dict['adv_mode'].lower() == 'source':
@@ -305,20 +303,20 @@ def RobustEnhance(args_dict):
 
 # if __name__ == "__main__":
 #     args_dict = {
-#         'model_dir': './feasca_cifar10_lenet_result/',  # 模型训练输出路径及加载路径
-#         'adv_mode': 'source', #  训练初始模型source 训练鲁棒性增强模型用 feature_scatter,
+#         'model_dir': './fs_svhn_vgg/',  # 模型训练输出路径及加载路径
+#         'adv_mode': 'feature_scatter', #  训练初始模型source 训练鲁棒性增强模型用 feature_scatter,
 #         'init_model_pass': 'latest',  # 默认'-1'， 加,路径为model_dir。(-1: from scratch; K: checkpoint-K; latest = latest)
 #         'resume': False, # 加载init_model_pass 继续训练
 #         'lr': 0.1,  # 学习率
 #         'batch_size_train': 128,  # 每次train的样本数
-#         'max_epoch': 1, # 训练批次大小 默认200
+#         'max_epoch': 200, # 训练批次大小 默认200
 #         'decay_epoch1': 60,
 #         'decay_epoch2': 90,
 #         'decay_rate': 0.1,
-#         'dataset': 'cifar10',  # 数据集选择（cifar10，cifar100，svhn）
+#         'dataset': 'svhn',  # 数据集选择（cifar10，cifar100，svhn）
 #         'num_classes': 10,  # 图片种类（cifar10 = 10，cifar100 =100，svhn =10）
 #         'image_size': 32, # 数据集样本规格大小
-#         'model1': ResNet(50, 10)  # 输入要进行鲁棒增强的网路架构，ResNet(50, 10), LeNet(10), VGG(16, 10), WideResNet(depth=28, num_classes=10, widen_factor=10)
+#         'model1': VGG(16, 10)  # 输入要进行鲁棒增强的网路架构，ResNet(50, 10), LeNet(10), VGG(16, 10), WideResNet(depth=28, num_classes=10, widen_factor=10)
 #     }
 
 #     RobustEnhance(args_dict)

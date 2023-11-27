@@ -1786,6 +1786,45 @@ def auto_attack():
     else:
         abort(403)
 
+@app.route('/Defense/AdvTraining_CNNAT', methods=['POST'])
+def CNN_AT():
+    """
+    CNN对抗训练 
+    输入：tid：主任务ID
+    dataset：数据集名称
+    modelname：模型类型
+    attackmethod:攻击方法
+    """
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        tid = inputParam["tid"]
+        dataset = inputParam["dataset"]
+        modelname = inputParam["modelname"]
+        attackmethod = inputParam["attackmethod"]
+        evaluate_methods = inputParam["evaluate_methods"]
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        value = {
+            "type":"CNN_AT",
+            "state":0,
+            "name":["CNN_AT"],
+            "dataset":dataset,
+            "modelname":modelname,
+            "attackmethod":attackmethod,
+            "evaluate_methods":evaluate_methods,
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", inputParam["dataset"])
+        # 执行任务
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_advtraining_at, tid, stid, dataset, modelname, attackmethod, evaluate_methods)
+        IOtool.add_task_queue(tid, stid, t2, 300000)
+        res = {"code":1,"msg":"success","Taskid":tid,"stid":stid}
+        return jsonify(res)
+    else:
+        abort(403)      
+
+
 @app.route('/Defense/AdvTraining_GNN', methods=['POST'])
 def AdvTraining_GNN():
     """
@@ -1937,7 +1976,53 @@ def SEAT():
         return jsonify(res)
     else:
         abort(403)        
-        
+     
+
+@app.route('/Defense/AdvTraining_RiFT', methods=['POST'])
+def RiFT():
+    """
+    关键参数微调鲁棒训练 
+    输入：tid：主任务ID
+    dataset：数据集名称
+    modelname：模型类型
+    attack_method：对抗训练方法
+    evaluate_methods: 测试攻击方法list
+    ···待补充其他参数
+    """
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        tid = inputParam["tid"]
+        dataset = inputParam["dataset"]
+        modelname = inputParam["modelname"]
+        attack_method = inputParam["attack_method"]
+        evaluate_methods = inputParam["evaluate_methods"]
+        train_epoch = inputParam["train_epoch"]
+        at_epoch = inputParam["at_epoch"]
+        batchsize = inputParam["batchsize"]
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        value = {
+            "type":"RiFT",
+            "state":0,
+            "name":["RiFT"],
+            "dataset":dataset,
+            "modelname":modelname,
+            "attack_method":attack_method,
+            "evaluate_methods":evaluate_methods,
+            "train_epoch": train_epoch,
+            "at_epoch":at_epoch,
+            "batchsize":batchsize,
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", inputParam["dataset"])
+        # 执行任务
+        pool = IOtool.get_pool(tid)
+        t2 = pool.submit(interface.run_rift, tid, stid, dataset, modelname, attack_method, evaluate_methods, train_epoch, at_epoch, batchsize)
+        IOtool.add_task_queue(tid, stid, t2, 300000)
+        res = {"code":1,"msg":"success","Taskid":tid,"stid":stid}
+        return jsonify(res)
+    else:
+        abort(403)   
 
 @app.route('/Task/UploadData', methods=['POST'])
 def UploadData():
