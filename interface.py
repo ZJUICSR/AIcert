@@ -1940,7 +1940,7 @@ def run_featurescatter(tid,AAtid, dataset, modelname, lr, batch_size, max_epoch,
     IOtool.change_subtask_state(tid, AAtid, 2)
     IOtool.change_task_success_v2(tid=tid)
 
-def run_seat(tid,AAtid, dataset, modelname, lr, n_class, max_epoch):
+def run_seat(tid,AAtid, dataset, modelname, lr, epsilon, max_epoch, evaluate_method):
     """特征散射鲁棒训练
     :params tid:主任务ID
     :params AAtid:子任务id
@@ -1957,11 +1957,15 @@ def run_seat(tid,AAtid, dataset, modelname, lr, n_class, max_epoch):
     # devive = IOtool.get_device()
     logging = IOtool.get_logger(AAtid)
     res = adv_traind.run_seat(
+        dataset = dataset,
         modelname=modelname,  
         lr = lr, 
-        n_class=n_class,  
+        epsilon=epsilon,  
         max_epoch = max_epoch,
-        out_path=osp.join(ROOT,"output", tid, AAtid), logging=logging)  
+        evaluate_method = evaluate_method,
+        out_path=osp.join(ROOT,"output", tid, AAtid), 
+        # out_path=osp.join(ROOT,"output", tid, "S20231127_1552_b9dabb5"), 
+        logging=logging)  
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
     IOtool.change_subtask_state(tid, AAtid, 2)
