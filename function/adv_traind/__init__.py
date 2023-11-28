@@ -130,30 +130,40 @@ def run_featurescatter(dataset, modelname, lr, batch_size, max_epoch, decay_epoc
         "enh_acc": enh_acc 
     }
         
-from .SEAT.seat import seat
+from .SEAT.seat import seatrain, seatest
 
-def run_seat(modelname, lr, n_class, max_epoch, out_path, logging=None):
+def run_seat(dataset, modelname, lr, epsilon, max_epoch, evaluate_method, out_path, logging=None):
+    
     logging.info('Start SEAT running......')
-    args_dict = {'epochs': max_epoch,
-             'arch': modelname,
-             'num_classes': n_class,
-             'lr': lr,
-             'loss_fn': 'cent',
-             'log_step': 7,
-             'epsilon': 0.031,
-             'num_steps': 10,
-             'step_size': 0.007,
-             'resume': False,
-             'out_dir': out_path,
-             'ablation': ''}
-    nat_acc, pgd20_acc, ema_nat_acc, ema_pgd20_acc = seat(args_dict)
-    logging.info('Finish SEAT Enhancing......')
-    return {
-        "nat_acc": nat_acc,
-        "pgd20_acc": pgd20_acc,
-        "ema_nat_acc": ema_nat_acc,
-        "ema_pgd20_acc": ema_pgd20_acc
-    }
+    
+    args_dict = {
+        'epochs': max_epoch, 
+        'arch': modelname,
+        'lr': lr,
+        'loss_fn': 'cent',
+        'epsilon': epsilon,
+        'num_steps': 10,
+        'step_size': 0.007,
+        'resume': False,  # test:True train:False
+        'out_dir': out_path,
+        'ablation': '',
+        'evaluate_method': evaluate_method}
+    
+    if not os.path.exists(os.path.join("output/cache/SEAT",modelname,'bestpoint.pth.tar')) or not os.path.exists(os.path.join("output/cache/SEAT",modelname,'ema_bestpoint.pth.tar')):
+        logging.info('Pretrained model not existed......')
+        if os.path.exists(os.path.join("output/cache/SEAT",modelname)):
+            shutil.rmtree(os.path.join("output/cache/SEAT",modelname))
+        logging.info('Model training......')
+        seatrain(args_dict)
+        shutil.copytree(out_path, os.path.join("output/cache/SEAT",modelname))
+        logging.info('Model training finished......')
+    else:
+        shutil.copytree(os.path.join("output/cache/SEAT",modelname),out_path)
+    logging.info('Model testing......')
+    res = seatest(args_dict)
+    logging.info('Finish SEAT testing......')
+    return res
+    
     
     
 from .RiFT.test import start_evaluate
