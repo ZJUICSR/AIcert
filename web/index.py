@@ -1115,6 +1115,7 @@ def Detect():
     # response_data = interface.run_detect(tid, stid, defense_methods, adv_dataset, adv_model, adv_method, adv_nums, adv_file_path)
 
     return json.dumps(response_data)
+
 # ----------------- 课题2 测试样本自动生成 -----------------
 @app.route('/Concolic/SamGenParamSet', methods=['GET','POST'])
 def Concolic():
@@ -1908,8 +1909,9 @@ def SEAT():
         dataset = inputParam["dataset"]
         modelname = inputParam["modelname"]
         lr = inputParam["lr"]
-        n_class = inputParam["n_class"]
+        epsilon = inputParam["epsilon"]
         max_epoch = inputParam["max_epoch"]
+        evaluate_method = inputParam["evaluate_method"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
         value = {
@@ -1919,13 +1921,14 @@ def SEAT():
             "dataset":dataset,
             "modelname":modelname,
             "lr":lr,
-            "n_class":n_class,
+            "n_class":epsilon,
+            "evaluate_method": evaluate_method
         }
         IOtool.add_subtask_info(tid, stid, value)
         IOtool.change_task_info(tid, "dataset", inputParam["dataset"])
         # 执行任务
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.run_seat, tid, stid, dataset, modelname, lr, n_class, max_epoch)
+        t2 = pool.submit(interface.run_seat, tid, stid, dataset, modelname, lr, epsilon, max_epoch, evaluate_method)
         IOtool.add_task_queue(tid, stid, t2, 300000)
         res = {"code":1,"msg":"success","Taskid":tid,"stid":stid}
         return jsonify(res)
