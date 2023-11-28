@@ -6,7 +6,7 @@ class SmallCNN(nn.Module):
     def __init__(self, drop=0.5):
         super(SmallCNN, self).__init__()
 
-        self.num_channels = 1
+        self.num_channels = 3
         self.num_labels = 10
 
         activ = nn.ReLU(True)
