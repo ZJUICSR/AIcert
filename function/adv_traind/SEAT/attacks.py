@@ -9,9 +9,10 @@ from torch.autograd import Variable
 import torch.optim as optim
 from torchvision import datasets, transforms
 import numpy as np
-
+from torchattacks import *
 # from utils import torch_accuracy
 from .utils import torch_accuracy
+
 
 class AttackerPolymer:
 
@@ -43,7 +44,7 @@ class AttackerPolymer:
 
     def run_specified(self, name, model, img, gt, step_count=None, category='Madry', return_acc=False):
         name = name.upper()
-        if 'PGD' in name:
+        if 'PGD' in name and name not in ["PGDL1", "PGDL2", 'TPGD']:
             num_steps = int(name.split('_')[-1])
             return self.PGD(model, img, gt, num_steps=num_steps, category=category, step_count=step_count, return_acc=return_acc)
         elif name == 'MIM':
@@ -54,6 +55,9 @@ class AttackerPolymer:
             return self.AA(model, img, gt, return_acc=return_acc)
         elif name == 'NAT':
             return self.NAT(model, img, gt, return_acc=return_acc)
+        elif name in ['MIFGSM', 'DIFGSM', 'FGSM', 'RFGSM', 'FFGSM', "BIM", "PGDL1", "PGDL2", 'TPGD']:
+            # print(f'step in {name} attack')
+            return self.other_methods(model, img, gt, name, return_acc=return_acc)
         else:
             raise NotImplementedError
 
@@ -64,6 +68,38 @@ class AttackerPolymer:
             acc = torch_accuracy(pred, gt, (1,))
             return acc
         return img
+
+    def get_attack(self, method, model):
+        eps = self.epsilon
+        attacks_dict = {
+            'fgsm': FGSM(model=model, eps=eps),
+            'bim': BIM(model=model, eps=eps, alpha=2 / 255, steps=10),
+            'rfgsm': RFGSM(model, eps=eps, alpha=2 / 255, steps=10),
+            'ffgsm': FFGSM(model=model, eps=eps, alpha=2 / 255),
+            'mifgsm': MIFGSM(model, eps=eps, alpha=2 / 255, steps=10, decay=0.1),
+            'difgsm': DIFGSM(model=model, eps=eps, alpha=2 / 255, steps=10, diversity_prob=0.5, resize_rate=0.9),
+            'upgd': UPGD(model=model, eps=eps, alpha=2 / 255, steps=10),
+            'pgdl1': PGD(model=model, eps=eps, alpha=2 / 225, steps=10, random_start=True),
+            'tpgd': TPGD(model=model, eps=eps, alpha=2 / 255, steps=10),
+            'pgdl2': PGDL2(model=model, eps=eps, alpha=0.2, steps=10),
+        }
+
+        attacks = attacks_dict.keys()
+        if method.lower() not in attacks:
+            return None
+        return attacks_dict[method.lower()]
+
+    def other_methods(self, model, img, gt, name, return_acc=True):
+        attack = self.get_attack(method=name, model=model)
+        model.eval()
+
+        x_adv = attack(img, gt)
+        x_adv = Variable(x_adv, requires_grad=False)
+        if return_acc:
+            adv_pred = model(x_adv)
+            adv_acc = torch_accuracy(adv_pred, gt, (1,))
+            return adv_acc
+        return x_adv
 
     def PGD(self, model, img, gt, num_steps, category='Madry', rand_init=True, step_count=None, return_acc=False):
         model.eval()
