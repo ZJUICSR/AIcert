@@ -1905,12 +1905,13 @@ def FeatureScatter():
         tid = inputParam["tid"]
         dataset = inputParam["dataset"]
         modelname = inputParam["modelname"]
+        attack_method = inputParam["attack_method"]
+        evaluate_methods = inputParam["evaluate_methods"]
         lr = inputParam["lr"]
         batch_size = inputParam["batch_size"]
         max_epoch = inputParam["max_epoch"]
         decay_epoch = inputParam["decay_epoch"]
         decay_rate = inputParam["decay_rate"]
-        weight_decay = inputParam["weight_decay"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
         value = {
@@ -1919,18 +1920,19 @@ def FeatureScatter():
             "name":["FeatureScatter"],
             "dataset":dataset,
             "modelname":modelname,
+            "attack_method":attack_method,
+            "evaluate_methods":evaluate_methods,
             "lr":lr,
             "batch_size":batch_size,
             "max_epoch":max_epoch,
             "decay_epoch":decay_epoch,
             "decay_rate":decay_rate,
-            "weight_decay":weight_decay,
         }
         IOtool.add_subtask_info(tid, stid, value)
         IOtool.change_task_info(tid, "dataset", inputParam["dataset"])
         # 执行任务
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.run_featurescatter, tid, stid, dataset, modelname, lr, batch_size, max_epoch, decay_epoch, decay_rate, weight_decay)
+        t2 = pool.submit(interface.run_featurescatter, tid, stid, dataset, modelname, attack_method, evaluate_methods, lr, batch_size, max_epoch, decay_epoch, decay_rate)
         IOtool.add_task_queue(tid, stid, t2, 3000)
         res = {"code":1,"msg":"success","Taskid":tid,"stid":stid}
         return jsonify(res)
