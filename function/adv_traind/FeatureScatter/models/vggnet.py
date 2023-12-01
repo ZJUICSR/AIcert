@@ -57,7 +57,7 @@ class VGG(nn.Module):
         out = out.view(out.size(0), -1)
         out = self.linear(out)
 
-        return out, out.view(x.size(0), -1)
+        return out
 
     def _make_layers(self, cfg):
         layers = []
