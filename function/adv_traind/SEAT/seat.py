@@ -58,7 +58,6 @@ def seatrain(args_dict):
             np.interp([epoch], [0, args_dict['epochs'] // 3, args_dict['epochs'] * 2 // 3, args_dict['epochs']],
                       [args_dict['lr'], args_dict['lr'], args_dict['lr'] / 10, args_dict['lr'] / 20])[0]
     elif args_dict['arch'] == 'preactresnet18':
-        args_dict['lr'] = 0.1
         adjust_learning_rate = lambda epoch: \
             np.interp([epoch], [0, args_dict['epochs'] // 3, args_dict['epochs'] * 2 // 3, args_dict['epochs']],
                      [args_dict['lr'], args_dict['lr'], args_dict['lr'] / 10, args_dict['lr'] / 20])[0]
