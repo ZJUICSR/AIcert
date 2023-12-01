@@ -4,25 +4,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .models import *
-# from torch.autograd.gradcheck import zero_gradients
+from torch.autograd.gradcheck import zero_gradients
 from torch.autograd import Variable
-import math
-
-from .utils import softCrossEntropy
-from .utils import one_hot_tensor, label_smoothing
+from .utils import softCrossEntropy, one_hot_tensor, label_smoothing
 from .ot import sinkhorn_loss_joint_IPOT
 import pickle
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-def zero_gradients(x):
-    if isinstance(x, torch.Tensor):
-        if x.grad is not None:
-            x.grad.detach_()
-            x.grad.zero_()
-    elif isinstance(x, collections.abc.Iterable):
-        for elem in x:
-            zero_gradients(elem)
 
 class Attack_None(nn.Module):
     def __init__(self, basic_net, config):
@@ -38,7 +27,7 @@ class Attack_None(nn.Module):
         else:
             self.basic_net.eval()
         outputs, _ = self.basic_net(inputs)
-        return outputs, _
+        return outputs, None
 
 
 class Attack_PGD(nn.Module):
