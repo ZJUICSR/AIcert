@@ -1925,7 +1925,7 @@ def run_advtraining_gnn(tid,AAtid, dataset, batch_size, train_size, test_size, v
     IOtool.change_subtask_state(tid, AAtid, 2)
     IOtool.change_task_success_v2(tid=tid)
 
-def run_featurescatter(tid,AAtid, dataset, modelname, lr, batch_size, max_epoch, decay_epoch, decay_rate, weight_decay):
+def run_featurescatter(tid,AAtid, dataset, modelname, attack_method, evaluate_methods, lr, batch_size, max_epoch, decay_epoch, decay_rate):
     """特征散射鲁棒训练
     :params tid:主任务ID
     :params AAtid:子任务id
@@ -1947,12 +1947,13 @@ def run_featurescatter(tid,AAtid, dataset, modelname, lr, batch_size, max_epoch,
     res = adv_traind.run_featurescatter(
         dataset=dataset.lower(),  # 数据集
         modelname=modelname.lower(),  # 模型类型
+        attack_method = attack_method, # 对抗训练方法
+        evaluate_methods = evaluate_methods, # 评估算法
         lr = lr, # 学习率
         batch_size=batch_size,  # 批处理大小
         max_epoch=max_epoch,  # 最大训练轮数
         decay_epoch=decay_epoch,  # 学习率衰减的轮数
         decay_rate=decay_rate,  # 学习率衰减的速率
-        weight_decay=weight_decay,  # 权重衰减
         out_path=osp.join(ROOT,"output", tid, AAtid), logging=logging)  
     res["stop"] = 1
     IOtool.write_json(res,osp.join(ROOT,"output", tid, AAtid+"_result.json"))
