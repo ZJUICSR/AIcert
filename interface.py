@@ -1,13 +1,16 @@
 import os
 import os.path as osp
+import numpy as np
 import torch
 import torchvision
 import time
+import textattack
 from function.ex_methods.module.func import get_loader, get_batchsize,load_image, predict, get_class_list, get_normalize_para
-from function.ex_methods.module.generate_adv import get_adv_loader, sample_untargeted_attack
-from function.ex_methods.module.load_model import load_model, load_torch_model
+from function.ex_methods.module.generate_adv import get_adv_loader, sample_untargeted_attack, text_attack
+from function.ex_methods.module.load_model import load_model, load_torch_model, load_text_model
 from function.ex_methods import attribution_maps, layer_explain, dim_reduciton_visualize
-from function.ex_methods.lime import lime_image_ex
+from function.ex_methods.lime import lime_image_ex, lime_text_ex
+from scipy.stats import kendalltau
 from PIL import Image
 from IOtool import IOtool, Callback
 ROOT = osp.dirname(osp.abspath(__file__))
@@ -267,6 +270,7 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, mode):
     dataset = datasetparam["name"]
     model_name = modelparam["name"]
     model = modelparam["ckpt"]
+    res = {}
 
     if mode == "image":
         logging.info("[数据集获取]：目前数据模态为图片类型")
@@ -296,14 +300,14 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, mode):
             )
         img_x = re_trans(img_x)
 
-        res = {}
         class_list = get_class_list(dataset, root)
         class_name = class_list[label.item()]
 
         save_path = params["out_path"]
         logging.info("[LIME图像解释]：正在对正常图片数据进行解释")
-        img_url, img_lime_url = lime_image_ex(img, net, model_name, dataset, device, save_path)
-        res["nor"] = {"image":img_url,"ex_image":img_lime_url,"class_name":class_name}
+        res["adv_methods"] = adv_methods
+        nor_img_lime, img_url, img_lime_url = lime_image_ex(img, net, model_name, dataset, device, save_path)
+        res["nor"] = {"image":img_url,"ex_image":img_lime_url,"class_name":class_name,"kendalltau":"不适用"}
         logging.info("[LIME图像解释]：正常图片数据解释已完成")
         for adv_method in adv_methods:
             logging.info("[数据集获取]：正在生成图像{:s}对抗样本".format(adv_method))
@@ -312,18 +316,50 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, mode):
             class_name = class_list[adv_label.item()]
             save_path = params["out_path"]
             logging.info("[LIME图像解释]：正在对{:s}图片数据进行解释".format(adv_method))
-            img_url, img_lime_url = lime_image_ex(adv_img, net, model_name, dataset, device, save_path, imagetype=adv_method)
-            res[adv_method] = {"image":img_url, "ex_image":img_lime_url,"class_name":class_name}
+            adv_img_lime, img_url, img_lime_url = lime_image_ex(adv_img, net, model_name, dataset, device, save_path, imagetype=adv_method)
+            kendall_value, _ = kendalltau(np.array(nor_img_lime,dtype="float64"),np.array(adv_img_lime,dtype="float64"))
+            kendall_value = round(kendall_value, 4)
+            res[adv_method] = {"image":img_url, "ex_image":img_lime_url,"class_name":class_name,"kendalltau":kendall_value}
             logging.info("[LIME图像解释]：{:s}图片数据解释已完成".format(adv_method))
         logging.info("[LIME图像解释]：LIME解释已全部完成")
     else:
+        # 数据为文本模态
         logging.info("[数据集获取]：目前数据模态为文本类型")
         text = datasetparam['data']
+        res["adv_methods"] = adv_methods
         logging.info("[数据集获取]：获取{:s}数据样本已完成.".format(dataset))
 
+        logging.info("[加载模型中]：正在加载{:s}模型.".format(model_name))
+        model = load_text_model(model_name)
+        tokenizer = model.tokenizer
+        model_wrapper = textattack.models.wrappers.PyTorchModelWrapper(model, tokenizer)
+        class_names = ["negitive", "positive"]
+        logging.info("[加载模型中]：{:s}模型已加载完成.".format(model_name))
 
+        logging.info("[LIME文本解释]：正在对正常文本数据进行解释.")
+        ex_nor = lime_text_ex(model_wrapper, text, class_names=class_names)
+        logging.info("[LIME文本解释]：正常文本数据解释分析完成.")
+        res['nor'] = {"class_names": ex_nor[0], 
+            "predictions":ex_nor[1], 
+            "regression_result":ex_nor[2], 
+            "explain_res":ex_nor[3], 
+            "raw_js":ex_nor[4]
+            }
+        logging.info("[LIME文本解释]：正在对对抗文本数据进行解释.")
+        for adv_method in adv_methods:
+            logging.info(f"[LIME文本对抗攻击]：采用{adv_method}对抗攻击方法生成对抗样本中...")
+            adv_text = text_attack(model_wrapper, adv_method, text)
+            ex_adv = lime_text_ex(model_wrapper, adv_text, class_names=class_names)
+            logging.info(f"[LIME文本解释]：{adv_method}对抗文本攻击数据解释分析完成.")
+            res[adv_method] = {"class_names": ex_adv[0], 
+                "predictions":ex_adv[1], 
+                "regression_result":ex_adv[2], 
+                "explain_res":ex_adv[3], 
+                "raw_js":ex_adv[4]
+                }
+        logging.info("[LIME文本解释]：LIME解释已全部完成")
+    res["stop"] = 1  
     IOtool.write_json(res, osp.join(ROOT,"output", tid, stid+"_result.json")) 
-    taskinfo = IOtool.load_json(osp.join(ROOT,"output","task_info.json"))
-    taskinfo[tid]["function"][stid]["state"] = 2
-    IOtool.write_json(taskinfo,osp.join(ROOT,"output","task_info.json"))
+    print("interfase modify sub task state:", tid, stid)
+    IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)

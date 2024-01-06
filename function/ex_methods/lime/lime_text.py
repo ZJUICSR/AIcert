@@ -76,6 +76,32 @@ class TextDomainMapper(explanation.DomainMapper):
             ''' % (exp_object_name, json.dumps(all_occurrences), label,
                    json.dumps(text), div_name, json.dumps(opacity))
         return ret
+    
+    def visualize_instance(self, exp, label, div_name, 
+                                text=True, opacity=True):
+        """Adds text with highlighted words to visualization.
+
+        Args:
+             exp: list of tuples [(id, weight), (id,weight)]
+             label: label id (integer)
+             div_name: name of div object to be used for rendering(in js)
+             exp_object_name: name of js explanation object
+             text: if False, return empty
+             opacity: if True, fade colors according to weight
+        """
+        if not text:
+            return u''
+        text = (self.indexed_string.raw_string()
+                .encode('utf-8', 'xmlcharrefreplace').decode('utf-8'))
+        text = re.sub(r'[<>&]', '|', text)
+        exp = [(self.indexed_string.word(x[0]),
+                self.indexed_string.string_position(x[0]),
+                x[1]) for x in exp]
+        all_occurrences = list(itertools.chain.from_iterable(
+            [itertools.product([x[0]], x[1], [x[2]]) for x in exp]))
+        all_occurrences = [(x[0], int(x[1]), x[2]) for x in all_occurrences]
+
+        return(all_occurrences, label, text, div_name, opacity)
 
 
 class IndexedString(object):
@@ -418,7 +444,11 @@ class LimeTextExplainer(object):
         ret_exp = explanation.Explanation(domain_mapper=domain_mapper,
                                           class_names=self.class_names,
                                           random_state=self.random_state)
-        ret_exp.predict_proba = yss[0]
+        prediction = yss[0]
+        # pass softmax
+        prediction = np.exp(prediction - np.max(prediction)) 
+        prediction = prediction / np.sum(prediction)
+        ret_exp.predict_proba = prediction
         if top_labels:
             labels = np.argsort(yss[0])[-top_labels:]
             ret_exp.top_labels = list(labels)
