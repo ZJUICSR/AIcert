@@ -10,6 +10,7 @@ from function.ex_methods.module.func import get_class_list, preprocess_transform
 from function.ex_methods.lime import lime_image
 from skimage.color import rgb2gray
 from skimage.segmentation import mark_boundaries
+import textattack
 
 
 
@@ -57,7 +58,16 @@ def lime_image_ex(img, model, model_name, dataset, device, save_path, imagetype=
     img.save(osp.join(path, f"{model_name}_{imagetype}.png"))
     img_lime_url = "lime_result/" + f"{model_name}_lime_{imagetype}.png"
     img_url = "lime_result/" + f"{model_name}_{imagetype}.png"
-    return img_url, img_lime_url
+    return img_lime, img_url, img_lime_url
 
 # 把算法函数的接口写在这里，参考lime_image_ex()
-# def lime_text_ex():
+
+# input: text
+# output: the explain page of attacked text 
+from function.ex_methods.lime.lime_text import LimeTextExplainer
+def lime_text_ex(model, text, class_names):
+    explainer = LimeTextExplainer(class_names=class_names)
+    exp = explainer.explain_instance(text, model, num_features=6, top_labels=2)
+    data = exp.show_result()
+    return data
+    

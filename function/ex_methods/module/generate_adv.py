@@ -11,6 +11,7 @@ import torchvision.transforms as transforms
 import os
 import json
 from function.ex_methods.module.sequential import Sequential, Module
+import textattack
 
 class Normalize(Module):
     def __init__(self, mean, std) :
@@ -150,6 +151,27 @@ def untargeted_attack(dataset, method, model, data_loader, device, params, mean,
     adv_acc = get_accuracy(adv_loader, model, device, mean, std)
     logging.info(f"[生成对抗样本]：{method}对抗样本untargeted的攻击成功率为：{1-adv_acc}")
     return data
+
+# 选择文本对抗攻击方法
+def get_text_attack(adv_method):
+    method = adv_method.lower()
+    if method == "pwws":
+        return "PWWSRen2019"
+    elif method == "iga":
+        return "IGAWang2019"
+    elif method == "hotflip":
+        return "HotFlipEbrahimi2017"
+
+# 文本对抗样本
+def text_attack(model_wrapper, adv_method, text):
+    
+    attacker = eval("textattack.attack_recipes.{:s}".format(get_text_attack(adv_method))).build(model_wrapper)
+
+    example = textattack.shared.attacked_text.AttackedText(text)
+    output = attacker.goal_function.get_output(example)
+    result = attacker.attack(example, output)
+
+    return result.str_lines()[2] # [label_change, ori_text, adv_text]
 
 
 '''加载对抗样本'''

@@ -8,6 +8,8 @@ import torch
 import torchvision.models as models
 import os.path as osp
 
+import textattack
+
 def load_model(model_name, dataset, device, root, reference_model, logging, pretrained=True, attribution=True):
     if dataset == "imagenet":
         output_size = 7
@@ -106,4 +108,16 @@ def load_torch_model(model_name):
         model = models.inception_v3(pretrained=True)
     elif model_name == "efficientnet":
         model = models.efficientnet_b0(pretrained=True)
+    else:
+        raise NotImplementedError("暂不支持{:s}模型".format(model_name))
+    return model
+
+def load_text_model(model_name):
+    model = None
+    if model_name == "lstm":
+        model = textattack.models.helpers.LSTMForClassification.from_pretrained("lstm-sst2")
+    elif model_name == "wordcnn":
+        model = textattack.models.helpers.WordCNNForClassification.from_pretrained("cnn-sst2")
+    else:
+        raise NotImplementedError("暂不支持{:s}模型".format(model_name))
     return model
