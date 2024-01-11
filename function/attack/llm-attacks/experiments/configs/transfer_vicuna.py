@@ -20,7 +20,7 @@ def get_config():
     #     "/DIR/vicuna/vicuna-13b-v1.3"
     # ]
     config.tokenizer_kwargs = [{"use_fast": False}, {"use_fast": False}]
-    onfig.model_paths = [
+    config.model_paths = [
         "/root/GPT/FastChat/vicuna_data/vicuna-7b-v1.1",
     ]
     # config.model_paths = [
