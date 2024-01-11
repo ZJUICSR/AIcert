@@ -17,8 +17,8 @@ TOTAL_BAR_LENGTH = 65.
 last_time = time.time()
 begin_time = last_time
 ROOT = osp.dirname(osp.abspath(__file__))
-POOLNUM = 4 # 线程池4个
-THREADNUM = 4 # 每个线程池中的线程数4个
+POOLNUM = 2 # 线程池4个
+THREADNUM = 2 # 每个线程池中的线程数4个
 
 class IOtool:
     __taskinfoclock = threading.Lock()
