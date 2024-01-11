@@ -1805,6 +1805,7 @@ def CNN_AT():
         evaluate_methods = inputParam["evaluate_methods"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
+        IOtool.write_json(inputParam,osp.join(ROOT,"output", tid, stid + "_param.json"))
         value = {
             "type":"CNN_AT",
             "state":0,
@@ -1859,6 +1860,7 @@ def AdvTraining_GNN():
         random_state = inputParam["random_state"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
+        IOtool.write_json(inputParam,osp.join(ROOT,"output", tid, stid + "_param.json"))
         value = {
             "type":"AdvTraining_GNN",
             "state":0,
@@ -1914,6 +1916,7 @@ def FeatureScatter():
         decay_rate = inputParam["decay_rate"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
+        IOtool.write_json(inputParam,osp.join(ROOT,"output", tid, stid + "_param.json"))
         value = {
             "type":"FeatureScatter",
             "state":0,
@@ -1932,8 +1935,11 @@ def FeatureScatter():
         IOtool.change_task_info(tid, "dataset", inputParam["dataset"])
         # 执行任务
         pool = IOtool.get_pool(tid)
+        # t2 = pool.submit(interface.submitAandB,1,2)
         t2 = pool.submit(interface.run_featurescatter, tid, stid, dataset, modelname, attack_method, evaluate_methods, lr, batch_size, max_epoch, decay_epoch, decay_rate)
+        
         IOtool.add_task_queue(tid, stid, t2, 3000)
+        # interface.run_featurescatter(tid, stid, dataset, modelname, attack_method, evaluate_methods, lr, batch_size, max_epoch, decay_epoch, decay_rate)
         res = {"code":1,"msg":"success","Taskid":tid,"stid":stid}
         return jsonify(res)
     else:
@@ -1961,6 +1967,7 @@ def SEAT():
         evaluate_method = inputParam["evaluate_method"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
+        IOtool.write_json(inputParam,osp.join(ROOT,"output", tid, stid + "_param.json"))
         value = {
             "type":"SEAT",
             "state":0,
@@ -2006,6 +2013,7 @@ def RiFT():
         batchsize = inputParam["batchsize"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
+        IOtool.write_json(inputParam,osp.join(ROOT,"output", tid, stid + "_param.json"))
         value = {
             "type":"RiFT",
             "state":0,
