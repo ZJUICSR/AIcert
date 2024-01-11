@@ -274,16 +274,19 @@ def RobustEnhance(model, args_dict, logging=None):
             net.load_state_dict(checkpoint['net'])
             start_epoch = checkpoint['epoch'] + 1
             logging.info('resuming from epoch %s in latest' % start_epoch)
-        elif os.path.isfile(f_cache_path):
+        else:
             start_epoch = 0
             logging.info('train from scratch: no checkpoint directory or file found')
-        elif os.path.isfile(f_path):
-            checkpoint = torch.load(f_path)
-            net.load_state_dict(checkpoint['net'])
-            start_epoch = checkpoint['epoch'] + 1
-            logging.info('resuming from epoch %s' % (start_epoch - 1))
-        elif not os.path.isfile(f_path) or not os.path.isfile(f_path_latest):
-            logging.info('train from scratch: no checkpoint directory or file found')
+        # elif os.path.isfile(f_cache_path):
+        #     start_epoch = 0
+        #     logging.info('train from scratch: no checkpoint directory or file found')
+        # elif os.path.isfile(f_path):
+        #     checkpoint = torch.load(f_path)
+        #     net.load_state_dict(checkpoint['net'])
+        #     start_epoch = checkpoint['epoch'] + 1
+        #     logging.info('resuming from epoch %s' % (start_epoch - 1))
+        # elif not os.path.isfile(f_path) or not os.path.isfile(f_path_latest):
+        #     logging.info('train from scratch: no checkpoint directory or file found')
 
     soft_xent_loss = softCrossEntropy()
 
