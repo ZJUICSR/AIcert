@@ -328,9 +328,9 @@ class SignOPTAttack(EvasionAttack):
             ):
                 lbd_lo = lbd_lo * 0.99
                 nquery += 1
-                if lbd_lo < tol:
-                    self._is_label(x_0 + lbd_lo * theta, y_0)
-                    break
+                # if lbd_lo < tol:
+                #     self._is_label(x_0 + lbd_lo * theta, y_0)
+                #     break
 
         while (lbd_hi - lbd_lo) > tol:
             lbd_mid = (lbd_lo + lbd_hi) / 2.0
