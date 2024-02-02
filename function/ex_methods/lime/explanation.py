@@ -191,11 +191,53 @@ class Explanation(object):
         See as_html() for parameters.
         This will throw an error if you don't have IPython installed"""
 
-        from IPython.core.display import display, HTML
-        display(HTML(self.as_html(labels=labels,
+        return self.as_html(labels=labels,
                                   predict_proba=predict_proba,
                                   show_predicted_value=show_predicted_value,
-                                  **kwargs)))
+                                  **kwargs)
+
+    def show_result(self,
+                    labels=None,
+                    predict_proba=True,
+                    show_predicted_value=True,
+                    **kwargs):
+
+        if labels is None and self.mode == "classification":
+            labels = self.available_labels()
+        
+        class_names = None
+        predictions = None
+        if self.mode == "classification" and predict_proba:
+            class_names = [str(x) for x in self.class_names]
+            predictions = list(self.predict_proba.astype(float))
+
+        regression_result = None
+        if self.mode == "regression" and show_predicted_value:
+            regression_result = (float(self.predicted_value),
+                                float(self.min_value),
+                                float(self.max_value))
+        
+        explain_res = []
+        if self.mode == "classification":
+            for label in labels:
+                exp = self.as_list(label)
+                explain_res.append([exp, label.item()])
+        else:
+            exp = self.as_list()
+            explain_res.append([exp, self.dummy_label.item()])
+
+        if self.mode == "classification":
+            html_data = self.local_exp[labels[0]]
+        else:
+            html_data = self.local_exp[self.dummy_label]
+
+        raw_js = self.domain_mapper.visualize_instance(
+                html_data,
+                labels[0].item() if self.mode == "classification" else self.dummy_label.item(),
+                'raw_div',
+                **kwargs)
+        
+        return (class_names, predictions, regression_result, explain_res, raw_js)
 
     def save_to_file(self,
                      file_path,
@@ -246,15 +288,8 @@ class Explanation(object):
         if labels is None and self.mode == "classification":
             labels = self.available_labels()
 
-        this_dir, _ = os.path.split(__file__)
-        bundle = open(os.path.join(this_dir, 'bundle.js'),
-                      encoding="utf8").read()
-
-        out = u'''<html>
-        <meta http-equiv="content-type" content="text/html; charset=UTF8">
-        <head><script>%s </script></head><body>''' % bundle
         random_id = id_generator(size=15, random_state=check_random_state(self.random_state))
-        out += u'''
+        out = u'''
         <div class="lime top_div" id="top_div%s"></div>
         ''' % random_id
 
@@ -321,6 +356,6 @@ class Explanation(object):
         %s
         </script>
         ''' % (random_id, predict_proba_js, predict_value_js, exp_js, raw_js)
-        out += u'</body></html>'
+        
 
         return out
