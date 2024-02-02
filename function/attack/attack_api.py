@@ -179,7 +179,7 @@ class EvasionAttacker():
         print(self.method)
         for key, value in kwargs.items():
             if key not in self.attack.attack_params:
-                if key != "save_path":
+                if key not in ["save_path","eps"]:
                     error = "{} is not the parameter of {}".format(key, method)
                     raise ValueError(error)
             else:

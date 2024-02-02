@@ -5,7 +5,10 @@ from .model_Lenet import lenet
 from .train_model import Train
 
 import torch
+import torchvision.models as models
 import os.path as osp
+
+import textattack
 
 def load_model(model_name, dataset, device, root, reference_model, logging, pretrained=True, attribution=True):
     if dataset == "imagenet":
@@ -78,13 +81,43 @@ def load_model(model_name, dataset, device, root, reference_model, logging, pret
         save_root = osp.join(root,f"model/ckpt")
         path = osp.join(save_root, "{:s}_{:s}.pt".format(dataset, model_name))
         if not osp.exists(path):
-            logging.info("找不到缓存区中的{:s}数据集上训练的{:s}模型，重新进行训练".format(dataset, model_name))
+            # logging.info("找不到缓存区中的{:s}数据集上训练的{:s}模型，重新进行训练".format(dataset, model_name))
+            print("si")
             acc, model = Train(model_name, model, dataset, device)
-            logging.info("{:s}模型训练完成，在{:s}数据集上的准确率为{:.2f}".format(model_name, dataset, acc*100))
+            # logging.info("{:s}模型训练完成，在{:s}数据集上的准确率为{:.2f}".format(model_name, dataset, acc*100))
             model.to(device="cpu")
             torch.save(model.state_dict(), path)
         else:
             logging.info("加载到缓存区中的{:s}数据集上训练的{:s}模型".format(dataset, model_name))
             model.load_state_dict(torch.load(path))
+    return model
 
+def load_torch_model(model_name):
+    model = None
+    if model_name == "vgg16":
+        model = models.vgg16(pretrained=True)
+    elif model_name == "resnet50":
+        model = models.resnet50(pretrained=True)
+    elif model_name == "densenet121":
+        model = models.densenet121(pretrained=True)
+    elif model_name == "mobilenet":
+        model = models.mobilenet_v2(pretrained=True)
+    elif model_name == "alexnet":
+        model = models.alexnet(pretrained=True)
+    elif model_name == "inception":
+        model = models.inception_v3(pretrained=True)
+    elif model_name == "efficientnet":
+        model = models.efficientnet_b0(pretrained=True)
+    else:
+        raise NotImplementedError("暂不支持{:s}模型".format(model_name))
+    return model
+
+def load_text_model(model_name):
+    model = None
+    if model_name == "lstm":
+        model = textattack.models.helpers.LSTMForClassification.from_pretrained("lstm-sst2")
+    elif model_name == "wordcnn":
+        model = textattack.models.helpers.WordCNNForClassification.from_pretrained("cnn-sst2")
+    else:
+        raise NotImplementedError("暂不支持{:s}模型".format(model_name))
     return model
