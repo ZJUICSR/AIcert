@@ -571,7 +571,10 @@ def query_log():
         body = {"code":1003,"msg":"fail,log is NULL","Log":Log}
     else:
         body = {"code":1,"msg":"success","Log":Log}
+    # print(body)
     return jsonify(body)
+
+
 # 删除任务
 @app.route('/Task/DeleteTask', methods=['DELETE'])
 def delete_task():
@@ -606,6 +609,15 @@ def delete_task():
         shutil.rmtree(outpath)
     body = {"code":1,"msg":"success"}
     return jsonify(body)
+
+@app.route('/Task/UploadPic', methods=['POST'])
+def UploadPic():
+    if request.method == "POST":
+        file = request.files.get('avatar')
+        basePath = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)
+        save_dir = os.path.join(basePath[0], 'dataset/data/ckpt',"upload.jpg")
+        file.save(save_dir)
+        return jsonify({'save_dir': save_dir})
 
 # 结果输出
 @app.route("/output/Resultdata", methods=["GET"])
@@ -784,8 +796,7 @@ def AttackDimReduciton():
     Dataset：数据集名称
     Model：模型名称
     AdvMethods:list 对抗攻击算法名称
-    VisMethods：list 数据降维方法
-    
+    VisMethods:list 降维方法名称
     """
     global LiRPA_LOGS
     if (request.method == "POST"):
@@ -1004,6 +1015,63 @@ def auto_verify_img():
         return json.dumps(resp,ensure_ascii=False)
     # return render_template('index_auto_verify.html')
 
+@app.route('/Attack/AdversarialAnalysis', methods=['POST'])
+def AdversarialAnalysis():
+    """
+    对抗图像归因与降维解释集成api
+    输入：tid：主任务ID
+    Dataset：数据集名称
+    Model：模型名称
+    AdvMethods:list 对抗攻击算法名称
+    ExMethods:攻击机理解释方法名称
+    vis_methods: list 降维方法名称
+    """
+    global LiRPA_LOGS
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        tid = inputParam["Taskid"]
+        datasetparam = inputParam["DatasetParam"]
+        modelparam = inputParam["ModelParam"]
+        adv_methods = inputParam["AdvMethods"]
+        ex_methods = inputParam["ExMethods"]
+        use_layer_explain = inputParam["Use_layer_explain"]
+        vis_methods = inputParam["VisMethods"]
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        IOtool.write_json(inputParam, osp.join(ROOT,"output", tid, stid + "_param.json"))
+        value = {
+            "type":"adversarial_analysis",
+            "state":0,
+            "name":["model"],
+            "dataset":datasetparam["name"],
+            "method":adv_methods,
+            "model":modelparam["name"],
+            "exmethod":ex_methods,
+            "vis_methods":vis_methods
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", datasetparam["name"])
+        IOtool.change_task_info(tid, "model", modelparam["name"])
+        # 执行任务
+        datasetparam["name"] = datasetparam["name"].lower()
+        modelparam["name"] = modelparam["name"].lower()
+        
+        pool = IOtool.get_pool(tid)
+        
+        t2 = pool.submit(interface.submitAandB,tid,stid,1,2)
+        # t2 = pool.submit(interface.run_adversarial_analysis, tid, stid, datasetparam, modelparam, ex_methods, vis_methods, adv_methods, use_layer_explain)
+        IOtool.add_task_queue(tid, stid, t2, 300 * len(vis_methods) + 400 * len(ex_methods) + 300*len(adv_methods))
+        interface.run_adversarial_analysis(tid, stid, datasetparam, modelparam, ex_methods, vis_methods, adv_methods, use_layer_explain)
+        res = {
+            "code":1,
+            "msg":"success",
+            "tid":tid,
+            "stid":stid
+        }
+        return jsonify(res)
+    else:
+        abort(403)
+
 @app.route('/Attack/AttackAttrbutionAnalysis', methods=['POST'])
 def AttackAttrbutionAnalysis():
     """
@@ -1068,33 +1136,34 @@ def AttackLime():
     global LiRPA_LOGS
     if (request.method == "POST"):
         inputParam = json.loads(request.data)
-        print(request.data)
         tid = inputParam["Taskid"]
         datasetparam = inputParam["DatasetParam"]
         modelparam = inputParam["ModelParam"]
         adv_methods = inputParam["AdvMethods"]
-        # ex_methods = inputParam["ExMethods"]
+        data_mode = inputParam["mode"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
         IOtool.write_json(inputParam, osp.join(ROOT,"output", tid, stid + "_param.json"))
-        value = {
+        value =  {
             "type":"attack_lime",
             "state":0,
             "name":["model"],
             "dataset":datasetparam["name"],
             "method":adv_methods,
             "model":modelparam["name"],
+            "mode":data_mode
         }
         IOtool.add_subtask_info(tid, stid, value)
         IOtool.change_task_info(tid, "dataset", datasetparam["name"])
         IOtool.change_task_info(tid, "model", modelparam["name"])
+
         # 执行任务
         datasetparam["name"] = datasetparam["name"].lower()
         modelparam["name"] = modelparam["name"].lower()
-        
+
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.run_lime, tid, stid, datasetparam, modelparam, adv_methods)
-        IOtool.add_task_queue(tid, stid, t2, 300)
+        t2 = pool.submit(interface.run_lime, tid, stid, datasetparam, modelparam, adv_methods, data_mode)
+        IOtool.add_task_queue(tid, stid, t2,  400*len(adv_methods))
         res = {
             "code":1,
             "msg":"success",
@@ -2082,14 +2151,7 @@ def DownloadData():
             else:
                 return jsonify(bool=False, msg='No such file, please check file path')
 
-@app.route('/Task/UploadPic', methods=['POST'])
-def UploadPic():
-    if request.method == "POST":
-        file = request.files.get('avatar')
-        basePath = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)
-        save_dir = os.path.join(basePath[0], 'dataset/data/ckpt',"upload.jpg")
-        file.save(save_dir)
-        return jsonify({'save_dir': save_dir})
+
 
 @app.route('/Attack/LLM_attack', methods=['POST'])
 def LLM_attack():
