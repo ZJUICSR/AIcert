@@ -1,0 +1,16 @@
+{
+    "public": {
+        "1": "MNIST_train",
+        "2": "MNIST_test",
+        "3": "CIFAR10_train",
+        "4": "CIFAR10_test"
+    },
+    "customize": {
+        "1000": "catdogbird",
+        "1001": "newdata",
+        "1002": "dasdasd",
+        "1003": "1",
+        "1004": "1",
+        "1005": "1"
+    }
+}
