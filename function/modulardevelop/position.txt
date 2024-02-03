@@ -1,0 +1,38 @@
+/data/zxy/anaconda3/envs/ak_2.3/lib/python3.6/site-packages/onnx2torch//onnx_node.py-3
+from types import MappingProxyType
+
+from typing import Any
+
+from typing import Mapping
+
+/data/zxy/anaconda3/envs/ak_2.3/lib/python3.6/site-packages/onnx2torch//onnx_node.py-80
+        return MappingProxyType(self._proto_attributes)
+
+/data/zxy/anaconda3/envs/ak_2.3/lib/python3.6/site-packages/onnx2torch//onnx_graph.py-3
+from types import MappingProxyType
+
+from typing import Mapping
+
+from typing import Tuple
+
+/data/zxy/anaconda3/envs/ak_2.3/lib/python3.6/site-packages/onnx2torch//onnx_graph.py-84
+        return MappingProxyType(self._initializers)
+
+
+
+    def value_type(self, value_name: str) -> ValueType:
+
+/data/zxy/anaconda3/envs/ak_2.3/lib/python3.6/site-packages/onnx2torch/node_converters/nms.py-53
+                        out_fmt='xyxy',
+
+                    )
+
+
+
+/data/zxy/anaconda3/envs/ak_2.3/lib/python3.6/site-packages/onnx2torch/utils/common.py-89
+    # zxy
+
+    half_len = len(padding) // 2
+
+    if padding[:half_len] != padding[half_len:]:
+
