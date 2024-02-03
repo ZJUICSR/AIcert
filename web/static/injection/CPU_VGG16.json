@@ -1,0 +1,9 @@
+{
+	"name":"VGG16",
+  "hard":"Intel i7 7700 CPU",
+	"dataset":"CIFAR10",
+  "label":["vanilla VGG16","Lightweight VGG16(Before quantization)","Lightweight VGG16(After quantization)"],
+	"time":[28.9732,31.9120,8.9726],
+  "ACC":[0.9238,0.9233,0.9218],
+  "size":[59.6243,14.2894,3.7418]
+}
