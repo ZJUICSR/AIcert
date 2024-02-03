@@ -1,0 +1,9 @@
+{
+	"name":"VGG16",
+  "hard":"Jetson Nano(ARM 架构)",
+	"dataset":"CIFAR10",
+  "label":["vanilla VGG16","Lightweight VGG16(Before quantization)","Lightweight VGG16(After quantization)"],
+	"time":[30.9815,69.7343,15.8954],
+  "ACC":[0.9177,0.9215,0.9186],
+  "size":[14.2651,3.8834,3.8834]
+}

@@ -1,0 +1,1 @@
+{"recom_algorithm": ["FGSM", "C&W", "DeepFool", "PGD", "AutoPGD", "BIM", "JMSA", "ZOO"], "acc": {"ori": 0.2537, "DeepFool": 0.1720, "PGD": 0.1428, "AutoPGD": 0.1358, "BIM": 0.1439}}
