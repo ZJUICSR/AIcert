@@ -1,4 +1,5 @@
 output/*
+web/static/media/*
 web/output/
 function/GroupDefense_2/
 function/ensemble/models/
