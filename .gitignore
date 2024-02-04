@@ -1,4 +1,6 @@
 output/*
+data/*
+models/*
 web/static/media/*
 web/output/
 function/GroupDefense_2/
