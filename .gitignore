@@ -4,7 +4,7 @@ models/*
 web/static/media/*
 web/output/
 function/GroupDefense_2/
-function/ensemble/models/
+function/ensemble/models/*.pt
 function/ensemble/datasets/
 function/formal_verify/auto_LiRPA/*
 function/ensemble/ensemble_defense/test.log
