@@ -22,6 +22,6 @@ def run_modulardevelop(dataset,model,tuner,init, epoch,iternum, device, out_path
     os.system("bash -c 'source ~/anaconda3/etc/profile.d/conda.sh &&  conda activate autotrain && python function/modulardevelop/demo/run_convert.py --data "+dataset+" --model_path "+out_path+"/best_model.h5 --target_bk paddle  --save_dir "+out_path+"/target_paddle'")
     res["target_paddle"] = os.path.join(out_path,"target_paddle")
     # 退出到项目环境
-    os.system("bash -c 'source ~/anaconda3/etc/profile.d/conda.sh && conda deactivate")
+    os.system("bash -c 'source ~/anaconda3/etc/profile.d/conda.sh && conda deactivate' ")
     # print(res)
     return res
