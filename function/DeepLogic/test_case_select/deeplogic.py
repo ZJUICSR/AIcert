@@ -135,7 +135,7 @@ def deeplogic_test(model, device,model_name,dataset_name,data,true_test):
     
     df['error_level']=error_level(pred_test_prob,true_test)
 
-    df.to_csv('output/cache/test_case_select/all_output/output_cifar/{}/{}_deeplogic_0.csv'.format(model_name,dataset_name))
+    df.to_csv('output/cache/test_case_select/all_output/output_{}/{}/{}_deeplogic_0.csv'.format(dataset_name, model_name,dataset_name))
 
 from test_case_select.show_result import *
 def evaluate_deeplogic(dataset, modelname, out_path='./', logging=None):
