@@ -1605,10 +1605,10 @@ def ModularDevelopParamSet():
         IOtool.change_task_info(tid, "dataset", dataset)
         IOtool.change_task_info(tid, "model", model)
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.run_modulardevelop, tid, AAtid, dataset, model, tuner, init, epoch, iternum)
-        t2 = pool.submit(interface.submitAandB, tid, AAtid, 1, 2)
+        t2 = pool.submit(interface.run_modulardevelop, tid, AAtid, dataset, model, tuner, init, epoch, iternum)
+        # t2 = pool.submit(interface.submitAandB, tid, AAtid, 1, 2)
         IOtool.add_task_queue(tid, AAtid, t2, 3000)
-        interface.run_modulardevelop( tid, AAtid, dataset, model, tuner, init, epoch, iternum )
+        # interface.run_modulardevelop( tid, AAtid, dataset, model, tuner, init, epoch, iternum )
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
