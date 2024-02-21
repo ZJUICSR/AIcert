@@ -19,9 +19,6 @@ sys.path.append(os.path.dirname(__file__).rsplit('/',1)[0])
 sys.path.append("..")
 
 
-sys.path.append("..")
-
-
 
 def save_data(x_train,x_test,y_train,y_test,save_path):
     dataset={}
@@ -156,7 +153,7 @@ def model_generate(
     os.makedirs(tmp_dir)
     os.makedirs('./tmp')
     log_path=os.path.join(root_path,'log.pkl')
-
+    
     if data=='mnist':
         (x_train, y_train), (x_test, y_test) = mnist_load_data()
     elif data=='cifar10':
