@@ -105,7 +105,8 @@ button:active {
   width: 72px;
   height: 25px;
   overflow-wrap: break-word;
-  color: rgba(255, 255, 255, 1);
+  /* color: rgba(255, 255, 255, 1); */
+  color: black;
   font-size: 18px;
   font-family: PingFangSC-Regular;
   font-weight: 600;
