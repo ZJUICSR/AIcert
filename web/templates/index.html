@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>人工智能安全理论及验证平台</title>
+    <title>AIcert</title>
     <link rel="stylesheet" type="text/css" href="../static/css/indexcss/common.css" />
     <link rel="stylesheet" type="text/css" href="../static/css//indexcss/swiper.min.css" />
     <link rel="stylesheet" type="text/css" href="../static/css/indexcss/index.css" />
@@ -33,10 +33,10 @@
           <div class="block_2 flex-col" onclick="window.open('https://github.com/AISecurity2030/Attack', '_self')"></div>
         </div>
         <div class="text-wrapper_1 flex-row">
-          <span class="text_6">人工智能安全理论及验证平台</span>
+          <span class="text_6">人工智能<br>安全理论及验证平台</span>
         </div>
         <div class="text-wrapper_2 flex-row">
-          <span class="text_7">适用于大规模人工智能系统的评估与验证</span>
+          <span class="text_7">聚焦人工智能系统全链路安全威胁，提供一站式安全检测和多维度评估，助力人工智能系统安全防护。</span>
         </div>
       </div>
       <div class="group_2 flex-col">
@@ -46,42 +46,114 @@
         </video>
         <div class="box_1 flex-col">
           <div class="section_2 flex-col">
-            <span class="text_9">平台功能</span>
-            <img class="image_5" referrerpolicy="no-referrer" src="../static/img/head_line_4.png" />
+            <span class="text_14">平台功能</span>
+            <img class="image_5" referrerpolicy="no-referrer" src="../static/img/head_line_3.png" />
             <div class="pc-banner">
               <div class="swiper-container swiper-container-horizontal">
                   <div class="swiper-wrapper" style="transform: translate3d(-1080px, 0px, 0px); transition-duration: 1000ms;">
-                    <div class="swiper-slide swiper-slide-duplicate swiper-slide-duplicate-prev" data-swiper-slide-index="3"  >
-                      <img src="../static/img/对抗攻击评估.png" onclick="goto_adv_attack()">
+                    <div class="swiper-slide swiper-slide-duplicate swiper-slide-duplicate-prev" data-swiper-slide-index="21"  >
+                      <img src="../static/img/swiper/数据公平性提升.png" onclick="goto_dataFairnessDebias()"> 
                     </div>
-                    <div class="swiper-slide swiper-slide-duplicate swiper-slide-duplicate-active" data-swiper-slide-index="4"  >
-                      <img src="../static/img/鲁棒性增强.png" onclick="goto_robust_enhance()">
+                    <div class="swiper-slide swiper-slide-duplicate swiper-slide-duplicate-active" data-swiper-slide-index="22"  >
+                      <img src="../static/img/swiper/异常数据检测.png" onclick="goto_dataClean()">
                     </div>
-                      <div class="swiper-slide swiper-slide-duplicate-next" data-swiper-slide-index="0"  >
-                        <img src="../static/img/公平性.png" onclick="goto_fairness()">
-                      </div>
-                      <div class="swiper-slide" data-swiper-slide-index="1"  >
-                        <img src="../static/img/后门攻击.png" onclick="goto_bkd_attack()">
-                      </div>
-                      <div class="swiper-slide" data-swiper-slide-index="2"  >
-                        <img src="../static/img/形式化验证.png" onclick="goto_formal_verification()">
-                      </div>
-                      <div class="swiper-slide swiper-slide-prev" data-swiper-slide-index="3"  >
-                        <img src="../static/img/对抗攻击评估.png" onclick="goto_adv_attack()">
-                      </div>
-                      <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="4"  >
-                        <img src="../static/img/鲁棒性增强.png" onclick="goto_robust_enhance()">
-                      </div>
+                    <div class="swiper-slide swiper-slide-duplicate-next" data-swiper-slide-index="0"  >
+                      <img src="../static/img/swiper/AI模型安全度量.png" onclick="goto_modelMeasure() ">
+                    </div>
+                    <div class="swiper-slide" data-swiper-slide-index="1"  >
+                      <img src="../static/img/swiper/对抗攻击评估.png" onclick="goto_adv_attack()">
+                    </div>
+                    <div class="swiper-slide" data-swiper-slide-index="2"  >
+                      <img src="../static/img/swiper/后门攻击评估.png" onclick="goto_bkd_attack()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-prev" data-swiper-slide-index="3"  >
+                      <img src="../static/img/swiper/模型对抗性测试.png" onclick="goto_autoattack()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="4"  >
+                      <img src="../static/img/swiper/模型公平性评估.png" onclick="modelFairnessEva()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="5"  >
+                      <img src="../static/img/swiper/形式化验证.png" onclick="goto_formal_verification()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="6"  >
+                      <img src="../static/img/swiper/对抗攻击防御.png" onclick="goto_advAttackDefense()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="7"  >
+                      <img src="../static/img/swiper/后门攻击防御.png" onclick="goto_backdoorDefense()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="8"  >
+                      <img src="../static/img/swiper/模型鲁棒性训练.png" onclick="goto_robust_advTraining()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="9"  >
+                      <img src="../static/img/swiper/模型公平性提升.png" onclick="goto_modelFairnessDebias()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="10"  >
+                      <img src="../static/img/swiper/模型群智化防御.png" onclick="goto_crowdDefense()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="11"  >
+                      <img src="../static/img/swiper/AI模型模块化开发.png" onclick="goto_modularDevelop()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="12"  >
+                      <img src="../static/img/swiper/标准化单元测试.png" onclick="goto_coverage_neural()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="13"  >
+                      <img src="../static/img/swiper/攻击机理分析.png" onclick="goto_exMethod()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="14"  >
+                      <img src="../static/img/swiper/AI开发框架安全结构度量.png" onclick="goto_frameworkTest()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="15"  >
+                      <img src="../static/img/swiper/开发环境分析与框架适配.png" onclick="goto_envTest()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="16"  >
+                      <img src="../static/img/swiper/侧信道分析.png" onclick="goto_side()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="17"  >
+                      <img src="../static/img/swiper/故障注入验证.png" onclick="goto_inject()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="18"  >
+                      <img src="../static/img/swiper/基于硬件优化的软硬件一体化验证.png" onclick="goto_hardOpt()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="19"  >
+                      <img src="../static/img/swiper/测试样本自动生成.png" onclick="goto_concolic()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="20"  >
+                      <img src="../static/img/swiper/数据公平性评估.png" onclick="goto_dataFairnessEva()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="21"  >
+                      <img src="../static/img/swiper/数据公平性提升.png" onclick="goto_dataFairnessDebias()">
+                    </div>
+                    <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="22"  >
+                      <img src="../static/img/swiper/异常数据检测.png" onclick="goto_dataClean()">
+                    </div>
+                    <!--  -->
                     <div class="swiper-slide swiper-slide-center none-effect swiper-slide-duplicate swiper-slide-next" data-swiper-slide-index="0"  >
-                      <img src="../static/img/公平性.png" onclick="goto_fairness()">
+                      <img src="../static/img/swiper/AI模型安全度量.png" onclick="goto_modelMeasure() ">
                     </div>
                     <div class="swiper-slide swiper-slide-duplicate" data-swiper-slide-index="1"  >
-                      <img src="../static/img/后门攻击.png" onclick="goto_bkd_attack()">
+                      <img src="../static/img/swiper/对抗攻击评估.png" onclick="goto_adv_attack()">
                     </div>
                   </div>
                 </div> 
             </div>
             <div class="swiper-pagination swiper-pagination-clickable swiper-pagination-bullets">
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
+              <span class="swiper-pagination-bullet"></span>
               <span class="swiper-pagination-bullet"></span>
               <span class="swiper-pagination-bullet"></span>
               <span class="swiper-pagination-bullet"></span>
@@ -109,10 +181,11 @@
                 src="../static/img/advantage_1.png"
               />
             </div>
-            <span class="text_15-0">一站式检测</span>
+            <!-- <span class="text_15-0">一站式检测</span> -->
+            <span class="text_15-0">全链路安全检测</span>
             <span class="text_16-0">
-              平台对人工智能数据和模型进行安全性评估并给出加固方案，用户无需切换多个平台，实现一站式检测。
-              <!-- 支持多种经典和SOTA软硬件攻击，一体化全面检测人工智能模型，并给出加固方案。 -->
+              <!-- 平台对人工智能数据和模型进行安全性评估并给出加固方案，用户无需切换多个平台，实现一站式检测。 -->
+              深度检测AI系统全架构各个关键节点的安全威胁，深入挖掘AI系统漏洞，全面地评估AI系统的安全状况，及时发现并消除威胁。
             </span>
           </div>
           <div class="list-items_1-1 flex-col">
@@ -123,11 +196,12 @@
                 src="../static/img/advantage_2.png"
               />
             </div>
-            <!-- <span class="text_15-1">准确率高</span> -->
-            <span class="text_15-1">场景可拓展</span>
+            
+            <!-- <span class="text_15-1">场景可拓展</span> -->
+            <span class="text_15-1">高效率安全开发</span>
             <span class="text_16-1">
-              平台内置多场景数据和模型，同时支持自定义数据集和模型算法上传，平台核心能力得到充分发挥。
-              <!-- 持续更新业内各类攻击算法，全面覆盖新型安全风险，攻击抵抗率90%以上 -->
+              <!-- 平台内置多场景数据和模型，同时支持自定义数据集和模型算法上传，平台核心能力得到充分发挥。 -->
+              基于组件式系统建模思想，从数据处理、模型构建、运行环境安全检测等环节保障开发过程安全，实现了AI系统的安全开发。
             </span>
           </div>
           <div class="list-items_1-2 flex-col">
@@ -138,9 +212,10 @@
                 src="../static/img/advantage_3.png"
               />
             </div>
-            <span class="text_15-2">全周期评估</span>
+            <!-- <span class="text_15-2">全周期评估</span> -->
+            <span class="text_15-2">多维度安全评估</span>
             <span class="text_16-2">
-              从鲁棒性、公平性、完整性等多维度出发，平台对数据和模型全生命周期存在的安全风险进行评估和防御。
+              从鲁棒性、公平性、完整性、可靠性、可解释性、可验证性六个不同的维度，能够帮助用户更全面、客观的认知人工智能系统的安全性。
             </span>
           </div>
         </div>
