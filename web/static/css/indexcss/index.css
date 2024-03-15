@@ -19,20 +19,20 @@
 .section_1 {
   width: 1189px;
   height: 74px;
-  margin: 22px 0 0 261px;
+  margin: 22px 0 0 370px;
 }
 
-.block_1 {
-  /* background-image: url(../../img/icon.png); */
-  background-image: url(../../img/index_icon.png);
-  width: 59px;
-  height: 74px;
-}
+/* .block_1 { */
+  /* background-image: url(../../img/AIcert_icon.png); */
+  /* background-image: url(../../img/index_icon.png); */
+  /* width: 120px; */
+  /* height: 30px; */
+/* } */
 
 .image_1 {
   width: 38px;
   height: 18px;
-  margin: 30px 0 0 277px;
+  margin: 30px 0 0 150px;
 }
 
 .text_1 {
@@ -910,13 +910,14 @@
   margin: 0 0 0 735px;
   flex-direction: row;
   align-items: center;
+
 }
 
-.box_10 {
+/* .box_10 {
   background-image: url(../../img/index_icon.png);
   width: 28px;
   height: 28px;
-}
+} */
 
 .text_23 {
   width: 312px;
@@ -933,9 +934,10 @@
 }
 
 .box_11 {
-  width: 550px;
+  width: 750px;
   height: 21px;
-  margin: 17px 0 40px 685px;
+  margin: 17px 0 40px 555px;
+  /* gap: 5px; */
 }
 
 .image-text_1 {
@@ -966,7 +968,7 @@
 .image-text_2 {
   width: 144px;
   height: 20px;
-  margin-left: 48px;
+  margin-left: 110px;
 }
 
 .thumbnail_1 {
