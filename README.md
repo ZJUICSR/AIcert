@@ -78,4 +78,4 @@ view：后台与前端的接口，每个python文件为一个蓝图，在flask�
 如果你有任何疑问或需要帮助，请随时[联系我们](zju.aicert@gmail.com)。
 
 ## 协议
-AIcert基于MIT协议，关于协议的更多信息，请参看[LICENSE](https://github.com/ZJUICSR/AIcert/blob/main/LICENSE)文件。
+AIcert基于 MulanPSL-2.0协议，关于协议的更多信息，请参看[LICENSE](https://github.com/ZJUICSR/AIcert/blob/main/LICENSE)文件。
