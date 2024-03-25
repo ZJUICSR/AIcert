@@ -1,0 +1,933 @@
+[
+    {
+        "name": "逃逸攻击",
+        "desc": "攻击模式",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "毒化攻击",
+        "desc": "攻击模式",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "图片",
+        "desc": "攻击数据",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "文本",
+        "desc": "攻击数据",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "图",
+        "desc": "攻击数据",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "黑盒",
+        "desc": "攻击场景",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "白盒",
+        "desc": "攻击场景",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "图像分类",
+        "desc": "任务类型",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "文本分类",
+        "desc": "任务类型",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "情感分析",
+        "desc": "任务类型",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "智能推荐",
+        "desc": "任务类型",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "目标检测",
+        "desc": "任务类型",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "机器翻译",
+        "desc": "任务类型",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "异常检测",
+        "desc": "任务类型",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "3D点云",
+        "desc": "任务类型",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "语音识别",
+        "desc": "任务类型",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "物体分割",
+        "desc": "任务类型",
+        "paper": "",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "L-BFGS",
+        "desc": "攻击算法",
+        "paper": "Intriguing properties of neural networks",
+        "method_type": "基于优化",
+        "task_type": ""
+    },
+    {
+        "name": "FGSM",
+        "desc": "攻击算法",
+        "paper": "Explaining and harnessing adversarial examples",
+        "method_type": "基于梯度",
+        "task_type": ""
+    },
+    {
+        "name": "DeepFool",
+        "desc": "攻击算法",
+        "paper": "Deepfool: a simple and accurate method to fool deep neural networks",
+        "method_type": "基于超平面",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "C&W",
+        "desc": "攻击算法",
+        "paper": "Towards neural networks",
+        "method_type": "基于优化",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "BIM",
+        "desc": "攻击算法",
+        "paper": "Adversarial machine learning at scale",
+        "method_type": "基于梯度",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "Adversarial Patch",
+        "desc": "攻击算法",
+        "paper": "Adversarial patch",
+        "method_type": "对抗补丁",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "ATN",
+        "desc": "攻击算法",
+        "paper": "Adversarial Transformation Networks",
+        "method_type": "基于生成模型",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "JSMA",
+        "desc": "攻击算法",
+        "paper": "The limitations of deep learning in adversarial settings",
+        "method_type": "基于梯度",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "PGD",
+        "desc": "攻击算法",
+        "paper": "Towards deep learning models resistant to adversarial attacks",
+        "method_type": "基于梯度",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "TPGD",
+        "desc": "攻击算法",
+        "paper": "Theoretically Principled Trade-off between Robustness and Accuracy",
+        "method_type": "基于梯度",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "AutoPGD",
+        "desc": "攻击算法",
+        "paper": "Reliable evaluation of adversarial robustness with an ensemble of diverse parameter-free attacks",
+        "method_type": "基于梯度",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "DIFGSM",
+        "desc": "攻击算法",
+        "paper": "Improving Transferability of Adversarial Examples with Input Diversity ",
+        "method_type": "基于梯度",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "RFGSM",
+        "desc": "攻击算法",
+        "paper": "Ensemble Adversarial Traning: Attacks and Defences",
+        "method_type": "基于梯度",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "FAB",
+        "desc": "攻击算法",
+        "paper": "Minimally distorted Adversarial Examples with a Fast Adaptive Boundary Attack",
+        "method_type": "基于决策边界",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "ZOO",
+        "desc": "攻击算法",
+        "paper": "Zoo: Zeroth order optimization based black-box attacks to deep neural networks without training substitute models",
+        "method_type": "基于梯度估计",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "Square",
+        "desc": "攻击算法",
+        "paper": "Square Attack: a query-efficient black-box adversarial attack via random search ",
+        "method_type": "基于梯度",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "AutoZOOM",
+        "desc": "攻击算法",
+        "paper": "Autozoom: Autoencoder-based zeroth order optimization method for attacking black-box neural networks",
+        "method_type": "基于梯度估计",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "Boundary-Attack",
+        "desc": "攻击算法",
+        "paper": "Decision-based adversarial attacks: Reliable attacks against black-box machine learning \nmodels",
+        "method_type": "基于决策",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "Substitute-Model",
+        "desc": "攻击算法",
+        "paper": "Practical black-box attacks against machine learning",
+        "method_type": "基于替代模型",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "NES-Attack",
+        "desc": "攻击算法",
+        "paper": "Black-box Adversarial Attacks with Limited Queries and Information",
+        "method_type": "基于梯度估计",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "SimBa",
+        "desc": "攻击算法",
+        "paper": "Simple Black-box Adversarial Attacks",
+        "method_type": "基于梯度估计",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "DeepConfuse",
+        "desc": "攻击算法",
+        "paper": "Learning to confuse: Generating training time adversarial data with auto-encoder",
+        "method_type": "投毒攻击",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "NNPoision",
+        "desc": "攻击算法",
+        "paper": "Generative Poisoning Attack Method Against Neural Networks",
+        "method_type": "投毒攻击",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "Badnets",
+        "desc": "攻击算法",
+        "paper": "Badnets: Identifying vulnerabilities in the machine learning model supply chain",
+        "method_type": "投毒攻击",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "Trojan Attack",
+        "desc": "攻击算法",
+        "paper": "Trojaning attack on neural networks",
+        "method_type": "投毒攻击",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "Bullseye Polytope",
+        "desc": "攻击算法",
+        "paper": "Bullseye Polytope: A Scalable Clean-Label Poisoning Attack with Improved Transferability",
+        "method_type": "投毒攻击",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "PolytopeAttack",
+        "desc": "攻击算法",
+        "paper": "Transferable Clean-Label Poisoning Attacks on Deep Neural Nets",
+        "method_type": "投毒攻击",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "BPDA",
+        "desc": "攻击算法",
+        "paper": "Obfuscated gradients give a false sense of security: Circumventing defenses to adversarial examples",
+        "method_type": "基于梯度",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "MI-FGSM",
+        "desc": "攻击算法",
+        "paper": "Boosting Adversarial Attacks with Momentum",
+        "method_type": "基于梯度",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "Adversarial-Training",
+        "desc": "防御算法",
+        "paper": "Explaining and harnessing adversarial examples",
+        "method_type": "对抗训练",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "IBP-CROWN",
+        "desc": "防御算法",
+        "paper": "Towards stable and efficient training of verifiably robust neural networks",
+        "method_type": "形式化验证",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "Defense-GAN",
+        "desc": "防御算法",
+        "paper": "Defense-gan: Protecting classifiers against adversarial attacks using generative models",
+        "method_type": "图像预处理",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "InvGAN",
+        "desc": "防御算法",
+        "paper": "Invert and Defend: Model-based Approximate Inversion of Generative Adversarial Networks for Secure Inference",
+        "method_type": "图像预处理",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "SID",
+        "desc": "防御算法",
+        "paper": "Detecting Adversarial Examples from Sensitivity Inconsistency of Spatial-Transform Domain",
+        "method_type": "对抗样本检测",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "ADC-detector",
+        "desc": "防御算法",
+        "paper": "ACT-Detector: Adaptive channel transformation-based light-weighted detector for adversarial attacks",
+        "method_type": "对抗样本检测",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "DIP",
+        "desc": "防御算法",
+        "paper": "Real-Time Adversarial Attack Detection with Deep Image Prior Initialized as a High-Level Representation Based Blurring Network",
+        "method_type": "对抗样本检测",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "SmsNet",
+        "desc": "防御算法",
+        "paper": "SmsNet: A New Deep Convolutional Neural Network Model for Adversarial Example Detection",
+        "method_type": "对抗样本检测",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "Activation Clustering",
+        "desc": "防御算法",
+        "paper": "Detecting backdoor attacks on deep neural networks by activation clustering",
+        "method_type": "后门攻击检测",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "Neural Cleanse",
+        "desc": "防御算法",
+        "paper": "Neural Cleanse: Identifying and Mitigating Backdoor Attacks in Neural Networks",
+        "method_type": "后门攻击检测",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "Deep k-NN",
+        "desc": "防御算法",
+        "paper": "Deep k-nn defense against clean-label data poisoning attacks",
+        "method_type": "后门攻击检测",
+        "task_type": "图像分类"
+    },
+    {
+        "name": "DeepWordBug",
+        "desc": "攻击算法",
+        "paper": "Black-box generation of adversarial text sequences to evade deep learning classifiers",
+        "method_type": "关键单词或字母替换",
+        "task_type": "文本分类"
+    },
+    {
+        "name": "BERT-Attack",
+        "desc": "攻击算法",
+        "paper": "Bert-attack: Adversarial attack against bert using bert",
+        "method_type": "实用Bert攻击",
+        "task_type": "文本分类"
+    },
+    {
+        "name": "WordChange",
+        "desc": "攻击算法",
+        "paper": "Wordchange: Adversarial examples generation approach for chinese text classification",
+        "method_type": "关键单词或字母替换",
+        "task_type": "文本分类"
+    },
+    {
+        "name": "BAE",
+        "desc": "攻击算法",
+        "paper": "Bae: Bert-based adversarial examples for text classification",
+        "method_type": "关键单词替换",
+        "task_type": "文本分类"
+    },
+    {
+        "name": "TextFooler",
+        "desc": "攻击算法",
+        "paper": "Is bert really robust? a strong baseline for natural language attack on text classification and entailment",
+        "method_type": "关键单词替换",
+        "task_type": "情感分析"
+    },
+    {
+        "name": "CLARE",
+        "desc": "攻击算法",
+        "paper": "Contextualized perturbation for textual adversarial attack",
+        "method_type": "关键单词替换",
+        "task_type": "情感分析"
+    },
+    {
+        "name": "AEG",
+        "desc": "攻击算法",
+        "paper": "Generating black-box adversarial examples for text classifiers using a deep reinforced model",
+        "method_type": "关键单词替换",
+        "task_type": "文本分类"
+    },
+    {
+        "name": "Hard-Label-Attack",
+        "desc": "攻击算法",
+        "paper": "Generating natural language attacks in a hard label black box setting",
+        "method_type": "同意词替换",
+        "task_type": "文本分类"
+    },
+    {
+        "name": "Lage-Scale-Adversarial-Attack",
+        "desc": "攻击算法",
+        "paper": "Generating natural language adversarial examples on a large scale with generative models",
+        "method_type": "生成模型",
+        "task_type": "文本分类"
+    },
+    {
+        "name": "Robust-Word-Recognition",
+        "desc": "防御算法",
+        "paper": "Combating adversarial misspellings with robust word recognition",
+        "method_type": "语法检查",
+        "task_type": "情感分析"
+    },
+    {
+        "name": "DISP",
+        "desc": "防御算法",
+        "paper": "Learning to discriminate perturbations for blocking adversarial attacks in text classification",
+        "method_type": "数据转换",
+        "task_type": "文本分类"
+    },
+    {
+        "name": "AMDA",
+        "desc": "防御算法",
+        "paper": "Better robustness by more coverage: Adversarial training with mixup augmentation for robust fine-tuning",
+        "method_type": "鲁棒性训练",
+        "task_type": "文本分类"
+    },
+    {
+        "name": "Safer",
+        "desc": "防御算法",
+        "paper": "SAFER: A structure-free approach for certified robustness to adversarial word substitutions",
+        "method_type": "形式化验证",
+        "task_type": "文本分类"
+    },
+    {
+        "name": "FGWS",
+        "desc": "防御算法",
+        "paper": "Frequency-guided word substitutions for detecting textual adversarial examples",
+        "method_type": "对抗样本检测",
+        "task_type": "文本分类"
+    },
+    {
+        "name": "RanMask",
+        "desc": "防御算法",
+        "paper": "Certified Robustness to Text Adversarial Attacks by Randomized [MASK]",
+        "method_type": "形式化验证",
+        "task_type": "文本分类"
+    },
+    {
+        "name": "TextFirewall",
+        "desc": "防御算法",
+        "paper": "TextFirewall: Omni-Defending Against Adversarial Texts in Sentiment Classification",
+        "method_type": "对抗样本检测",
+        "task_type": "情感分析"
+    },
+    {
+        "name": "BAT",
+        "desc": "防御算法",
+        "paper": "Adversarial training for aspect-based sentiment analysis with bert",
+        "method_type": "数据转换",
+        "task_type": "情感分析"
+    },
+    {
+        "name": "PWWS",
+        "desc": "攻击算法",
+        "paper": "Frequency-guided word substitutions for detecting textual adversarial examples",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "NIPA",
+        "desc": "攻击算法",
+        "paper": "Adversarial attacks on graph neural networks via node injections: A hierarchical reinforcement learning approach",
+        "method_type": "",
+        "task_type": "智能推荐"
+    },
+    {
+        "name": "PoisonRec",
+        "desc": "攻击算法",
+        "paper": "Poisonrec: an adaptive data poisoning framework for attacking black-box recommender systems",
+        "method_type": "",
+        "task_type": ""
+    },
+    {
+        "name": "GF-Attack",
+        "desc": "攻击算法",
+        "paper": "Adversarial Attack Framework on Graph Embedding Models with Limited Knowledge[",
+        "method_type": "",
+        "task_type": "智能推荐"
+    },
+    {
+        "name": "TNA",
+        "desc": "攻击算法",
+        "paper": "Influence function based data poisoning attacks to top-n recommender systems",
+        "method_type": "",
+        "task_type": "智能推荐"
+    },
+    {
+        "name": "CopyAttack",
+        "desc": "攻击算法",
+        "paper": "Attacking Black-box Recommendations via Copying Cross-domain User Profiles",
+        "method_type": "",
+        "task_type": "智能推荐"
+    },
+    {
+        "name": "Single-Node-Attack",
+        "desc": "攻击算法",
+        "paper": "Single-Node Attack for Fooling Graph Neural Networks",
+        "method_type": "",
+        "task_type": "智能推荐"
+    },
+    {
+        "name": "TrialAttack",
+        "desc": "攻击算法",
+        "paper": "Triple Adversarial Learning for Influence based Poisoning Attack in Recommender Systems",
+        "method_type": "",
+        "task_type": "智能推荐"
+    },
+    {
+        "name": "AMR",
+        "desc": "防御算法",
+        "paper": "Adversarial training towards robust multimedia recommender system",
+        "method_type": "鲁棒性训练",
+        "task_type": "智能推荐"
+    },
+    {
+        "name": "FNCF",
+        "desc": "防御算法",
+        "paper": "Enhancing the robustness of neural collaborative filtering systems under malicious attacks",
+        "method_type": "",
+        "task_type": "智能推荐"
+    },
+    {
+        "name": "APT",
+        "desc": "防御算法",
+        "paper": "Fight Fire with Fire: Towards Robust Recommender Systems via Adversarial Poisoning Training",
+        "method_type": "鲁棒性训练",
+        "task_type": "智能推荐"
+    },
+    {
+        "name": "DAVE",
+        "desc": "防御算法",
+        "paper": "Dual Adversarial Variational Embedding for Robust Recommendation",
+        "method_type": "鲁棒性训练",
+        "task_type": "智能推荐"
+    },
+    {
+        "name": "SAO",
+        "desc": "防御算法",
+        "paper": "Sequential-based adversarial optimisation for personalised top-n item recommendation",
+        "method_type": "鲁棒性训练",
+        "task_type": "智能推荐"
+    },
+    {
+        "name": "ATMBPR",
+        "desc": "防御算法",
+        "paper": "Adversarial training-based mean Bayesian personalized ranking for recommender system",
+        "method_type": "鲁棒性训练",
+        "task_type": "智能推荐"
+    },
+    {
+        "name": "RobustDet",
+        "desc": "防御算法",
+        "paper": "Adversarially-Aware Robust Object Detector",
+        "method_type": "对抗样本检测",
+        "task_type": "目标检测"
+    },
+    {
+        "name": "DAG",
+        "desc": "攻击算法",
+        "paper": "Adversarial Examples for Semantic Segmentation and Object Detection",
+        "method_type": "基于优化",
+        "task_type": "目标检测"
+    },
+    {
+        "name": "CWAT",
+        "desc": "防御算法",
+        "paper": "Class-Aware Robust Adversarial Training for Object Detection",
+        "method_type": "对抗训练",
+        "task_type": "目标检测"
+    },
+    {
+        "name": "DPatch",
+        "desc": "攻击算法",
+        "paper": "DPatch: An Adversarial Patch Attack on Object Detectors",
+        "method_type": "基于优化",
+        "task_type": "目标检测"
+    },
+    {
+        "name": "PAP",
+        "desc": "攻击算法",
+        "paper": "On Physical Adversarial Patches for Object Detection",
+        "method_type": "基于优化",
+        "task_type": "目标检测"
+    },
+    {
+        "name": "APAPD",
+        "desc": "攻击算法",
+        "paper": "Fooling automated surveillance cameras: adversarial patches to attack person detection",
+        "method_type": "基于优化",
+        "task_type": "目标检测"
+    },
+    {
+        "name": "IA-Attack",
+        "desc": "攻击算法",
+        "paper": "Imitation Attacks and Defenses for Black-box Machine Translation Systems",
+        "method_type": "基于替代模型",
+        "task_type": "机器翻译"
+    },
+    {
+        "name": "WSLS",
+        "desc": "攻击算法",
+        "paper": "Crafting Adversarial Examples for Neural Machine Translation",
+        "method_type": "关键单词替换",
+        "task_type": "机器翻译"
+    },
+    {
+        "name": "InjAttack",
+        "desc": "攻击算法",
+        "paper": "Putting words into the system’s mouth: A targeted attack on neural machine translation using monolingual data poisoning",
+        "method_type": "",
+        "task_type": "机器翻译"
+    },
+    {
+        "name": "3D-ADV",
+        "desc": "攻击算法",
+        "paper": "Generating 3D adversarial point clouds",
+        "method_type": "",
+        "task_type": "3D点云"
+    },
+    {
+        "name": "IFGM",
+        "desc": "攻击算法",
+        "paper": "Extending adversarial attacks and defenses to deep 3D point cloud classifiers",
+        "method_type": "基于梯度",
+        "task_type": "3D点云"
+    },
+    {
+        "name": "AdvPC",
+        "desc": "攻击算法",
+        "paper": "AdvPC: Transferable adversarial perturbations on 3D point clouds",
+        "method_type": "基于生成网络",
+        "task_type": "3D点云"
+    },
+    {
+        "name": "Shapeadv",
+        "desc": "攻击算法",
+        "paper": "Shapeadv: Generating shape-aware adversarial 3d\npoint clouds",
+        "method_type": "基于优化",
+        "task_type": "3D点云"
+    },
+    {
+        "name": "VSA",
+        "desc": "攻击算法",
+        "paper": "Adversarial attack by limited point cloud surface modifications",
+        "method_type": "基于优化",
+        "task_type": "3D点云"
+    },
+    {
+        "name": "JGBA",
+        "desc": "攻击算法",
+        "paper": "Efficient joint gradient based attack against sor defense\nfor 3d point cloud classification",
+        "method_type": "基于优化",
+        "task_type": "3D点云"
+    },
+    {
+        "name": "IAT",
+        "desc": "攻击算法",
+        "paper": "Imperceptible transfer attack and defense on 3d point cloud classification",
+        "method_type": "基于优化",
+        "task_type": "3D点云"
+    },
+    {
+        "name": "LG-GAN",
+        "desc": "攻击算法",
+        "paper": "Lg-gan: Label guided adversarial network for flexible targeted attack of point cloud based deep networks",
+        "method_type": "基于生成网络",
+        "task_type": "3D点云"
+    },
+    {
+        "name": "SOR",
+        "desc": "防御算法",
+        "paper": "Dup-net: Denoiser and upsampler network for 3d adversarial point clouds defense88",
+        "method_type": "输入转换",
+        "task_type": "3D点云"
+    },
+    {
+        "name": "IF-Defense",
+        "desc": "防御算法",
+        "paper": "If-defense: 3d adversarial point cloud defense via implicit function based restoration",
+        "method_type": "输入转换",
+        "task_type": "3D点云"
+    },
+    {
+        "name": "Ada3Diff",
+        "desc": "防御算法",
+        "paper": "Ada3diff: Defending against 3d adversarial point clouds via adaptive diffusion",
+        "method_type": "输入转换",
+        "task_type": "3D点云"
+    },
+    {
+        "name": "PointCutMix",
+        "desc": "防御算法",
+        "paper": "Pointcutmix: Regularization strategy for point cloud classification",
+        "method_type": "数据增强",
+        "task_type": "3D点云"
+    },
+    {
+        "name": "LPF-Defense",
+        "desc": "防御算法",
+        "paper": "Lpf-defense: 3d adversarial defense based on frequency analysis",
+        "method_type": "数据增强",
+        "task_type": "3D点云"
+    },
+    {
+        "name": "LPC",
+        "desc": "防御算法",
+        "paper": "Robust structured declarative classifiers for 3d point clouds: Defending adversarial attacks with implicit gradients",
+        "method_type": "模型结构优化",
+        "task_type": "3D点云"
+    },
+    {
+        "name": "SEC4SR",
+        "desc": "攻击算法",
+        "paper": "SEC4SR: A security analysis platform for speaker recognition",
+        "method_type": "基于梯度",
+        "task_type": "语音识别"
+    },
+    {
+        "name": "Kreuk",
+        "desc": "攻击算法",
+        "paper": "Fooling end-to-end speaker verification with adversarial examples",
+        "method_type": "基于梯度",
+        "task_type": "语音识别"
+    },
+    {
+        "name": "Abdullah",
+        "desc": "攻击算法",
+        "paper": "Hear “No Evil”, See “Kenansville”*: Efficient and Transferable Black-Box Attacks on Speech Recognition and Voice Identification Systems",
+        "method_type": "基于音频处理",
+        "task_type": "语音识别"
+    },
+    {
+        "name": "GE2E",
+        "desc": "攻击算法",
+        "paper": "Spoofing Speaker Verification System by Adversarial Examples Leveraging the Generalized Speaker Difference",
+        "method_type": "基于优化",
+        "task_type": "语音识别"
+    },
+    {
+        "name": "Vmask",
+        "desc": "攻击算法",
+        "paper": "Voiceprint mimicry attack towards speaker verification system in smart home",
+        "method_type": "基于梯度",
+        "task_type": "语音识别"
+    },
+    {
+        "name": "UAPG",
+        "desc": "攻击算法",
+        "paper": "Universal Adversarial Perturbations Generative Network For Speaker Recognition",
+        "method_type": "基于优化",
+        "task_type": "语音识别"
+    },
+    {
+        "name": "FoolHD",
+        "desc": "攻击算法",
+        "paper": "FoolHD: Fooling Speaker Identification by Highly Imperceptible Adversarial Disturbances",
+        "method_type": "基于优化",
+        "task_type": "语音识别"
+    },
+    {
+        "name": "UAPs",
+        "desc": "攻击算法",
+        "paper": "Enabling fast and universal audio adversarial attack using generative model",
+        "method_type": "基于梯度",
+        "task_type": "语音识别"
+    },
+    {
+        "name": "LDS-ATV",
+        "desc": "防御算法",
+        "paper": "Adversarial Regularization for End-to-End Robust Speaker Verification",
+        "method_type": "对抗训练",
+        "task_type": "语音识别"
+    },
+    {
+        "name": "HAT",
+        "desc": "防御算法",
+        "paper": "Adversarial defense for deep speaker recognition using hybrid adversarial training",
+        "method_type": "对抗训练",
+        "task_type": "语音识别"
+    },
+    {
+        "name": "ADV-EST",
+        "desc": "防御算法",
+        "paper": "Adversarial Perturbation Estimation to Classify and Detect Adversarial\nAttacks against Speaker Identification",
+        "method_type": "攻击检测",
+        "task_type": "语音识别"
+    },
+    {
+        "name": "Pre-Processing-Defenses",
+        "desc": "防御算法",
+        "paper": "Study of Pre-processing Defenses against Adversarial Attacks on State-of-the-art Speaker Recognition Systems",
+        "method_type": "数据预处理",
+        "task_type": "语音识别"
+    },
+    {
+        "name": "ENM",
+        "desc": "攻击算法",
+        "paper": "Rallying adversarial techniques against deep learning for network security",
+        "method_type": "",
+        "task_type": "异常检测"
+    },
+    {
+        "name": "Attack-GAN",
+        "desc": "攻击算法",
+        "paper": "Packet-level adversarial network traffic crafting using sequence generative adversarial networks",
+        "method_type": "基于生成网络",
+        "task_type": "异常检测"
+    },
+    {
+        "name": "TANTRA",
+        "desc": "攻击算法",
+        "paper": "Tantra: Timing-based adversarial network traffic reshaping attack",
+        "method_type": "",
+        "task_type": "异常检测"
+    },
+    {
+        "name": "ADAPATIVE-JSMA",
+        "desc": "攻击算法",
+        "paper": "Adversarial examples for network intrusion detection systems",
+        "method_type": "基于优化",
+        "task_type": "异常检测"
+    },
+    {
+        "name": "NIDSGAN",
+        "desc": "攻击算法",
+        "paper": "Generating practical adversarial network traffic flows using NIDSGAN",
+        "method_type": "基于生成网络",
+        "task_type": "异常检测"
+    },
+    {
+        "name": "ALAD",
+        "desc": "防御算法",
+        "paper": "Black Box Attacks on Deep Anomaly Detectors",
+        "method_type": "异常检测",
+        "task_type": "异常检测"
+    },
+    {
+        "name": "AnoGAN",
+        "desc": "防御算法",
+        "paper": "Unsupervised anomaly detection with generative adversarial networks to guide marker discovery",
+        "method_type": "对抗样本检测",
+        "task_type": "异常检测"
+    },
+    {
+        "name": "DAGMM",
+        "desc": "防御算法",
+        "paper": "Deep autoencoding gaussian mixture model for unsupervised anomaly detection",
+        "method_type": "对抗样本检测",
+        "task_type": "异常检测"
+    },
+    {
+        "name": "SegPGD",
+        "desc": "攻击算法",
+        "paper": "Segpgd: An effective and efficient adversarial attack for evaluating and boosting segmentation robustness",
+        "method_type": "基于梯度",
+        "task_type": "物体分割"
+    },
+    {
+        "name": "IAA",
+        "desc": "攻击算法",
+        "paper": "Rethinking adversarial transferability from a data distribution perspective",
+        "method_type": "基于迁移性",
+        "task_type": "物体分割"
+    }
+]
