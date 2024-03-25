@@ -2,10 +2,10 @@
 # ![AIcert](web/static/img/logo.svg)人工智能安全理论及验证平台
 人工智能安全评测平台AIcert是浙江大学区块链与数据安全全国重点实验室人工智能数据安全团队在科技部科技创新2030-“新一代人工智能”重大项目等多个国家级/省部级项目以及浙江大学区块链与数据安全全国重点实验室的共同支持下研发的基于AI系统行为安全验证理论、模型自动建模开发、六维综合量化评估等先进技术实现的多层面全方位全栈安全评测平台。
 
-<video id="video" controls="" preload="none" poster="封面">
-      <source id="mp4" src="web/static/img/architecture.mp4" type="video/mp4">
+<!-- <video id="video" controls="" preload="none" poster="封面">
+      <source id="mp4" src="web/static/img/architecture.mp4" type="video/mp4"> -->
 </video>
-<!-- ![Architecture](web/static/img/architecture.mp4) -->
+![Architecture](web/static/img/architecture.mp4) 
 
 AIcert解决了从数据到系统、从算法开发到系统部署的多层面全方位安全检测技术覆盖，实现了包括数据质量评估、算法安全验证、模型安全评测、框架安全度量、系统安全检测在内的五大5核心层面的AI系统全栈安全评测体系与技术平台。
 
@@ -15,7 +15,7 @@ AIcert解决了从数据到系统、从算法开发到系统部署的多层面�
 
 ## 文档
 
-**介绍文档**：我们提供[功能介绍文档](https://github.com/ZJUICSR/AIcert/blob/main/web/static/pdf/AI%E5%B9%B3%E5%8F%B0%E4%BB%8B%E7%BB%8D%E6%96%87%E6%A1%A3v8.pdf)、[API说明文档](https://n1nltex7w5.feishu.cn/docx/LbN2dsyYZo4jn9xCMm5c3HEdnSf?from=from_copylink)
+**介绍文档**：我们提供[功能介绍文档](web/static/pdf/AI%E5%B9%B3%E5%8F%B0%E4%BB%8B%E7%BB%8D%E6%96%87%E6%A1%A3v8.pdf)、[API说明文档](https://n1nltex7w5.feishu.cn/docx/LbN2dsyYZo4jn9xCMm5c3HEdnSf?from=from_copylink)
 
 ## 快速开始
 
