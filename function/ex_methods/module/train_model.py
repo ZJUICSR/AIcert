@@ -7,17 +7,6 @@ import tqdm, copy, random
 import numpy as np
 import torch.nn.functional as F
 
-def adjust_learning_rate(optimizer, epoch, lr_):
-    """decrease the learning rate"""
-    lr = lr_
-    if epoch >= 40:
-        lr = lr * 0.1
-    if epoch >= 60:
-        lr = lr * 0.01
-
-    for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
-
 def Train(model_name, model, dataset, device):
     # 训练超参数
     train_batchsize = 128  # 训练批大小
@@ -54,7 +43,7 @@ def Train(model_name, model, dataset, device):
     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=2e-4)
     #optimizer = optim.Adam(model.parameters(), lr=lr)
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer,
-                                                        milestones=[100, 150], last_epoch=-1)
+                                                        milestones=[50, 70], last_epoch=-1)
 
 
     model.train()

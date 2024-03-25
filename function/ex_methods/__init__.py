@@ -1,22 +1,19 @@
 import os.path as osp
 import os
 import numpy as np
-import torch
 import torchvision
 from PIL import Image
-from function.ex_methods.module.func import get_loader, Logger, recreate_image, get_batchsize
-from function.ex_methods.module.generate_adv import get_adv_loader, sample_untargeted_attack
+from function.ex_methods.module.func import get_loader, Logger, recreate_image, get_batchsize, load_image, predict, get_class_list,\
+    get_normalize_para, grad_visualize, lrp_visualize, target_layer, load_image, get_target_num, grad_visualize, convert_to_grayscale, \
+    loader2imagelist, save_ex_img, get_normalize_para, predict
+from function.ex_methods.module.generate_adv import get_adv_loader, sample_untargeted_attack, text_attack
+from function.ex_methods.module.layer_activation_with_guided_backprop import layer_analysis
 from function.ex_methods.module.load_model import load_model as load_model_ex
+from function.ex_methods.module.load_model import load_torch_model, load_text_model
 from function.ex_methods.module.model_Lenet import lenet
-from function.ex_methods.lime import lime_image_ex
-from .module.func import grad_visualize, lrp_visualize, target_layer, load_image
-from .module.layer_activation_with_guided_backprop import layer_analysis
-from .module.func import get_class_list, get_target_num, grad_visualize, convert_to_grayscale, \
-    loader2imagelist, save_ex_img, save_process_result, get_normalize_para, preprocess_transform, predict
+from function.ex_methods.lime import lime_image_ex, lime_text_ex
 from scipy.stats import kendalltau
-from .lime import lime_image
-from skimage.color import rgb2gray
-from skimage.segmentation import mark_boundaries
+
 
 
 '''获取基于梯度/反向传播的解释方法'''
@@ -116,7 +113,6 @@ def attribution_maps(net, nor_loader, adv_dataloader, ex_methods, params, img_nu
     """
     dataset = params["dataset"]["name"].lower()
     model_name = params["model"]["name"].lower()
-    # model_name = "resnet34"
 
     save_path = params["out_path"]
     root = params["root"]
@@ -179,6 +175,7 @@ def attribution_maps(net, nor_loader, adv_dataloader, ex_methods, params, img_nu
             adv_img_list = loader2imagelist(adv_loader, dataset, img_num)
             lrp_result_list, gradcam_result_list, ig_result_list, class_name_list = [], [], [], []
             for imgs_x, label in adv_loader:
+                imgs_x = trans(imgs_x)
                 imgs_x = imgs_x.to(device)
                 label = label.to(device)
                 lrp_list, gradcam_list, ig_list, class_name = get_gradbase_explain(
@@ -254,6 +251,7 @@ def layer_explain(model, model_name, nor_loader, adv_loader, dataset, save_path,
             t_list = []
             for nor_layer, adv_layer in zip(nor_imgs,adv_imgs):    
                 kendall_value, _ = kendalltau(np.array(nor_layer,dtype="float64"),np.array(adv_layer,dtype="float64"))
+                kendall_value = round(kendall_value, 4)
                 t_list.append(kendall_value)
             all_result["value"][adv_method].update({
                 f"img_{index}": t_list
@@ -277,6 +275,7 @@ def get_kendalltau(nor_dict, adv_dict, save_path):
             for nor_ex_img, adv_ex_img in zip(nor_ex, adv_ex):
                 value, _ = kendalltau(np.array(nor_ex_img, dtype="float"), np.array(
                     adv_ex_img, dtype="float"))
+                value = round(value,4)
                 tmp.append(value)
             values[f"{method}"] = tmp
         result[f"{adv_method}"] = values

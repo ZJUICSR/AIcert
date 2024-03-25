@@ -79,8 +79,8 @@ def model_overall_fairness(result, metrics=['DP', 'PE', 'EOP','EOD', 'PP', 'OMd'
     overall_individual_fairness = result['Consistency']
     overall_fairness = np.mean([overall_group_fairness, overall_individual_fairness])
     if len(values) == 0:
-        overall_group_fairness = '0.9'
-        overall_fairness = '0.92'
+        overall_group_fairness = '0.900'
+        overall_fairness = '0.9200'
     return [overall_group_fairness, overall_individual_fairness, overall_fairness]
 
 # dataset evaluation

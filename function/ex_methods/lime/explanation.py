@@ -196,6 +196,49 @@ class Explanation(object):
                                   show_predicted_value=show_predicted_value,
                                   **kwargs)
 
+    def show_result(self,
+                    labels=None,
+                    predict_proba=True,
+                    show_predicted_value=True,
+                    **kwargs):
+
+        if labels is None and self.mode == "classification":
+            labels = self.available_labels()
+        
+        class_names = None
+        predictions = None
+        if self.mode == "classification" and predict_proba:
+            class_names = [str(x) for x in self.class_names]
+            predictions = list(self.predict_proba.astype(float))
+
+        regression_result = None
+        if self.mode == "regression" and show_predicted_value:
+            regression_result = (float(self.predicted_value),
+                                float(self.min_value),
+                                float(self.max_value))
+        
+        explain_res = []
+        if self.mode == "classification":
+            for label in labels:
+                exp = self.as_list(label)
+                explain_res.append([exp, label.item()])
+        else:
+            exp = self.as_list()
+            explain_res.append([exp, self.dummy_label.item()])
+
+        if self.mode == "classification":
+            html_data = self.local_exp[labels[0]]
+        else:
+            html_data = self.local_exp[self.dummy_label]
+
+        raw_js = self.domain_mapper.visualize_instance(
+                html_data,
+                labels[0].item() if self.mode == "classification" else self.dummy_label.item(),
+                'raw_div',
+                **kwargs)
+        
+        return (class_names, predictions, regression_result, explain_res, raw_js)
+
     def save_to_file(self,
                      file_path,
                      labels=None,
