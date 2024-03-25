@@ -162,11 +162,11 @@ def DataFairnessEvaluate():
         # 添加任务信息到taskinfo
         value = {
             # 任务类型,注意任务类型不能重复，用于结果返回的key值索引
-            "type":"date_evaluate",
+            "type":"data_evaluate",
             # 任务状态：0 未执行；1 正在执行；2 执行成功；3 执行失败
             "state":0,
             # 方法名称：如对抗攻击中的fgsm，ffgsm等，呈现在结果界面
-            "name":["date_evaluate"],
+            "name":["data_evaluate"],
             # 数据集信息，呈现在结果界面，若干有选择模型还需增加模型字段：model
             "dataset":dataname,
         }
@@ -242,7 +242,7 @@ def DataFairnessDebias():
         # 执行任务
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_data_debias_api, tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList)
-        # t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+
         
         IOtool.add_task_queue(tid, stid, t2, 300)
         # interface.run_data_debias_api(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList)
@@ -289,7 +289,7 @@ def ModelFairnessEvaluate():
         IOtool.change_task_info(tid, "model", modelname)
         
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+
         # IOtool.add_task_queue(tid, stid, t2, 300)
         if dataname in ["Compas", "Adult", "German"]:
             try:
@@ -362,7 +362,7 @@ def ModelFairnessDebias():
         IOtool.change_task_info(tid, "dataset", dataname)
         IOtool.change_task_info(tid, "model", modelname)
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.submitAandB, tid, AAtid, 1, 2)
+
         IOtool.add_task_queue(tid, AAtid, t2, 300)
         save_folder = osp.join(ROOT,"output", "cache", "fairness")
         model_path = inputParam["modelpath"]
@@ -377,10 +377,10 @@ def ModelFairnessDebias():
                 senAttrList=inputParam["senAttrList"]
                 tarAttrList=inputParam["tarAttrList"]
                 staAttrList=inputParam["staAttrList"]
-            # t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, sensattrs = senAttrList, 
-            #                  targetattr = tarAttrList, staAttrList = staAttrList, model_path=model_path, save_folder=save_folder)
-            interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, sensattrs = senAttrList, 
+            t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, sensattrs = senAttrList, 
                              targetattr = tarAttrList, staAttrList = staAttrList, model_path=model_path, save_folder=save_folder)
+            # interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, sensattrs = senAttrList, 
+                            #  targetattr = tarAttrList, staAttrList = staAttrList, model_path=model_path, save_folder=save_folder)
         else:
             dataname = dataname.lower()
             # time.sleep(20)
@@ -392,10 +392,10 @@ def ModelFairnessDebias():
             except:
                 metrics = inputParam["metrics"]
             test_mode = inputParam["test_mode"]
-            # t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, 
-            #                  test_mode = test_mode, model_path=model_path, save_folder=save_folder)
-            interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, 
+            t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, 
                              test_mode = test_mode, model_path=model_path, save_folder=save_folder)
+            # interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, 
+            #                  test_mode = test_mode, model_path=model_path, save_folder=save_folder)
             # time.sleep(20)
             
         # IOtool.add_task_queue(tid, AAtid, t2, 30000)    
@@ -571,10 +571,7 @@ def query_log():
         body = {"code":1003,"msg":"fail,log is NULL","Log":Log}
     else:
         body = {"code":1,"msg":"success","Log":Log}
-    # print(body)
     return jsonify(body)
-
-
 # 删除任务
 @app.route('/Task/DeleteTask', methods=['DELETE'])
 def delete_task():
@@ -770,10 +767,10 @@ def BackdoorAttack():
         IOtool.change_task_info(tid, "model", model)
         # 执行任务
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.run_backdoor_attack, tid, stid, dataname, model, adv_method, inputParam)
-        t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+        t2 = pool.submit(interface.run_backdoor_attack, tid, stid, dataname, model, adv_method, inputParam)
+
         IOtool.add_task_queue(tid, stid, t2, 72000*len(adv_method))
-        interface.run_backdoor_attack(tid, stid, dataname, model, adv_method, inputParam)
+        # interface.run_backdoor_attack(tid, stid, dataname, model, adv_method, inputParam)
         # t2 = threading.Thread(target=interface.run_backdoor_attack,args=(tid, stid, dataname, model, adv_method, inputParam))
         # t2.setDaemon(True)
         # t2.start()
@@ -796,7 +793,8 @@ def AttackDimReduciton():
     Dataset：数据集名称
     Model：模型名称
     AdvMethods:list 对抗攻击算法名称
-    VisMethods:list 降维方法名称
+    VisMethods：list 数据降维方法
+    
     """
     global LiRPA_LOGS
     if (request.method == "POST"):
@@ -1058,10 +1056,10 @@ def AdversarialAnalysis():
         
         pool = IOtool.get_pool(tid)
         
-        t2 = pool.submit(interface.submitAandB,tid,stid,1,2)
-        # t2 = pool.submit(interface.run_adversarial_analysis, tid, stid, datasetparam, modelparam, ex_methods, vis_methods, adv_methods, use_layer_explain)
+
+        t2 = pool.submit(interface.run_adversarial_analysis, tid, stid, datasetparam, modelparam, ex_methods, vis_methods, adv_methods, use_layer_explain)
         IOtool.add_task_queue(tid, stid, t2, 300 * len(vis_methods) + 400 * len(ex_methods) + 300*len(adv_methods))
-        interface.run_adversarial_analysis(tid, stid, datasetparam, modelparam, ex_methods, vis_methods, adv_methods, use_layer_explain)
+        # interface.run_adversarial_analysis(tid, stid, datasetparam, modelparam, ex_methods, vis_methods, adv_methods, use_layer_explain)
         res = {
             "code":1,
             "msg":"success",
@@ -1674,8 +1672,8 @@ def ModularDevelopParamSet():
         IOtool.change_task_info(tid, "dataset", dataset)
         IOtool.change_task_info(tid, "model", model)
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.run_modulardevelop, tid, AAtid, dataset, model, tuner, init, epoch, iternum)
-        t2 = pool.submit(interface.submitAandB, tid, AAtid, 1, 2)
+        t2 = pool.submit(interface.run_modulardevelop, tid, AAtid, dataset, model, tuner, init, epoch, iternum)
+        # t2 = pool.submit(interface.submitAandB, tid, AAtid, 1, 2)
         IOtool.add_task_queue(tid, AAtid, t2, 3000)
         interface.run_modulardevelop( tid, AAtid, dataset, model, tuner, init, epoch, iternum )
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
@@ -1743,7 +1741,6 @@ def FormalVerification():
         IOtool.change_task_info(tid, "dataset", inputParam["dataset"])
         IOtool.change_task_info(tid, "model", inputParam["model"])
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
         t2 = pool.submit(interface.run_verify, tid, stid, param)
         IOtool.add_task_queue(tid, stid, t2, 30000)
         # interface.run_verify(tid, stid, param)
@@ -1794,10 +1791,9 @@ def ensemble():
             adv_param.update({temp:inputParam[temp]})
         pool = IOtool.get_pool(tid)
         # t2 = pool.submit(interface.run_ensemble_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
-        # t2 = pool.submit(interface.run_group_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
-        t2 = pool.submit(interface.submitAandB, tid, stid, 10, 20)
+        t2 = pool.submit(interface.run_group_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
         IOtool.add_task_queue(tid, stid, t2, 72000*len(adv_methods))
-        interface.run_group_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
+        # interface.run_group_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
         res = {
             "code":1,
             "msg":"success",
@@ -1820,6 +1816,7 @@ def auto_attack():
     """
     if (request.method == "POST"):
         inputParam = json.loads(request.data)
+        print(inputParam)
         tid = inputParam["Taskid"]
         datasetparam = inputParam["DatasetParam"]
         modelparam = inputParam["ModelParam"]
@@ -1843,7 +1840,6 @@ def auto_attack():
         modelparam["name"] = modelparam["name"]
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_graph_knowledge, tid, stid, datasetparam, modelparam, auto_method, inputParam)
-        # t2 = pool.submit(interface.submitAandB, tid, stid, 10, 20)
         IOtool.add_task_queue(tid, stid, t2, 72000)
         # interface.run_graph_knowledge(tid, stid, datasetparam, modelparam, auto_method, inputParam)
         res = {
@@ -2004,7 +2000,6 @@ def FeatureScatter():
         IOtool.change_task_info(tid, "dataset", inputParam["dataset"])
         # 执行任务
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.submitAandB,1,2)
         t2 = pool.submit(interface.run_featurescatter, tid, stid, dataset, modelname, attack_method, evaluate_methods, lr, batch_size, max_epoch, decay_epoch, decay_rate)
         
         IOtool.add_task_queue(tid, stid, t2, 3000)
@@ -2174,7 +2169,7 @@ def LLM_attack():
         }
         IOtool.add_subtask_info(tid, stid, value)
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+
         t2 = pool.submit(interface.llm_attack, tid, stid, goal, target)
         IOtool.add_task_queue(tid, stid, t2, 30000)
         # interface.llm_attack(tid, stid, goal, target)
