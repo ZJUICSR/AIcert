@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 __author__ = 'homeway'
-__copyright__ = 'Copyright © 2021/03/22, ZJUICSR'
+__copyright__ = 'Copyright © 2021/03/22'
 import argparse
 import os
 from flask import Flask

@@ -1,4 +1,5 @@
 output/*
+function/ensemble/models/ckpt/*
 data/*
 models/*
 web/static/media/*
