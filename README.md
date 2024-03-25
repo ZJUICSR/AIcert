@@ -1,37 +1,14 @@
-## 人工智能安全理论及验证平台
+# 人工智能安全理论及验证平台 AIcert
 
-1. 无法创建空文件夹，为了保持目录结构完整，各文件夹预留空白__init__.py，后续可删掉
-2. 分支解释 \
-	· main：主分支，用来版本发布 \
-	· release：用于发布正式版本之前（即合并到 master 分支之前），需要有的预发布的版本进行测试 \
-	· develop：日常开发分支，保存开发的最新代码 \
-	· feature_name：课题功能负责人（name）上传代码分支 \
-	
-3. 环境配置 python>=3.7, <3.10
+## 平台部署
+1. 环境配置 python>=3.7, <3.10
 	```
 	pip install -r requirement.txt
 	```
-4. 将所需模型下载到/model下。模型无需上传，给到可下载链接即可 \
-	系统环境分析--CVE模型valid_extract.pkl放置到./model下
-	测试样本自动生成--放置到./model/ckpt下
-5. 各版本开源功能如下
 
-	| 开源版本v1.0 | 开源版本v2.0 | 开源版本v3.0 |
-	| ----------- | ----------- | ----------- |
-	| 对抗攻击评估 | 对抗攻击防御 | 模型安全度量 |
-	| 后门攻击评估 | 后门攻击防御 | 模型模块化开发 |
-	| 攻击机理分析 | 模型形式化验证 | 模型对抗性测试 |
-	| 系统环境分析 | 标准化单元测试 | 模型群智化防御 |
-	| 异常数据检测 | 开发框架安全度量 |  |
-	| 测试样本自动生成 | 故障注入检测 |  |
-	| 模型鲁棒性形式化验证 | 侧信道分析 |  |
-	| 公平性评估与提升 | 模型鲁棒性训练 |  |
+2. 运行：python main.py  --port 端口
+3. 使用Google浏览器打开界面
 
-
-
-## 运行：python main.py
-
- **在此之前，需要具备web前后端基本交互流程，ajax传参，flask基本运行原理等知识**
 
  ### 项目基本架构介绍：
 
@@ -48,12 +25,101 @@
 
 static 为静态目录，其下的所有文件在整个flask框架启动后，前端都可以访问到，flask也可以自行指定static目录  
 templates：存储所有的前端html页面  
-view：后台与前端的接口，每个python文件为一个蓝图，在flask生成时需要进行注册。api.py里面是之前我写的几个用到的，可以参考。  
-为了方便，前端传参的js我暂时也写在了html文件里（最底部），采用ajax的传参框架，可以参考。
+view：后台与前端的接口，每个python文件为一个蓝图，在flask生成时需要进行注册。
 
-### 预训练模型：
+## 基于[audo_LiRPA](https://github.com/Verified-Intelligence/auto_LiRPA)的模型形式化验证接口
 
-预训练模型文件大于50M，可下载[预训练模型](https://drive.google.com/drive/folders/11t2aPUNrr-I8f2zL_GtAVqRCDcs2NgG7?usp=sharing)后，放于model目录。
+### 1. 环境安装
 
-PS： 项目暂时没有配置工程上的如log、redis之类，后面有需要再考虑   
+#### 1.1 audo_LiRPA安装
+
+1. 进入audo_LiRPA目录执行命令：
+
+    cd auto_LiRPA\auto_LiRPA  
+    python setup.py install  
+
+2. python依赖库安装：  
+   pip install -r requirements.txt
+   
+
+
+#### 1.2 第三方包约定
+
+*输出文件的地址，在配置文件中写出，一般为绝对目录*
+
+需包含文件以及说明如下：
+1. requirements.txt - python依赖包文件
+
+### 2. Element Definition
+
+#### 2.1 训练数据类型：
+- image(mnist, cifar10， gtsrb, MTFL)
+- language(SST-2)
+
+#### 2.2 模型类型：
+- CNN、ResNet、DenseNet;
+- LSTM、Transformer;
+下载LSTM和Transformer预训练模型：  
+cd third_party.auto_LiRPA_verifiy/language/  
+mkdir model  
+cd model/  
+wget http://web.cs.ucla.edu/~zshi/files/auto_LiRPA/trained/ckpt_lstm  
+wget http://web.cs.ucla.edu/~zshi/files/auto_LiRPA/trained/ckpt_transformer  
+
+
+
+### 3. 接口位置
+#### 3.1 vision
+- 接口文件位置：/auto_LiRPA/third_party/auto_LiRPA_verifiy/vision/verify.py
+- 接口函数：verify()
+- 调用示例：/auto_LiRPA/third_party/auto_LiRPA_verifiy/vision/test.py
+- 模型数据接口：支持mnist，cifar，gtsrb数据集   
+from auto_LiRPA_verifiy import get_mnist_data(获取mnist数据), get_cifar_data(获取cifar数据), get_gtsrb_data(获取gtsrb交通数据), get_MTFL_data(获取人脸识别数据集)  
+from auto_LiRPA_verifiy import get_mnist_cnn_model（针对mnist的CNN模型）, get_cifar_resnet18（针对cifar的resnet模型）, get_cifar_densenet_model（针对cifar10的DenseNet模型）, get_gtsrb_resnet18（针对gtsrb的resnet模型）, get_MTFL_resnet18(针对人脸识别数据集的resnet18模型)
+
+
+#### 3.2 language
+- 接口文件位置：/auto_LiRPA/third_party/auto_LiRPA_verifiy/language/verify.py
+- 接口函数：verify()
+- 调用示例：/auto_LiRPA/third_party/auto_LiRPA_verifiy/language/test.py
+- 模型数据接口：支持sst情感分析数据集   
+from auto_LiRPA_verifiy import get_sst_data（获取sst数据）
+from auto_LiRPA_verifiy import get_lstm_demo_model（获取lstm预训练模型）, get_transformer_model（获取Transformer预训练模型）
+
+
+### 4 数据集
+#### 4.1 SST-2 情感分析数据集
+- cd auto_LiRPA/third_party/auto_LiRPA_verifiy/language/data
+- wget http://download.huan-zhang.com/datasets/language/data_language.tar.gz
+- tar xvf data_language.tar.gz 
+- 数据集介绍：SST-2(The Stanford Sentiment Treebank，斯坦福情感树库)，该数据集包含电影评论中的句子和它们情感的人类注释，是针对给定句子的情感倾向二分类数据集，类别分为两类正面情感（positive，样本标签对应为1）和负面情感（negative，样本标签对应为0）。该数据集包含了67, 350个训练样本，1, 821个测试样本。
+
+#### 4.2 MNIST 数据集
+- 调用get_mnist_data()函数自动下载
+- 数据集介绍：MNIST数据集(Mixed National Institute of Standards and Technology database)是美国国家标准与技术研究院收集整理的大型手写数字数据库，该数据集由10个类别的共计70,000个28*28像素的灰度图像组成，每个类有7,000个图像。
+
+#### 4.3 CIFAR-10 数据集
+- cd auto_LiRPA/third_party/auto_LiRPA_verifiy/vision/data
+- wget https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz
+- 数据集介绍：CIFAR-10数据集由CIFAR(Candian Institute For Advanced Research) 收集整理的一个用于机器学习和图像识别问题的数据集。该数据集由10个类别的共计60,000个32x32彩色图像组成，每个类有6000个图像。
+
+#### 4.4 GTSRB 数据集
+- [GTSTB](https://www.kaggle.com/meowmeowmeowmeowmeow/gtsrb-german-traffic-sign?select=Train) 页面下载achieve.zip压缩包
+- 解压到 auto_LiRPA/third_party/auto_LiRPA_verifiy/vision/data/gtsrb目录下
+- 数据集介绍：GTSRB（German Traffic Sign Recognition Benchmark）是德国交通标志数据集，该数据集数据集包由43个类别的共计51,839幅像素不等的采自真实交通环境下的交通标志图像组成，其中训练和测试图像分别为39,209和12,630幅。
+
+#### 4.5 Multi-Task Facial Landmark (MTFL)数据集，（人脸识别数据集，识别男女性别）
+- cd auto_LiRPA/third_party/auto_LiRPA_verifiy/vision/data
+- mkdir MTFL
+- cd MTFL
+- wget http://mmlab.ie.cuhk.edu.hk/projects/TCDCN/data/MTFL.zip
+- unzip MTFL.zip
+- 数据集介绍：该数据集由来自网络的12995张像素大小不等的真实人脸图片组成，该数据集标注了每张图片的五官坐标，性别、是否微笑、是否带眼睛，以及人脸朝向等信息。
+
+### 5 Acknowledgments
+
+- Code refers to [auto_LiRPA](https://github.com/Verified-Intelligence/auto_LiRPA).
+
+
+
 
