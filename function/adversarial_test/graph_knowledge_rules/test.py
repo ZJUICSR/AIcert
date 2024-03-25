@@ -46,6 +46,7 @@ def test(model,
          attack_type='evasion_attack',
          data_type='image',
          defend_algorithm='Adversarial-Training',
+         task_type='图像分类',
          device='cpu',
          acc_value={},
          param_hash='',
@@ -85,7 +86,8 @@ def test(model,
     recmmend_method = knowledge.recom(attack_mode=attack_mode,
                                       attack_type=attack_type,
                                       data_type=data_type,
-                                      defend_algorithm=defend_algorithm)
+                                      defend_algorithm=defend_algorithm,
+                                      task_type=task_type)
     if log_func is not None:
         log_func('[模型测试阶段] 相关攻击算法含：{:s}'.format(str(recmmend_method)))
     result['recom_algorithm'] = list(recmmend_method)
@@ -136,6 +138,7 @@ def run(model, test_loader, num_classes, test_acc, params, param_hash="", log_fu
          attack_type=params["attack_type"],
          data_type=params["data_type"],
          defend_algorithm=params["defend_algorithm"],
+         task_type=params["task_type"],
          device=torch.device(params["device"]),
          acc_value=test_acc,
          save_path=save_path,
