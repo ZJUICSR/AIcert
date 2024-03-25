@@ -5,7 +5,7 @@
 <!-- <video id="video" controls="" preload="none" poster="封面">
       <source id="mp4" src="web/static/img/architecture.mp4" type="video/mp4"> -->
 </video>
-![Architecture](web/static/img/architecture.mp4) 
+![Architecture](web/static/img/panorama.png) 
 
 AIcert解决了从数据到系统、从算法开发到系统部署的多层面全方位安全检测技术覆盖，实现了包括数据质量评估、算法安全验证、模型安全评测、框架安全度量、系统安全检测在内的五大5核心层面的AI系统全栈安全评测体系与技术平台。
 
