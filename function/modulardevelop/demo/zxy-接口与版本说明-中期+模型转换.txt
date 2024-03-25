@@ -1,0 +1,60 @@
+前端输入接口：dict格式
+
+1. 模型种类'block_type'。['efficient'，'resnet'，'xception'，'vanilla'，'vgg']# 待补充：
+2. 自动化构造模型'search'。自动化根据模型种类构建性能优秀的模型。 True or False
+3. 数据集'data'。（经过增强或者未经增强的数据集，cifar或mnist），str格式，如果是我们自己的数据集的话，请把路径写在这里，到时候我们的功能会从路径里读数据。
+4. 模型存储目录'save_dir'。所有输出和中间结果都会存在这个目录里
+5. 模型训练epoch上限'epoch'。默认为200， 用户可不选
+6. 调用GPU'gpu'。可选['0','1']
+
+TRUE: # 对应demo1
+	1. 模型搜索方法'tuner'。当自动化构造模型为False时可选，['dream', 'greedy', 'random', 'bayesian', 'hyperband']。随机出事种子并开始自动化搜索模型。  用户可不选
+	2. 模型搜索次数上限'trial'，默认为50。  用户可不选
+
+FALSE：# 对应demo2
+	1. 模型超参数路径'param_path'。当自动化构造模型为False时可选， json文件，存储构成模型的具体超参数，可选参数包括但不限于模型的版本，trainable，优化器等	。需要用户编写并指定json的路径。 用户可不选，则自动加载我们预载的模型
+
+
+输出接口：
+	1. 保存在模型存储目录'save_dir'的模型'model.h5'和对应训练历史文件'history.pkl'。
+	history.pkl会随着训练不断更新。其中包含训练的accuracy、loss、valaccuracy、valloss， 前端可以每隔一段时间读一次该文件
+
+
+
+算法依赖库版本：
+Python 3.6.9           	#3.6.9是考虑和框架测试结合，如果其他人的工作无法在3.6.9环境下，可用3.7.7，并在组会和我们一并跟老师沟通
+TensorFlow 2.3
+AutoKeras 1.0.12
+Kerastuner 1.0.2
+keras2onnx 1.7.0  #这里及之后都是模型转换接口所需环境
+onnx 1.11.0
+onnx2torch 1.3.0
+x2paddle 1.3.6
+===============================================================================================================================
+模型转换接口说明：
+
+需要先在./xpaddle_mv文件夹内按照readme.md安装模型转换工具
+
+前端输入接口：dict格式
+
+1. 模型路径'model_path'。生成/训练后模型的路径，模型应为.h5模型。例如前文中“保存在模型存储目录'save_dir'的模型'model.h5'”
+2. 目标后端'target_bk'。模型转换的目标后端。 可选 ['torch', 'paddle']
+3. 数据集模型存储目录'save_dir'。转换后所有输出模型和中间结果 保存的文件夹，用户自行定义或者前端指定到一个临时文件夹中。
+4. 数据集'dataset'。经过增强或者未经增强的数据集，str格式。可选['mnist','cifar10']
+5. 调用GPU'gpu'。可选['0','1']
+
+输出接口：
+	1. 保存在模型存储目录'save_dir'的模型。
+	如果转换目标为paddlepaddle，则结果会在其中的子文件夹'paddle_model'中；如果转换的目标是torch模型，结果是.pth模型，一般叫做'best_model.pth'。
+	如何使用模型进行训练，样例展示在'training_model'目录的'paddle_train.py'和'torch_train.py'中。
+
+算法依赖库版本：不变
+
+模型转换测试：
+|model|pytorch|paddle|
+|resnet|T|T|
+|xception|F|F| # globalmaxpool 层不支持转换
+|vgg|T|T| # cifar mnist数据集均可成功转换
+|vanilla|T|T| # cifar mnist数据集均可成功转换
+
+如上所示：Vanilla/VGG/ResNet均已验证符合要求，以满足三种模型支持三种框架（TensorFlow\PyTorch\PaddlePaddle)的指标
