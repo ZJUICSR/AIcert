@@ -52,14 +52,15 @@ class AttackKnowledge(object):
     def get_edges_list(edges, node):
         return {d for (v, d) in edges if v == node}
 
-    def recom(self, attack_mode: str, attack_type: str, data_type: str, defend_algorithm: str):
+    def recom(self, attack_mode: str, attack_type: str, data_type: str, defend_algorithm: str, task_type: str):
         edges = self.graph.edges()
         attack_modes_recom = self.get_edges_list(edges, attack_mode)
         attack_type_recom = self.get_edges_list(edges, attack_type)
         data_type_recom = self.get_edges_list(edges, data_type)
         defend_algorithm_recom = self.get_edges_list(edges, defend_algorithm)
+        task_recom = self.get_edges_list(edges, task_type)
 
-        recom_algorithms = attack_modes_recom & attack_type_recom & data_type_recom
+        recom_algorithms = attack_modes_recom & attack_type_recom & data_type_recom & task_recom
 
         if len(defend_algorithm_recom) != 0:
             recom_algorithms -= defend_algorithm_recom
