@@ -132,7 +132,7 @@ if __name__ == '__main__':
         'accuracy': list(acc),
         'val_accuracy': list(valacc)
     }
-    output = open('./output/cache/develop/history_da.pkl', 'wb')
+    output = open('../history_da.pkl', 'wb')
     pickle.dump(history, output)
     output.close()
     model = tf.keras.models.load_model('./models/' + str(name) + '.h5')

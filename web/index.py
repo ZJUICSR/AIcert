@@ -162,11 +162,11 @@ def DataFairnessEvaluate():
         # 添加任务信息到taskinfo
         value = {
             # 任务类型,注意任务类型不能重复，用于结果返回的key值索引
-            "type":"date_evaluate",
+            "type":"data_evaluate",
             # 任务状态：0 未执行；1 正在执行；2 执行成功；3 执行失败
             "state":0,
             # 方法名称：如对抗攻击中的fgsm，ffgsm等，呈现在结果界面
-            "name":["date_evaluate"],
+            "name":["data_evaluate"],
             # 数据集信息，呈现在结果界面，若干有选择模型还需增加模型字段：model
             "dataset":dataname,
         }
@@ -242,7 +242,7 @@ def DataFairnessDebias():
         # 执行任务
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_data_debias_api, tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList)
-        # t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+
         
         IOtool.add_task_queue(tid, stid, t2, 300)
         # interface.run_data_debias_api(tid, stid, dataname, datamethod, senAttrList, tarAttrList, staAttrList)
@@ -289,7 +289,7 @@ def ModelFairnessEvaluate():
         IOtool.change_task_info(tid, "model", modelname)
         
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+
         # IOtool.add_task_queue(tid, stid, t2, 300)
         if dataname in ["Compas", "Adult", "German"]:
             try:
@@ -362,7 +362,7 @@ def ModelFairnessDebias():
         IOtool.change_task_info(tid, "dataset", dataname)
         IOtool.change_task_info(tid, "model", modelname)
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.submitAandB, tid, AAtid, 1, 2)
+
         IOtool.add_task_queue(tid, AAtid, t2, 300)
         save_folder = osp.join(ROOT,"output", "cache", "fairness")
         model_path = inputParam["modelpath"]
@@ -377,10 +377,10 @@ def ModelFairnessDebias():
                 senAttrList=inputParam["senAttrList"]
                 tarAttrList=inputParam["tarAttrList"]
                 staAttrList=inputParam["staAttrList"]
-            # t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, sensattrs = senAttrList, 
-            #                  targetattr = tarAttrList, staAttrList = staAttrList, model_path=model_path, save_folder=save_folder)
-            interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, sensattrs = senAttrList, 
+            t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, sensattrs = senAttrList, 
                              targetattr = tarAttrList, staAttrList = staAttrList, model_path=model_path, save_folder=save_folder)
+            # interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, sensattrs = senAttrList, 
+                            #  targetattr = tarAttrList, staAttrList = staAttrList, model_path=model_path, save_folder=save_folder)
         else:
             dataname = dataname.lower()
             # time.sleep(20)
@@ -392,10 +392,10 @@ def ModelFairnessDebias():
             except:
                 metrics = inputParam["metrics"]
             test_mode = inputParam["test_mode"]
-            # t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, 
-            #                  test_mode = test_mode, model_path=model_path, save_folder=save_folder)
-            interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, 
+            t2 = pool.submit(interface.run_model_debias_api, tid, AAtid, dataname, modelname, algorithmname, metrics, 
                              test_mode = test_mode, model_path=model_path, save_folder=save_folder)
+            # interface.run_model_debias_api(tid, AAtid, dataname, modelname, algorithmname, metrics, 
+            #                  test_mode = test_mode, model_path=model_path, save_folder=save_folder)
             # time.sleep(20)
             
         # IOtool.add_task_queue(tid, AAtid, t2, 30000)    
@@ -607,6 +607,15 @@ def delete_task():
     body = {"code":1,"msg":"success"}
     return jsonify(body)
 
+@app.route('/Task/UploadPic', methods=['POST'])
+def UploadPic():
+    if request.method == "POST":
+        file = request.files.get('avatar')
+        basePath = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)
+        save_dir = os.path.join(basePath[0], 'dataset/data/ckpt',"upload.jpg")
+        file.save(save_dir)
+        return jsonify({'save_dir': save_dir})
+
 # 结果输出
 @app.route("/output/Resultdata", methods=["GET"])
 def get_result():
@@ -758,10 +767,10 @@ def BackdoorAttack():
         IOtool.change_task_info(tid, "model", model)
         # 执行任务
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.run_backdoor_attack, tid, stid, dataname, model, adv_method, inputParam)
-        t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+        t2 = pool.submit(interface.run_backdoor_attack, tid, stid, dataname, model, adv_method, inputParam)
+
         IOtool.add_task_queue(tid, stid, t2, 72000*len(adv_method))
-        interface.run_backdoor_attack(tid, stid, dataname, model, adv_method, inputParam)
+        # interface.run_backdoor_attack(tid, stid, dataname, model, adv_method, inputParam)
         # t2 = threading.Thread(target=interface.run_backdoor_attack,args=(tid, stid, dataname, model, adv_method, inputParam))
         # t2.setDaemon(True)
         # t2.start()
@@ -1004,6 +1013,63 @@ def auto_verify_img():
         return json.dumps(resp,ensure_ascii=False)
     # return render_template('index_auto_verify.html')
 
+@app.route('/Attack/AdversarialAnalysis', methods=['POST'])
+def AdversarialAnalysis():
+    """
+    对抗图像归因与降维解释集成api
+    输入：tid：主任务ID
+    Dataset：数据集名称
+    Model：模型名称
+    AdvMethods:list 对抗攻击算法名称
+    ExMethods:攻击机理解释方法名称
+    vis_methods: list 降维方法名称
+    """
+    global LiRPA_LOGS
+    if (request.method == "POST"):
+        inputParam = json.loads(request.data)
+        tid = inputParam["Taskid"]
+        datasetparam = inputParam["DatasetParam"]
+        modelparam = inputParam["ModelParam"]
+        adv_methods = inputParam["AdvMethods"]
+        ex_methods = inputParam["ExMethods"]
+        use_layer_explain = inputParam["Use_layer_explain"]
+        vis_methods = inputParam["VisMethods"]
+        format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+        stid = "S"+IOtool.get_task_id(str(format_time))
+        IOtool.write_json(inputParam, osp.join(ROOT,"output", tid, stid + "_param.json"))
+        value = {
+            "type":"adversarial_analysis",
+            "state":0,
+            "name":["model"],
+            "dataset":datasetparam["name"],
+            "method":adv_methods,
+            "model":modelparam["name"],
+            "exmethod":ex_methods,
+            "vis_methods":vis_methods
+        }
+        IOtool.add_subtask_info(tid, stid, value)
+        IOtool.change_task_info(tid, "dataset", datasetparam["name"])
+        IOtool.change_task_info(tid, "model", modelparam["name"])
+        # 执行任务
+        datasetparam["name"] = datasetparam["name"].lower()
+        modelparam["name"] = modelparam["name"].lower()
+        
+        pool = IOtool.get_pool(tid)
+        
+
+        t2 = pool.submit(interface.run_adversarial_analysis, tid, stid, datasetparam, modelparam, ex_methods, vis_methods, adv_methods, use_layer_explain)
+        IOtool.add_task_queue(tid, stid, t2, 300 * len(vis_methods) + 400 * len(ex_methods) + 300*len(adv_methods))
+        # interface.run_adversarial_analysis(tid, stid, datasetparam, modelparam, ex_methods, vis_methods, adv_methods, use_layer_explain)
+        res = {
+            "code":1,
+            "msg":"success",
+            "tid":tid,
+            "stid":stid
+        }
+        return jsonify(res)
+    else:
+        abort(403)
+
 @app.route('/Attack/AttackAttrbutionAnalysis', methods=['POST'])
 def AttackAttrbutionAnalysis():
     """
@@ -1068,33 +1134,34 @@ def AttackLime():
     global LiRPA_LOGS
     if (request.method == "POST"):
         inputParam = json.loads(request.data)
-        print(request.data)
         tid = inputParam["Taskid"]
         datasetparam = inputParam["DatasetParam"]
         modelparam = inputParam["ModelParam"]
         adv_methods = inputParam["AdvMethods"]
-        # ex_methods = inputParam["ExMethods"]
+        data_mode = inputParam["mode"]
         format_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
         stid = "S"+IOtool.get_task_id(str(format_time))
         IOtool.write_json(inputParam, osp.join(ROOT,"output", tid, stid + "_param.json"))
-        value = {
+        value =  {
             "type":"attack_lime",
             "state":0,
             "name":["model"],
             "dataset":datasetparam["name"],
             "method":adv_methods,
             "model":modelparam["name"],
+            "mode":data_mode
         }
         IOtool.add_subtask_info(tid, stid, value)
         IOtool.change_task_info(tid, "dataset", datasetparam["name"])
         IOtool.change_task_info(tid, "model", modelparam["name"])
+
         # 执行任务
         datasetparam["name"] = datasetparam["name"].lower()
         modelparam["name"] = modelparam["name"].lower()
-        
+
         pool = IOtool.get_pool(tid)
-        t2 = pool.submit(interface.run_lime, tid, stid, datasetparam, modelparam, adv_methods)
-        IOtool.add_task_queue(tid, stid, t2, 300)
+        t2 = pool.submit(interface.run_lime, tid, stid, datasetparam, modelparam, adv_methods, data_mode)
+        IOtool.add_task_queue(tid, stid, t2,  400*len(adv_methods))
         res = {
             "code":1,
             "msg":"success",
@@ -1605,10 +1672,10 @@ def ModularDevelopParamSet():
         IOtool.change_task_info(tid, "dataset", dataset)
         IOtool.change_task_info(tid, "model", model)
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.run_modulardevelop, tid, AAtid, dataset, model, tuner, init, epoch, iternum)
-        t2 = pool.submit(interface.submitAandB, tid, AAtid, 1, 2)
+        t2 = pool.submit(interface.run_modulardevelop, tid, AAtid, dataset, model, tuner, init, epoch, iternum)
+        # t2 = pool.submit(interface.submitAandB, tid, AAtid, 1, 2)
         IOtool.add_task_queue(tid, AAtid, t2, 3000)
-        interface.run_modulardevelop( tid, AAtid, dataset, model, tuner, init, epoch, iternum )
+        # interface.run_modulardevelop( tid, AAtid, dataset, model, tuner, init, epoch, iternum )
         res = {"code":1,"msg":"success","Taskid":tid,"stid":AAtid}
         return jsonify(res)
     else:
@@ -1674,7 +1741,6 @@ def FormalVerification():
         IOtool.change_task_info(tid, "dataset", inputParam["dataset"])
         IOtool.change_task_info(tid, "model", inputParam["model"])
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
         t2 = pool.submit(interface.run_verify, tid, stid, param)
         IOtool.add_task_queue(tid, stid, t2, 30000)
         # interface.run_verify(tid, stid, param)
@@ -1725,10 +1791,9 @@ def ensemble():
             adv_param.update({temp:inputParam[temp]})
         pool = IOtool.get_pool(tid)
         # t2 = pool.submit(interface.run_ensemble_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
-        # t2 = pool.submit(interface.run_group_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
-        t2 = pool.submit(interface.submitAandB, tid, stid, 10, 20)
+        t2 = pool.submit(interface.run_group_defense, tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
         IOtool.add_task_queue(tid, stid, t2, 72000*len(adv_methods))
-        interface.run_group_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
+        # interface.run_group_defense(tid, stid, datasetparam, modelparam, adv_methods, adv_param, defense_methods)
         res = {
             "code":1,
             "msg":"success",
@@ -1751,6 +1816,7 @@ def auto_attack():
     """
     if (request.method == "POST"):
         inputParam = json.loads(request.data)
+        print(inputParam)
         tid = inputParam["Taskid"]
         datasetparam = inputParam["DatasetParam"]
         modelparam = inputParam["ModelParam"]
@@ -1774,7 +1840,6 @@ def auto_attack():
         modelparam["name"] = modelparam["name"]
         pool = IOtool.get_pool(tid)
         t2 = pool.submit(interface.run_graph_knowledge, tid, stid, datasetparam, modelparam, auto_method, inputParam)
-        # t2 = pool.submit(interface.submitAandB, tid, stid, 10, 20)
         IOtool.add_task_queue(tid, stid, t2, 72000)
         # interface.run_graph_knowledge(tid, stid, datasetparam, modelparam, auto_method, inputParam)
         res = {
@@ -1935,7 +2000,6 @@ def FeatureScatter():
         IOtool.change_task_info(tid, "dataset", inputParam["dataset"])
         # 执行任务
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.submitAandB,1,2)
         t2 = pool.submit(interface.run_featurescatter, tid, stid, dataset, modelname, attack_method, evaluate_methods, lr, batch_size, max_epoch, decay_epoch, decay_rate)
         
         IOtool.add_task_queue(tid, stid, t2, 3000)
@@ -2082,14 +2146,7 @@ def DownloadData():
             else:
                 return jsonify(bool=False, msg='No such file, please check file path')
 
-@app.route('/Task/UploadPic', methods=['POST'])
-def UploadPic():
-    if request.method == "POST":
-        file = request.files.get('avatar')
-        basePath = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)
-        save_dir = os.path.join(basePath[0], 'dataset/data/ckpt',"upload.jpg")
-        file.save(save_dir)
-        return jsonify({'save_dir': save_dir})
+
 
 @app.route('/Attack/LLM_attack', methods=['POST'])
 def LLM_attack():
@@ -2112,7 +2169,7 @@ def LLM_attack():
         }
         IOtool.add_subtask_info(tid, stid, value)
         pool = IOtool.get_pool(tid)
-        # t2 = pool.submit(interface.submitAandB, tid, stid, 1, 2)
+
         t2 = pool.submit(interface.llm_attack, tid, stid, goal, target)
         IOtool.add_task_queue(tid, stid, t2, 30000)
         # interface.llm_attack(tid, stid, goal, target)

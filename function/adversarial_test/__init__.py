@@ -41,6 +41,7 @@ def run_adv_test(model, auto_method, dataloader=None, batch_size=128, eps=16, at
               'attack_type': kwargs['attack_type'],
               'data_type': kwargs['data_type'],
               'defend_algorithm': kwargs['defend_algorithm'],
+              'task_type':kwargs["task_type"],
               'device': device,
               'out_path': save_path}
         print(kwargs)
@@ -50,6 +51,7 @@ def run_adv_test(model, auto_method, dataloader=None, batch_size=128, eps=16, at
               'attack_type': kwargs['attack_type'],
               'data_type': kwargs['data_type'],
               'defend_algorithm': kwargs['defend_algorithm'],
+              'task_type':kwargs["task_type"],
               'device': device,
               'out_path': save_path}
         defend_info = graph_rule_run(model, dataloader, num_classes=10, test_acc={}, param_hash=param_hash, params=params, log_func=log_func)
