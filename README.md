@@ -3,8 +3,8 @@
 人工智能安全评测平台AIcert是浙江大学区块链与数据安全全国重点实验室人工智能数据安全团队在科技部科技创新2030-“新一代人工智能”重大项目等多个国家级/省部级项目以及浙江大学区块链与数据安全全国重点实验室的共同支持下研发的基于AI系统行为安全验证理论、模型自动建模开发、六维综合量化评估等先进技术实现的多层面全方位全栈安全评测平台。
 
 <!-- <video id="video" controls="" preload="none" poster="封面">
-      <source id="mp4" src="web/static/img/architecture.mp4" type="video/mp4"> -->
-</video>
+      <source id="mp4" src="web/static/img/architecture.mp4" type="video/mp4"> 
+</video>-->
 ![Architecture](web/static/img/panorama.svg) 
 
 AIcert解决了从数据到系统、从算法开发到系统部署的多层面全方位安全检测技术覆盖，实现了包括数据质量评估、算法安全验证、模型安全评测、框架安全度量、系统安全检测在内的五大5核心层面的AI系统全栈安全评测体系与技术平台。
