@@ -21,6 +21,7 @@ def main(_):
     params = _CONFIG.value
 
     attack_lib = dynamic_import(f'llm_attacks.{params.attack}')
+    print("---------------------------param-------------------------")
 
     print(params)
 

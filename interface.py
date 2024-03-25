@@ -1244,10 +1244,10 @@ def knowledge_consistency(tid, stid, arch,dataset,img_path,layer):
     plt.close()
     l2 = torch.norm(delta, p=2).numpy().tolist()
     layers = len(target)
-    resp={'l2':l2,'input':f'static/img/tmp_imgs/{tid}/{stid}.png',
-                'output':f'static/img/tmp_imgs/{tid}/{stid}_output_{layer}.png',
-                'target':f'static/img/tmp_imgs/{tid}/{stid}_target_{layer}.png',
-                'delta':f'static/img/tmp_imgs/{tid}/{stid}_delta_{layer}.png',
+    resp={'l2':l2,'input':f'static/output/{tid}/{stid}/input.png',
+                'output':f'static/output/{tid}/{stid}/{stid}_output_{layer}.png',
+                'target':f'static/output/{tid}/{stid}/{stid}_target_{layer}.png',
+                'delta':f'static/output/{tid}/{stid}/{stid}_delta_{layer}.png',
             }
     resp["stop"] = 1
     IOtool.write_json(resp, osp.join(ROOT,"output", tid, stid+"_result.json")) 
@@ -1391,6 +1391,8 @@ def run_group_defense(tid,stid, datasetparam, modelparam, adv_methods, adv_param
     train_loader, test_loader, channel = load_dataset(datasetparam['name'], batchsize=batchsize, rate=0.1)
     # 加载模型
     model = load_model_net(modelparam['name'], datasetparam['name'], channel=channel, logging=logging)
+    result["AdvAttack"]["test_acc"] = eval_test(model.eval().to(device), test_loader, device=device)
+    logging.info("[模型训练阶段] 模型训练完成，测试准确率：{:.3f}% ".format(result["AdvAttack"]["test_acc"]))
     # 记载对抗样本
     adv_loader = get_load_adv_data(datasetparam, modelparam, adv_methods, adv_param, model, test_loader, device, batchsize, logging=logging)
     # 计算对抗攻击成功率
@@ -1660,7 +1662,7 @@ def run_graph_knowledge(tid, stid, datasetparam, modelparam, auto_method, inputp
         temp = adversarial_test.run_adv_test(model, auto_method,dataloader=test_loader, param_hash=param_hash,
                               save_path=outpath, log_func=logging.info, device=device, attack_mode=inputparam['attack_mode'],
                               attack_type=inputparam['attack_type'],data_type=inputparam['data_type'],
-                              defend_algorithm=inputparam['defend_algorithm'], dataset=datasetparam['name'].lower())
+                              defend_algorithm=inputparam['defend_algorithm'],task_type=inputparam["task_type"], dataset=datasetparam['name'].lower())
         result[auto_method] = temp
     # result = adversarial_test.run(model, test_loader, params = params, param_hash=str(time.time()),
     #                     log_func=logging.info)
