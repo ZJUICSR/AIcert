@@ -3,18 +3,15 @@
   position: relative;
   /* width: 1920px; */
   width: 100%;
-  height: 3500px;
+  height: 3760px;
   overflow: hidden;
 }
 
 .group_1 {
-  /* height: 560px; */
-  /* background: url(../../img/background_head_earth.png) */
-  background: url(../../img/bg.848718b.png)
+    background: url(../../img/bg.848718b.png)
     100% no-repeat;
   background-size: 100% 100%;
-  /* width: 1920px; */
-}
+  }
 
 .section_1 {
   width: 1189px;
@@ -97,7 +94,31 @@
   line-height: 25px;
   margin: 26px 0 0 80px;
 }
-
+#partner{
+  /* width: 1920px; */
+  height: 160px;
+  padding: 50px 0px ;
+  background: #FFF;
+  overflow: hidden;
+  position: relative;
+}
+#partner ul{
+  position:absolute;
+  left: 0;
+  margin: 0;
+  padding: 0;
+}
+#partner ul li{
+  /* width: 202px; */
+  float: left;
+  list-style:none;
+  height: 60px;
+  padding: 0px 48px ;
+  display: inline-block;
+}
+.partnerImg{
+  height: 60px;
+}
 .text_5 {
   width: 72px;
   height: 25px;
@@ -530,7 +551,7 @@
   text-align: right;
   white-space: nowrap;
   line-height: 33px;
-  margin: 29px 0 0 102px;
+  margin: 29px 0 0 85px;
 }
 
 .text_16-0 {
@@ -591,7 +612,7 @@
   text-align: right;
   white-space: nowrap;
   line-height: 33px;
-  margin: 29px 0 0 102px;
+  margin: 29px 0 0 110px;
 }
 
 .text_16-1 {
@@ -652,7 +673,7 @@
   text-align: right;
   white-space: nowrap;
   line-height: 33px;
-  margin: 29px 0 0 102px;
+  margin: 29px 0 0 120px;
 }
 
 .text_16-2 {
@@ -667,15 +688,17 @@
   line-height: 22px;
   margin: 24px 0 44px 24px;
 }
-
+.partnerUl{
+  overflow: auto;
+}
 .box_2 {
   background-color: #f3f7ff;
   position: relative;
-  width: 1920px;
+  width: 100%;
   height: 876px;
   overflow: hidden;
   /* margin: 100px 0 166px 0; */
-  margin: 110px 0 166px 0;
+  margin: 110px 0 0px 0;
 }
 
 .text_17 {
@@ -695,16 +718,19 @@
 .image_10 {
   width: 169px;
   height: 28px;
-  margin: 8px 0 744px 875px;
+  margin: 8px 0 0 875px;
 }
 
 .box_3 {
-  background-image: url(../../img/background_app.png);
+  background: url(../../img/background_app.png) 100% no-repeat;
+  height: 776px;
+  background-position: -421px 170px
+  /* background-image: url(../../img/background_app.png);
   position: absolute;
   left: -424px;
   top: 291px;
   width: 2576px;
-  height: 585px;
+  height: 585px; */
 }
 
 .box_4 {
@@ -900,7 +926,7 @@
   position: absolute;
   left: 0;
   /* top: 3300px; */
-  top: 3350px;
+  top: 3540px;
 }
 
 .box_9 {

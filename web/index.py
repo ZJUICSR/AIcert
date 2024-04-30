@@ -363,7 +363,7 @@ def ModelFairnessDebias():
         IOtool.change_task_info(tid, "model", modelname)
         pool = IOtool.get_pool(tid)
 
-        IOtool.add_task_queue(tid, AAtid, t2, 300)
+        # IOtool.add_task_queue(tid, AAtid, t2, 300)
         save_folder = osp.join(ROOT,"output", "cache", "fairness")
         model_path = inputParam["modelpath"]
         if dataname in ["Compas", "Adult", "German"]:
@@ -398,7 +398,7 @@ def ModelFairnessDebias():
             #                  test_mode = test_mode, model_path=model_path, save_folder=save_folder)
             # time.sleep(20)
             
-        # IOtool.add_task_queue(tid, AAtid, t2, 30000)    
+        IOtool.add_task_queue(tid, AAtid, t2, 30000)    
         res = {
             "tid":tid,
             "stid":AAtid
@@ -613,6 +613,8 @@ def UploadPic():
         file = request.files.get('avatar')
         basePath = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)
         save_dir = os.path.join(basePath[0], 'dataset/data/ckpt',"upload.jpg")
+        if os.path.exists(save_dir):
+            os.remove(save_dir)
         file.save(save_dir)
         return jsonify({'save_dir': save_dir})
 
@@ -1056,7 +1058,7 @@ def AdversarialAnalysis():
         
         pool = IOtool.get_pool(tid)
         
-
+        # t2 = pool.submit(interface.submitAandB, tid, stid, 10,10 )
         t2 = pool.submit(interface.run_adversarial_analysis, tid, stid, datasetparam, modelparam, ex_methods, vis_methods, adv_methods, use_layer_explain)
         IOtool.add_task_queue(tid, stid, t2, 300 * len(vis_methods) + 400 * len(ex_methods) + 300*len(adv_methods))
         # interface.run_adversarial_analysis(tid, stid, datasetparam, modelparam, ex_methods, vis_methods, adv_methods, use_layer_explain)
@@ -2180,6 +2182,21 @@ def LLM_attack():
             "stid":stid
         }
         return jsonify(res)
+
+@app.route('/MDTest/ModelInference', methods=['GET','POST'])
+def ModelInference():
+    if request.method == "POST":
+        inputdata = json.loads(request.data)
+        basePath = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)
+        image_dir = os.path.join(basePath[0], 'dataset/data/ckpt',"upload.jpg") 
+        # model_path =  inputdata["model_path"]
+        model_path = os.path.join(basePath[0], "model/ckpt/best_model.h5") 
+        res = interface.run_dynamic_inference(image_dir, model_path)
+        with open('./output/inference.json','r') as f:
+            label = json.load(f)
+        print(label)
+        return label
+
 def app_run(args):
     web_config={'host':args.host,'port':args.port,'debug':args.debug}
     app.run(**web_config)

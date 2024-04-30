@@ -5,13 +5,14 @@
 ### 1.1 audo_LiRPA安装
 
 1. 进入audo_LiRPA目录执行命令：
-
-    cd auto_LiRPA\auto_LiRPA  
+```
+   cd auto_LiRPA\auto_LiRPA  
     python setup.py install  
-
-2. python依赖库安装：  
+```
+3. python依赖库安装：
+```
    pip install -r requirements.txt
-   
+```
 
 
 ### 1.2 第三方包约定

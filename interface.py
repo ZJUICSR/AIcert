@@ -710,7 +710,7 @@ def run_adversarial_analysis(tid, stid, datasetparam, modelparam, ex_methods, vi
             logging.info( "[未选择执行模型层间解释]：将不执行模型层间解释分析方法")
     else:
         logging.info("当前未选择特征归因解释算法，跳过执行...")
-    
+    torch.cuda.empty_cache()
     # 如果选择了降维方法
     if len(vis_methods) != 0:
         logging.info("已选择了特征降维解释算法，即将执行...")
@@ -763,7 +763,7 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, mode):
     if mode == "image":
         logging.info("[数据集获取]：目前数据模态为图片类型")
     
-        save_dir = os.path.join('./dataset/data/ckpt/upload_lime.jpg')
+        save_dir = os.path.join('./dataset/data/ckpt/upload.jpg')
         if os.path.exists(save_dir):
             image = Image.open(save_dir) 
 
@@ -874,6 +874,23 @@ def verify_img(tid, stid, net, dataset, eps, pic_path):
     IOtool.change_subtask_state(tid, stid, 2)
     IOtool.change_task_success_v2(tid)
     return resp
+
+def run_dynamic_inference(image_dir, model_path):
+    """模型模块化开发-在线推理
+    :params tid:主任务ID
+    :params AAtid:子任务id
+    :params dataset: 数据集名称
+    :output res:需保存到子任务json中的返回结果/路径
+    """
+    res = modulardevelop.run_inference(image_dir, model_path)
+    
+    # checkpoint = torch.load(model_path, map_location=torch.device(0))
+    # model.load_state_dict(checkpoint)
+    # model = model.to(torch.device("cuda"))
+    # 如何加载执行
+    # imageLable = xxx()
+    # return imageLable
+    return res
 
 
 def submitAandB(tid, stid, a, b):
@@ -1286,7 +1303,7 @@ def load_dataset(dataset, batchsize, rate=0.1):
     # test_loader = DataLoader(test_dataset, batch_size=batchsize,shuffle=False)
     return train_loader, test_loader, channel
 
-def load_model_net(modelname, dataset, upload={'flag':0, 'upload_path':None}, channel=3, logging=None):
+def load_model_net(modelname, dataset, upload={'flag':0, 'upload_path':None}, channel=3, logging=None, device=None):
     from model.model_net.resnet_attack import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
     if upload['flag'] == 1:
         channel = upload['channel']
@@ -1295,6 +1312,7 @@ def load_model_net(modelname, dataset, upload={'flag':0, 'upload_path':None}, ch
             raise ValueError(error)
         modelpath = upload['upload_path']
     else: 
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         modelpath = osp.join("./model/ckpt", dataset.upper() + "_" + modelname.lower()+".pth")
         if (not osp.exists(modelpath)):
             logging.info("[模型获取]:服务器上模型不存在")
@@ -1542,7 +1560,7 @@ def run_group_defense(tid,stid, datasetparam, modelparam, adv_methods, adv_param
         print(defend_info)
         result['InteDefense']['ori'] = defend_info['ori_acc']
         for method in adv_methods:
-            result['InteDefense']['Inte_acc'][method] = defend_info[method]['defend_attack_acc']*100
+            result['InteDefense']['Inte_acc'][method] = defend_info[method]['defend_rate']*100
             result['InteDefense']['Inte_asr'][method] = 100-defend_info[method]['defend_rate']*100
         logging.info("[模型测试阶段]【集成防御方法】算法运行结束")
     if 'Nash' in defense_methods:

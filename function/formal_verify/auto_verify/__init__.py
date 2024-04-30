@@ -120,6 +120,9 @@ def auto_verify_img(net,data,eps,input_file='./test.jpg',device='cuda'):
     norm = np.inf
     ptb = PerturbationLpNorm(norm = norm, eps = eps)
     bounded_image = BoundedTensor(image, ptb)
+    ptb_zero = PerturbationLpNorm(norm = norm, eps = 0)
+    bounded_image_zero = BoundedTensor(image, ptb_zero)
+    _, predicted = torch.max(model(bounded_image_zero), 1) 
     print('Model prediction:', model(bounded_image))
     with torch.no_grad():  # If gradients of the bounds are not needed, we can use no_grad to save memory.
         lb2, ub2 = model.compute_bounds(x=(bounded_image,), method='CROWN-IBP')

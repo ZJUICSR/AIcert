@@ -22,6 +22,29 @@ window.onload = function() {
                  }
             }
 		});
+var oDiv = document.getElementById('partner');
+    var oUl= document.getElementsByClassName("partnerUl")[0];
+    var oLi = document.getElementsByClassName("partnerUl")[0].children
+    var timer = null;
+    var iSpeed = 2;
+    oUl.innerHTML += oUl.innerHTML
+    oUl.style.width = oLi.length*oLi[1].offsetWidth +950+'px';
+    function fnMove(){
+        if (oUl.offsetLeft < -oUl.offsetWidth/2){
+            oUl.style.left = 0;
+        }else if (oUl.offsetLeft >=0){
+            oUl.style.left = -oUl.offsetWidth / 2 + "px";
+        }
+        oUl.style.left = oUl.offsetLeft + iSpeed + "px";
+    }
+    iSpeed = -2;
+    timer = setInterval(fnMove, 30);
+    oDiv.onmouseover = function() {
+        clearInterval(timer);
+    }
+    oDiv.onmouseout = function() {
+        timer = setInterval(fnMove, 30);
+    }
 		}
 
 // 轮播图功能按钮
