@@ -22,7 +22,7 @@ window.onload = function() {
                  }
             }
 		});
-var oDiv = document.getElementById('partner');
+    var oDiv = document.getElementById('partner');
     var oUl= document.getElementsByClassName("partnerUl")[0];
     var oLi = document.getElementsByClassName("partnerUl")[0].children
     var timer = null;
