@@ -8,9 +8,6 @@ from control.mechanism.explain import get_explain, get_kendalltau
 from control.mechanism.fool import fool
 from control.mechanism.draw_result import plot_overview
 from utils.functional import save_ex_img, clean_ex_img, save_adv_img
-import numpy as np
-from interface import detect
-from werkzeug.utils import secure_filename
 
 api = Blueprint("api", __name__, template_folder="../templates", static_folder="../static")
 
@@ -115,44 +112,3 @@ def generage_adversary():
     adv_img = fool(nor_img, model, method, dataset)
     adv_img_f = save_adv_img(adv_img, "adv_img.png")
     return api.send_static_file(adv_img_f)
-
-
-api = Blueprint("api", __name__, template_folder="../templates", static_folder="../static")
-
-
-@api.route("/", methods=["GET", "POST"])
-def home():
-    return render_template("Adv_detect.html")
-
-@api.route("/detect", methods=["POST"])
-def Detect():
-    adv_dataset = request.form.get("adv_dataset")
-    adv_model = request.form.get("adv_model")
-    adv_method = request.form.get("adv_method")
-    adv_nums = request.form.get("adv_nums")
-    # defense_methods = request.form.getlist("defense_methods[]")
-    defense_methods_str = request.form.get("defense_methods")
-    defense_methods = json.loads(defense_methods_str)
-    adv_nums = int(adv_nums)
-    if 'adv_examples' in request.files:
-        adv_examples = request.files['adv_examples']
-        # 获取文件名
-        file_name = secure_filename(adv_examples.filename)
-        
-        # 生成唯一的文件路径
-        adv_file_path = "/mnt/data2/yxl/AI-platform/dataset/adv_examples/" + file_name
-        # 将对抗样本文件保存到服务器上的指定位置
-        adv_examples.save(adv_file_path)
-    else:
-        adv_file_path = None
-    
-    detect_rate_dict = {}
-    for defense_method in defense_methods:
-        detect_rate, no_defense_accuracy = detect(adv_dataset, adv_model, adv_method, adv_nums, defense_method, adv_file_path)
-        detect_rate_dict[defense_method] = round(detect_rate, 4)
-    no_defense_accuracy_list = no_defense_accuracy.tolist() if isinstance(no_defense_accuracy, np.ndarray) else no_defense_accuracy
-    response_data = {
-        "detect_rates": detect_rate_dict,
-        "no_defense_accuracy": no_defense_accuracy_list
-    }
-    return json.dumps(response_data)

@@ -143,6 +143,8 @@ def attribution_maps(net, nor_loader, adv_dataloader, ex_methods, params, img_nu
         gradcam_result_list.extend(gradcam_list)
         ig_result_list.extend(ig_list)
         class_name_list.extend(class_name)
+        del label
+        del imgs_x
     nor_ex_dict = {"lrp": lrp_result_list,
                    "gradcam": gradcam_result_list,
                    "ig": ig_result_list}
@@ -185,6 +187,8 @@ def attribution_maps(net, nor_loader, adv_dataloader, ex_methods, params, img_nu
                 ig_result_list.extend(ig_list)
                 class_name_list.extend(class_name)
                 results[method] = {}
+                del imgs_x
+                del label
             adv_ex_dict[method] = {"lrp": lrp_result_list,
                                    "gradcam": gradcam_result_list, "ig": ig_result_list}
 

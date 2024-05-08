@@ -600,7 +600,7 @@ def run(params, logging=None):
     resnet18 = models.resnet18(pretrained=True)
     resnet50 = models.wide_resnet50_2(pretrained=True)
     alexnet = models.alexnet(pretrained=True)
-    inception = models.inception_v3(pretrained=True)
+    inception = models.inception_v3(aux_logits=False,pretrained=True)
     model_dict = {
         'vgg16':VGG16,
         'resnet18':resnet18,
@@ -611,10 +611,16 @@ def run(params, logging=None):
     
     model = model_dict[params["model"]]
     logging.info("模型加载完成......")
-    transform = transforms.Compose([
-                    transforms.RandomResizedCrop(224),
+    if params["model"] == 'inception':
+        transform = transforms.Compose([
+                    transforms.RandomResizedCrop(299),
                     transforms.ToTensor()
             ])
+    else:
+        transform = transforms.Compose([
+                        transforms.RandomResizedCrop(224),
+                        transforms.ToTensor()
+                ])
     cifar10_traindata = datasets.CIFAR10(root='./dataset/data/',train=True,download=True,transform=transform)
     cifar10_testdata = datasets.CIFAR10(root='./dataset/data/',train=False,download=True,transform=transform)
     train_loader = DataLoader(cifar10_traindata, batch_size=BATCH_SIZE, shuffle=True)
