@@ -613,6 +613,8 @@ def UploadPic():
         file = request.files.get('avatar')
         basePath = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)
         save_dir = os.path.join(basePath[0], 'dataset/data/ckpt',"upload.jpg")
+        if os.path.exists(save_dir):
+            os.remove(save_dir)
         file.save(save_dir)
         return jsonify({'save_dir': save_dir})
 
@@ -685,7 +687,6 @@ def AdvAttack():
     Dataset：数据集名称
     Model：模型名称
     Method:list 对抗攻击算法名称
-    attackparam：攻击参数
     
     """
     global LiRPA_LOGS
@@ -1056,7 +1057,7 @@ def AdversarialAnalysis():
         
         pool = IOtool.get_pool(tid)
         
-
+        # t2 = pool.submit(interface.submitAandB, tid, stid, 10,10 )
         t2 = pool.submit(interface.run_adversarial_analysis, tid, stid, datasetparam, modelparam, ex_methods, vis_methods, adv_methods, use_layer_explain)
         IOtool.add_task_queue(tid, stid, t2, 300 * len(vis_methods) + 400 * len(ex_methods) + 300*len(adv_methods))
         # interface.run_adversarial_analysis(tid, stid, datasetparam, modelparam, ex_methods, vis_methods, adv_methods, use_layer_explain)
@@ -1240,6 +1241,7 @@ def Detect():
     # response_data = interface.run_detect(tid, stid, defense_methods, adv_dataset, adv_model, adv_method, adv_nums, adv_file_path)
 
     return json.dumps(response_data)
+
 
 # ----------------- 课题2 测试样本自动生成 -----------------
 @app.route('/Concolic/SamGenParamSet', methods=['GET','POST'])
@@ -1968,7 +1970,7 @@ def AdvTraining_GNN():
         return jsonify(res)
     else:
         abort(403)
-        
+                
 @app.route('/Defense/AdvTraining_FeatureScatter', methods=['POST'])
 def FeatureScatter():
     """
@@ -2196,6 +2198,22 @@ def LLM_attack():
             "stid":stid
         }
         return jsonify(res)
+
+@app.route('/MDTest/ModelInference', methods=['GET','POST'])
+def ModelInference():
+    if request.method == "POST":
+        inputdata = json.loads(request.data)
+        basePath = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)
+        image_dir = os.path.join(basePath[0], 'dataset/data/ckpt',"upload.jpg") 
+        # model_path =  inputdata["model_path"]
+        model_path = os.path.join(basePath[0], "model/ckpt/best_model.h5") 
+        res = interface.run_dynamic_inference(image_dir, model_path)
+        with open('./output/inference.json','r') as f:
+            label = json.load(f)
+        print(label)
+        return label
+
+
 def app_run(args):
     web_config={'host':args.host,'port':args.port,'debug':args.debug}
     app.run(**web_config)

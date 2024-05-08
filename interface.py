@@ -727,7 +727,7 @@ def run_adversarial_analysis(tid, stid, datasetparam, modelparam, ex_methods, vi
             logging.info( "[未选择执行模型层间解释]：将不执行模型层间解释分析方法")
     else:
         logging.info("当前未选择特征归因解释算法，跳过执行...")
-    
+    torch.cuda.empty_cache()
     # 如果选择了降维方法
     if len(vis_methods) != 0:
         logging.info("已选择了特征降维解释算法，即将执行...")
@@ -780,7 +780,7 @@ def run_lime(tid, stid, datasetparam, modelparam, adv_methods, mode):
     if mode == "image":
         logging.info("[数据集获取]：目前数据模态为图片类型")
     
-        save_dir = os.path.join('./dataset/data/ckpt/upload_lime.jpg')
+        save_dir = os.path.join('./dataset/data/ckpt/upload.jpg')
         if os.path.exists(save_dir):
             image = Image.open(save_dir) 
 
@@ -1303,7 +1303,7 @@ def load_dataset(dataset, batchsize, rate=0.1):
     # test_loader = DataLoader(test_dataset, batch_size=batchsize,shuffle=False)
     return train_loader, test_loader, channel
 
-def load_model_net(modelname, dataset, upload={'flag':0, 'upload_path':None}, channel=3, logging=None):
+def load_model_net(modelname, dataset, upload={'flag':0, 'upload_path':None}, channel=3, logging=None, device=None):
     from model.model_net.resnet_attack import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
     if upload['flag'] == 1:
         channel = upload['channel']
@@ -1338,7 +1338,6 @@ def load_model_net(modelname, dataset, upload={'flag':0, 'upload_path':None}, ch
     except:
         model.load_state_dict(checkpoint['net'])
     return model
-
 from function.ex_methods.module.func import get_loader
 from function.attack import run_get_adv_data, run_get_adv_attack, Attack_Obj
 def get_load_adv_data(datasetparam, modelparam, adv_methods, adv_param, model, test_loader, device, batchsize, logging=None):
@@ -1561,7 +1560,7 @@ def run_group_defense(tid,stid, datasetparam, modelparam, adv_methods, adv_param
         print(defend_info)
         result['InteDefense']['ori'] = defend_info['ori_acc']
         for method in adv_methods:
-            result['InteDefense']['Inte_acc'][method] = defend_info[method]['defend_attack_acc']*100
+            result['InteDefense']['Inte_acc'][method] = defend_info[method]['defend_rate']*100
             result['InteDefense']['Inte_asr'][method] = 100-defend_info[method]['defend_rate']*100
         logging.info("[模型测试阶段]【集成防御方法】算法运行结束")
     if 'Nash' in defense_methods:
