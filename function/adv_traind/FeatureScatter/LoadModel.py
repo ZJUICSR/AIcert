@@ -92,7 +92,7 @@ def train_fun(epoch, net, args_dict, optimizer, trainloader, device):
         iterator.set_postfix({"Loss": f'{np.array(train_loss).mean():.6f}',
                               "Acc": f'{np.array(train_acc).mean():.6f}'})
 
-    cache_path = join('./output/cache/FeaSca/',str(args_dict['dataset'])+'_'+str(args_dict['modelname']),'enhance')
+    cache_path = join('./output/cache/FeaSca/',str(args_dict['dataset'])+'_'+str(args_dict['modelname']))
     if epoch % args_dict['save_epochs'] == 0 or epoch >= args_dict['max_epoch'] - 2:
         # print('Saving..')
         f_path = os.path.join(args_dict['model_dir'], ('checkpoint-%s' % epoch))
@@ -104,13 +104,13 @@ def train_fun(epoch, net, args_dict, optimizer, trainloader, device):
         }
         if not os.path.isdir(args_dict['model_dir']):
             os.mkdir(args_dict['model_dir'])
-        if not os.path.isdir(f_cache):
-            os.mkdir(f_cache)
+        if not os.path.isdir(cache_path):
+            os.mkdir(cache_path)
         torch.save(state, f_path)
         torch.save(state, f_cache)
 
     if epoch >= 0:
-        # print('Saving latest @ epoch %s..' % (epoch))
+        print('Saving latest @ epoch %s..' % (epoch))
         f_path = os.path.join(args_dict['model_dir'], 'latest')
         f_cache = os.path.join('./output/cache/FeaSca/',str(args_dict['dataset'])+'_'+str(args_dict['modelname']), ('checkpoint-%s' % epoch))
         state = {
@@ -122,8 +122,8 @@ def train_fun(epoch, net, args_dict, optimizer, trainloader, device):
         }
         if not os.path.isdir(args_dict['model_dir']):
             os.mkdir(args_dict['model_dir'])
-        if not os.path.isdir(f_cache):
-            os.mkdir(f_cache)
+        # if not os.path.isdir(f_cache):
+        #     os.mkdir(f_cache)
         torch.save(state, f_path)
         torch.save(state, f_cache)
 

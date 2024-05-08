@@ -363,7 +363,7 @@ def ModelFairnessDebias():
         IOtool.change_task_info(tid, "model", modelname)
         pool = IOtool.get_pool(tid)
 
-        IOtool.add_task_queue(tid, AAtid, t2, 300)
+        # IOtool.add_task_queue(tid, AAtid, t2, 300)
         save_folder = osp.join(ROOT,"output", "cache", "fairness")
         model_path = inputParam["modelpath"]
         if dataname in ["Compas", "Adult", "German"]:
@@ -398,7 +398,7 @@ def ModelFairnessDebias():
             #                  test_mode = test_mode, model_path=model_path, save_folder=save_folder)
             # time.sleep(20)
             
-        # IOtool.add_task_queue(tid, AAtid, t2, 30000)    
+        IOtool.add_task_queue(tid, AAtid, t2, 30000)    
         res = {
             "tid":tid,
             "stid":AAtid
@@ -1680,6 +1680,22 @@ def ModularDevelopParamSet():
         return jsonify(res)
     else:
         abort(403)
+
+# 模块化开发在线推理 
+@app.route('/MDTest/ModelInference', methods=['GET','POST'])
+def ModelInference():
+    if request.method == "POST":
+        inputdata = json.loads(request.data)
+        basePath = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)
+        image_dir = os.path.join(basePath[0], 'dataset/data/ckpt',"upload.jpg") 
+        # model_path =  inputdata["model_path"]
+        model_path = os.path.join(basePath[0], "model/ckpt/best_model.h5") 
+        res = interface.run_dynamic_inference(image_dir, model_path)
+        with open('./output/inference.json','r') as f:
+            label = json.load(f)
+        print(label)
+        return label         
+        
 # ----------------- 课题3 侧信道分析 -----------------
 @app.route('/SideAnalysis', methods=["POST"])
 def SideAnalysis():

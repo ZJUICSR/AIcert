@@ -3,7 +3,7 @@ sys.path.append(os.path.dirname(__file__))
 sys.path.append('utils')
 # utls_file = os.path.join(os.path.dirname(__file__),'utils')
 # sys.path.append(utls_file)
-from demo import run_search, run_convert
+from demo import run_search, run_convert, inference
 
 def run_modulardevelop(dataset,model,tuner,init, epoch,iternum, device, out_path, logging=None):
     logging.info("开始执行模块化开发功能......")
@@ -25,3 +25,10 @@ def run_modulardevelop(dataset,model,tuner,init, epoch,iternum, device, out_path
     os.system("bash -c 'source ~/anaconda3/etc/profile.d/conda.sh && conda deactivate' ")
     # print(res)
     return res
+
+def run_inference(img_path, model_path):
+    # res = inference.inference_online(img_path, model_path)
+    # return res
+    # cmd = "bash -c 'source ~/anaconda3/etc/profile.d/conda.sh &&  conda activate autotrain && python function/modulardevelop/demo/inference.py --image_path "+img_path+" --model_path "+model_path
+    # print(cmd)
+    os.system("bash -c 'source ~/anaconda3/etc/profile.d/conda.sh &&  conda activate autotrain && python function/modulardevelop/demo/inference.py --image_path "+img_path+" --model_path "+model_path+"'")

@@ -21,8 +21,12 @@ class Normalize(Module):
         
     def forward(self, input):
         # Broadcasting
-        mean = self.mean.reshape(1, 3, 1, 1)
-        std = self.std.reshape(1, 3, 1, 1)
+        if input.shape[1] == 1:
+            mean = self.mean.reshape(1, 1, 1, 1)
+            std = self.std.reshape(1, 1, 1, 1)
+        else:
+            mean = self.mean.reshape(1, 3, 1, 1)
+            std = self.std.reshape(1, 3, 1, 1)
         return (input - mean) / std
     
 class torch_Normalize(torch.nn.Module):

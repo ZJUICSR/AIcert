@@ -370,6 +370,23 @@ def run_modulardevelop(tid,AAtid, dataset, modelname, tuner, init, epoch, iternu
     IOtool.change_subtask_state(tid, AAtid, 2)
     IOtool.change_task_success_v2(tid=tid)
 
+def run_dynamic_inference(image_dir, model_path):
+    """模型模块化开发-在线推理
+    :params tid:主任务ID
+    :params AAtid:子任务id
+    :params dataset: 数据集名称
+    :output res:需保存到子任务json中的返回结果/路径
+    """
+    res = modulardevelop.run_inference(image_dir, model_path)
+    
+    # checkpoint = torch.load(model_path, map_location=torch.device(0))
+    # model.load_state_dict(checkpoint)
+    # model = model.to(torch.device("cuda"))
+    # 如何加载执行
+    # imageLable = xxx()
+    # return imageLable
+    return res
+    
 from train_network import train_resnet_mnist, train_resnet_cifar10, eval_test, test_batch, robust_train
 
 def run_adv_attack(tid, stid, dataname, model, methods, inputParam, sample_num=128):
@@ -1295,6 +1312,7 @@ def load_model_net(modelname, dataset, upload={'flag':0, 'upload_path':None}, ch
             raise ValueError(error)
         modelpath = upload['upload_path']
     else: 
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         modelpath = osp.join("./model/ckpt", dataset.upper() + "_" + modelname.lower()+".pth")
         if (not osp.exists(modelpath)):
             logging.info("[模型获取]:服务器上模型不存在")
@@ -1320,6 +1338,7 @@ def load_model_net(modelname, dataset, upload={'flag':0, 'upload_path':None}, ch
     except:
         model.load_state_dict(checkpoint['net'])
     return model
+
 from function.ex_methods.module.func import get_loader
 from function.attack import run_get_adv_data, run_get_adv_attack, Attack_Obj
 def get_load_adv_data(datasetparam, modelparam, adv_methods, adv_param, model, test_loader, device, batchsize, logging=None):
