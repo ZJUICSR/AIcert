@@ -2199,20 +2199,6 @@ def LLM_attack():
         }
         return jsonify(res)
 
-@app.route('/MDTest/ModelInference', methods=['GET','POST'])
-def ModelInference():
-    if request.method == "POST":
-        inputdata = json.loads(request.data)
-        basePath = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)
-        image_dir = os.path.join(basePath[0], 'dataset/data/ckpt',"upload.jpg") 
-        # model_path =  inputdata["model_path"]
-        model_path = os.path.join(basePath[0], "model/ckpt/best_model.h5") 
-        res = interface.run_dynamic_inference(image_dir, model_path)
-        with open('./output/inference.json','r') as f:
-            label = json.load(f)
-        print(label)
-        return label
-
 
 def app_run(args):
     web_config={'host':args.host,'port':args.port,'debug':args.debug}

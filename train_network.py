@@ -25,7 +25,7 @@ def train_resnet_mnist(name, modelpath='', logging = None, device = None, featur
     model = eval(modelname)(1).to(device)
     if logging:
         logging.info(f"[模型训练]:加载数据集MNIST")
-    input_shape, (_, _), (x_train, y_train), (x_test, y_test), min_pixel_value, max_pixel_value , _= load_mnist("/root/fairness/AI-Platform/dataset/MNIST", 1)
+    input_shape, (_, _), (x_train, y_train), (x_test, y_test), min_pixel_value, max_pixel_value , _= load_mnist("./dataset/MNIST", 1)
     batch_size = 256
     num_epochs = 5
     num_batch = int(np.ceil(len(x_train) / float(batch_size)))
@@ -76,7 +76,7 @@ def train_resnet_cifar10(name, modelpath='', logging=None, device=None, feature=
     model = eval(modelname)(3).to(device)
     if logging:
         logging.info(f"[模型训练]:加载数据集CIFAR10") 
-    input_shape, (_, _), (x_train, y_train), (x_test, y_test), min_pixel_value, max_pixel_value, _= load_cifar10("/root/fairness/AI-Platform/dataset/CIFAR10", 1)
+    input_shape, (_, _), (x_train, y_train), (x_test, y_test), min_pixel_value, max_pixel_value, _= load_cifar10("./dataset/CIFAR10", 1)
 
     batch_size = 128
     num_epochs = 20
