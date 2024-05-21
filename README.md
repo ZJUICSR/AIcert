@@ -81,6 +81,14 @@ static 为静态目录，其下的所有文件在整个flask框架启动后，�
 templates：存储所有的前端html页面  
 view：后台与前端的接口，每个python文件为一个蓝图，在flask生成时需要进行注册。 -->
 
+## Contribution
+
+Thanks goes to these wonderful contributors:
+
+<a href="https://github.com/ZJUICSR/AIcert/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=ZJUICSR/AIcert" />
+</a>
+
 ## 联系我们
 如果你有任何疑问或需要帮助，请随时[联系我们](zju.aicert@gmail.com)。
 
