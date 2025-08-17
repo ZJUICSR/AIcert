@@ -13,6 +13,14 @@ AIcert解决了从数据到系统、从算法开发到系统部署的多层面�
 - 高效率、自动化的安全开发；
 - 多维度、系统化的量化分析。
 
+
+**全系代码支持NVIDIA GeForce系列硬件，部分核心 Huawei Ascend硬件环境**
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkTpipyBdLYi5fwPPAncvMehX-UwDjUPNJXg&s" alt="NVIDIA GeForce" width="48%"/>
+  <img src="https://img.trendforce.com/blog/wp-content/uploads/2024/10/28173030/ascend-910.png" alt="Huawei Ascend" width="48%"/>
+</div>
+
 ## 文档
 
 **介绍文档**：我们提供[功能介绍文档](web/static/pdf/AI%E5%B9%B3%E5%8F%B0%E4%BB%8B%E7%BB%8D%E6%96%87%E6%A1%A3v8.pdf)、[API说明文档](https://n1nltex7w5.feishu.cn/docx/LbN2dsyYZo4jn9xCMm5c3HEdnSf?from=from_copylink)
