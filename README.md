@@ -17,8 +17,8 @@ AIcert解决了从数据到系统、从算法开发到系统部署的多层面�
 **全系代码支持NVIDIA GeForce系列硬件，部分核心 Huawei Ascend硬件环境**
 
 <div style="display: flex; justify-content: space-between;">
-  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkTpipyBdLYi5fwPPAncvMehX-UwDjUPNJXg&s" alt="NVIDIA GeForce" width="48%"/>
-  <img src="https://img.trendforce.com/blog/wp-content/uploads/2024/10/28173030/ascend-910.png" alt="Huawei Ascend" width="48%"/>
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkTpipyBdLYi5fwPPAncvMehX-UwDjUPNJXg&s" alt="NVIDIA GeForce" width="48%" height="300px" />
+  <img src="https://img.trendforce.com/blog/wp-content/uploads/2024/10/28173030/ascend-910.png" alt="Huawei Ascend" width="48%" height="300px"/>
 </div>
 
 ## 文档
